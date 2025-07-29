@@ -11,6 +11,7 @@ import {
 } from '@ionic/react';
 import React, { useState } from 'react';
 import CommonAppBar from '../components/CustomHeader';
+import KeyboardOverlay from '../components/KeyboardOverlay';
 
 const Home: React.FC = () => {
   const [showDialog, setShowDialog] = useState(false);

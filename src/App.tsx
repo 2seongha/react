@@ -10,6 +10,8 @@ import Email from './pages/Email';
 
 import usePreviousPath from './hooks/usePreviousPath';
 import Notice from './pages/Notice';
+import KeyboardOverlay from './components/KeyboardOverlay';
+import VisualViewportDebug from './components/debug';
 
 const RouterOutletWithAnimation: React.FC = () => {
   const { currentPath, prevPath } = usePreviousPath();
@@ -44,6 +46,8 @@ const App: React.FC = () => {
         <IonReactRouter>
           <RouterOutletWithAnimation />
         </IonReactRouter>
+        <KeyboardOverlay />
+        <VisualViewportDebug />
       </IonApp>
   );
 };
