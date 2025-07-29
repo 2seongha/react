@@ -12,7 +12,7 @@ const KeyboardOverlay = () => {
       const fullHeight = window.innerHeight;
       const keyboard = fullHeight - vh;
 
-      if (keyboard > 100) {
+      if (keyboard > 0) {
         // 키보드가 올라왔다고 판단
         setKeyboardHeight(Math.max(keyboard, ESTIMATED_KEYBOARD_HEIGHT));
       } else {
@@ -36,7 +36,7 @@ const KeyboardOverlay = () => {
         right: 0,
         height: keyboardHeight,
         width: '100%',
-        backgroundColor: 'white',
+        backgroundColor: 'lightgray',
         zIndex: 9999,
         pointerEvents: 'none',
       }}
