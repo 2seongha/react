@@ -1,6 +1,6 @@
 import { IonApp, IonRouterOutlet, iosTransitionAnimation } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, BrowserRouter, HashRouter } from 'react-router-dom';
 import React from 'react';
 
 import Tabs from './components/Tabs';
@@ -35,11 +35,11 @@ const RouterOutletWithAnimation: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <IonApp>
-      <IonReactRouter>
-        <RouterOutletWithAnimation />
-      </IonReactRouter>
-    </IonApp>
+      <IonApp>
+        <IonReactRouter>
+          <RouterOutletWithAnimation />
+        </IonReactRouter>
+      </IonApp>
   );
 };
 
