@@ -40,7 +40,7 @@ const RouterOutletWithAnimation: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-      <IonApp>
+      <IonApp style={{ height: 'calc(var(--vh, 1vh) * 100)' }}>
         <IonReactRouter>
           <RouterOutletWithAnimation />
         </IonReactRouter>
