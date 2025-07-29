@@ -1,7 +1,7 @@
 import { IonApp, IonRouterOutlet, iosTransitionAnimation } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect, BrowserRouter, HashRouter } from 'react-router-dom';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import Tabs from './components/Tabs';
 import Detail from './pages/Detail';
@@ -13,6 +13,11 @@ import Notice from './pages/Notice';
 
 const RouterOutletWithAnimation: React.FC = () => {
   const { currentPath, prevPath } = usePreviousPath();
+
+  useEffect(() => {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }, []);
 
   const animation = React.useMemo(() => {
     if (currentPath.startsWith('/menu') || prevPath.startsWith('/menu')) {
