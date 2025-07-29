@@ -6,7 +6,7 @@ const KeyboardOverlay = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
-    
+
     const onResize = () => {
       const vh = window.visualViewport?.height || window.innerHeight;
       const fullHeight = window.innerHeight;
@@ -22,8 +22,12 @@ const KeyboardOverlay = () => {
     };
 
     window.visualViewport?.addEventListener('resize', onResize);
+    window.visualViewport?.addEventListener('scroll', onResize);
+
     return () => {
       window.visualViewport?.removeEventListener('resize', onResize);
+      window.visualViewport?.addEventListener('scroll', onResize);
+
     };
   }, []);
 
