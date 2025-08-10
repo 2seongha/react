@@ -256,11 +256,13 @@ const _initWebview = async (
     const receiveBack = () => {
       console.log('----- webview receiveBack -----');
 
-      // React Router나 다른 라우터의 뒤로가기 로직 구현
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
+      const currentPath = window.location.pathname;
+
+      // 경로가 "/app"으로 시작하면 종료 처리
+      if (currentPath.startsWith('/app')) {
         webviewAppEnd();
+      } else {
+        window.history.back();
       }
     };
 
