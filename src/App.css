@@ -4,6 +4,7 @@
   padding: 2rem;
   text-align: center;
 }
+
 /* 웹앱 전체 패딩 적용 */
 ion-header {
   padding-top: var(--webview-padding-top);
@@ -16,11 +17,18 @@ ion-app {
 
 ion-content {
   --offset-bottom: 1px !important;
-  --offset-top: 0px ;
+  --offset-top: 0px;
 }
 
+/* Firefox, Android 대응 */
 ion-content::part(scroll) {
-	scrollbar-color: transparent transparent;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: none;
+}
+
+/* iOS Safari 대응 */
+ion-content::part(scroll)::-webkit-scrollbar {
+  display: none;
 }
 
 ion-tab-bar {
