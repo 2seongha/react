@@ -168,10 +168,7 @@ const MenuCard: React.FC = () => {
                 height: { duration: 0.4 },
               }}
               style={{
-                backgroundColor: '#fff', overflow: 'hidden', // ← 고정
-                willChange: 'opacity, height, transform',
-                WebkitTransform: 'translateZ(0)',
-                WebkitBackfaceVisibility: 'hidden',
+                overflow: 'hidden', // ← 고정
               }}
             >
               <IonItem button key={index} className='menu-ion-item'>
