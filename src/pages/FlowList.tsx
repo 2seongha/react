@@ -76,6 +76,9 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         delay: index * 0.02,
         ease: "linear",
       }}
+      style={{
+        overflow: 'hidden', // ← 고정
+      }}
     >
       <IonItem button className='flow-list-item' onClick={() => { }} mode='md'>
         <div className='flow-list-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
