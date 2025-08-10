@@ -66,15 +66,10 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
       initial={{
         opacity: 0,
         height: '30px',
-        overflow: 'hidden'
       }}
       animate={{
         opacity: 1,
         height: '60px',
-        overflow: 'visible'
-      }}
-      style={{
-        backgroundColor: '#fff'
       }}
       transition={{
         duration: 0.2,
