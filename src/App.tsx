@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import useAppStore from './stores/appStore';
 import { initWebview } from './webview';
 import { preloadCriticalImages, preloadAllImages, calculateProgress, type ImagePreloadProgress } from './utils/imagePreloader';
+import { Commet } from 'react-loading-indicators';
 
 const RouterOutletWithAnimation: React.FC = () => {
   const { currentPath, prevPath } = usePreviousPath();
@@ -135,7 +136,9 @@ const App: React.FC = () => {
     }
   }, [themeMode]);
 
-  if (!completeInitWebview) return <div style={{width:'100%', height:'100%', background:'var(--ion-background-color)'}} />;
+  if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)' }}>
+    <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
+  </div>;
   return (
     <IonApp>
       <IonReactRouter>
