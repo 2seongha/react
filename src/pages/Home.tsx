@@ -170,6 +170,7 @@ const MenuCard: React.FC = () => {
                 ease: "easeInOut",
                 height: { duration: 0.4 },
               }}
+              style={{backgroundColor:'#fff'}}
             >
               <IonItem button key={index} className='menu-ion-item'>
                 <div className='menu-item'>
