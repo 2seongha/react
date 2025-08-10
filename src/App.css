@@ -6,12 +6,12 @@
 }
 /* 웹앱 전체 패딩 적용 */
 ion-header {
-  padding-top: var(--safe-area-top);
+  padding-top: var(--webview-padding-top);
 }
 
 ion-app {
-  /* height: calc(100vh - var(--safe-area-bottom)) !important;
-  margin-bottom: var(--safe-area-bottom) !important; */
+  height: calc(100vh - var(--webview-padding-bottom)) !important;
+  margin-bottom: var(--webview-padding-bottom) !important;
 }
 
 ion-content {
