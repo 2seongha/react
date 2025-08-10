@@ -34,7 +34,7 @@ const RouterOutletWithAnimation: React.FC = () => {
   return (
     <IonRouterOutlet animation={animation} mode={varUA.indexOf('android') > -1 ? 'md' : 'ios'}>
       <Route path="/app" component={Tabs} />
-      <Route path="/flowList" component={FlowList} exact/>
+      <Route path="/flowList" component={FlowList} exact />
       <Route path="/detail" component={Detail} exact />
       <Route path="/menu" component={Menu} exact />
       <Route path="/notice" component={Notice} exact />
@@ -46,6 +46,7 @@ const RouterOutletWithAnimation: React.FC = () => {
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
+  const [completeInitWebview, setCompleteInitWebview] = useState<boolean>(false);
 
   useEffect(() => {
     // 웹뷰 초기화와 이미지 preload를 병렬로 실행
@@ -97,13 +98,14 @@ const App: React.FC = () => {
         const success = await webviewPromise;
         if (success) {
           console.log('웹뷰 초기화 완료!');
+          setCompleteInitWebview(true);
         }
 
         // 모든 이미지 로딩도 완료 대기 (앱 시작에는 필수가 아님)
         allImagesPromise.catch(error => {
           console.warn('일부 이미지 로딩 실패:', error);
         });
-        
+
       } catch (error) {
         console.error('앱 초기화 실패:', error);
       }
@@ -133,6 +135,7 @@ const App: React.FC = () => {
     }
   }, [themeMode]);
 
+  if (completeInitWebview) return <div style={{width:'100%', height:'100%', background:'var(--ion-background-color)'}} />;
   return (
     <IonApp>
       <IonReactRouter>
