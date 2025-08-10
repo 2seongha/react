@@ -145,19 +145,16 @@ const MenuCard: React.FC = () => {
                 opacity: 0,
                 y: -10,
                 height: 0,
-                overflow: 'hidden'
               }}
               animate={{
                 opacity: 1,
                 y: 0,
                 height: '48px',
-                overflow: 'visible'
               }}
               exit={{
                 opacity: 0,
                 height: 0,
                 y: -10,
-                overflow: 'hidden',
                 transition: {
                   delay: index * 0.04,
                   ease: "easeInOut",
@@ -170,7 +167,12 @@ const MenuCard: React.FC = () => {
                 ease: "easeInOut",
                 height: { duration: 0.4 },
               }}
-              style={{backgroundColor:'#fff'}}
+              style={{
+                backgroundColor: '#fff', overflow: 'hidden', // ← 고정
+                willChange: 'opacity, height, transform',
+                WebkitTransform: 'translateZ(0)',
+                WebkitBackfaceVisibility: 'hidden',
+              }}
             >
               <IonItem button key={index} className='menu-ion-item'>
                 <div className='menu-item'>
