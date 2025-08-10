@@ -13,6 +13,7 @@ import Notice from './pages/Notice';
 import Settings from './pages/Settings';
 import useAppStore from './stores/appStore';
 import { initWebview } from './webview';
+import { preloadCriticalImages, preloadAllImages, calculateProgress, type ImagePreloadProgress } from './utils/imagePreloader';
 
 const RouterOutletWithAnimation: React.FC = () => {
   const { currentPath, prevPath } = usePreviousPath();
@@ -46,14 +47,31 @@ const RouterOutletWithAnimation: React.FC = () => {
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [isWebviewReady, setIsWebviewReady] = useState(false);
+  const [imageProgress, setImageProgress] = useState<ImagePreloadProgress>({
+    loaded: 0,
+    total: 0,
+    percentage: 0,
+    isComplete: false
+  });
+  const [isImagesReady, setIsImagesReady] = useState(false);
 
   useEffect(() => {
-    // 웹뷰 초기화
-    const initializeWebview = async () => {
+    // 웹뷰 초기화와 이미지 preload를 병렬로 실행
+    const initializeApp = async () => {
       try {
+        // 1단계: 중요 이미지들을 먼저 preload
+        console.log('⚡ 중요 이미지 preload 시작...');
+        await preloadCriticalImages((loaded, total) => {
+          const progress = calculateProgress(loaded, total);
+          setImageProgress(prev => ({
+            ...progress,
+            total: prev.total || total // 전체 로딩 진행률을 위해 전체 이미지 수 유지
+          }));
+        });
+
+        // 2단계: 웹뷰 초기화 (중요 이미지 로딩과 병렬 실행 가능)
         console.log('웹뷰 초기화 시작...');
-        
-        const success = await initWebview(
+        const webviewPromise = initWebview(
           // onPaddingReceived
           (padding) => {
             console.log('Padding received:', padding);
@@ -85,18 +103,39 @@ const App: React.FC = () => {
           }
         );
 
+        // 3단계: 나머지 모든 이미지 preload (백그라운드에서)
+        const allImagesPromise = preloadAllImages((loaded, total) => {
+          const progress = calculateProgress(loaded, total);
+          setImageProgress(progress);
+          
+          if (progress.isComplete) {
+            console.log('🎉 모든 이미지 로딩 완료!');
+            setIsImagesReady(true);
+          }
+        });
+
+        // 웹뷰 초기화 완료 대기
+        const success = await webviewPromise;
         if (success) {
           console.log('웹뷰 초기화 완료!');
           setIsWebviewReady(true);
         }
+
+        // 모든 이미지 로딩도 완료 대기 (앱 시작에는 필수가 아님)
+        allImagesPromise.catch(error => {
+          console.warn('일부 이미지 로딩 실패:', error);
+          setIsImagesReady(true); // 실패해도 앱은 계속 실행
+        });
+        
       } catch (error) {
-        console.error('웹뷰 초기화 실패:', error);
-        // 웹뷰 초기화 실패해도 앱은 실행
+        console.error('앱 초기화 실패:', error);
+        // 초기화 실패해도 앱은 실행
         setIsWebviewReady(true);
+        setIsImagesReady(true);
       }
     };
 
-    initializeWebview();
+    initializeApp();
   }, []);
 
   useEffect(() => {
@@ -126,13 +165,68 @@ const App: React.FC = () => {
       <IonApp>
         <div style={{
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           height: '100vh',
-          fontSize: '18px',
-          color: 'var(--ion-color-primary)'
+          padding: '20px',
+          textAlign: 'center'
         }}>
-          앱 초기화 중...
+          <div style={{
+            fontSize: '18px',
+            color: 'var(--ion-color-primary)',
+            marginBottom: '30px'
+          }}>
+            앱 초기화 중...
+          </div>
+          
+          {/* 이미지 로딩 진행률 */}
+          <div style={{
+            width: '100%',
+            maxWidth: '300px',
+            marginBottom: '20px'
+          }}>
+            <div style={{
+              fontSize: '14px',
+              color: 'var(--ion-color-medium)',
+              marginBottom: '8px'
+            }}>
+              이미지 로딩 중... {imageProgress.percentage}%
+            </div>
+            
+            {/* 프로그레스 바 */}
+            <div style={{
+              width: '100%',
+              height: '4px',
+              backgroundColor: 'var(--ion-color-light)',
+              borderRadius: '2px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${imageProgress.percentage}%`,
+                height: '100%',
+                backgroundColor: 'var(--ion-color-primary)',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+            
+            <div style={{
+              fontSize: '12px',
+              color: 'var(--ion-color-medium)',
+              marginTop: '4px'
+            }}>
+              {imageProgress.loaded} / {imageProgress.total} 이미지
+            </div>
+          </div>
+          
+          {/* 추가 상태 정보 */}
+          <div style={{
+            fontSize: '12px',
+            color: 'var(--ion-color-medium)',
+            opacity: 0.7
+          }}>
+            {isImagesReady ? '✅ 이미지 로딩 완료' : '🖼️ 이미지 로딩 중...'}
+          </div>
         </div>
       </IonApp>
     );

@@ -80,6 +80,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         duration: 0.4,
         delay: index * 0.05,
         height: { duration: 0.4 },
+        ease: "linear",
       }}
     >
       <IonItem button className='flow-list-item' onClick={() => { }} mode='md'>

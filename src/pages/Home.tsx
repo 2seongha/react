@@ -68,9 +68,6 @@ const Home: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2, ease: "easeInOut" }}>
           <MenuCard />
-          <MenuCard />
-          <MenuCard />
-          <MenuCard />
         </motion.div>
         <motion.div style={{ marginTop: '12px' }}
           initial={{ opacity: 0, y: -15 }}
