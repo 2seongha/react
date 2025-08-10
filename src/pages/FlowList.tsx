@@ -79,7 +79,6 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
       transition={{
         duration: 0.4,
         delay: index * 0.05,
-        ease: "easeInOut",
         height: { duration: 0.4 },
       }}
     >
@@ -88,7 +87,9 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
           <IonImg src={icon.image}></IonImg>
         </div>
         <span>{area?.oLtext}</span>
-        <AnimatedBadge count={Number(area.cnt)} />
+        <div className='animated-badge'>
+          <span>{Number(area.cnt)}</span>
+        </div>
       </IonItem>
     </motion.div>
   );
