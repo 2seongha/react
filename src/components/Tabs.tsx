@@ -1,4 +1,4 @@
-import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/react';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet, useIonRouter } from '@ionic/react';
 import { home, document, notifications, menu } from 'ionicons/icons';
 import React, { useEffect, useState } from 'react';
 import { Route, Redirect, useLocation, useHistory } from 'react-router-dom';
@@ -10,7 +10,8 @@ import More from '../pages/More';
 const Tabs: React.FC = () => {
   const location = useLocation();
   const [selectedTab, setSelectedTab] = useState('home');
-  const history = useHistory();
+  const router = useIonRouter();
+
   useEffect(() => {
     const path = location.pathname;
     if (path === '/app/home') setSelectedTab('home');
@@ -28,15 +29,15 @@ const Tabs: React.FC = () => {
       </IonRouterOutlet>
 
       <IonTabBar slot="bottom" mode='md'>
-        <IonTabButton tab="home" onClick={() => history.replace('/app/home')} selected={selectedTab === 'home'}>
+        <IonTabButton tab="home" onClick={() => router.push('/app/home', 'root', 'replace')} selected={selectedTab === 'home'}>
           <IonIcon icon={home} />
           <IonLabel style={{ fontSize: '10px' }}>홈</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="notifications" onClick={() => history.replace('/app/notifications')}  selected={selectedTab === 'notifications'}>
+        <IonTabButton tab="notifications" onClick={() => router.push('/app/notifications', 'root', 'replace')} selected={selectedTab === 'notifications'}>
           <IonIcon icon={notifications} />
           <IonLabel style={{ fontSize: '10px' }}>알림</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="more"  onClick={() => history.replace('/app/more')}  selected={selectedTab === 'more'}>
+        <IonTabButton tab="more" onClick={() => router.push('/app/more', 'root', 'replace')} selected={selectedTab === 'more'}>
           <IonIcon icon={menu} />
           <IonLabel style={{ fontSize: '10px' }}>더보기</IonLabel>
         </IonTabButton>
