@@ -74,11 +74,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         overflow: 'visible'
       }}
       style={{
-        background: 'var(--ion-background-color)',
-        willChange: 'opacity, height',
-        overflow: 'hidden', // 여기는 style로 고정
-        WebkitBackfaceVisibility: 'hidden',
-        WebkitTransform: 'translateZ(0)', // 강제 하드웨어 가속
+        backgroundColor: '#fff'
       }}
       transition={{
         duration: 0.2,
