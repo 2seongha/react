@@ -57,7 +57,7 @@ const GroupButton: React.FC = () => {
       {todoSummary ? (
         todoSummary.map((item, index) => (
           <button
-            key={item.flowCode}
+          key={`group-button${index}`}
             ref={(el) => { (buttonRefs.current[index] = el) }}
             onClick={() => handleClick(index)}
             className={`group-button ${selected?.value === index ? 'selected' : ''}`}
@@ -68,7 +68,7 @@ const GroupButton: React.FC = () => {
       ) : (
         Array.from({ length: 10 }).map((_, index) => (
           <CustomSkeleton
-            key={index}
+            key={`group-button${index}`}
             width={80}
             height={30}
             style={{ borderRadius: '16px' }}

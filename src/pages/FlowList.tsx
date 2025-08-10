@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import './FlowList.css';
 import { getFlowIcon } from '../utils';
-import AnimatedBadge from '../components/AnimatedBadge';
 
 const FlowList: React.FC = () => {
   const setFlowList = useAppStore(state => state.setFlowList);
@@ -62,24 +61,21 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
   const icon = getFlowIcon(area.flowCode!);
 
   return (
-    <motion.div key={index}
+    <motion.div key={area.flowCode}
       layout
       initial={{
         opacity: 0,
-        y: -10,
-        height: 0,
+        height: '30px',
         overflow: 'hidden'
       }}
       animate={{
         opacity: 1,
-        y: 0,
         height: '60px',
         overflow: 'visible'
       }}
       transition={{
-        duration: 0.4,
-        delay: index * 0.05,
-        height: { duration: 0.4 },
+        duration: 0.2,
+        delay: index * 0.02,
         ease: "linear",
       }}
     >

@@ -59,7 +59,7 @@
 .welcome-card-name>span:first-child {
   color: var(--ion-text-color);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .welcome-card-name>span:last-child {
@@ -129,7 +129,7 @@ ion-item.menu-ion-item {
 
 .menu-item-content>span {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   margin: 0 0 0 12px;
 }
 

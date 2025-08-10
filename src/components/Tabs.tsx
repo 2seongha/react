@@ -1,18 +1,16 @@
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/react';
 import { home, document, notifications, menu } from 'ionicons/icons';
 import React, { useEffect, useState } from 'react';
-import { Route, Redirect, useLocation } from 'react-router-dom';
+import { Route, Redirect, useLocation, useHistory } from 'react-router-dom';
 
 import Home from '../pages/Home';
 import Notifications from '../pages/Notifications';
 import More from '../pages/More';
-import FlowList from '../pages/FlowList';
-import Config from '../pages/Settings';
 
 const Tabs: React.FC = () => {
   const location = useLocation();
   const [selectedTab, setSelectedTab] = useState('home');
-
+  const history = useHistory();
   useEffect(() => {
     const path = location.pathname;
     if (path === '/app/home') setSelectedTab('home');
@@ -30,17 +28,17 @@ const Tabs: React.FC = () => {
       </IonRouterOutlet>
 
       <IonTabBar slot="bottom" mode='md'>
-        <IonTabButton tab="home" href="/app/home" selected={selectedTab === 'home'}>
+        <IonTabButton tab="home" onClick={() => history.replace('/app/home')} selected={selectedTab === 'home'}>
           <IonIcon icon={home} />
-          <IonLabel style={{fontSize:'10px'}}>홈</IonLabel>
+          <IonLabel style={{ fontSize: '10px' }}>홈</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="notifications" href="/app/notifications" selected={selectedTab === 'notifications'}>
+        <IonTabButton tab="notifications" onClick={() => history.replace('/app/notifications')}  selected={selectedTab === 'notifications'}>
           <IonIcon icon={notifications} />
-          <IonLabel style={{fontSize:'10px'}}>알림</IonLabel>
+          <IonLabel style={{ fontSize: '10px' }}>알림</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="more" href="/app/more" selected={selectedTab === 'more'}>
+        <IonTabButton tab="more"  onClick={() => history.replace('/app/more')}  selected={selectedTab === 'more'}>
           <IonIcon icon={menu} />
-          <IonLabel style={{fontSize:'10px'}}>더보기</IonLabel>
+          <IonLabel style={{ fontSize: '10px' }}>더보기</IonLabel>
         </IonTabButton>
       </IonTabBar>
     </IonTabs>

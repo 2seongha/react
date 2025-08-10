@@ -10,8 +10,8 @@ ion-header {
 }
 
 ion-app {
-  height: calc(100vh - var(--safe-area-bottom)) !important;
-  margin-bottom: var(--safe-area-bottom) !important;
+  /* height: calc(100vh - var(--safe-area-bottom)) !important;
+  margin-bottom: var(--safe-area-bottom) !important; */
 }
 
 ion-content {
