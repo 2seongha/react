@@ -1,0 +1,37 @@
+.flow-list ion-content {
+  --padding-top: 0px;
+  --padding-bottom: 12px;
+  --padding-start: 22px;
+  --padding-end: 22px;
+}
+
+.flow-list-item {
+  margin-top: 10px;
+  border-radius: 12px;
+  --min-height: 60px;
+  --inner-border-width: 0px;
+  --padding-start: 0px;
+  --inner-padding-end: 0px;
+  display: flex;
+  align-items: center;
+}
+
+.flow-list-item>span {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  padding-left: 12px;
+}
+
+.flow-list-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-list-item-icon > ion-img {
+  width: 36px;
+}

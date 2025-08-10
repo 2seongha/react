@@ -1,84 +1,321 @@
 import {
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
-  IonList,
   IonItem,
-  IonLabel,
-  IonAlert,
+  IonCard,
+  IonCardContent,
+  IonButton,
+  IonIcon,
+  useIonViewWillEnter,
+  IonRefresher,
+  IonRefresherContent,
+  RefresherCustomEvent,
+  IonImg,
+  useIonRouter,
 } from '@ionic/react';
 import React, { useState } from 'react';
-import CommonAppBar from '../components/CustomHeader';
-import KeyboardOverlay from '../components/KeyboardOverlay';
+import { motion, AnimatePresence } from 'framer-motion';
+import { chevronDown, chevronForwardOutline, person } from 'ionicons/icons';
+import CustomSkeleton from '../components/CustomSkeleton';
+import AppBar from '../components/AppBar';
+import useAppStore from '../stores/appStore';
+import './Home.css';
+import { getFlowIcon } from '../utils';
+import { ApprovalModel, AreaModel } from '../stores/types';
+import GroupButton from '../components/GroupButton';
 
 const Home: React.FC = () => {
-  const [showDialog, setShowDialog] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const setMenuAreas = useAppStore(state => state.setMenuAreas);
+  const setTodoSummary = useAppStore(state => state.setTodoSummary);
+  const setApprovals = useAppStore(state => state.setApprovals);
+
+  const fetchMenuAreas = useAppStore(state => state.fetchMenuAreas);
+  const fetchTodoSummary = useAppStore(state => state.fetchTodoSummary);
+
+  useIonViewWillEnter(() => {
+    fetchMenuAreas();
+    fetchTodoSummary();
+  });
+
+  async function handleRefresh(event: RefresherCustomEvent) {
+    setMenuAreas(null);
+    setTodoSummary(null);
+    setApprovals(null);
+    await Promise.allSettled(([fetchMenuAreas(), fetchTodoSummary()]));
+    event.detail.complete();
+  }
 
   return (
-    <IonPage>
-      <IonHeader>
-        <CommonAppBar title="홈" showBackButton={false} />
-      </IonHeader>
-      <IonContent>
-        <IonList>
-          <IonItem routerLink="/detail">
-            <IonLabel>상세화면</IonLabel>
-          </IonItem>
-          <IonItem routerLink="/menu">
-            <IonLabel>메뉴</IonLabel>
-          </IonItem>
-          <IonItem routerLink="/notice">
-            <IonLabel>공지</IonLabel>
-          </IonItem>
-          <IonItem button onClick={() => setShowDialog(true)}>
-            <IonLabel>다이얼로그 열기</IonLabel>
-          </IonItem>
-          <IonItem routerLink="/secondAuth/email" >
-            <IonLabel>2차 비밀번호 초기화</IonLabel>
-          </IonItem>
-        </IonList>
-
-        <IonAlert
-          isOpen={showDialog}
-          onDidDismiss={() => setShowDialog(false)}
-          header="입력 다이얼로그"
-          inputs={[
-            {
-              name: 'inputValue',
-              type: 'text',
-              placeholder: '값을 입력하세요',
-            },
-          ]}
-          buttons={[
-            {
-              text: '취소',
-              role: 'cancel',
-              handler: () => {
-                setShowDialog(false);
-              },
-            },
-            {
-              text: '확인',
-              handler: (data) => {
-                setInputValue(data.inputValue);
-                setShowDialog(false);
-              },
-            },
-          ]}
-        />
-
-        {/* 입력한 값 보여주기 (디버깅용) */}
-        {inputValue && (
-          <div style={{ padding: '16px', fontSize: '16px' }}>
-            입력한 값: <strong>{inputValue}</strong>
-          </div>
-        )}
+    <IonPage className='home'>
+      <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
+      <IonContent fullscreen={true}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
+        <motion.div initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0, ease: "easeInOut" }}>
+          <NoticeCard />
+        </motion.div>
+        <motion.div style={{ marginTop: '12px' }}
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: "easeInOut" }}>
+          <WelcomeCard />
+        </motion.div>
+        <motion.div style={{ marginTop: '12px' }}
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: "easeInOut" }}>
+          <MenuCard />
+        </motion.div>
+        <motion.div style={{ marginTop: '12px' }}
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: "easeInOut" }}>
+          <TodoSummaryCard />
+        </motion.div>
       </IonContent>
     </IonPage>
   );
 };
 
 export default Home;
+
+
+const NoticeCard: React.FC = () => {
+  return (
+    <IonCard button className='home-card' onClick={() => {
+
+    }}>
+      <div className='notice-card-content'>
+        <div className='notice-card-badge'>
+          <span>공지사항</span>
+        </div>
+        <span className='notice-card-notice'>새로운 공지사항이 없습니다.</span>
+        <IonIcon src={chevronForwardOutline} style={{ width: 20 }} />
+      </div>
+    </IonCard>
+  );
+}
+
+const WelcomeCard: React.FC = () => {
+  return (
+    <IonCard className='home-card'>
+      <div className='welcome-card-content'>
+        <IonImg src='/assets/images/icon/person.webp' style={{ width: '48px' }}></IonImg>
+        <div className='welcome-card-name'>
+          <span>이성하님</span>
+          <span>좋은 하루 보내세요</span>
+        </div>
+        <IonButton className='welcome-card-button'>내 정보</IonButton>
+      </div>
+    </IonCard>
+  );
+}
+
+
+const MenuCard: React.FC = () => {
+  const menuAreas = useAppStore(state => state.menuAreas);
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+
+  const hasMoreMenus = menuAreas && menuAreas.length > 3;
+
+  return (
+    <IonCard className='home-card menu-card'>
+      {/* <IonCardContent className='menu-card-context'> */}
+
+      {Array.from({ length: !menuAreas ? 3 : Math.min(menuAreas.length, 3) }).map((_, index) => (
+        <MenuItem key={index} menuItem={menuAreas?.[index]} isLoading={!menuAreas} />
+      ))}
+      <motion.div
+        layout
+        transition={{
+          duration: 0.4,
+          ease: "easeInOut",
+        }}
+      >
+        <AnimatePresence>
+          {isMenuExpanded && menuAreas && (menuAreas.slice(3)).map((menu, index) => {
+            const icon = getFlowIcon(menu.flowCode!);
+
+            return <motion.div key={index}
+              layout
+              initial={{
+                opacity: 0,
+                y: -10,
+                height: 0,
+                overflow: 'hidden'
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                height: '48px',
+                overflow: 'visible'
+              }}
+              exit={{
+                opacity: 0,
+                height: 0,
+                y: -10,
+                overflow: 'hidden',
+                transition: {
+                  delay: index * 0.04,
+                  ease: "easeInOut",
+                  opacity: { duration: 0.4 }
+                }
+              }}
+              transition={{
+                duration: 0.4,
+                delay: index * 0.05,
+                ease: "easeInOut",
+                height: { duration: 0.4 },
+              }}
+            >
+              <IonItem button key={index} className='menu-ion-item'>
+                <div className='menu-item'>
+                  <div className='menu-item-content'>
+                    <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
+                      <IonImg src={icon.image} />
+                    </div>
+                    <span>{menu.oLtext}</span>
+                  </div>
+                  <span className='menu-item-count'>{menu.cnt}건</span>
+                </div>
+              </IonItem>
+            </motion.div>
+          })
+          }
+        </AnimatePresence>
+      </motion.div>
+
+      <IonButton
+        color='medium'
+        className='menu-expand-button'
+        fill="clear"
+        onClick={() => setIsMenuExpanded(!isMenuExpanded)}
+        disabled={!hasMoreMenus}
+      >
+        <span>{isMenuExpanded ? '메뉴 접기' : '메뉴 펼치기'}</span>
+        <motion.div
+          style={{ paddingLeft: '4px' }}
+          animate={{ rotate: isMenuExpanded ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <IonIcon
+            icon={chevronDown}
+          />
+        </motion.div>
+      </IonButton>
+      {/* </IonCardContent> */}
+    </IonCard>
+  );
+};
+
+interface MenuItemProps {
+  menuItem?: AreaModel;
+  isLoading?: boolean;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
+  if (isLoading || !menuItem) {
+    return (
+      <IonItem className='menu-ion-item'>
+        <div className='menu-item'>
+          <CustomSkeleton width={80} />
+          <CustomSkeleton width={50} />
+        </div>
+      </IonItem>
+    );
+  }
+
+  const icon = getFlowIcon(menuItem.flowCode!);
+  const router = useIonRouter();
+
+  return (
+    <IonItem button className='menu-ion-item' onClick={() => {
+      router.push('/flowList');
+    }}>
+      <div className='menu-item'>
+        <div className='menu-item-content'>
+          <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
+            <IonImg src={icon.image} />
+          </div>
+          <span>{menuItem.oLtext}</span>
+        </div>
+        <span className='menu-item-count'>{menuItem.cnt}건</span>
+      </div>
+    </IonItem>
+  );
+};
+
+const TodoSummaryCard: React.FC = () => {
+  const todoSummary = useAppStore(state => state.todoSummary);
+  const approvals = useAppStore(state => state.approvals);
+
+  return (
+    <IonCard className='home-card todo-summary-card' onClick={() => {
+
+    }}>
+      <div className='todo-summary-title'>
+        <IonImg src={getFlowIcon('TODO').image} />
+        <span>미결함</span>
+      </div>
+      <GroupButton />
+      <AnimatePresence>
+        {todoSummary?.length == 0 ?
+          <div className='todo-summary-no-data'>
+            <IonImg src='/assets/images/icon/search.webp' />
+            <span>미결 항목이 없습니다.</span>
+          </div> :
+          Array.from({ length: !approvals ? 3 : Math.min(approvals.length, 3) }).map((_, index) => (
+            <ApprovalItem key={index} approvalItem={approvals?.[index]} isLoading={!approvals} index={index} />
+          ))}
+      </AnimatePresence>
+      <IonButton
+        color='medium'
+        className='menu-expand-button'
+        fill="clear"
+        onClick={() => { }}
+        disabled={!todoSummary || !todoSummary.length}
+      >
+        <span>자세히 보기</span>
+        <IonIcon src={chevronForwardOutline} style={{ width: 14, marginLeft: 2 }} />
+      </IonButton>
+    </IonCard>
+  );
+}
+
+interface ApprovalItemProps {
+  approvalItem?: ApprovalModel;
+  isLoading?: boolean;
+  index: number;
+}
+
+const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = false, index }) => {
+  if (isLoading || !approvalItem) {
+    return (
+      <IonItem className='menu-ion-item'>
+        <div className='menu-item'>
+          <CustomSkeleton width={200} />
+        </div>
+      </IonItem>
+    );
+  }
+
+
+  return (
+    <IonItem button className='todo-summary-ion-item'>
+      <div className='todo-summary-item-wrapper'>
+        <span className='todo-summary-index'>{`${index + 1}.`}</span>
+        <div className='todo-summary-content'>
+          <span className='todo-summary-item-title'>{approvalItem.apprTitle}</span>
+          <div className='todo-summary-item-sub-wrapper'>
+            <span>{approvalItem.createDate + '・'}</span>
+            <IonIcon src={person} ></IonIcon>
+            <span>{approvalItem.creatorName}</span>
+          </div>
+        </div>
+      </div>
+    </IonItem>
+  );
+};

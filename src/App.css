@@ -4,3 +4,25 @@
   padding: 2rem;
   text-align: center;
 }
+/* 웹앱 전체 패딩 적용 */
+ion-header {
+  padding-top: var(--safe-area-top);
+}
+
+ion-app {
+  height: calc(100vh - var(--safe-area-bottom)) !important;
+  margin-bottom: var(--safe-area-bottom) !important;
+}
+
+ion-content {
+  --offset-bottom: 1px !important;
+  --offset-top: 0px ;
+}
+
+ion-content::part(scroll) {
+	scrollbar-color: transparent transparent;
+}
+
+ion-tab-bar {
+  --border: 1px solid var(--custom-border-color-50);
+}

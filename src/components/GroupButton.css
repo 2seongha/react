@@ -1,0 +1,31 @@
+.group-button-wrapper {
+  height: 56px;
+  display: flex;
+  overflow-x: auto;
+  padding: 8px 0 16px 0;
+  margin-bottom: 8px;
+  gap: 8px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--custom-border-color-50);
+}
+
+.group-button {
+  padding: 0px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--custom-border-color-100);
+  height: 32px;
+  background: transparent;
+  color: #646D7B;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  /* transition: background-color 0.2s, color 0.2s; */
+}
+
+.group-button.selected {
+  background: #646D7B;
+  color: white;
+  font-weight: 600;
+  border-color: #646D7B;
+}

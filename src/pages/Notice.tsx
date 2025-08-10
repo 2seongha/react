@@ -5,7 +5,7 @@ import Tab from '@mui/material/Tab';
 
 import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-import CommonAppBar from '../components/CustomHeader';
+import AppBar from '../components/AppBar';
 
 const Notice: React.FC = () => {
   const [value, setValue] = React.useState(0);
@@ -22,7 +22,7 @@ const Notice: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <CommonAppBar title={'공지'} showBackButton={true} />
+        <AppBar title={<span>공지</span>} showBackButton={true} />
         <Tabs value={value} onChange={handleTabChange} variant="fullWidth" aria-label="탭 메뉴" sx={{
           '& .MuiTab-root': {
             outline: 'none',

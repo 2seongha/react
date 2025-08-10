@@ -1,12 +1,12 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import React from 'react';
-import CommonAppBar from '../components/CustomHeader';
+import AppBar from '../components/AppBar';
 
 const Detail: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <CommonAppBar title={'상세'} showBackButton={true} />
+        <AppBar title={<span>상세</span>} showBackButton={true} />
       </IonHeader>
       <IonContent className="ion-padding">
         <p>상세 페이지입니다.</p>

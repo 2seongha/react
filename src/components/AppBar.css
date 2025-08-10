@@ -1,0 +1,52 @@
+.app-bar ion-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.app-bar ion-back-button {
+  height: 44px;
+  width: 44px;
+}
+
+.app-bar ion-toolbar.app-bar-color {
+  --background: transparent;
+}
+
+.toolbar-container {
+  height: 100%;
+}
+
+.logo-wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+  padding-left: 8px;
+}
+
+.app-bar-button {
+  --padding-start: 0;
+  --padding-end: 0;
+  --border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-bar-button ion-icon {
+  color: rgba(100, 109, 123, .48);
+}
+
+.app-bar-title-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}

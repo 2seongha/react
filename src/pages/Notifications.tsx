@@ -4,7 +4,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
 import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
+import AppBar from '../components/AppBar';
 
 const Notifications: React.FC = () => {
   const [value, setValue] = React.useState(0);
@@ -20,7 +20,8 @@ const Notifications: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
+      <AppBar title={<span>알림</span>}></AppBar>
+      {/* <IonHeader>
         <IonToolbar>
           <IonTitle>알림</IonTitle>
         </IonToolbar>
@@ -28,7 +29,7 @@ const Notifications: React.FC = () => {
           <Tab label="전체 공지" />
           <Tab label="부서 공지" />
         </Tabs>
-      </IonHeader>
+      </IonHeader> */}
       <IonContent fullscreen className="ion-padding">
 
         <Swiper onSwiper={(swiper) => swiperRef.current = swiper}
