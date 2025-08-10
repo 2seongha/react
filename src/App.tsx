@@ -136,7 +136,7 @@ const App: React.FC = () => {
     }
   }, [themeMode]);
 
-  if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)' }}>
+  if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
   </div>;
   return (
