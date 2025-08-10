@@ -86,7 +86,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         ease: "linear",
       }}
     >
-      <IonItem button className='flow-list-item' onClick={() => { }} mode='md'>
+      <IonItem button className='flow-list-item' onClick={() => { }}>
         <div className='flow-list-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
           <IonImg src={icon.image}></IonImg>
         </div>
