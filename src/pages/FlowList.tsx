@@ -36,7 +36,7 @@ const FlowList: React.FC = () => {
       } showBackButton={true} showCount={true} count={totalCount}></AppBar>
 
       <IonContent fullscreen >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode='md'>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
         {!flowList ?
