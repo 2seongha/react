@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import './FlowList.css';
 import { getFlowIcon } from '../utils';
+import { refreshOutline } from 'ionicons/icons';
 
 const FlowList: React.FC = () => {
   const setFlowList = useAppStore(state => state.setFlowList);
@@ -37,7 +38,7 @@ const FlowList: React.FC = () => {
 
       <IonContent fullscreen >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-          <IonRefresherContent></IonRefresherContent>
+          <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
         </IonRefresher>
         {!flowList ?
           <div className='loading-indicator-wrapper'>
@@ -65,7 +66,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
       layout
       initial={{
         opacity: 0,
-        height: '30px',
+        height: '20px',
       }}
       animate={{
         opacity: 1,
@@ -77,7 +78,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         ease: "linear",
       }}
       style={{
-        overflow: 'hidden', // ← 고정
+        overflow: 'visible', // ← 고정
       }}
     >
       <IonItem button className='flow-list-item' onClick={() => { }} mode='md'>

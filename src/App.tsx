@@ -15,6 +15,7 @@ import useAppStore from './stores/appStore';
 import { initWebview } from './webview';
 import { preloadCriticalImages, preloadAllImages, calculateProgress, type ImagePreloadProgress } from './utils/imagePreloader';
 import { Commet } from 'react-loading-indicators';
+import { getPlatformMode } from './utils';
 
 const RouterOutletWithAnimation: React.FC = () => {
   const { currentPath, prevPath } = usePreviousPath();
@@ -22,6 +23,21 @@ const RouterOutletWithAnimation: React.FC = () => {
   useEffect(() => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+    const handler = () => {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement) {
+        active.blur();
+      }
+    };
+
+    document.addEventListener('touchend', handler);
+    document.addEventListener('mouseup', handler);
+
+    return () => {
+      document.removeEventListener('touchend', handler);
+      document.removeEventListener('mouseup', handler);
+    };
   }, []);
 
   const animation = React.useMemo(() => {
@@ -31,9 +47,8 @@ const RouterOutletWithAnimation: React.FC = () => {
     return undefined;
   }, [currentPath, prevPath]);
 
-  const varUA = navigator.userAgent.toLowerCase();
   return (
-    <IonRouterOutlet animation={animation} mode={varUA.indexOf('android') > -1 ? 'md' : 'ios'}>
+    <IonRouterOutlet animation={animation} mode={getPlatformMode()}>
       <Route path="/app" component={Tabs} />
       <Route path="/flowList" component={FlowList} exact />
       <Route path="/detail" component={Detail} exact />

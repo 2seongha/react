@@ -187,3 +187,8 @@ export const getFileTypeIcon = (fileName: string): MappingIcon => {
     image: `${iconBasePath}/filetype/file.webp`,
   };
 };
+
+export function getPlatformMode(): 'md' | 'ios' {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return userAgent.indexOf('android') > -1 ? 'md' : 'ios';
+}

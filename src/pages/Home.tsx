@@ -15,12 +15,12 @@ import {
 } from '@ionic/react';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { chevronDown, chevronForwardOutline, person } from 'ionicons/icons';
+import { chevronDown, chevronDownCircleOutline, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import './Home.css';
-import { getFlowIcon } from '../utils';
+import { getFlowIcon, getPlatformMode } from '../utils';
 import { ApprovalModel, AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
 
@@ -49,8 +49,8 @@ const Home: React.FC = () => {
     <IonPage className='home'>
       <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
       <IonContent fullscreen={true}>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-          <IonRefresherContent></IonRefresherContent>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode() }>
+          <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
         </IonRefresher>
         <motion.div initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -143,22 +143,19 @@ const MenuCard: React.FC = () => {
               layout
               initial={{
                 opacity: 0,
-                y: -10,
                 height: 0,
               }}
               animate={{
                 opacity: 1,
-                y: 0,
                 height: '48px',
               }}
               exit={{
                 opacity: 0,
                 height: 0,
-                y: -10,
                 transition: {
                   delay: index * 0.04,
                   ease: "easeInOut",
-                  opacity: { duration: 0.4 }
+                  opacity: { duration: 0.2 }
                 }
               }}
               transition={{
@@ -168,7 +165,7 @@ const MenuCard: React.FC = () => {
                 height: { duration: 0.4 },
               }}
               style={{
-                overflow: 'hidden', // ← 고정
+                overflow: 'visible', // ← 고정
               }}
             >
               <IonItem button key={index} className='menu-ion-item'>
