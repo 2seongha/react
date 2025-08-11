@@ -24,19 +24,18 @@ const RouterOutletWithAnimation: React.FC = () => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 
-    const handler = () => {
-      const active = document.activeElement;
-      if (active instanceof HTMLElement) {
-        active.blur();
-      }
+    const removeActivated = () => {
+      document.querySelectorAll('.ion-activated').forEach((el) =>
+        el.classList.remove('ion-activated')
+      );
     };
-
-    document.addEventListener('touchend', handler);
-    document.addEventListener('mouseup', handler);
-
+  
+    document.addEventListener('touchend', removeActivated);
+    document.addEventListener('mouseup', removeActivated);
+  
     return () => {
-      document.removeEventListener('touchend', handler);
-      document.removeEventListener('mouseup', handler);
+      document.removeEventListener('touchend', removeActivated);
+      document.removeEventListener('mouseup', removeActivated);
     };
   }, []);
 
