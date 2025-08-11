@@ -35,8 +35,13 @@ ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  *:hover {
-    background-color: transparent; /* 원하는 hover 효과 */
+@media (hover: none) and (pointer: coarse) {
+  button:hover,
+  a:hover,
+  .your-button-class:hover {
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    color: inherit !important;
   }
 }
