@@ -35,9 +35,14 @@ ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
-@media (hover: none) {
-  ion-button:hover,
-  ion-item:hover,
+@media (hover: none) and (pointer: coarse) {
+  *:hover {
+    background: none !important;
+    box-shadow: none !important;
+    color: inherit !important;
+    filter: none !important;
+  }
+
   .ion-activated {
     background: none !important;
     box-shadow: none !important;
