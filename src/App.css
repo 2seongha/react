@@ -35,7 +35,13 @@ ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
-/* 잔상 제거 */
-ion-item{
-  --background-hover: transparent;
+@media (hover: none) and (pointer: coarse) {
+  * {
+    --background-hover: transparent !important;
+    --ion-color-base: transparent !important;
+  }
+
+  a:hover {
+    color: unset;
+  }
 }
