@@ -35,7 +35,7 @@ ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
-@media (hover: none) and (pointer: coarse) {
+@media (hover: hover) {
   *:hover {
     background: none !important;
     box-shadow: none !important;
