@@ -26,7 +26,7 @@ import './App.css';
 setupIonicReact({
   mode: 'md',
   animated: true,
-  rippleEffect: false,
+  rippleEffect: true,
 });
 
 createRoot(document.getElementById('root')!).render(

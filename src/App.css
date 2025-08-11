@@ -39,7 +39,7 @@ ion-tab-bar {
   *:hover {
     background: none !important;
     box-shadow: none !important;
-    color: inherit !important;
+    color: transparent !important;
     filter: none !important;
   }
 

@@ -23,20 +23,6 @@ const RouterOutletWithAnimation: React.FC = () => {
   useEffect(() => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-    const removeActivated = () => {
-      document.querySelectorAll('.ion-activated').forEach((el) =>
-        el.classList.remove('ion-activated')
-      );
-    };
-  
-    document.addEventListener('touchend', removeActivated);
-    document.addEventListener('mouseup', removeActivated);
-  
-    return () => {
-      document.removeEventListener('touchend', removeActivated);
-      document.removeEventListener('mouseup', removeActivated);
-    };
   }, []);
 
   const animation = React.useMemo(() => {
