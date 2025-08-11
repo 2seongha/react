@@ -37,6 +37,6 @@ ion-tab-bar {
 
 @media (hover: none) and (pointer: coarse) { 
   * {
-    pointer-events: none;
+    pointer-events: none !important;
   }
 }
