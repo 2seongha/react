@@ -1,0 +1,15 @@
+.approval {
+  background-color: var(--ion-background-color2);
+}
+
+.approval ion-content {
+  --padding-top: 12px;
+  --padding-bottom: 0px;
+  --padding-start: 22px;
+  --padding-end: 22px;
+  --background: var(--ion-background-color2);
+}
+
+.approval ion-toolbar {
+  --background: var(--ion-background-color) !important;
+}

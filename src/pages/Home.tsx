@@ -15,7 +15,7 @@ import {
 } from '@ionic/react';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { chevronDown, chevronDownCircleOutline, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
+import { chevronDown, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -52,7 +52,7 @@ const Home: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode() }>
           <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
         </IonRefresher>
-        <motion.div initial={{ opacity: 0, y: -15 }}
+        <motion.div initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0, ease: "easeInOut" }}>
           <NoticeCard />

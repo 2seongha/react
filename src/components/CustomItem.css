@@ -1,0 +1,79 @@
+.custom-item {
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  position: relative;
+  background-color: var(--ion-background-color);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.custom-item-wrapper {
+  width: 100%;
+}
+
+/* 체크박스 선택 시 스타일 - 오버레이 방식 */
+.custom-item.selected {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.15);
+  --background: rgba(var(--ion-color-primary-rgb), 0.08);
+}
+
+.custom-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  height: 46px;
+  width: 100%;
+  padding: 8px 16px;
+}
+
+/* 체크박스 클릭 영역 확장 */
+.custom-item-header-checkbox-area {
+  position: relative;
+  padding: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  overflow: hidden;
+  pointer-events: all;
+  z-index: 1;
+}
+
+.custom-item-header-checkbox-area  > ion-checkbox {
+  height: 18px;
+}
+
+.custom-item-header-content-area {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.custom-item-body {
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  padding: 8px 16px;
+}
+
+
+/* 리플 효과를 둥글게 만들기 */
+.custom-item-header-content-area ion-ripple-effect,
+.custom-item-body ion-ripple-effect {
+  border-radius: 12px;
+}
+
+/* .custom-item-header-content-area .ripple-effect,
+.custom-item-body .ripple-effect {
+  border-radius: 12px;
+} */

@@ -13,11 +13,11 @@ import {
 import { arrowBack, menu, notifications, search, settings, settingsSharp } from 'ionicons/icons';
 import './AppBar.css';
 import useAppStore from '../stores/appStore';
-import SlotCounter from 'react-slot-counter';
 import AnimatedBadge from './AnimatedBadge';
 
 type AppBarProps = {
   title?: ReactNode;
+  bottom?: ReactNode;
   showBackButton?: boolean;
   showLogo?: boolean;
   showSearchButton?: boolean;
@@ -30,6 +30,7 @@ type AppBarProps = {
 
 const AppBar: React.FC<AppBarProps> = ({
   title,
+  bottom,
   showBackButton = false,
   showLogo = false,
   showSearchButton = false,
@@ -70,7 +71,7 @@ const AppBar: React.FC<AppBarProps> = ({
         <IonTitle>
           <div className='app-bar-title-wrapper'>
             {title}
-            {showCount ? !count ? null : <AnimatedBadge count={count} key={count}/> : null}
+            {showCount ? <AnimatedBadge count={count} key={count} /> : null}
           </div>
         </IonTitle>
         <IonButtons slot="end">
@@ -104,6 +105,7 @@ const AppBar: React.FC<AppBarProps> = ({
           }
         </IonButtons>
       </IonToolbar>
+      {bottom}
     </IonHeader>
   );
 };

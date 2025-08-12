@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonImg, IonItem, IonLabel, IonList, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherCustomEvent, useIonViewWillEnter } from '@ionic/react';
+import { IonContent, IonHeader, IonImg, IonItem, IonLabel, IonList, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
 import React from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -32,7 +32,7 @@ const FlowList: React.FC = () => {
 
   return (
     <IonPage className='flow-list'>
-      <AppBar title={
+      <AppBar key='flow-list-app-bar' title={
         <span>미결함</span>
       } showBackButton={true} showCount={true} count={totalCount}></AppBar>
 
@@ -44,7 +44,7 @@ const FlowList: React.FC = () => {
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
           </div> : flowList?.map((area, index) => {
-            return <FlowListItem area={area} index={index} key={index}></FlowListItem>;
+            return <FlowListItem area={area} index={index} key={`flow-list-item-${index}`}/>;
           })}
       </IonContent>
     </IonPage>
@@ -59,10 +59,11 @@ interface FlowListProps {
 }
 
 const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
+  const router = useIonRouter();
   const icon = getFlowIcon(area.flowCode!);
 
   return (
-    <motion.div key={area.flowCode}
+    <motion.div
       layout
       initial={{
         opacity: 0,
@@ -81,7 +82,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         overflow: 'visible', // ← 고정
       }}
     >
-      <IonItem button className='flow-list-item' onClick={() => { }} mode='md'>
+      <IonItem button className='flow-list-item' onClick={() => { router.push('/approval', 'forward', 'push') }} mode='md'>
         <div className='flow-list-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
           <IonImg src={icon.image}></IonImg>
         </div>

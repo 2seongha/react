@@ -5,12 +5,13 @@ import React, { useEffect, useState } from 'react';
 
 import Tabs from './components/Tabs';
 import FlowList from './pages/FlowList';
+import Approval from './pages/Approval';
 import Detail from './pages/Detail';
 import Menu from './pages/Menu';
+import Settings from './pages/Settings';
 
 import usePreviousPath from './hooks/usePreviousPath';
 import Notice from './pages/Notice';
-import Settings from './pages/Settings';
 import useAppStore from './stores/appStore';
 import { initWebview } from './webview';
 import { preloadCriticalImages, preloadAllImages, calculateProgress, type ImagePreloadProgress } from './utils/imagePreloader';
@@ -36,6 +37,7 @@ const RouterOutletWithAnimation: React.FC = () => {
     <IonRouterOutlet animation={animation} mode={getPlatformMode()}>
       <Route path="/app" component={Tabs} />
       <Route path="/flowList" component={FlowList} exact />
+      <Route path="/approval" component={Approval} exact />
       <Route path="/detail" component={Detail} exact />
       <Route path="/menu" component={Menu} exact />
       <Route path="/notice" component={Notice} exact />

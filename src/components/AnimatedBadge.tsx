@@ -10,11 +10,11 @@ const AnimatedBadge: React.FC<AnimatedBadgeProps> = ({ count }) => {
 
   return (
     <div className='animated-badge'>
-        <SlotCounter 
-          value={count}
-          startValue={0}
-          autoAnimationStart={true}
-        />
+      {count == 0 ? <span>0</span> : <SlotCounter
+        value={count}
+        startValue={0}
+        autoAnimationStart={true}
+      />}
     </div>
   );
 };
