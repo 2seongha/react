@@ -1,5 +1,6 @@
 import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonLabel, IonItem } from '@ionic/react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh } from 'ionicons/icons';
@@ -49,8 +50,8 @@ const Approval: React.FC = () => {
     return approvals ? approvals.length : 0;
   }, [approvals]);
 
-  // 날짜 포맷팅 함수
-  const formatDate = (dateString: string) => {
+  // 날짜 포맷팅 함수 - useCallback으로 최적화
+  const formatDate = useCallback((dateString: string) => {
     if (!dateString) return '날짜 선택';
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
@@ -58,31 +59,43 @@ const Approval: React.FC = () => {
       month: '2-digit',
       day: '2-digit'
     });
-  };
+  }, []);
 
-  // 날짜 초기화 함수 (기본값으로 리셋)
-  const resetDates = () => {
+  // 날짜 초기화 함수 (기본값으로 리셋) - useCallback으로 최적화
+  const resetDates = useCallback(() => {
     setStartDate(defaultStartDate);
     setEndDate(defaultEndDate);
-  };
+  }, [defaultStartDate, defaultEndDate]);
 
-  // 날짜 선택 확인 함수
-  const handleStartDateConfirm = (value: string) => {
+  // 날짜 선택 확인 함수 - useCallback으로 최적화
+  const handleStartDateConfirm = useCallback((value: string) => {
     setStartDate(value);
     setIsStartDateOpen(false);
-  };
+  }, []);
 
-  const handleEndDateConfirm = (value: string) => {
+  const handleEndDateConfirm = useCallback((value: string) => {
     setEndDate(value);
     setIsEndDateOpen(false);
-  };
+  }, []);
+
+  // 네비게이션 핸들러 - useCallback으로 최적화
+  const handleBackNavigation = useCallback(() => {
+    router.push('/flowList', 'back', 'pop');
+  }, [router]);
+
+  // Virtuoso용 아이템 렌더러
+  const VirtualizedApprovalItem = useCallback((index: number, approval: ApprovalModel) => {
+    return (
+      <ApprovalItem approval={approval} index={index} key={`approval-item-${index}`} />
+    );
+  }, []);
 
   return (
     <IonPage className='approval'>
       <AppBar
         title={
           <div className='app-bar-title-wrapper'>
-            <span className='app-bar-sub-title' onClick={() => { router.push('/flowList', 'back', 'pop') }}>미결함</span>
+            <span className='app-bar-sub-title' onClick={handleBackNavigation}>미결함</span>
             <IonIcon src={chevronForwardOutline} style={{ width: 16, color: 'var(--ion-color-secondary)' }} />
             <span>SAP 전표</span>
           </div>
@@ -166,16 +179,30 @@ const Approval: React.FC = () => {
         count={totalCount} />
 
       <IonContent fullscreen>
-
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
         </IonRefresher>
-        {!approvals ?
+        {!approvals ? (
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
-          </div> : approvals?.map((approval, index) => {
-            return <ApprovalItem approval={approval} index={index} key={`approval-item-${index}`} />;
-          })}
+          </div>
+        ) : (
+          <Virtuoso
+            data={approvals}
+            itemContent={VirtualizedApprovalItem}
+            style={{ height: '100%' }}
+            overscan={5}
+            increaseViewportBy={200}
+            defaultItemHeight={120}
+            components={{
+              Item: ({ children, ...props }) => (
+                <div {...props} style={{ ...props.style, marginBottom: 12, minHeight: 100 }}>
+                  {children}
+                </div>
+              )
+            }}
+          />
+        )}
       </IonContent>
     </IonPage>
   );
@@ -188,46 +215,47 @@ interface ApprovalProps {
   index: number;
 }
 
-const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index }) => {
-  const router = useIonRouter();
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index }) => {
   const [isChecked, setIsChecked] = React.useState(false);
 
-  const handleCheckboxChange = (checked: boolean) => {
+  const handleCheckboxChange = useCallback((checked: boolean) => {
     setIsChecked(checked);
     console.log(`Approval ${approval.apprTitle} ${checked ? 'selected' : 'deselected'}`);
-  };
+  }, [approval.apprTitle]);
+
+  const motionProps = useMemo(() => ({
+    layout: true,
+    initial: {
+      // x: '-80%',
+      opacity: .5,
+    },
+    animate: {
+      // x: 0,
+      opacity: 1,
+    },
+    transition: {
+      duration: 0.4,
+      delay: index * 0.04,
+      ease: "linear" as const,
+    },
+    style: {
+      overflow: 'visible' as const,
+      marginBottom: 12,
+    }
+  }), [index]);
+
+  const titleElement = useMemo(() => <span>{approval.apprTitle}</span>, [approval.apprTitle]);
+  const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-    <motion.div
-      layout
-      initial={{
-        x: '-80%',
-        opacity: 0,
-      }}
-      animate={{
-        x: 0,
-        opacity: 1,
-      }}
-      transition={{
-        duration: 0.4,
-        delay: index * 0.04,
-        ease: "linear",
-      }}
-      style={{
-        overflow: 'visible', // ← 고정
-        marginBottom: 12,
-      }}
-    >
+    // <motion.div {...motionProps}>
       <CustomItem
         selectable={true}
         checked={isChecked}
-        title={<span>{approval.apprTitle}</span>}
-        // onClick={() => console.log('item clicked')}
+        title={titleElement}
         onCheckboxChange={handleCheckboxChange}
-        sub={
-          <div style={{ height: '40px' }}> hello</div>
-        }
+        sub={subElement}
       />
-    </motion.div>
+    // </motion.div>
   );
-}
+});

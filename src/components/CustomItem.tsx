@@ -1,5 +1,5 @@
 import { IonCheckbox, IonIcon, IonRippleEffect, IonItem, IonButton } from '@ionic/react';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useMemo, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline } from 'ionicons/icons';
@@ -14,36 +14,44 @@ interface CustomItemProps {
   expandable?: boolean;
 }
 
-const CustomItem: React.FC<CustomItemProps> = ({ selectable, title, sub, onClick, onCheckboxChange, checked }) => {
+const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, sub, onClick, onCheckboxChange, checked }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleCheckboxToggle = (e: React.MouseEvent) => {
+  const handleCheckboxToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // 부모 클릭 이벤트 방지
     if (onCheckboxChange) {
       onCheckboxChange(!checked);
     }
-  };
+  }, [onCheckboxChange, checked]);
 
-  const handleTitleClick = () => {
+  const handleTitleClick = useCallback(() => {
     if (sub) {
       setIsExpanded(!isExpanded);
     } else if (onClick) {
       onClick();
     }
-  };
+  }, [sub, isExpanded, onClick]);
 
-  const headerButton = sub ? (
-    <IonIcon
-      src={isExpanded ? chevronDownOutline : chevronForwardOutline}
-      style={{ width: 14, marginLeft: 2 }}
-    />
-  ) : onClick ? (
-    <IonIcon src={chevronForwardOutline} style={{ width: 14, marginLeft: 2 }} />
-  ) : null;
+  const headerButton = useMemo(() => {
+    if (sub) {
+      return (
+        <IonIcon
+          src={isExpanded ? chevronDownOutline : chevronForwardOutline}
+          style={{ width: 14, marginLeft: 2 }}
+        />
+      );
+    } else if (onClick) {
+      return <IonIcon src={chevronForwardOutline} style={{ width: 14, marginLeft: 2 }} />;
+    }
+    return null;
+  }, [sub, isExpanded, onClick]);
+
+  const itemClasses = useMemo(() => `custom-item ${checked ? 'selected' : ''}`, [checked]);
+  const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`, [sub, onClick]);
 
   return (
     <IonItem
-      className={`custom-item ${checked ? 'selected' : ''}`}
+      className={itemClasses}
       onClick={onClick ? onClick : undefined}
       button={!!onClick}
       mode='md'
@@ -51,11 +59,6 @@ const CustomItem: React.FC<CustomItemProps> = ({ selectable, title, sub, onClick
       <div className='custom-item-wrapper'>
         {/* //* header */}
         <div className='custom-item-header'>
-          {/* <div className='custom-item-header-checkbox-area ion-activatable'
-            onClick={handleCheckboxToggle}>
-            <IonCheckbox checked={checked} mode='md' />
-            <IonRippleEffect />
-          </div> */}
           {selectable ? (
             <IonButton fill='clear' onClick={handleCheckboxToggle} shape='round'>
               <IonCheckbox checked={checked} mode='md' />
@@ -63,7 +66,7 @@ const CustomItem: React.FC<CustomItemProps> = ({ selectable, title, sub, onClick
           ) : null}
 
           <div
-            className={`custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`}
+            className={contentAreaClasses}
             onClick={sub ? handleTitleClick : onClick}
           >
             {title}
@@ -101,8 +104,7 @@ const CustomItem: React.FC<CustomItemProps> = ({ selectable, title, sub, onClick
         </AnimatePresence>
       </div>
     </IonItem>
-
   );
-};
+});
 
 export default CustomItem;
