@@ -18,6 +18,8 @@ const Approval: React.FC = () => {
   
   // 초기 로딩 상태 추적
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  // 스크롤 상태 추적
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // 기본 날짜 설정 (6개월 전 ~ 오늘) - useMemo로 최적화
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -98,6 +100,18 @@ const Approval: React.FC = () => {
   const handleBackNavigation = useCallback(() => {
     router.push('/flowList', 'back', 'pop');
   }, [router]);
+
+  // 스크롤 이벤트 핸들러
+  const handleScrollStart = useCallback(() => {
+    setIsScrolling(true);
+  }, []);
+
+  const handleScrollEnd = useCallback(() => {
+    // 스크롤이 끝난 후 약간의 지연을 두어 DOM 업데이트 완료 대기
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, 100);
+  }, []);
 
   // Virtuoso용 아이템 렌더러
   const VirtualizedApprovalItem = useCallback((index: number, approval: ApprovalModel) => {
@@ -200,7 +214,7 @@ const Approval: React.FC = () => {
         count={totalCount} />
 
       <IonContent fullscreen>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={isScrolling}>
           <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
         </IonRefresher>
         {!approvals ? (
@@ -215,6 +229,8 @@ const Approval: React.FC = () => {
             overscan={5}
             increaseViewportBy={200}
             defaultItemHeight={120}
+            isScrolling={handleScrollStart}
+            endReached={handleScrollEnd}
             components={{
               Item: ({ children, ...props }) => (
                 <div {...props} style={{ ...props.style, marginBottom: 12, minHeight: 100 }}>
