@@ -49,5 +49,15 @@
 
 .approval-item-wrapper {
   min-height: 1px;
-  padding: 12px 22px 0 22px;
+  padding: 0px 22px 12px 22px;
+}
+
+/* 체크박스 선택 시 스타일 */
+.approval-item-wrapper.selected {
+  transform: scale(1.02);
+  transition: transform 0.15s ease-out;
+}
+
+.approval .ion-content-scroll-host >div >div >div:first-child {
+  margin-top: 12px;
 }

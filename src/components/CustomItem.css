@@ -12,19 +12,20 @@
   background-color: var(--ion-background-color);
   border-radius: 12px;
   transform: scale(1);
-  transition: box-shadow 0.15s ease-out, background-color 0.15s ease-out, border 0.15s ease-out;
+  transition: box-shadow 0.15s ease-out, background-color 0.15s ease-out, scale 0.15s ease-out;
 }
 
 .custom-item-wrapper {
   width: 100%;
 }
 
-/* 체크박스 선택 시 스타일 - 오버레이 방식 */
+/* 체크박스 선택 시 스타일 */
 .custom-item.selected {
   box-shadow: 0 3px 10px rgba(var(--ion-color-primary-rgb), 0.2);
   --background: rgba(var(--ion-color-primary-rgb), 0.08);
-  border-left: 4px solid var(--ion-color-primary);
+  transition: box-shadow 0.15s ease-out, background-color 0.15s ease-out;
 }
+
 
 .custom-item-header {
   display: flex;

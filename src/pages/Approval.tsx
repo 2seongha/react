@@ -174,17 +174,20 @@ const Approval: React.FC = () => {
     }
   }, [filteredApprovals, isAllSelected]);
 
-  const renderItem = useCallback((index: number, approval: ApprovalModel) => (
-    <div className="approval-item-wrapper">
-      <ApprovalItem
-        key={approval.flowNo}
-        approval={approval}
-        index={index}
-        isSelected={selectedItems.has(approval.flowNo)}
-        onSelectionChange={handleItemSelection}
-      />
-    </div>
-  ), [selectedItems, handleItemSelection]);
+  const renderItem = useCallback((index: number, approval: ApprovalModel) => {
+    const isSelected = selectedItems.has(approval.flowNo);
+    return (
+      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''}`}>
+        <ApprovalItem
+          key={approval.flowNo}
+          approval={approval}
+          index={index}
+          isSelected={isSelected}
+          onSelectionChange={handleItemSelection}
+        />
+      </div>
+    );
+  }, [selectedItems, handleItemSelection]);
 
 
 
