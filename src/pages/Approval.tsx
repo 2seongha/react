@@ -15,6 +15,9 @@ const Approval: React.FC = () => {
   const fetchApprovals = useAppStore(state => state.fetchApprovals);
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
+  
+  // 초기 로딩 상태 추적
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // 기본 날짜 설정 (6개월 전 ~ 오늘) - useMemo로 최적화
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -36,14 +39,27 @@ const Approval: React.FC = () => {
 
   useIonViewWillEnter(() => {
     setApprovals(null);
+    setIsInitialLoad(true);
     fetchApprovals();
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setApprovals(null);
+    setIsInitialLoad(true);
     await Promise.allSettled(([fetchApprovals()]));
     event.detail.complete();
   }
+
+  // 초기 로딩 완료 후 애니메이션 비활성화
+  React.useEffect(() => {
+    if (approvals && isInitialLoad) {
+      const timer = setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 400);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [approvals, isInitialLoad]);
 
   // flowList의 전체 카운트 계산 (메모이제이션)
   const totalCount = React.useMemo(() => {
@@ -86,9 +102,14 @@ const Approval: React.FC = () => {
   // Virtuoso용 아이템 렌더러
   const VirtualizedApprovalItem = useCallback((index: number, approval: ApprovalModel) => {
     return (
-      <ApprovalItem approval={approval} index={index} key={`approval-item-${index}`} />
+      <ApprovalItem 
+        approval={approval} 
+        index={index} 
+        key={`approval-item-${index}`}
+        enableAnimation={isInitialLoad}
+      />
     );
-  }, []);
+  }, [isInitialLoad]);
 
   return (
     <IonPage className='approval'>
@@ -213,9 +234,10 @@ export default Approval;
 interface ApprovalProps {
   approval: ApprovalModel;
   index: number;
+  enableAnimation?: boolean;
 }
 
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, enableAnimation = false }) => {
   const [isChecked, setIsChecked] = React.useState(false);
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -226,16 +248,16 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index }) =
   const motionProps = useMemo(() => ({
     layout: true,
     initial: {
-      // x: '-80%',
-      opacity: .5,
+      x: '-20%',
+      opacity: 0,
     },
     animate: {
-      // x: 0,
+      x: 0,
       opacity: 1,
     },
     transition: {
-      duration: 0.4,
-      delay: index * 0.04,
+      duration: 0.2,
+      delay: index * 0.02,
       ease: "linear" as const,
     },
     style: {
@@ -247,15 +269,24 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index }) =
   const titleElement = useMemo(() => <span>{approval.apprTitle}</span>, [approval.apprTitle]);
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
-  return (
-    // <motion.div {...motionProps}>
-      <CustomItem
-        selectable={true}
-        checked={isChecked}
-        title={titleElement}
-        onCheckboxChange={handleCheckboxChange}
-        sub={subElement}
-      />
-    // </motion.div>
+  const itemContent = (
+    <CustomItem
+      selectable={true}
+      checked={isChecked}
+      title={titleElement}
+      onCheckboxChange={handleCheckboxChange}
+      sub={subElement}
+    />
+  );
+
+  // 애니메이션 활성화 상태에 따라 조건부 렌더링
+  return enableAnimation ? (
+    <motion.div {...motionProps}>
+      {itemContent}
+    </motion.div>
+  ) : (
+    <div style={{ marginBottom: 12 }}>
+      {itemContent}
+    </div>
   );
 });
