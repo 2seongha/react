@@ -296,7 +296,7 @@ const Approval: React.FC = () => {
 
       <IonContent
         fullscreen
-        scrollY={true}
+        scrollY={false}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
@@ -320,11 +320,11 @@ const Approval: React.FC = () => {
                 scrollCallbackRef.current();
               }
             }}
-            components={{
-              Scroller: React.forwardRef<HTMLDivElement, any>((props, ref) => (
-                <div {...props} ref={ref} style={{ ...(props.style || {}) }} />
-              ))
-            }}
+            // components={{
+            //   Scroller: React.forwardRef<HTMLDivElement, any>((props, ref) => (
+            //     <div {...props} ref={ref} style={{ ...(props.style || {}) }} />
+            //   ))
+            // }}
             itemContent={renderItem}
           />
         ) : (
