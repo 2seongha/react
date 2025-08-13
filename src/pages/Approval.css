@@ -38,6 +38,7 @@
 
 .approval .select-all-button {
   width: 50%;
+  touch-action: manipulation;
 }
 
 .approval .scroll-top-button {

@@ -248,7 +248,7 @@ const Approval: React.FC = () => {
               </IonButton>
             </IonToolbar>
             <IonToolbar>
-              <IonItem button onClick={handleSelectAll} mode='md' className='select-all-button'>
+              <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
                 <IonCheckbox
                   mode='md'
                   checked={isAllSelected}
