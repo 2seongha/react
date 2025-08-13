@@ -18,9 +18,8 @@ const Approval: React.FC = () => {
   const router = useIonRouter();
   const [isTop, setIsTop] = useState(true);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<number | null>(null);
   const [searchText, setSearchText] = useState<string>('');
+  const scrollCallbackRef = useRef<(() => void) | null>(null);
 
 
   // 기본 날짜 설정 (6개월 전 ~ 오늘) - useMemo로 최적화
@@ -40,7 +39,7 @@ const Approval: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(defaultEndDate);
   const [isStartDateOpen, setIsStartDateOpen] = useState(false);
   const [isEndDateOpen, setIsEndDateOpen] = useState(false);
-
+  console.log('rebuild');
   useIonViewWillEnter(() => {
     setApprovals(null);
     setSelectedItems(new Set());
@@ -61,14 +60,6 @@ const Approval: React.FC = () => {
   const scrollToTop = () => {
     virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
   };
-
-  useEffect(() => {
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
 
   // 전체 카운트 계산 (메모이제이션)
   const totalCount = React.useMemo(() => {
@@ -321,14 +312,10 @@ const Approval: React.FC = () => {
             overscan={20}
             increaseViewportBy={{ top: 500, bottom: 200 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
-            rangeChanged={(range) => {
-              setIsScrolling(true);
-              if (scrollTimeoutRef.current) {
-                clearTimeout(scrollTimeoutRef.current);
+            rangeChanged={() => {
+              if (scrollCallbackRef.current) {
+                scrollCallbackRef.current();
               }
-              scrollTimeoutRef.current = setTimeout(() => {
-                setIsScrolling(false);
-              }, 1000);
             }}
             components={{
               List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
@@ -348,28 +335,75 @@ const Approval: React.FC = () => {
             {searchText ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
           </div>
         )}
-        < IonFab
-          vertical="bottom"
-          horizontal="end"
-          slot="fixed"
-          style={{
-            marginBottom: '12px',
-            opacity: (isScrolling && !isTop) ? 1 : 0,
-            transform: (isScrolling && !isTop) ? 'scale(1)' : 'scale(0.8)',
-            transition: 'all 0.3s ease-in-out',
-            pointerEvents: (isScrolling && !isTop) ? 'auto' : 'none'
-          }}
-        >
-          <IonButton onClick={scrollToTop} className='scroll-top-button'>
-            <span>상단으로 이동</span>
-          </IonButton>
-        </IonFab>
+        <ScrollToTopFab
+          isTop={isTop}
+          onScrollToTop={scrollToTop}
+          scrollCallbackRef={scrollCallbackRef}
+        />
       </IonContent>
     </IonPage >
   );
 };
 
 export default Approval;
+
+// 독립적인 ScrollToTop FAB 컴포넌트
+interface ScrollToTopFabProps {
+  isTop: boolean;
+  onScrollToTop: () => void;
+  scrollCallbackRef: React.MutableRefObject<(() => void) | null>;
+}
+
+const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScrollToTop, scrollCallbackRef }) => {
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Virtuoso의 rangeChanged 이벤트를 통해 스크롤 감지
+    const handleScroll = () => {
+      if (!isTop) {
+        setIsScrolling(true);
+        
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        
+        scrollTimeoutRef.current = setTimeout(() => {
+          setIsScrolling(false);
+        }, 2000);
+      }
+    };
+
+    // callback 등록
+    scrollCallbackRef.current = handleScroll;
+    
+    return () => {
+      scrollCallbackRef.current = null;
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [isTop, scrollCallbackRef]);
+
+  return (
+    <IonFab
+      vertical="bottom"
+      horizontal="end"
+      slot="fixed"
+      style={{
+        marginBottom: '12px',
+        opacity: (isScrolling && !isTop) ? 1 : 0,
+        transform: (isScrolling && !isTop) ? 'scale(1)' : 'scale(0.8)',
+        transition: 'all 0.3s ease-in-out',
+        pointerEvents: (isScrolling && !isTop) ? 'auto' : 'none'
+      }}
+    >
+      <IonButton onClick={onScrollToTop} className='scroll-top-button'>
+        <span>상단으로 이동</span>
+      </IonButton>
+    </IonFab>
+  );
+});
 
 interface ApprovalProps {
   approval: ApprovalModel;
