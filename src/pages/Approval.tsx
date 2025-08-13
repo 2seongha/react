@@ -186,13 +186,15 @@ const Approval: React.FC = () => {
 
   // Virtuoso itemContent 최적화를 위한 안정된 함수
   const renderItem = useCallback((index: number, approval: ApprovalModel) => (
-    <ApprovalItemMemo
-      key={approval.flowNo}
-      approval={approval}
-      index={index}
-      isSelected={selectedItems.has(approval.flowNo)}
-      onSelectionChange={handleItemSelection}
-    />
+    <div className="approval-item-wrapper">
+      <ApprovalItemMemo
+        key={approval.flowNo}
+        approval={approval}
+        index={index}
+        isSelected={selectedItems.has(approval.flowNo)}
+        onSelectionChange={handleItemSelection}
+      />
+    </div>
   ), [selectedItems, handleItemSelection]);
 
 
@@ -313,9 +315,9 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
+            className='ion-content-scroll-host'
             ref={virtuosoRef}
             data={filteredApprovals}
-            style={{ height: '100%' }}
             overscan={20}
             increaseViewportBy={{ top: 500, bottom: 200 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
@@ -327,6 +329,11 @@ const Approval: React.FC = () => {
               scrollTimeoutRef.current = setTimeout(() => {
                 setIsScrolling(false);
               }, 1000);
+            }}
+            components={{
+              List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
+                <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
+              ))
             }}
             itemContent={renderItem}
           />
