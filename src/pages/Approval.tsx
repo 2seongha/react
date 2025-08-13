@@ -4,7 +4,7 @@ import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import CustomItem from '../components/CustomItem';
 import './Approval.css';
@@ -21,6 +21,7 @@ const Approval: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
+  const [searchText, setSearchText] = useState<string>('');
 
 
   // 기본 날짜 설정 (6개월 전 ~ 오늘) - useMemo로 최적화
@@ -45,6 +46,7 @@ const Approval: React.FC = () => {
     setApprovals(null);
     setIsInitial(true);
     setSelectedItems(new Set());
+    setSearchText('');
     fetchApprovals();
   });
 
@@ -52,17 +54,15 @@ const Approval: React.FC = () => {
     setApprovals(null);
     setIsInitial(true);
     setSelectedItems(new Set());
+    setSearchText('');
     await Promise.allSettled(([fetchApprovals()]));
     event.detail.complete();
   }
 
   //* 스크롤 관련
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const scrollContainerRef = useRef<HTMLIonContentElement>(null);
   const scrollToTop = () => {
-    virtuosoRef.current?.scrollToIndex({
-      index: 0,
-      behavior: 'smooth', // or 'auto'
-    });
+    scrollContainerRef.current?.scrollToTop(500);
   };
   // 스크롤 중일 때만 버튼 보이기
   const handleScroll = useCallback((scrolling: boolean) => {
@@ -88,17 +88,17 @@ const Approval: React.FC = () => {
     };
   }, []);
 
-  // flowList의 전체 카운트 계산 (메모이제이션)
-  const totalCount = React.useMemo(() => {
-    return approvals ? approvals.length : 0;
-  }, [approvals]);
-
   useEffect(() => {
     if (approvals != null) {
       setTimeout(() => {
         setIsInitial(false);
       }, (approvals.length - 1) * 20 + 200);
     }
+  }, [approvals]);
+
+  // 전체 카운트 계산 (메모이제이션)
+  const totalCount = React.useMemo(() => {
+    return approvals ? approvals.length : 0;
   }, [approvals]);
 
   // 날짜 포맷팅 함수 - useCallback으로 최적화
@@ -147,25 +147,68 @@ const Approval: React.FC = () => {
     });
   }, []);
 
-  // 전체 선택 상태 계산
+  // 검색어로 필터링된 결과
+  const filteredApprovals = useMemo(() => {
+    if (!approvals) return null;
+    if (!searchText.trim()) return approvals;
+
+    return approvals.filter(approval =>
+      approval.apprTitle.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [approvals, searchText]);
+
+  // 필터된 카운트 계산
+  const filteredCount = React.useMemo(() => {
+    return filteredApprovals ? filteredApprovals.length : 0;
+  }, [filteredApprovals]);
+
+  // 전체 선택 상태 계산 (필터된 결과 기준)
   const isAllSelected = useMemo(() => {
-    if (!approvals || approvals.length === 0) return false;
-    return selectedItems.size === approvals.length;
-  }, [selectedItems.size, approvals?.length]);
+    if (!filteredApprovals || filteredApprovals.length === 0) return false;
+    const filteredFlowNos = filteredApprovals.map(approval => approval.flowNo);
+    return filteredFlowNos.every(flowNo => selectedItems.has(flowNo));
+  }, [selectedItems, filteredApprovals]);
+
+  // 검색 핸들러
+  const handleSearch = useCallback((e: CustomEvent) => {
+    const searchValue = e.detail.value;
+    setSearchText(searchValue);
+
+    // 검색어가 있을 때만 필터링에서 제외된 선택 항목들 제거
+    if (searchValue.trim() && approvals) {
+      const filteredFlowNos = approvals
+        .filter(approval =>
+          approval.apprTitle.toLowerCase().includes(searchValue.toLowerCase())
+        )
+        .map(approval => approval.flowNo);
+
+      setSelectedItems(prev => {
+        const newSet = new Set<string>();
+        for (const flowNo of prev) {
+          // 현재 필터 결과에 포함된 항목만 선택 상태 유지
+          if (filteredFlowNos.includes(flowNo)) {
+            newSet.add(flowNo);
+          }
+        }
+        return newSet;
+      });
+    }
+    // 검색어가 비어있으면 선택 상태는 그대로 유지 (모든 항목이 다시 보이므로)
+  }, [approvals]);
 
   // 전체 선택/해제 핸들러
   const handleSelectAll = useCallback(() => {
-    if (!approvals) return;
+    if (!filteredApprovals) return;
 
     if (isAllSelected) {
       // 전체 해제
       setSelectedItems(new Set());
     } else {
-      // 전체 선택
-      const allItemIds = approvals.map((approval) => approval.flowNo);
+      // 전체 선택 (필터된 결과만)
+      const allItemIds = filteredApprovals.map((approval) => approval.flowNo);
       setSelectedItems(new Set(allItemIds));
     }
-  }, [approvals, isAllSelected]);
+  }, [filteredApprovals, isAllSelected]);
 
 
   return (
@@ -181,7 +224,13 @@ const Approval: React.FC = () => {
         bottom={
           <>
             <IonToolbar>
-              <IonSearchbar />
+              <IonSearchbar
+                value={searchText}
+                onIonInput={handleSearch}
+                placeholder="제목으로 검색"
+                showClearButton="focus"
+                debounce={10}
+              />
             </IonToolbar>
             {/* 날짜 선택 섹션 */}
             <IonToolbar>
@@ -224,7 +273,7 @@ const Approval: React.FC = () => {
                   mode='md'
                   checked={isAllSelected}
                 />
-                <span>전체 선택 ({selectedItems.size}/{approvals?.length ?? 0})</span>
+                <span>전체 선택 ({selectedItems.size}/{filteredCount})</span>
               </IonItem>
             </IonToolbar>
 
@@ -265,8 +314,16 @@ const Approval: React.FC = () => {
         showCount={true}
         count={totalCount} />
 
-      <IonContent fullscreen scrollY={false} >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
+      <IonContent
+        fullscreen
+        scrollEvents={true}
+        ref={scrollContainerRef}
+        onIonScroll={(e) => {
+          const scrollTop = e.detail.scrollTop;
+          setIsTop(scrollTop === 0);
+          handleScroll(true);
+        }}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
 
@@ -274,33 +331,46 @@ const Approval: React.FC = () => {
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" />
           </div>
-        ) : (
-          <Virtuoso
-            ref={virtuosoRef}
-            className="ion-content-scroll-host"
-            atTopStateChange={(isTop) => {
-              setIsTop(isTop);
-              if (isTop) {
-                setIsScrolling(false);
-                if (scrollTimeoutRef.current) {
-                  clearTimeout(scrollTimeoutRef.current);
-                }
-              }
-            }}
-            isScrolling={handleScroll}
-            data={approvals}
-            overscan={5}
-            itemContent={(index, approval) => (
-              <ApprovalItem
-                approval={approval}
-                index={index}
-                animate={isInitial}
-                isSelected={selectedItems.has(approval.flowNo)}
-                onSelectionChange={handleItemSelection}
-              />
-            )}
-          />
-        )}
+        ) :
+          // filteredApprovals && filteredApprovals.length > 0 ? (
+          <AnimatePresence mode='sync'>
+            {filteredApprovals?.map((approval, index) => (
+              <motion.div
+                key={approval.flowNo}
+                layout
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 100 }}
+                transition={{
+                  duration: 0.1,
+                  delay: index * 0.01,
+                }}
+                style={{
+                  marginBottom: 12,
+                  overflow: 'visible'
+                }}
+              >
+                <ApprovalItem
+                  approval={approval}
+                  index={index}
+                  isSelected={selectedItems.has(approval.flowNo)}
+                  onSelectionChange={handleItemSelection}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          // ) : (
+          //   <div style={{
+          //     display: 'flex',
+          //     justifyContent: 'center',
+          //     alignItems: 'center',
+          //     height: '200px',
+          //     color: 'var(--ion-color-medium)'
+          //   }}>
+          //     {searchText ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
+          //   </div>
+          // )
+        }
         <IonFab
           vertical="bottom"
           horizontal="end"
@@ -326,67 +396,28 @@ export default Approval;
 interface ApprovalProps {
   approval: ApprovalModel;
   index: number;
-  animate: boolean;
   isSelected: boolean;
   onSelectionChange: (id: string, isSelected: boolean) => void;
 }
 
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, animate, isSelected, onSelectionChange }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange }) => {
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
 
-
-  const motionProps = useMemo(() => ({
-    layout: true,
-    initial: {
-      x: '-100%',
-    },
-    animate: {
-      x: 0,
-    },
-    transition: {
-      duration: 0.2,
-      delay: index * 0.02,
-      ease: "linear" as const,
-    },
-    style: {
-      overflow: 'visible' as const,
-    }
-  }), [index]);
-
   const titleElement = useMemo(() => <span>{approval.apprTitle}</span>, [approval.apprTitle]);
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
-  const itemStyle = {
-    minHeight: '52px',
-    height: 'auto'
-  };
-
   return (
-    <div style={itemStyle}>
-      {animate ? (
-        <motion.div {...motionProps}>
-          <CustomItem
-            selectable={true}
-            checked={isSelected}
-            title={titleElement}
-            onClick={() => { }}
-            onCheckboxChange={handleCheckboxChange}
-            sub={subElement}
-          />
-        </motion.div>
-      ) : (
-        <CustomItem
-          selectable={true}
-          checked={isSelected}
-          title={titleElement}
-          onClick={() => { }}
-          onCheckboxChange={handleCheckboxChange}
-          sub={subElement}
-        />
-      )}
-    </div>
+
+    <CustomItem
+      selectable={true}
+      checked={isSelected}
+      title={titleElement}
+      onClick={() => { }}
+      onCheckboxChange={handleCheckboxChange}
+      sub={subElement}
+    />
   );
 });
