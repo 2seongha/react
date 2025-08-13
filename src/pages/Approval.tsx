@@ -199,6 +199,17 @@ const Approval: React.FC = () => {
     }
   }, [filteredApprovals, isAllSelected]);
 
+  // Virtuoso itemContent 최적화를 위한 안정된 함수
+  const renderItem = useCallback((index: number, approval: ApprovalModel) => (
+    <ApprovalItemMemo
+      key={approval.flowNo}
+      approval={approval}
+      index={index}
+      isSelected={selectedItems.has(approval.flowNo)}
+      onSelectionChange={handleItemSelection}
+    />
+  ), [selectedItems, handleItemSelection]);
+
 
   return (
     <IonPage className='approval'>
@@ -317,24 +328,15 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
-            className="ion-content-scroll-host"
-            // ref={virtuosoRef}
+            ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={10}
-            // defaultItemHeight={200}
-            // isScrolling={handleScroll}
-            // atTopStateChange={(atTop) => setIsTop(atTop)}
-            // style={{ height: '100%' }}
-            itemContent={(index, approval) => (
-              // <div style={{ marginBottom: 12 }}>
-              <ApprovalItem
-                approval={approval}
-                index={index}
-                isSelected={selectedItems.has(approval.flowNo)}
-                onSelectionChange={handleItemSelection}
-              />
-              // </div>
-            )}
+            style={{ height: '100%' }}
+            fixedItemHeight={180}
+            overscan={20}
+            increaseViewportBy={{ top: 200, bottom: 200 }}
+            isScrolling={handleScroll}
+            atTopStateChange={(atTop) => setIsTop(atTop)}
+            itemContent={renderItem}
           />
         ) : (
           <div style={{
@@ -376,8 +378,8 @@ interface ApprovalProps {
   onSelectionChange: (id: string, isSelected: boolean) => void;
 }
 
+// Optimized ApprovalItem with fixed height for Virtuoso
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange }) => {
-
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -386,7 +388,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-    <div style={{ marginTop: '12px' }}>
+    <div style={{ height: 180, marginBottom: 12, overflow: 'hidden' }}>
       <CustomItem
         selectable={true}
         checked={isSelected}
@@ -396,5 +398,14 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
         sub={subElement}
       />
     </div>
+  );
+});
+
+// Highly optimized memo component for virtuoso
+const ApprovalItemMemo = React.memo<ApprovalProps>(ApprovalItem, (prevProps, nextProps) => {
+  return (
+    prevProps.approval.flowNo === nextProps.approval.flowNo &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.index === nextProps.index
   );
 });
