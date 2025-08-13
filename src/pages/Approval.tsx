@@ -1,6 +1,5 @@
 import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonLabel, IonItem } from '@ionic/react';
 import React, { useState, useMemo, useCallback } from 'react';
-import { Virtuoso } from 'react-virtuoso';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh } from 'ionicons/icons';
@@ -9,17 +8,14 @@ import { motion } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import CustomItem from '../components/CustomItem';
 import './Approval.css';
+import { Virtuoso } from 'react-virtuoso';
 
 const Approval: React.FC = () => {
   const setApprovals = useAppStore(state => state.setApprovals);
   const fetchApprovals = useAppStore(state => state.fetchApprovals);
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
-  
-  // 초기 로딩 상태 추적
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  // 스크롤 상태 추적
-  const [isScrolling, setIsScrolling] = useState(false);
+
 
   // 기본 날짜 설정 (6개월 전 ~ 오늘) - useMemo로 최적화
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -41,27 +37,14 @@ const Approval: React.FC = () => {
 
   useIonViewWillEnter(() => {
     setApprovals(null);
-    setIsInitialLoad(true);
     fetchApprovals();
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setApprovals(null);
-    setIsInitialLoad(true);
     await Promise.allSettled(([fetchApprovals()]));
     event.detail.complete();
   }
-
-  // 초기 로딩 완료 후 애니메이션 비활성화
-  React.useEffect(() => {
-    if (approvals && isInitialLoad) {
-      const timer = setTimeout(() => {
-        setIsInitialLoad(false);
-      }, 400);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [approvals, isInitialLoad]);
 
   // flowList의 전체 카운트 계산 (메모이제이션)
   const totalCount = React.useMemo(() => {
@@ -101,29 +84,13 @@ const Approval: React.FC = () => {
     router.push('/flowList', 'back', 'pop');
   }, [router]);
 
-  // 스크롤 이벤트 핸들러
-  const handleScrollStart = useCallback(() => {
-    setIsScrolling(true);
+  // IonContent 스크롤 엘리먼트 참조
+  const scrollElementRef = React.useRef<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    scrollElementRef.current = document.querySelector('.ion-content-scroll-host') as HTMLElement;
   }, []);
 
-  const handleScrollEnd = useCallback(() => {
-    // 스크롤이 끝난 후 약간의 지연을 두어 DOM 업데이트 완료 대기
-    setTimeout(() => {
-      setIsScrolling(false);
-    }, 100);
-  }, []);
-
-  // Virtuoso용 아이템 렌더러
-  const VirtualizedApprovalItem = useCallback((index: number, approval: ApprovalModel) => {
-    return (
-      <ApprovalItem 
-        approval={approval} 
-        index={index} 
-        key={`approval-item-${index}`}
-        enableAnimation={isInitialLoad}
-      />
-    );
-  }, [isInitialLoad]);
 
   return (
     <IonPage className='approval'>
@@ -213,8 +180,8 @@ const Approval: React.FC = () => {
         showCount={true}
         count={totalCount} />
 
-      <IonContent fullscreen>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={isScrolling}>
+      <IonContent fullscreen scrollY={false}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
         </IonRefresher>
         {!approvals ? (
@@ -223,22 +190,34 @@ const Approval: React.FC = () => {
           </div>
         ) : (
           <Virtuoso
+            className="ion-content-scroll-host"
             data={approvals}
-            itemContent={VirtualizedApprovalItem}
-            style={{ height: '100%' }}
-            overscan={5}
-            increaseViewportBy={200}
-            defaultItemHeight={120}
-            isScrolling={handleScrollStart}
-            endReached={handleScrollEnd}
-            components={{
-              Item: ({ children, ...props }) => (
-                <div {...props} style={{ ...props.style, marginBottom: 12, minHeight: 100 }}>
-                  {children}
-                </div>
-              )
-            }}
-          />
+            itemContent={(index, approval) => (
+              <ApprovalItem
+                approval={approval}
+                index={index}
+                key={`approval-item-${index}`} // key는 이 위치에 없어도 괜찮음
+              />
+            )}
+          >
+          </Virtuoso>
+
+
+          // <Virtuoso
+          //   className="ion-content-scroll-host"
+          //   data={approvals}
+          //   // style={{ height: '100%' }}
+          //   itemContent={(index, approval) => (
+          //     <ApprovalItem
+          //       approval={approval}
+          //       index={index}
+          //       key={`approval-item-${index}`}
+          //     />
+          //   )}
+          //   // defaultItemHeight={120}
+          //   // overscan={5}
+          //   // increaseViewportBy={200}
+          // />
         )}
       </IonContent>
     </IonPage>
@@ -250,10 +229,9 @@ export default Approval;
 interface ApprovalProps {
   approval: ApprovalModel;
   index: number;
-  enableAnimation?: boolean;
 }
 
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, enableAnimation = false }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index }) => {
   const [isChecked, setIsChecked] = React.useState(false);
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -272,8 +250,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, ena
       opacity: 1,
     },
     transition: {
-      duration: 0.2,
-      delay: index * 0.02,
+      duration: 0.4,
+      delay: index * 0.04,
       ease: "linear" as const,
     },
     style: {
@@ -285,24 +263,16 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, ena
   const titleElement = useMemo(() => <span>{approval.apprTitle}</span>, [approval.apprTitle]);
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
-  const itemContent = (
-    <CustomItem
-      selectable={true}
-      checked={isChecked}
-      title={titleElement}
-      onCheckboxChange={handleCheckboxChange}
-      sub={subElement}
-    />
-  );
-
-  // 애니메이션 활성화 상태에 따라 조건부 렌더링
-  return enableAnimation ? (
+  return (
     <motion.div {...motionProps}>
-      {itemContent}
+      <CustomItem
+        selectable={true}
+        checked={isChecked}
+        title={titleElement}
+        onClick={() => { }}
+        onCheckboxChange={handleCheckboxChange}
+        sub={subElement}
+      />
     </motion.div>
-  ) : (
-    <div style={{ marginBottom: 12 }}>
-      {itemContent}
-    </div>
   );
 });
