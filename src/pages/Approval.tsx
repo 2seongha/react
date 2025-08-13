@@ -17,7 +17,6 @@ const Approval: React.FC = () => {
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
   const [isTop, setIsTop] = useState(true);
-  const [isInitial, setIsInitial] = useState(true);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
@@ -44,7 +43,6 @@ const Approval: React.FC = () => {
 
   useIonViewWillEnter(() => {
     setApprovals(null);
-    setIsInitial(true);
     setSelectedItems(new Set());
     setSearchText('');
     fetchApprovals();
@@ -52,7 +50,6 @@ const Approval: React.FC = () => {
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setApprovals(null);
-    setIsInitial(true);
     setSelectedItems(new Set());
     setSearchText('');
     await Promise.allSettled(([fetchApprovals()]));
@@ -87,14 +84,6 @@ const Approval: React.FC = () => {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (approvals != null) {
-      setTimeout(() => {
-        setIsInitial(false);
-      }, (approvals.length - 1) * 20 + 200);
-    }
-  }, [approvals]);
 
   // 전체 카운트 계산 (메모이제이션)
   const totalCount = React.useMemo(() => {
@@ -334,44 +323,58 @@ const Approval: React.FC = () => {
         ) :
           // filteredApprovals && filteredApprovals.length > 0 ? (
           <AnimatePresence mode='sync'>
-            {filteredApprovals?.map((approval, index) => (
-              <motion.div
-                key={approval.flowNo}
-                layout
-                initial={{ opacity: 0, x: -100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 100 }}
-                transition={{
-                  duration: 0.1,
-                  delay: index * 0.01,
-                }}
-                style={{
-                  marginBottom: 12,
-                  overflow: 'visible'
-                }}
-              >
-                <ApprovalItem
-                  approval={approval}
-                  index={index}
-                  isSelected={selectedItems.has(approval.flowNo)}
-                  onSelectionChange={handleItemSelection}
-                />
-              </motion.div>
+            {Array.from({ length: 500 }).map((_, index) => (
+              // <motion.div
+              //   key={index}
+              //   layout
+              //   initial={{ opacity: 0, x: -20 }}
+              //   animate={{ opacity: 1, x: 0 }}
+              //   exit={{ opacity: 0, x: 20 }}
+              //   transition={{
+              //     duration: 0.1,
+              //     delay: index * 0.01,
+              //   }}
+              //   style={{
+              //     marginBottom: 12, 
+              //     overflow: 'visible'
+              //   }}
+              // >
+              <ApprovalItem
+                approval={{ apprTitle: `title ${index}`, flowNo: '', createDate: '', creatorName: '' }}
+                index={index}
+                isSelected={selectedItems.has('')}
+                onSelectionChange={handleItemSelection}
+              />
+              // </motion.div>
             ))}
-          </AnimatePresence>
-          // ) : (
-          //   <div style={{
-          //     display: 'flex',
-          //     justifyContent: 'center',
-          //     alignItems: 'center',
-          //     height: '200px',
-          //     color: 'var(--ion-color-medium)'
-          //   }}>
-          //     {searchText ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
-          //   </div>
-          // )
-        }
-        <IonFab
+          </AnimatePresence>}
+        {/* {filteredApprovals?.map((approval, index) => (
+          <motion.div
+            key={approval.flowNo}
+            layout
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{
+              duration: 0.1,
+              delay: index * 0.01,
+            }}
+            style={{
+              marginBottom: 12,
+              overflow: 'visible'
+            }}
+          >
+            <ApprovalItem
+              approval={approval}
+              index={index}
+              isSelected={selectedItems.has(approval.flowNo)}
+              onSelectionChange={handleItemSelection}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+      } */}
+        < IonFab
           vertical="bottom"
           horizontal="end"
           slot="fixed"
@@ -387,7 +390,7 @@ const Approval: React.FC = () => {
           </IonButton>
         </IonFab>
       </IonContent>
-    </IonPage>
+    </IonPage >
   );
 };
 
