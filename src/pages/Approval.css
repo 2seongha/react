@@ -3,10 +3,10 @@
 }
 
 .approval ion-content {
-  /* --padding-top: 12px; */
-  --padding-bottom: 12px;
-  --padding-start: 22px;
-  --padding-end: 22px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
   --background: var(--ion-background-color2);
 }
 

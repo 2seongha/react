@@ -61,21 +61,6 @@ const Approval: React.FC = () => {
   const scrollToTop = () => {
     virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
   };
-  // 스크롤 중일 때만 버튼 보이기
-  const handleScroll = useCallback((scrolling: boolean) => {
-    if (scrolling) {
-      setIsScrolling(true);
-
-      // 스크롤 멈춘 후 1000ms 뒤에 버튼 숨김
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-      }, 2000);
-    }
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -318,7 +303,7 @@ const Approval: React.FC = () => {
         fullscreen
         scrollY={false}
       >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
 
@@ -332,9 +317,17 @@ const Approval: React.FC = () => {
             data={filteredApprovals}
             style={{ height: '100%' }}
             overscan={20}
-            increaseViewportBy={{ top: 200, bottom: 200 }}
-            // isScrolling={handleScroll}
+            increaseViewportBy={{ top: 500, bottom: 200 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
+            rangeChanged={(range) => {
+              setIsScrolling(true);
+              if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+              }
+              scrollTimeoutRef.current = setTimeout(() => {
+                setIsScrolling(false);
+              }, 1000);
+            }}
             itemContent={renderItem}
           />
         ) : (
