@@ -320,6 +320,7 @@ const Approval: React.FC = () => {
             className="ion-content-scroll-host"
             // ref={virtuosoRef}
             data={filteredApprovals}
+            overscan={10}
             // defaultItemHeight={200}
             // isScrolling={handleScroll}
             // atTopStateChange={(atTop) => setIsTop(atTop)}
