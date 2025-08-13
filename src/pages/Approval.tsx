@@ -333,7 +333,7 @@ const Approval: React.FC = () => {
             style={{ height: '100%' }}
             overscan={20}
             increaseViewportBy={{ top: 200, bottom: 200 }}
-            isScrolling={handleScroll}
+            // isScrolling={handleScroll}
             atTopStateChange={(atTop) => setIsTop(atTop)}
             itemContent={renderItem}
           />
@@ -353,7 +353,7 @@ const Approval: React.FC = () => {
           horizontal="end"
           slot="fixed"
           style={{
-            marginBottom: '24px',
+            marginBottom: '12px',
             opacity: (isScrolling && !isTop) ? 1 : 0,
             transform: (isScrolling && !isTop) ? 'scale(1)' : 'scale(0.8)',
             transition: 'all 0.3s ease-in-out',
