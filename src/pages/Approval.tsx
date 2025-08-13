@@ -331,7 +331,6 @@ const Approval: React.FC = () => {
             ref={virtuosoRef}
             data={filteredApprovals}
             style={{ height: '100%' }}
-            fixedItemHeight={180}
             overscan={20}
             increaseViewportBy={{ top: 200, bottom: 200 }}
             isScrolling={handleScroll}
@@ -388,7 +387,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-    <div style={{ height: 180, marginBottom: 12, overflow: 'hidden' }}>
+    <div style={{ marginTop: 12 }}>
       <CustomItem
         selectable={true}
         checked={isSelected}
