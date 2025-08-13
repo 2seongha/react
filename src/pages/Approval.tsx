@@ -317,11 +317,11 @@ const Approval: React.FC = () => {
                 scrollCallbackRef.current();
               }
             }}
-            // components={{
-            //   List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
-            //     <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
-            //   ))
-            // }}
+            components={{
+              List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
+                <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
+              ))
+            }}
             itemContent={renderItem}
           />
         ) : (
