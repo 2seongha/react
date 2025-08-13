@@ -6,7 +6,7 @@ import { AreaModel } from '../stores/types';
 import { motion } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import './FlowList.css';
-import { getFlowIcon } from '../utils';
+import { getFlowIcon, getPlatformMode } from '../utils';
 import { refreshOutline } from 'ionicons/icons';
 
 const FlowList: React.FC = () => {
@@ -37,14 +37,14 @@ const FlowList: React.FC = () => {
       } showBackButton={true} showCount={true} count={totalCount}></AppBar>
 
       <IonContent fullscreen >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-          <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
+          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
         {!flowList ?
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
           </div> : flowList?.map((area, index) => {
-            return <FlowListItem area={area} index={index} key={`flow-list-item-${index}`}/>;
+            return <FlowListItem area={area} index={index} key={`flow-list-item-${index}`} />;
           })}
       </IonContent>
     </IonPage>

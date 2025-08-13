@@ -42,21 +42,21 @@ export async function fetchApprovals(): Promise<ApprovalModel[]> {
 
     // Mock API call with realistic menu area data
     const mockApprovals: ApprovalModel[] = [
-      { apprTitle: '초과근무 신청', createDate: '2025.08.10', creatorName: '홍길동' },
-      { apprTitle: '휴가 신청', createDate: '2025.08.09', creatorName: '김영희' },
-      { apprTitle: '출장비 정산', createDate: '2025.08.08', creatorName: '박민수' },
-      { apprTitle: '교육 신청', createDate: '2025.08.07', creatorName: '이수진' },
-      { apprTitle: '구매 요청', createDate: '2025.08.06', creatorName: '최태영' },
-      { apprTitle: '회의실 예약', createDate: '2025.08.05', creatorName: '정소연' },
-      { apprTitle: '장비 신청', createDate: '2025.08.04', creatorName: '임동현' },
-      { apprTitle: '계약 승인', createDate: '2025.08.03', creatorName: '윤미정' },
-      { apprTitle: '예산 승인', createDate: '2025.08.02', creatorName: '강호철' },
-      { apprTitle: '인사 발령', createDate: '2025.08.01', creatorName: '송지혜' },
-      { apprTitle: '프로젝트 승인', createDate: '2025.07.31', creatorName: '한상우' },
-      { apprTitle: '급여 정산', createDate: '2025.07.30', creatorName: '오세영' },
-      { apprTitle: '경비 정산', createDate: '2025.07.29', creatorName: '배수진' },
-      { apprTitle: '시설 보수', createDate: '2025.07.28', creatorName: '남궁민' },
-      { apprTitle: '외부 교육', createDate: '2025.07.27', creatorName: '서미경' }
+      { apprTitle: '초과근무 신청', flowNo: '1', createDate: '2025.08.10', creatorName: '홍길동' },
+      { apprTitle: '휴가 신청', flowNo: '2', createDate: '2025.08.09', creatorName: '김영희' },
+      { apprTitle: '출장비 정산', flowNo: '3', createDate: '2025.08.08', creatorName: '박민수' },
+      { apprTitle: '교육 신청', flowNo: '4', createDate: '2025.08.07', creatorName: '이수진' },
+      { apprTitle: '구매 요청', flowNo: '5', createDate: '2025.08.06', creatorName: '최태영' },
+      { apprTitle: '회의실 예약', flowNo: '6', createDate: '2025.08.05', creatorName: '정소연' },
+      { apprTitle: '장비 신청', flowNo: '7', createDate: '2025.08.04', creatorName: '임동현' },
+      { apprTitle: '계약 승인', flowNo: '8', createDate: '2025.08.03', creatorName: '윤미정' },
+      { apprTitle: '예산 승인', flowNo: '9', createDate: '2025.08.02', creatorName: '강호철' },
+      { apprTitle: '인사 발령', flowNo: '10', createDate: '2025.08.01', creatorName: '송지혜' },
+      { apprTitle: '프로젝트 승인', flowNo: '11', createDate: '2025.07.31', creatorName: '한상우' },
+      { apprTitle: '급여 정산', flowNo: '12', createDate: '2025.07.30', creatorName: '오세영' },
+      { apprTitle: '경비 정산', flowNo: '13', createDate: '2025.07.29', creatorName: '배수진' },
+      { apprTitle: '시설 보수', flowNo: '14', createDate: '2025.07.28', creatorName: '남궁민' },
+      { apprTitle: '외부 교육', flowNo: '15', createDate: '2025.07.27', creatorName: '서미경' }
     ];
 
     return mockApprovals;

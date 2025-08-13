@@ -60,6 +60,7 @@ export interface AreaModel {
 
 export interface ApprovalModel {
   apprTitle: string;
+  flowNo: string;
   createDate: string;
   creatorName: string;
 }

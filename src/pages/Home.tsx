@@ -49,8 +49,8 @@ const Home: React.FC = () => {
     <IonPage className='home'>
       <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
       <IonContent fullscreen={true}>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode() }>
-          <IonRefresherContent pullingIcon={refreshOutline}></IonRefresherContent>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
+          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
         <motion.div initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
