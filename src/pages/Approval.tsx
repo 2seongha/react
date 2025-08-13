@@ -39,7 +39,6 @@ const Approval: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(defaultEndDate);
   const [isStartDateOpen, setIsStartDateOpen] = useState(false);
   const [isEndDateOpen, setIsEndDateOpen] = useState(false);
-  console.log('rebuild');
   useIonViewWillEnter(() => {
     setApprovals(null);
     setSelectedItems(new Set());
@@ -306,17 +305,18 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
-            // className='ion-content-scroll-host'
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={20}
+            initialItemCount={10}
+            initialTopMostItemIndex={0}
             increaseViewportBy={{ top: 500, bottom: 200 }}
-            atTopStateChange={(atTop) => setIsTop(atTop)}
-            rangeChanged={() => {
+            atTopStateChange={useCallback((atTop: boolean) => setIsTop(atTop), [])}
+            rangeChanged={useCallback(() => {
               if (scrollCallbackRef.current) {
                 scrollCallbackRef.current();
               }
-            }}
+            }, [])}
             components={{
               List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
                 <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
@@ -362,7 +362,9 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
     // Virtuoso의 rangeChanged 이벤트를 통해 스크롤 감지
     const handleScroll = () => {
       if (!isTop) {
-        setIsScrolling(true);
+        if (!isScrolling) {  // 이미 스크롤 중이면 중복 처리 방지
+          setIsScrolling(true);
+        }
         
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
@@ -383,7 +385,7 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [isTop, scrollCallbackRef]);
+  }, [isTop, isScrolling, scrollCallbackRef]);
 
   return (
     <IonFab
