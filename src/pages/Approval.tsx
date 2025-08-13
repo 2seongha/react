@@ -306,22 +306,22 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
-            className='ion-content-scroll-host'
+            // className='ion-content-scroll-host'
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={20}
             increaseViewportBy={{ top: 500, bottom: 200 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
-            // rangeChanged={() => {
-            //   if (scrollCallbackRef.current) {
-            //     scrollCallbackRef.current();
-            //   }
-            // }}
-            components={{
-              List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
-                <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
-              ))
+            rangeChanged={() => {
+              if (scrollCallbackRef.current) {
+                scrollCallbackRef.current();
+              }
             }}
+            // components={{
+            //   List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
+            //     <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
+            //   ))
+            // }}
             itemContent={renderItem}
           />
         ) : (
