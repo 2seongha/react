@@ -82,3 +82,34 @@
 .custom-item-body .ripple-effect {
   border-radius: 12px;
 } */
+
+/* 시계방향 테두리 애니메이션 */
+.custom-item.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  padding: 2px;
+  background: conic-gradient(from -90deg, var(--ion-color-primary), var(--ion-color-primary));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  animation: borderRotate 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes borderRotate {
+  from {
+    transform: rotate(0deg) scale(1);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(180deg) scale(1);
+    opacity: 1;
+  }
+}

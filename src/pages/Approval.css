@@ -56,7 +56,10 @@
 .approval-item-wrapper.selected {
   transform: scale(1.02);
   transition: transform 0.15s ease-out;
+  position: relative;
 }
+
+
 
 .approval .ion-content-scroll-host >div >div >div:first-child {
   margin-top: 12px;
