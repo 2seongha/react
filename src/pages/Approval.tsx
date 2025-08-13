@@ -353,6 +353,7 @@ const Approval: React.FC = () => {
           horizontal="end"
           slot="fixed"
           style={{
+            marginBottom: '24px',
             opacity: (isScrolling && !isTop) ? 1 : 0,
             transform: (isScrolling && !isTop) ? 'scale(1)' : 'scale(0.8)',
             transition: 'all 0.3s ease-in-out',
@@ -387,16 +388,14 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-    <div style={{ marginTop: 12 }}>
-      <CustomItem
-        selectable={true}
-        checked={isSelected}
-        title={titleElement}
-        onClick={() => { }}
-        onCheckboxChange={handleCheckboxChange}
-        sub={subElement}
-      />
-    </div>
+    <CustomItem
+      selectable={true}
+      checked={isSelected}
+      title={titleElement}
+      onClick={() => { }}
+      onCheckboxChange={handleCheckboxChange}
+      sub={subElement}
+    />
   );
 });
 
