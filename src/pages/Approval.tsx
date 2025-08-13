@@ -296,9 +296,9 @@ const Approval: React.FC = () => {
 
       <IonContent
         fullscreen
-        scrollY={false}
+        scrollY={true}
       >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={false}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
 
@@ -308,7 +308,6 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
-            className="ion-content-scroll-host"
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={20}
@@ -321,11 +320,11 @@ const Approval: React.FC = () => {
                 scrollCallbackRef.current();
               }
             }}
-            // components={{
-            //   List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
-            //     <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
-            //   ))
-            // }}
+            components={{
+              Scroller: React.forwardRef<HTMLDivElement, any>((props, ref) => (
+                <div {...props} ref={ref} style={{ ...(props.style || {}) }} />
+              ))
+            }}
             itemContent={renderItem}
           />
         ) : (
