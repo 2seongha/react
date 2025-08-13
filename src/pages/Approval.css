@@ -54,7 +54,7 @@
 
 /* 체크박스 선택 시 스타일 */
 .approval-item-wrapper.selected {
-  transform: scale(1.02);
+  /* transform: scale(1.02); */
   transition: transform 0.15s ease-out;
   position: relative;
 }
