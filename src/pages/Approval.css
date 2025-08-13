@@ -61,3 +61,7 @@
 .approval .ion-content-scroll-host >div >div >div:first-child {
   margin-top: 12px;
 }
+
+.approval .ion-content-scroll-host {
+  z-index: 0;
+}

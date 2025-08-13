@@ -19,13 +19,12 @@
   width: 100%;
 }
 
-/* 체크박스 선택 시 스타일 */
+/* 체크박스 선택 시 스타일 - 오버레이 방식 */
 .custom-item.selected {
   box-shadow: 0 3px 10px rgba(var(--ion-color-primary-rgb), 0.2);
   --background: rgba(var(--ion-color-primary-rgb), 0.08);
-  transition: box-shadow 0.15s ease-out, background-color 0.15s ease-out;
+  transform: scale(1.02);
 }
-
 
 .custom-item-header {
   display: flex;
