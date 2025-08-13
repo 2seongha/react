@@ -174,10 +174,9 @@ const Approval: React.FC = () => {
     }
   }, [filteredApprovals, isAllSelected]);
 
-  // Virtuoso itemContent 최적화를 위한 안정된 함수
   const renderItem = useCallback((index: number, approval: ApprovalModel) => (
     <div className="approval-item-wrapper">
-      <ApprovalItemMemo
+      <ApprovalItem
         key={approval.flowNo}
         approval={approval}
         index={index}
@@ -186,6 +185,7 @@ const Approval: React.FC = () => {
       />
     </div>
   ), [selectedItems, handleItemSelection]);
+
 
 
   return (
@@ -305,23 +305,24 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
+            className="ion-content-scroll-host"
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={20}
             initialItemCount={10}
             initialTopMostItemIndex={0}
             increaseViewportBy={{ top: 500, bottom: 200 }}
-            atTopStateChange={useCallback((atTop: boolean) => setIsTop(atTop), [])}
-            rangeChanged={useCallback(() => {
+            atTopStateChange={(atTop) => setIsTop(atTop)}
+            rangeChanged={() => {
               if (scrollCallbackRef.current) {
                 scrollCallbackRef.current();
               }
-            }, [])}
-            components={{
-              List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
-                <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
-              ))
             }}
+            // components={{
+            //   List: React.forwardRef<HTMLDivElement, any>((props, ref) => (
+            //     <div {...props} ref={ref} style={{ ...(props.style || {}), paddingBottom: '12px' }} />
+            //   ))
+            // }}
             itemContent={renderItem}
           />
         ) : (
@@ -347,6 +348,149 @@ const Approval: React.FC = () => {
 
 export default Approval;
 
+// Swipeable Item Component
+interface SwipeAction {
+  label: string;
+  color: string;
+  onClick: () => void;
+}
+
+interface SwipeableItemProps {
+  children: React.ReactNode;
+  actions: SwipeAction[];
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, actions, isOpen, setIsOpen }) => {
+  const [dragX, setDragX] = useState(0);
+  const constraintsRef = useRef<HTMLDivElement>(null);
+
+  const actionWidth = 80;
+  const totalActionsWidth = actions.length * actionWidth;
+
+  const handleDragEnd = useCallback((_: any, info: any) => {
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
+
+    console.log('Drag ended - offset:', offset, 'velocity:', velocity, 'totalWidth:', totalActionsWidth);
+
+    // 거리 기준으로 30% 이상 스와이프하면 열기 (더 민감하게)
+    const distanceThreshold = totalActionsWidth * 0.01;
+    // 빠른 속도 기준
+    const velocityThreshold = -150;
+
+    // 왼쪽으로 스와이프한 경우 (음수 offset)
+    if (offset < 0) {
+      // 거리나 속도 중 하나라도 임계값을 넘으면 열기
+      if (Math.abs(offset) > distanceThreshold || velocity < velocityThreshold) {
+        console.log('Opening - distance triggered:', Math.abs(offset), '>', distanceThreshold, 'or velocity triggered:', velocity, '<', velocityThreshold);
+        setDragX(-totalActionsWidth);
+        setIsOpen(true);
+      } else {
+        console.log('Closing - thresholds not met');
+        setDragX(0);
+        setIsOpen(false);
+      }
+    } else {
+      // 오른쪽으로 스와이프하거나 이동하지 않은 경우 닫기
+      console.log('Closing - positive offset or no movement');
+      setDragX(0);
+      setIsOpen(false);
+    }
+  }, [totalActionsWidth, setIsOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setDragX(-totalActionsWidth);
+    } else {
+      setDragX(0);
+    }
+  }, [isOpen, totalActionsWidth]);
+
+  return (
+    <div
+      ref={constraintsRef}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '12px'
+      }}
+    >
+      {/* Action Buttons */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: totalActionsWidth,
+          display: 'flex',
+          zIndex: 1
+        }}
+      >
+        {actions.map((action, index) => (
+          <div
+            key={index}
+            onClick={action.onClick}
+            style={{
+              width: actionWidth,
+              backgroundColor: action.color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontWeight: '600',
+              fontSize: '14px',
+              cursor: 'pointer',
+              userSelect: 'none'
+            }}
+          >
+            {action.label}
+          </div>
+        ))}
+      </div>
+
+      {/* Swipeable Content */}
+      <motion.div
+        drag="x"
+        dragConstraints={{
+          left: -totalActionsWidth,
+          right: 0
+        }}
+        animate={{
+          x: dragX,
+          transition: {
+            type: "spring",
+            damping: 30,
+            stiffness: 400,
+            mass: 0.8
+          }
+        }}
+        onDragEnd={handleDragEnd}
+        dragElastic={0.05}
+        dragMomentum={false}
+        dragDirectionLock={true}
+        dragTransition={{
+          bounceStiffness: 600,
+          bounceDamping: 20
+        }}
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          backgroundColor: 'var(--ion-background-color)',
+          cursor: 'grab'
+        }}
+        whileDrag={{
+          cursor: 'grabbing'
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
+
 // 독립적인 ScrollToTop FAB 컴포넌트
 interface ScrollToTopFabProps {
   isTop: boolean;
@@ -365,11 +509,11 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
         if (!isScrolling) {  // 이미 스크롤 중이면 중복 처리 방지
           setIsScrolling(true);
         }
-        
+
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
         }
-        
+
         scrollTimeoutRef.current = setTimeout(() => {
           setIsScrolling(false);
         }, 2000);
@@ -378,7 +522,7 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
 
     // callback 등록
     scrollCallbackRef.current = handleScroll;
-    
+
     return () => {
       scrollCallbackRef.current = null;
       if (scrollTimeoutRef.current) {
@@ -414,32 +558,45 @@ interface ApprovalProps {
   onSelectionChange: (id: string, isSelected: boolean) => void;
 }
 
-// Optimized ApprovalItem with fixed height for Virtuoso
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange }) => {
+// Optimized ApprovalItem with swipe actions
+const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
+
+  const handleApprove = useCallback(() => {
+    console.log('승인:', approval.flowNo);
+    setIsOpen(false);
+  }, [approval.flowNo]);
+
+  const handleReject = useCallback(() => {
+    console.log('반려:', approval.flowNo);
+    setIsOpen(false);
+  }, [approval.flowNo]);
 
   const titleElement = useMemo(() => <span>{approval.apprTitle}</span>, [approval.apprTitle]);
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-    <CustomItem
-      selectable={true}
-      checked={isSelected}
-      title={titleElement}
-      onClick={() => { }}
-      onCheckboxChange={handleCheckboxChange}
-      sub={subElement}
-    />
+    <SwipeableItem
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      actions={[
+        { label: '승인', color: '#4CAF50', onClick: handleApprove },
+        { label: '반려', color: '#F44336', onClick: handleReject }
+      ]}
+    >
+      <CustomItem
+        selectable={true}
+        checked={isSelected}
+        title={titleElement}
+        onClick={() => { }}
+        onCheckboxChange={handleCheckboxChange}
+        sub={subElement}
+      />
+    </SwipeableItem>
   );
-});
+};
 
-// Highly optimized memo component for virtuoso
-const ApprovalItemMemo = React.memo<ApprovalProps>(ApprovalItem, (prevProps, nextProps) => {
-  return (
-    prevProps.approval.flowNo === nextProps.approval.flowNo &&
-    prevProps.isSelected === nextProps.isSelected &&
-    prevProps.index === nextProps.index
-  );
-});
