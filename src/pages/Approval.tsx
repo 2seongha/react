@@ -57,9 +57,9 @@ const Approval: React.FC = () => {
   }
 
   //* 스크롤 관련
-  const scrollContainerRef = useRef<HTMLIonContentElement>(null);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const scrollToTop = () => {
-    scrollContainerRef.current?.scrollToTop(500);
+    virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
   };
   // 스크롤 중일 때만 버튼 보이기
   const handleScroll = useCallback((scrolling: boolean) => {
@@ -216,9 +216,9 @@ const Approval: React.FC = () => {
               <IonSearchbar
                 value={searchText}
                 onIonInput={handleSearch}
-                placeholder="제목으로 검색"
+                placeholder="제목 / 상신자"
                 showClearButton="focus"
-                debounce={10}
+                debounce={50}
               />
             </IonToolbar>
             {/* 날짜 선택 섹션 */}
@@ -305,13 +305,8 @@ const Approval: React.FC = () => {
 
       <IonContent
         fullscreen
-        scrollEvents={true}
-        ref={scrollContainerRef}
-        onIonScroll={(e) => {
-          const scrollTop = e.detail.scrollTop;
-          setIsTop(scrollTop === 0);
-          handleScroll(true);
-        }}>
+        scrollY={false}
+      >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -320,60 +315,37 @@ const Approval: React.FC = () => {
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" />
           </div>
-        ) :
-          // filteredApprovals && filteredApprovals.length > 0 ? (
-          <AnimatePresence mode='sync'>
-            {Array.from({ length: 500 }).map((_, index) => (
-              // <motion.div
-              //   key={index}
-              //   layout
-              //   initial={{ opacity: 0, x: -20 }}
-              //   animate={{ opacity: 1, x: 0 }}
-              //   exit={{ opacity: 0, x: 20 }}
-              //   transition={{
-              //     duration: 0.1,
-              //     delay: index * 0.01,
-              //   }}
-              //   style={{
-              //     marginBottom: 12, 
-              //     overflow: 'visible'
-              //   }}
-              // >
+        ) : filteredApprovals && filteredApprovals.length > 0 ? (
+          <Virtuoso
+            className="ion-content-scroll-host"
+            // ref={virtuosoRef}
+            data={filteredApprovals}
+            // defaultItemHeight={200}
+            // isScrolling={handleScroll}
+            // atTopStateChange={(atTop) => setIsTop(atTop)}
+            // style={{ height: '100%' }}
+            itemContent={(index, approval) => (
+              // <div style={{ marginBottom: 12 }}>
               <ApprovalItem
-                approval={{ apprTitle: `title ${index}`, flowNo: '', createDate: '', creatorName: '' }}
+                approval={approval}
                 index={index}
-                isSelected={selectedItems.has('')}
+                isSelected={selectedItems.has(approval.flowNo)}
                 onSelectionChange={handleItemSelection}
               />
-              // </motion.div>
-            ))}
-          </AnimatePresence>}
-        {/* {filteredApprovals?.map((approval, index) => (
-          <motion.div
-            key={approval.flowNo}
-            layout
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{
-              duration: 0.1,
-              delay: index * 0.01,
-            }}
-            style={{
-              marginBottom: 12,
-              overflow: 'visible'
-            }}
-          >
-            <ApprovalItem
-              approval={approval}
-              index={index}
-              isSelected={selectedItems.has(approval.flowNo)}
-              onSelectionChange={handleItemSelection}
-            />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-      } */}
+              // </div>
+            )}
+          />
+        ) : (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '200px',
+            color: 'var(--ion-color-medium)'
+          }}>
+            {searchText ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
+          </div>
+        )}
         < IonFab
           vertical="bottom"
           horizontal="end"
@@ -413,14 +385,15 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-
-    <CustomItem
-      selectable={true}
-      checked={isSelected}
-      title={titleElement}
-      onClick={() => { }}
-      onCheckboxChange={handleCheckboxChange}
-      sub={subElement}
-    />
+    <div style={{ marginTop: '12px' }}>
+      <CustomItem
+        selectable={true}
+        checked={isSelected}
+        title={titleElement}
+        onClick={() => { }}
+        onCheckboxChange={handleCheckboxChange}
+        sub={subElement}
+      />
+    </div>
   );
 });
