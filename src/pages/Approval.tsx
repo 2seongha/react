@@ -583,14 +583,14 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
   const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
-    <SwipeableItem
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      actions={[
-        { label: '승인', color: '#4CAF50', onClick: handleApprove },
-        { label: '반려', color: '#F44336', onClick: handleReject }
-      ]}
-    >
+    // <SwipeableItem
+    //   isOpen={isOpen}
+    //   setIsOpen={setIsOpen}
+    //   actions={[
+    //     { label: '승인', color: '#4CAF50', onClick: handleApprove },
+    //     { label: '반려', color: '#F44336', onClick: handleReject }
+    //   ]}
+    // >
       <CustomItem
         selectable={true}
         checked={isSelected}
@@ -599,7 +599,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
         onCheckboxChange={handleCheckboxChange}
         sub={subElement}
       />
-    </SwipeableItem>
+    // {/* </SwipeableItem> */}
   );
 };
 

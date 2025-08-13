@@ -58,9 +58,9 @@
   transition: transform 0.15s ease-out;
 }
 
-/* .approval .ion-content-scroll-host >div >div >div:first-child {
+.approval .ion-content-scroll-host >div >div >div:first-child {
   margin-top: 12px;
-} */
+}
 
 .approval .ion-content-scroll-host {
   z-index: 0;
