@@ -203,7 +203,6 @@ const Approval: React.FC = () => {
             </IonToolbar>
             {/* 날짜 선택 섹션 */}
             <IonToolbar >
-              {/* 시작일 버튼 */}
               <div className='date-toolbar-wrapper'>
                 <IonItem
                   button
@@ -219,7 +218,6 @@ const Approval: React.FC = () => {
                   </div>
                 </IonItem>
                 <span>~</span>
-                {/* 종료일 버튼 */}
                 <IonItem
                   button
                   mode='md'
@@ -234,7 +232,6 @@ const Approval: React.FC = () => {
                   </div>
                 </IonItem>
 
-                {/* 초기화 버튼 */}
                 <IonItem
                   button
                   style={{ width: '36px' }}

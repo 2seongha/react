@@ -2,6 +2,10 @@
   background-color: var(--ion-background-color2);
 }
 
+.approval ion-header {
+  box-shadow: 0 4px 20px #00000030;
+}
+
 .approval ion-content {
   --background: var(--ion-background-color2);
 }
@@ -9,6 +13,7 @@
 .approval ion-toolbar {
   --background: var(--ion-background-color) !important;
   --opacity: 1 !important;
+  --box-shadow: 0 4px 20px #000;
 }
 
 .loading-indicator-wrapper {
@@ -32,6 +37,8 @@
 .approval .refresher-refreshing-icon {
   color: var(--ion-color-primary);
 }
+
+
 
 .approval .buttons-wrapper {
   display: flex;
