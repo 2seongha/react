@@ -63,11 +63,11 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
 
           <div
             className={contentAreaClasses}
-            onClick={sub ? handleTitleClick : onClick}
+            onClick={sub ? handleTitleClick : undefined}
           >
             {title}
             {headerButton}
-            {(sub || onClick) && <IonRippleEffect />}
+            {sub && <IonRippleEffect />}
           </div>
         </div>
 
