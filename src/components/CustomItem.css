@@ -95,7 +95,7 @@
 .custom-item-sub-title>ion-icon {
   width: 11px;
   margin-right: 2px;
-  color: #0000004b;
+  color: rgba(var(--ion-text-color-rgb), 0.28);
 }
 
 .custom-item-sub-title>span {
