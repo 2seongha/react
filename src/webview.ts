@@ -163,7 +163,7 @@ const _initWebview = async (
   onUserInfoReceived?: (info: { loginId: string; corp: CorpModel }) => void,
   onKeyboardChanged?: (keyboard: KeyboardVisibility) => void
 ): Promise<void> => {
-  const isWebView = 'N'; // 환경변수 가져오기
+  const isWebView = 'Y'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
 
   if (isWebView == 'Y') {
@@ -326,11 +326,6 @@ const _initWebview = async (
     }
   }
 };
-
-// 웹뷰 환경인지 확인하는 유틸리티 함수
-// export const isWebViewEnvironment = (): boolean => {
-// return import.meta.env.VITE_WEBVIEW === 'Y';
-// };
 
 // localStorage 헬퍼 함수들
 export const getStoredToken = (key: 'accessToken' | 'refreshToken' | 'deviceToken'): string | null => {

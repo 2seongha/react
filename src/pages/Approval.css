@@ -55,13 +55,14 @@
 
 .approval .search-bar {
   padding: 8px 20px;
-  --placeholder-color: #898D99;
+  --placeholder-color: var(--ion-color-secondary);
   --background: var(--search-bar-color);
   --border-radius: 8px;
 }
 
 .approval .search-bar .searchbar-input {
   padding-inline-start: 3rem !important;
+  font-size: 13px !important;
 }
 
 .approval .search-bar .searchbar-search-icon {
@@ -77,8 +78,8 @@
 }
 
 .approval .date-toolbar-button-wrapper {
-  --min-height: 36px;
-  --height: 36px;
+  --min-height: 32px;
+  --height: 32px;
   --inner-border-width: 0px;
   --padding-start: 0px;
   --inner-padding-end: 0px;
@@ -96,24 +97,6 @@
 }
 
 .approval .date-toolbar-button>span {
-  font-size: 12px;
+  font-size: 13px;
 }
 
-::-webkit-input-placeholder {
-  font-size: 12px;
-}
-
-::-moz-placeholder {
-  font-size: 0.85rem;
-
-}
-
-:-ms-input-placeholder {
-  font-size: 0.85rem;
-
-}
-
-:-moz-placeholder {
-  font-size: 0.85rem;
-
-}
