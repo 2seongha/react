@@ -116,10 +116,12 @@
 
 .custom-item-body-line >span:first-child {
   font-size: 12px;
+  font-weight: 500;
   color: var(--ion-color-secondary);
 }
 
 .custom-item-body-line >span:last-child {
   font-size: 12px;
+  font-weight: 500;
   color: rgba(var(--ion-text-color-rgb), 0.6);
 }
