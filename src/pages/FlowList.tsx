@@ -79,7 +79,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         ease: "linear",
       }}
       style={{
-        overflow: 'visible', // ← 고정
+        overflow: 'hidden', // ← 고정
       }}
     >
       <IonItem button className='flow-list-item' onClick={() => { router.push('/approval', 'forward', 'push') }} mode='md'>

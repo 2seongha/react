@@ -91,9 +91,9 @@ background-color: var(--ion-background-color2);
 }
 
 ion-item.menu-ion-item {
-  height: 48px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
   border-radius: 12px;
-  --inner-border-width: 0px;
 }
 
 .menu-item {
@@ -104,6 +104,7 @@ ion-item.menu-ion-item {
 }
 
 .menu-expand-button {
+  height: 42px;
   margin: 8px 0 0 0;
   border-top: 1px solid var(--custom-border-color-50);
   padding-top: 8px;

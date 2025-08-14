@@ -165,10 +165,10 @@ const MenuCard: React.FC = () => {
                 height: { duration: 0.4 },
               }}
               style={{
-                overflow: 'visible', // ← 고정
+                overflow: 'hidden', // ← 고정
               }}
             >
-              <IonItem button key={index} className='menu-ion-item'>
+              {/* <IonItem button key={index} className='menu-ion-item'>
                 <div className='menu-item'>
                   <div className='menu-item-content'>
                     <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
@@ -178,7 +178,9 @@ const MenuCard: React.FC = () => {
                   </div>
                   <span className='menu-item-count'>{menu.cnt}건</span>
                 </div>
-              </IonItem>
+              </IonItem> */}
+              <MenuItem key={index} menuItem={menu} isLoading={!menuAreas} />
+
             </motion.div>
           })
           }
