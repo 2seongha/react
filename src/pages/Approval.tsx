@@ -2,7 +2,7 @@ import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, I
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline, calendar, calendarClear } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline, calendar, calendarClear, close, checkmark } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
 import { motion, AnimatePresence, color } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
@@ -260,8 +260,14 @@ const Approval: React.FC = () => {
                   <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
                 </IonItem>
                 <div className='approve-buttons'>
-                  <IonButton mode='md' color='light' disabled={selectedItems.size === 0}><span>반려하기</span></IonButton>
-                  <IonButton mode='md' color='primary' disabled={selectedItems.size === 0}><span>승인하기</span></IonButton>
+                  <IonButton mode='md' color='light' disabled={selectedItems.size === 0}>
+                    <IonIcon src={close} />
+                    <span>반려하기</span>
+                  </IonButton>
+                  <IonButton mode='md' color='primary' disabled={selectedItems.size === 0}>
+                    <IonIcon src={checkmark} />
+                    <span>승인하기</span>
+                  </IonButton>
                 </div>
               </div>
             </IonToolbar>
