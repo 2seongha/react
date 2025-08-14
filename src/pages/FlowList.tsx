@@ -82,7 +82,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         overflow: 'visible', // ← 고정
       }}
     >
-      <IonItem button className='flow-list-item' onTouchStart={() => { router.push('/approval', 'forward', 'push') }} mode='md'>
+      <IonItem button className='flow-list-item' onClick={() => { router.push('/approval', 'forward', 'push') }} mode='md'>
         <div className='flow-list-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
           <IonImg src={icon.image}></IonImg>
         </div>

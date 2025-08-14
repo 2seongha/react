@@ -85,7 +85,7 @@ export default Home;
 
 const NoticeCard: React.FC = () => {
   return (
-    <IonCard button className='home-card' onTouchStart={() => {
+    <IonCard button className='home-card' onClick={() => {
 
     }}>
       <div className='notice-card-content'>
@@ -189,7 +189,7 @@ const MenuCard: React.FC = () => {
         color='medium'
         className='menu-expand-button'
         fill="clear"
-        onTouchStart={() => setIsMenuExpanded(!isMenuExpanded)}
+        onClick={() => setIsMenuExpanded(!isMenuExpanded)}
         disabled={!hasMoreMenus}
       >
         <span>{isMenuExpanded ? '메뉴 접기' : '메뉴 펼치기'}</span>
@@ -229,7 +229,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
   const router = useIonRouter();
 
   return (
-    <IonItem button className='menu-ion-item' onTouchStart={() => {
+    <IonItem button className='menu-ion-item' onClick={() => {
       router.push('/flowList');
     }}>
       <div className='menu-item'>
@@ -250,7 +250,7 @@ const TodoSummaryCard: React.FC = () => {
   const approvals = useAppStore(state => state.approvals);
 
   return (
-    <IonCard className='home-card todo-summary-card' onTouchStart={() => {
+    <IonCard className='home-card todo-summary-card' onClick={() => {
 
     }}>
       <div className='todo-summary-title'>
@@ -272,7 +272,7 @@ const TodoSummaryCard: React.FC = () => {
         color='medium'
         className='menu-expand-button'
         fill="clear"
-        onTouchStart={() => { }}
+        onClick={() => { }}
         disabled={!todoSummary || !todoSummary.length}
       >
         <span>자세히 보기</span>

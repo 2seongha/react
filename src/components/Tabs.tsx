@@ -29,15 +29,15 @@ const Tabs: React.FC = () => {
       </IonRouterOutlet>
 
       <IonTabBar slot="bottom" mode='md'>
-        {/* <IonTabButton tab="home" onTouchStart={() => router.push('/app/home', 'root', 'replace')} selected={selectedTab === 'home'}>
+        {/* <IonTabButton tab="home" onClick={() => router.push('/app/home', 'root', 'replace')} selected={selectedTab === 'home'}>
           <IonIcon icon={home} />
           <IonLabel style={{ fontSize: '10px' }}>홈</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="notifications" onTouchStart={() => router.push('/app/notifications', 'root', 'replace')} selected={selectedTab === 'notifications'}>
+        <IonTabButton tab="notifications" onClick={() => router.push('/app/notifications', 'root', 'replace')} selected={selectedTab === 'notifications'}>
           <IonIcon icon={notifications} />
           <IonLabel style={{ fontSize: '10px' }}>알림</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="more" onTouchStart={() => router.push('/app/more', 'root', 'replace')} selected={selectedTab === 'more'}>
+        <IonTabButton tab="more" onClick={() => router.push('/app/more', 'root', 'replace')} selected={selectedTab === 'more'}>
           <IonIcon icon={menu} />
           <IonLabel style={{ fontSize: '10px' }}>더보기</IonLabel>
         </IonTabButton> */}

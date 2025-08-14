@@ -8,16 +8,16 @@ interface CustomItemProps {
   title?: ReactNode;
   sub?: ReactNode;
   selectable?: boolean;
-  onTouchStart?: () => void;
+  onClick?: () => void;
   onCheckboxChange?: (checked: boolean) => void;
   checked?: boolean;
   expandable?: boolean;
 }
 
-const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, sub, onTouchStart, onCheckboxChange, checked }) => {
+const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, sub, onClick, onCheckboxChange, checked }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleCheckboxToggle = useCallback((e: any) => {
+  const handleCheckboxToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // 부모 클릭 이벤트 방지
     if (onCheckboxChange) {
       onCheckboxChange(!checked);
@@ -27,10 +27,10 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, s
   const handleTitleClick = useCallback(() => {
     if (sub) {
       setIsExpanded(!isExpanded);
-    } else if (onTouchStart) {
-      onTouchStart();
+    } else if (onClick) {
+      onClick();
     }
-  }, [sub, isExpanded, onTouchStart]);
+  }, [sub, isExpanded, onClick]);
 
   const headerButton = useMemo(() => {
     if (sub) {
@@ -40,38 +40,38 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, s
           style={{ width: 14, marginLeft: 2 }}
         />
       );
-    } else if (onTouchStart) {
+    } else if (onClick) {
       return <IonIcon src={chevronForwardOutline} style={{ width: 14, marginLeft: 2 }} />;
     }
     return null;
-  }, [sub, isExpanded, onTouchStart]);
+  }, [sub, isExpanded, onClick]);
 
   const itemClasses = useMemo(() => `custom-item ${checked ? 'selected' : ''}`, [checked]);
-  const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onTouchStart ? 'ion-activatable' : ''}`, [sub, onTouchStart]);
+  const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`, [sub, onClick]);
 
   return (
     <IonItem
       className={itemClasses}
-      onTouchStart={onTouchStart ? onTouchStart : undefined}
-      button={!!onTouchStart}
+      onClick={onClick ? onClick : undefined}
+      button={!!onClick}
       mode='md'
     >
       <div className='custom-item-wrapper'>
         {/* //* header */}
         <div className='custom-item-header'>
           {selectable ? (
-            <IonButton fill='clear' onTouchStart={handleCheckboxToggle} shape='round'>
+            <IonButton fill='clear' onClick={handleCheckboxToggle} shape='round'>
               <IonCheckbox checked={checked} mode='md' />
             </IonButton>
           ) : null}
 
           <div
             className={contentAreaClasses}
-            onTouchStart={sub ? handleTitleClick : onTouchStart}
+            onClick={sub ? handleTitleClick : onClick}
           >
             {title}
             {headerButton}
-            {(sub || onTouchStart) && <IonRippleEffect />}
+            {(sub || onClick) && <IonRippleEffect />}
           </div>
         </div>
 

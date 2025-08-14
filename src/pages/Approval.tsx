@@ -182,7 +182,7 @@ const Approval: React.FC = () => {
       <AppBar
         title={
           <div className='app-bar-title-wrapper'>
-            <span className='app-bar-sub-title' onTouchStart={handleBackNavigation}>미결함</span>
+            <span className='app-bar-sub-title' onClick={handleBackNavigation}>미결함</span>
             <IonIcon src={chevronForwardOutline} style={{ width: 16, color: 'var(--ion-color-secondary)' }} />
             <span>SAP 전표</span>
           </div>
@@ -211,7 +211,7 @@ const Approval: React.FC = () => {
                   className='date-toolbar-button-wrapper'
                   id="start-date-trigger"
                   style={{ flex: 1 }}
-                  onTouchStart={() => setIsStartDateOpen(true)}
+                  onClick={() => setIsStartDateOpen(true)}
                 >
                   <div className='date-toolbar-button'>
                     <IonIcon icon={calendarClearOutline} style={{ width: '16px', marginRight: '6px', color: '#646870' }} />
@@ -226,7 +226,7 @@ const Approval: React.FC = () => {
                   className='date-toolbar-button-wrapper'
                   id="end-date-trigger"
                   style={{ flex: 1 }}
-                  onTouchStart={() => setIsEndDateOpen(true)}
+                  onClick={() => setIsEndDateOpen(true)}
                 >
                   <div className='date-toolbar-button'>
                     <IonIcon icon={calendarClearOutline} style={{ width: '16px', marginRight: '6px', color: '#646870' }} />
@@ -240,7 +240,7 @@ const Approval: React.FC = () => {
                   style={{ width: '36px' }}
                   mode='md'
                   className='date-toolbar-button-wrapper'
-                  onTouchStart={resetDates}
+                  onClick={resetDates}
                   disabled={startDate === defaultStartDate && endDate === defaultEndDate}
                 >
                   <div className='date-toolbar-button'>
@@ -276,14 +276,14 @@ const Approval: React.FC = () => {
                     setStartDate(e.detail.value);
                   }
                 }}
-                onTouchStart={(e) => {
+                onClick={(e) => {
                   const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
-                  const isDayButtonTouchStarted = path?.some((el) =>
+                  const isDayButtonClicked = path?.some((el) =>
                     el instanceof HTMLElement &&
                     el.classList.contains('calendar-day-wrapper')
                   );
 
-                  if (isDayButtonTouchStarted) {
+                  if (isDayButtonClicked) {
                     setIsStartDateOpen(false);
                   }
                 }}
@@ -309,14 +309,14 @@ const Approval: React.FC = () => {
                     setEndDate(e.detail.value);
                   }
                 }}
-                onTouchStart={(e) => {
+                onClick={(e) => {
                   const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
-                  const isDayButtonTouchStarted = path?.some((el) =>
+                  const isDayButtonClicked = path?.some((el) =>
                     el instanceof HTMLElement &&
                     el.classList.contains('calendar-day-wrapper')
                   );
 
-                  if (isDayButtonTouchStarted) {
+                  if (isDayButtonClicked) {
                     setIsEndDateOpen(false);
                   }
                 }}
@@ -387,7 +387,7 @@ export default Approval;
 interface SwipeAction {
   label: string;
   color: string;
-  onTouchStart: () => void;
+  onClick: () => void;
 }
 
 interface SwipeableItemProps {
@@ -467,7 +467,7 @@ const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, actions, isOpen
         {actions.map((action, index) => (
           <div
             key={index}
-            onTouchStart={action.onTouchStart}
+            onClick={action.onClick}
             style={{
               width: actionWidth,
               backgroundColor: action.color,
@@ -619,15 +619,15 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
     //   isOpen={isOpen}
     //   setIsOpen={setIsOpen}
     //   actions={[
-    //     { label: '승인', color: '#4CAF50', onTouchStart: handleApprove },
-    //     { label: '반려', color: '#F44336', onTouchStart: handleReject }
+    //     { label: '승인', color: '#4CAF50', onClick: handleApprove },
+    //     { label: '반려', color: '#F44336', onClick: handleReject }
     //   ]}
     // >
     <CustomItem
       selectable={true}
       checked={isSelected}
       title={titleElement}
-      onTouchStart={() => { }}
+      onClick={() => { }}
       onCheckboxChange={handleCheckboxChange}
       sub={subElement}
     />
