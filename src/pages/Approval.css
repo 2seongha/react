@@ -12,6 +12,7 @@
 
 .approval ion-toolbar {
   --background: var(--ion-background-color) !important;
+  --opacity: 1;
 }
 
 .loading-indicator-wrapper {
@@ -53,19 +54,49 @@
   padding: 0px 22px 12px 22px;
 }
 
-/* 체크박스 선택 시 스타일 */
-.approval-item-wrapper.selected {
-  /* transform: scale(1.02); */
-  transition: transform 0.15s ease-out;
-  position: relative;
+.approval .search-bar {
+  padding: 8px 20px;
+  --placeholder-font-style: 12px;
+  --placeholder-color: #898D99;
+  --background: var(--search-bar-color);
+  --border-radius: 8px;
 }
 
-
-
-.approval .ion-content-scroll-host >div >div >div:first-child {
-  margin-top: 12px;
+.approval .search-bar .searchbar-input {
+  padding-inline-start: 3rem !important;
 }
 
-.approval .ion-content-scroll-host {
-  z-index: 0;
+.approval .search-bar .searchbar-search-icon {
+  padding-left: 8px;
+  color: var(--ion-color-primary);
+}
+
+.approval .date-toolbar-wrapper {
+  display: flex;
+  padding: 0 20px;
+  align-items: center;
+  gap: 8px;
+}
+
+.approval .date-toolbar-button-wrapper {
+  --min-height: 36px;
+  --height: 36px;
+  --inner-border-width: 0px;
+  --padding-start: 0px;
+  --inner-padding-end: 0px;
+  border: 1px solid var(--search-bar-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.approval .date-toolbar-button {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.approval .date-toolbar-button>span {
+  font-size: 12px;
 }

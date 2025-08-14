@@ -2,9 +2,9 @@ import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, I
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, color } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import CustomItem from '../components/CustomItem';
 import './Approval.css';
@@ -21,24 +21,6 @@ const Approval: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
   const scrollCallbackRef = useRef<(() => void) | null>(null);
 
-
-  // 기본 날짜 설정 (6개월 전 ~ 오늘) - useMemo로 최적화
-  const { defaultStartDate, defaultEndDate } = useMemo(() => {
-    const today = new Date();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(today.getMonth() - 6);
-
-    return {
-      defaultStartDate: sixMonthsAgo.toISOString().split('T')[0], // YYYY-MM-DD 형식
-      defaultEndDate: today.toISOString().split('T')[0]
-    };
-  }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
-
-  // 날짜 선택 관련 상태
-  const [startDate, setStartDate] = useState<string>(defaultStartDate);
-  const [endDate, setEndDate] = useState<string>(defaultEndDate);
-  const [isStartDateOpen, setIsStartDateOpen] = useState(false);
-  const [isEndDateOpen, setIsEndDateOpen] = useState(false);
   useIonViewWillEnter(() => {
     setApprovals(null);
     setSelectedItems(new Set());
@@ -54,16 +36,24 @@ const Approval: React.FC = () => {
     event.detail.complete();
   }
 
-  //* 스크롤 관련
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
-  const scrollToTop = () => {
-    virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
-  };
+  const totalCount = approvals?.length ?? 0;
 
-  // 전체 카운트 계산 (메모이제이션)
-  const totalCount = React.useMemo(() => {
-    return approvals ? approvals.length : 0;
-  }, [approvals]);
+  //* 날짜 관련
+  const { defaultStartDate, defaultEndDate } = useMemo(() => {
+    const today = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+    return {
+      defaultStartDate: sixMonthsAgo.toISOString().split('T')[0], // YYYY-MM-DD 형식
+      defaultEndDate: today.toISOString().split('T')[0]
+    };
+  }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
+
+  const [startDate, setStartDate] = useState<string>(defaultStartDate);
+  const [endDate, setEndDate] = useState<string>(defaultEndDate);
+  const [isStartDateOpen, setIsStartDateOpen] = useState(false);
+  const [isEndDateOpen, setIsEndDateOpen] = useState(false);
 
   // 날짜 포맷팅 함수 - useCallback으로 최적화
   const formatDate = useCallback((dateString: string) => {
@@ -82,16 +72,11 @@ const Approval: React.FC = () => {
     setEndDate(defaultEndDate);
   }, [defaultStartDate, defaultEndDate]);
 
-  // 날짜 선택 확인 함수 - useCallback으로 최적화
-  const handleStartDateConfirm = useCallback((value: string) => {
-    setStartDate(value);
-    setIsStartDateOpen(false);
-  }, []);
-
-  const handleEndDateConfirm = useCallback((value: string) => {
-    setEndDate(value);
-    setIsEndDateOpen(false);
-  }, []);
+  //* 스크롤 관련
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const scrollToTop = () => {
+    virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
+  };
 
   // 네비게이션 핸들러 - useCallback으로 최적화
   const handleBackNavigation = useCallback(() => {
@@ -117,48 +102,47 @@ const Approval: React.FC = () => {
     if (!searchText.trim()) return approvals;
 
     return approvals.filter(approval =>
-      approval.apprTitle.toLowerCase().includes(searchText.toLowerCase())
+      approval.apprTitle.toLowerCase().includes(searchText.toLowerCase()) ||
+      approval.creatorName.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [approvals, searchText]);
 
-  // 필터된 카운트 계산
-  const filteredCount = React.useMemo(() => {
-    return filteredApprovals ? filteredApprovals.length : 0;
-  }, [filteredApprovals]);
+  // 필터링된 결과가 변경될 때 선택된 아이템 중 필터에서 제외된 것들 제거
+  useEffect(() => {
+    if (filteredApprovals && selectedItems.size > 0) {
+      const filteredFlowNos = filteredApprovals.map(approval => approval.flowNo);
+      const newSelectedItems = new Set<string>();
 
-  // 전체 선택 상태 계산 (필터된 결과 기준)
+      selectedItems.forEach(flowNo => {
+        if (filteredFlowNos.includes(flowNo)) {
+          newSelectedItems.add(flowNo);
+        }
+      });
+
+      // 선택된 아이템이 변경되었을 때만 업데이트
+      if (newSelectedItems.size !== selectedItems.size) {
+        setSelectedItems(newSelectedItems);
+      }
+    }
+  }, [filteredApprovals, selectedItems]);
+
+  // filteredFlowNos 메모이제이션
+  const filteredFlowNos = useMemo(() =>
+    filteredApprovals?.map(approval => approval.flowNo) ?? [],
+    [filteredApprovals]
+  );
+
+  // 전체 선택 상태 계산
   const isAllSelected = useMemo(() => {
-    if (!filteredApprovals || filteredApprovals.length === 0) return false;
-    const filteredFlowNos = filteredApprovals.map(approval => approval.flowNo);
+    if (filteredFlowNos.length === 0) return false;
     return filteredFlowNos.every(flowNo => selectedItems.has(flowNo));
-  }, [selectedItems, filteredApprovals]);
+  }, [selectedItems, filteredFlowNos]);
 
   // 검색 핸들러
   const handleSearch = useCallback((e: CustomEvent) => {
     const searchValue = e.detail.value;
     setSearchText(searchValue);
-
-    // 검색어가 있을 때만 필터링에서 제외된 선택 항목들 제거
-    if (searchValue.trim() && approvals) {
-      const filteredFlowNos = approvals
-        .filter(approval =>
-          approval.apprTitle.toLowerCase().includes(searchValue.toLowerCase())
-        )
-        .map(approval => approval.flowNo);
-
-      setSelectedItems(prev => {
-        const newSet = new Set<string>();
-        for (const flowNo of prev) {
-          // 현재 필터 결과에 포함된 항목만 선택 상태 유지
-          if (filteredFlowNos.includes(flowNo)) {
-            newSet.add(flowNo);
-          }
-        }
-        return newSet;
-      });
-    }
-    // 검색어가 비어있으면 선택 상태는 그대로 유지 (모든 항목이 다시 보이므로)
-  }, [approvals]);
+  }, []);
 
   // 전체 선택/해제 핸들러
   const handleSelectAll = useCallback(() => {
@@ -175,6 +159,10 @@ const Approval: React.FC = () => {
   }, [filteredApprovals, isAllSelected]);
 
   const renderItem = useCallback((index: number, approval: ApprovalModel) => {
+    if (!approval || !approval.flowNo) {
+      return <div className="approval-item-wrapper">Error: Invalid item</div>;
+    }
+
     const isSelected = selectedItems.has(approval.flowNo);
     return (
       <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''}`}>
@@ -189,8 +177,6 @@ const Approval: React.FC = () => {
     );
   }, [selectedItems, handleItemSelection]);
 
-
-
   return (
     <IonPage className='approval'>
       <AppBar
@@ -203,89 +189,141 @@ const Approval: React.FC = () => {
         }
         bottom={
           <>
-            <IonToolbar>
+            <IonToolbar >
               <IonSearchbar
+                mode='ios'
+                class='search-bar'
                 value={searchText}
                 onIonInput={handleSearch}
                 placeholder="제목 / 상신자"
                 showClearButton="focus"
                 debounce={50}
+                style={{ textAlign: 'start' }}
               />
             </IonToolbar>
             {/* 날짜 선택 섹션 */}
-            <IonToolbar>
+            <IonToolbar >
               {/* 시작일 버튼 */}
-              <IonButton
-                id="start-date-trigger"
-                fill="outline"
-                size="small"
-                style={{ flex: 1 }}
-                onClick={() => setIsStartDateOpen(true)}
-              >
-                <IonIcon icon={calendarOutline} style={{ marginRight: '6px' }} />
-                {formatDate(startDate)}
-              </IonButton>
-              <span>~</span>
-              {/* 종료일 버튼 */}
-              <IonButton
-                id="end-date-trigger"
-                fill="outline"
-                size="small"
-                style={{ flex: 1 }}
-                onClick={() => setIsEndDateOpen(true)}
-              >
-                <IonIcon icon={calendarOutline} style={{ marginRight: '6px' }} />
-                {formatDate(endDate)}
-              </IonButton>
+              <div className='date-toolbar-wrapper'>
+                <IonItem
+                  button
+                  mode='md'
+                  className='date-toolbar-button-wrapper'
+                  id="start-date-trigger"
+                  style={{ flex: 1 }}
+                  onClick={() => setIsStartDateOpen(true)}
+                >
+                  <div className='date-toolbar-button'>
+                    <IonIcon icon={calendarClearOutline} style={{ width: '16px', marginRight: '6px', color: '#646870' }} />
+                    <span>{formatDate(startDate)}</span>
+                  </div>
+                </IonItem>
+                <span>~</span>
+                {/* 종료일 버튼 */}
+                <IonItem
+                  button
+                  mode='md'
+                  className='date-toolbar-button-wrapper'
+                  id="end-date-trigger"
+                  style={{ flex: 1 }}
+                  onClick={() => setIsEndDateOpen(true)}
+                >
+                  <div className='date-toolbar-button'>
+                    <IonIcon icon={calendarClearOutline} style={{ width: '16px', marginRight: '6px', color: '#646870' }} />
+                    <span>{formatDate(endDate)}</span>
+                  </div>
+                </IonItem>
 
-              {/* 초기화 버튼 */}
-              <IonButton
-                size="small"
-                onClick={resetDates}
-                disabled={startDate === defaultStartDate && endDate === defaultEndDate}
-              >
-                <IonIcon icon={refresh} />
-              </IonButton>
+                {/* 초기화 버튼 */}
+                <IonItem
+                  button
+                  style={{ width: '36px' }}
+                  mode='md'
+                  className='date-toolbar-button-wrapper'
+                  onClick={resetDates}
+                  disabled={startDate === defaultStartDate && endDate === defaultEndDate}
+                >
+                  <div className='date-toolbar-button'>
+                    <IonIcon icon={refresh} style={{ width: '18px', color: 'var(--ion-color-secondary)' }} />
+                  </div>
+                </IonItem>
+              </div>
             </IonToolbar>
             <IonToolbar>
               <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
                 <IonCheckbox
                   mode='md'
                   checked={isAllSelected}
+                  style={{ pointerEvents: 'none' }}
                 />
-                <span>전체 선택 ({selectedItems.size}/{filteredCount})</span>
+                <span>전체 선택 ({selectedItems.size})</span>
               </IonItem>
             </IonToolbar>
 
             {/* 시작일 선택 팝오버 */}
             <IonPopover
+              side="bottom" alignment="center"
               trigger="start-date-trigger"
               isOpen={isStartDateOpen}
               onDidDismiss={() => setIsStartDateOpen(false)}
               showBackdrop={true}
             >
               <IonDatetime
+                class='date-picker-pop-up'
                 value={startDate}
-                onIonChange={(e) => handleStartDateConfirm(e.detail.value as string)}
+                onIonChange={(e) => {
+                  if (typeof e.detail.value === 'string') {
+                    setStartDate(e.detail.value);
+                  }
+                }}
+                onClick={(e) => {
+                  const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
+                  const isDayButtonClicked = path?.some((el) =>
+                    el instanceof HTMLElement &&
+                    el.classList.contains('calendar-day-wrapper')
+                  );
+
+                  if (isDayButtonClicked) {
+                    setIsStartDateOpen(false);
+                  }
+                }}
                 presentation="date"
                 locale="ko-KR"
-                max={endDate || undefined}
+                max={endDate || defaultEndDate}
               />
             </IonPopover>
 
             {/* 종료일 선택 팝오버 */}
             <IonPopover
+              side="bottom" alignment="center"
               trigger="end-date-trigger"
               isOpen={isEndDateOpen}
               onDidDismiss={() => setIsEndDateOpen(false)}
               showBackdrop={true}
             >
               <IonDatetime
+                class='date-picker-pop-up'
                 value={endDate}
-                onIonChange={(e) => handleEndDateConfirm(e.detail.value as string)}
+                onIonChange={(e) => {
+                  if (typeof e.detail.value === 'string') {
+                    setEndDate(e.detail.value);
+                  }
+                }}
+                onClick={(e) => {
+                  const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
+                  const isDayButtonClicked = path?.some((el) =>
+                    el instanceof HTMLElement &&
+                    el.classList.contains('calendar-day-wrapper')
+                  );
+
+                  if (isDayButtonClicked) {
+                    setIsEndDateOpen(false);
+                  }
+                }}
                 presentation="date"
                 locale="ko-KR"
                 min={startDate || undefined}
+                max={defaultEndDate}
               />
             </IonPopover>
           </>
@@ -320,11 +358,6 @@ const Approval: React.FC = () => {
                 scrollCallbackRef.current();
               }
             }}
-            // components={{
-            //   Scroller: React.forwardRef<HTMLDivElement, any>((props, ref) => (
-            //     <div {...props} ref={ref} style={{ ...(props.style || {}) }} />
-            //   ))
-            // }}
             itemContent={renderItem}
           />
         ) : (
@@ -590,14 +623,14 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
     //     { label: '반려', color: '#F44336', onClick: handleReject }
     //   ]}
     // >
-      <CustomItem
-        selectable={true}
-        checked={isSelected}
-        title={titleElement}
-        onClick={() => { }}
-        onCheckboxChange={handleCheckboxChange}
-        sub={subElement}
-      />
+    <CustomItem
+      selectable={true}
+      checked={isSelected}
+      title={titleElement}
+      onClick={() => { }}
+      onCheckboxChange={handleCheckboxChange}
+      sub={subElement}
+    />
     // {/* </SwipeableItem> */}
   );
 };

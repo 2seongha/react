@@ -81,6 +81,8 @@
 
   --custom-border-color-50: #f2f2f2;
   --custom-border-color-100: #E8E8E8;
+
+  --search-bar-color: #F7F7F7;
 }
 
 [data-theme="dark"] {
@@ -128,6 +130,8 @@
 
   --custom-border-color-50: #2E3238;
   --custom-border-color-100: #2E3238;
+
+  --serach-bar-color: #2C3035;
 }
 
 body {

@@ -15,29 +15,39 @@ ion-app {
   margin-bottom: var(--webview-padding-bottom) !important;
 }
 
+/* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px !important;
   --offset-top: 0px;
 }
 
-/* Firefox, Android 대응 */
 ion-content::part(scroll) {
   scrollbar-color: transparent transparent;
   scrollbar-width: none;
 }
 
-/* iOS Safari 대응 */
 ion-content::part(scroll)::-webkit-scrollbar {
   display: none;
 }
 
+/* TabBar 관련 */
 ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
+/* Ripple 잔상 관련 */
 @media (hover: hover) and (pointer: fine) {
   * {
     --background-hover: transparent;
-    --ion-color-base: yellow;
   }
+}
+
+/* Popover 관련 */
+ion-popover {
+  --width: 300px;
+}
+
+/* DateTime 관련 */
+ion-datetime {
+  --background: var(--ion-background-color);
 }
