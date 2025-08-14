@@ -1,13 +1,4 @@
 .custom-item {
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --inner-padding-start: 0;
-  --inner-padding-end: 0;
-  --inner-padding-top: 0;
-  --inner-padding-bottom: 0;
-  --inner-border-width: 0;
   position: relative;
   background-color: var(--ion-background-color);
   border-radius: 12px;
@@ -19,9 +10,7 @@
   width: 100%;
 }
 
-/* 체크박스 선택 시 스타일 - 홀로그래픽 효과 */
 .custom-item.selected {
-  /* transform: scale(1.05); */
   box-shadow: 0 0 5px rgba(var(--ion-color-primary-rgb), 0.3);
   --background: rgba(var(--ion-color-primary-rgb), 0.05);
   transition: all 0.1s ease;
@@ -29,71 +18,24 @@
   overflow: hidden;
 }
 
-/* 홀로그래픽 효과 - 빛나는 선 */
-/* .custom-item.selected::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    0deg, 
-    transparent, 
-    transparent 30%, 
-    rgba(var(--ion-color-primary-rgb), 0.3)
-  );
-  transform: rotate(-45deg);
-  transition: all 0.5s ease;
-  opacity: 1;
-  animation: holographicSweep 0.8s ease-out forwards;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes holographicSweep {
-  0% {
-    opacity: 0;
-    transform: rotate(-45deg) translateY(-100%);
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: rotate(-45deg) translateY(100%);
-  }
-} */
-
 .custom-item-header {
   display: flex;
-  align-items: center;
-  justify-content: start;
-  gap: 8px;
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-  height: 52px;
-  width: 100%;
-  /* padding: 8px 16px; */
-}
-
-/* 체크박스 클릭 영역 확장 */
-.custom-item-header-checkbox-area {
-  position: relative;
-  padding: 14px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
-  margin-right: 8px;
+  gap: 8px;
   overflow: hidden;
-  pointer-events: all;
-  z-index: 1;
+  position: relative;
+  width: 100%;
+  padding: 16px 20px 12px 20px;
+  min-height: 48px;
 }
 
-.custom-item-header-checkbox-area  > ion-checkbox {
-  height: 18px;
+.custom-item-header-icon {
+  color: var(--ion-color-secondary);
+}
+
+.custom-item-header > ion-checkbox {
+  flex: 0;
 }
 
 .custom-item-header-content-area {
@@ -101,23 +43,29 @@
   height: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .custom-item-body {
+  padding: 16px 20px;
   border-radius: 12px;
   overflow: hidden;
   width: 100%;
-  padding: 8px 16px;
+  position: relative;
 }
 
+.custom-item-body::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 0;
+  width: calc(100% - 40px);
+  border-bottom: 1px solid var(--custom-border-color-50);
+}
 
 /* 리플 효과를 둥글게 만들기 */
 .custom-item-header-content-area ion-ripple-effect,
 .custom-item-body ion-ripple-effect {
   border-radius: 12px;
 }
-
-/* .custom-item-header-content-area .ripple-effect,
-.custom-item-body .ripple-effect {
-  border-radius: 12px;
-} */

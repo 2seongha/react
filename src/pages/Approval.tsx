@@ -2,7 +2,7 @@ import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, I
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline, calendar, calendarClear, close, checkmark } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline, calendar, calendarClear, close, checkmark, person } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
 import { motion, AnimatePresence, color } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
@@ -172,10 +172,11 @@ const Approval: React.FC = () => {
           index={index}
           isSelected={isSelected}
           onSelectionChange={handleItemSelection}
+          searchText={searchText}
         />
       </div>
     );
-  }, [selectedItems, handleItemSelection]);
+  }, [selectedItems, handleItemSelection, searchText]);
 
   return (
     <IonPage className='approval'>
@@ -601,10 +602,23 @@ interface ApprovalProps {
   index: number;
   isSelected: boolean;
   onSelectionChange: (id: string, isSelected: boolean) => void;
+  searchText: string;
 }
 
+// 텍스트 하이라이트 헬퍼 함수
+const highlightText = (text: string, searchText: string) => {
+  if (!searchText.trim()) return text;
+  
+  const regex = new RegExp(`(${searchText})`, 'gi');
+  const parts = text.split(regex);
+  
+  return parts.map((part, i) =>
+    regex.test(part) ? <strong key={i} style={{ color: 'var(--ion-color-primary)', fontWeight: 600 }}>{part}</strong> : part
+  );
+};
+
 // Optimized ApprovalItem with swipe actions
-const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange }) => {
+const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -621,8 +635,17 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
     setIsOpen(false);
   }, [approval.flowNo]);
 
-  const titleElement = useMemo(() => <span>{approval.apprTitle}</span>, [approval.apprTitle]);
-  const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
+  const titleElement = useMemo(() =>
+    <div className='approval-item-title'>
+      <span>{highlightText(approval.apprTitle, searchText)}</span>
+      <div className='approval-item-sub-title'>
+        <IonIcon src={person} />
+        <span>{highlightText(approval.creatorName, searchText)} ・ </span>
+        <span>{approval.createDate}</span>
+      </div>
+    </div>
+    , [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
+  // const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
 
   return (
     // <SwipeableItem
@@ -639,7 +662,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
       title={titleElement}
       onClick={() => { }}
       onCheckboxChange={handleCheckboxChange}
-      sub={subElement}
+    // sub={subElement}
     />
     // {/* </SwipeableItem> */}
   );

@@ -100,7 +100,7 @@
   padding: 8px 20px;
   --placeholder-color: #898D99;
   --placeholder-font-weight: 500;
-  --background: var(--search-bar-color);
+  --background: var(--custom-border-color-50);
   --border-radius: 8px;
 }
 
@@ -130,7 +130,7 @@
 .approval .date-toolbar-button-wrapper {
   --min-height: 30px;
   --height: 30px;
-  border: 1px solid var(--search-bar-color);
+  border: 1px solid var(--custom-border-color-50);
   border-radius: 8px;
   box-sizing: border-box;
 }
@@ -151,4 +151,37 @@
 
 .approval .date-toolbar-button>span {
   font-size: 13px;
+}
+
+.approval-item-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.approval-item-title>span {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  /* 줄 바꿈 방지 */
+  overflow: hidden;
+  /* 넘치는 부분 숨김 */
+  text-overflow: ellipsis;
+}
+
+.approval-item-sub-title {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+
+.approval-item-sub-title>ion-icon {
+  width: 11px;
+  margin-right: 2px;
+  color: #0000004b;
+}
+
+.approval-item-sub-title>span {
+  font-size: 11px;
+  color: var(--ion-color-secondary);
 }

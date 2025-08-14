@@ -2,7 +2,7 @@ import { IonCheckbox, IonIcon, IonRippleEffect, IonItem, IonButton } from '@ioni
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './CustomItem.css';
-import { chevronForwardOutline, chevronDownOutline } from 'ionicons/icons';
+import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
 
 interface CustomItemProps {
   title?: ReactNode;
@@ -35,13 +35,10 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, s
   const headerButton = useMemo(() => {
     if (sub) {
       return (
-        <IonIcon
-          src={isExpanded ? chevronDownOutline : chevronForwardOutline}
-          style={{ width: 14, marginLeft: 2 }}
-        />
+        <IonIcon src={isExpanded ? chevronUpOutline : chevronDownOutline} className='custom-item-header-icon' />
       );
     } else if (onClick) {
-      return <IonIcon src={chevronForwardOutline} style={{ width: 14, marginLeft: 2 }} />;
+      return <IonIcon src={chevronForwardOutline} className='custom-item-header-icon' />;
     }
     return null;
   }, [sub, isExpanded, onClick]);
@@ -60,9 +57,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, s
         {/* //* header */}
         <div className='custom-item-header'>
           {selectable ? (
-            <IonButton fill='clear' onClick={handleCheckboxToggle} shape='round'>
-              <IonCheckbox checked={checked} mode='md' />
-            </IonButton>
+            <IonCheckbox onClick={handleCheckboxToggle} checked={checked} mode='md' />
           ) : null}
 
           <div
