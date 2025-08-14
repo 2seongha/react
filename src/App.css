@@ -51,3 +51,8 @@ ion-popover {
 ion-datetime {
   --background: var(--ion-background-color);
 }
+
+/* 버튼 누르면 바로 먹히게 */
+button {
+  touch-action: manipulation;
+}

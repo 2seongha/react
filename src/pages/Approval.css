@@ -12,7 +12,7 @@
 
 .approval ion-toolbar {
   --background: var(--ion-background-color) !important;
-  --opacity: 1;
+  --opacity: 1 !important;
 }
 
 .loading-indicator-wrapper {
@@ -39,7 +39,6 @@
 
 .approval .select-all-button {
   width: 50%;
-  touch-action: manipulation;
 }
 
 .approval .scroll-top-button {
@@ -56,7 +55,6 @@
 
 .approval .search-bar {
   padding: 8px 20px;
-  --placeholder-font-style: 12px;
   --placeholder-color: #898D99;
   --background: var(--search-bar-color);
   --border-radius: 8px;
@@ -99,4 +97,23 @@
 
 .approval .date-toolbar-button>span {
   font-size: 12px;
+}
+
+::-webkit-input-placeholder {
+  font-size: 12px;
+}
+
+::-moz-placeholder {
+  font-size: 0.85rem;
+
+}
+
+:-ms-input-placeholder {
+  font-size: 0.85rem;
+
+}
+
+:-moz-placeholder {
+  font-size: 0.85rem;
+
 }
