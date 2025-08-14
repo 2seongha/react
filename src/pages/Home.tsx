@@ -165,7 +165,7 @@ const MenuCard: React.FC = () => {
                 height: { duration: 0.4 },
               }}
               style={{
-                overflow: 'hidden', // ← 고정
+                overflow: 'visible', // ← 고정
               }}
             >
               {/* <IonItem button key={index} className='menu-ion-item'>
