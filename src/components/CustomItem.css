@@ -34,7 +34,7 @@
   color: var(--ion-color-secondary);
 }
 
-.custom-item-header > ion-checkbox {
+.custom-item-header>ion-checkbox {
   flex: 0;
 }
 
@@ -68,4 +68,58 @@
 .custom-item-header-content-area ion-ripple-effect,
 .custom-item-body ion-ripple-effect {
   border-radius: 12px;
+}
+
+.custom-item-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-item-title>span {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  /* 줄 바꿈 방지 */
+  overflow: hidden;
+  /* 넘치는 부분 숨김 */
+  text-overflow: ellipsis;
+}
+
+.custom-item-sub-title {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+
+.custom-item-sub-title>ion-icon {
+  width: 11px;
+  margin-right: 2px;
+  color: #0000004b;
+}
+
+.custom-item-sub-title>span {
+  font-size: 11px;
+  color: var(--ion-color-secondary);
+}
+
+.custom-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-item-body-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.custom-item-body-line >span:first-child {
+  font-size: 12px;
+  color: var(--ion-color-secondary);
+}
+
+.custom-item-body-line >span:last-child {
+  font-size: 12px;
+  color: rgba(var(--ion-text-color-rgb), 0.6);
 }

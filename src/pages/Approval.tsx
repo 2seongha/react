@@ -608,10 +608,10 @@ interface ApprovalProps {
 // 텍스트 하이라이트 헬퍼 함수
 const highlightText = (text: string, searchText: string) => {
   if (!searchText.trim()) return text;
-  
+
   const regex = new RegExp(`(${searchText})`, 'gi');
   const parts = text.split(regex);
-  
+
   return parts.map((part, i) =>
     regex.test(part) ? <strong key={i} style={{ color: 'var(--ion-color-primary)', fontWeight: 600 }}>{part}</strong> : part
   );
@@ -636,16 +636,40 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
   }, [approval.flowNo]);
 
   const titleElement = useMemo(() =>
-    <div className='approval-item-title'>
+    <div className='custom-item-title'>
       <span>{highlightText(approval.apprTitle, searchText)}</span>
-      <div className='approval-item-sub-title'>
+      <div className='custom-item-sub-title'>
         <IonIcon src={person} />
         <span>{highlightText(approval.creatorName, searchText)} ・ </span>
         <span>{approval.createDate}</span>
       </div>
     </div>
     , [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
-  // const subElement = useMemo(() => <div style={{ height: '40px' }}> hello</div>, []);
+
+  const bodyElement = useMemo(() =>
+    <div className='custom-item-body'>
+      <div className='custom-item-body-line'>
+        <span>구분</span>
+        <span>임시전표</span>
+      </div>
+      <div className='custom-item-body-line'>
+        <span>전표 번호</span>
+        <span>1900000165</span>
+      </div>
+      <div className='custom-item-body-line'>
+        <span>거래처</span>
+        <span>현대 법인카드_7430820</span>
+      </div>
+      <div className='custom-item-body-line'>
+        <span>기본적요</span>
+        <span>소모품비</span>
+      </div>
+      <div className='custom-item-body-line'>
+        <span>계정명</span>
+        <span>소모품비-기타</span>
+      </div>
+    </div>
+    , []);
 
   return (
     // <SwipeableItem
@@ -660,6 +684,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
       selectable={true}
       checked={isSelected}
       title={titleElement}
+      body={bodyElement}
       onClick={() => { }}
       onCheckboxChange={handleCheckboxChange}
     // sub={subElement}

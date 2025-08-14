@@ -6,6 +6,7 @@ import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ion
 
 interface CustomItemProps {
   title?: ReactNode;
+  body?: ReactNode;
   sub?: ReactNode;
   selectable?: boolean;
   onClick?: () => void;
@@ -14,7 +15,7 @@ interface CustomItemProps {
   expandable?: boolean;
 }
 
-const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, sub, onClick, onCheckboxChange, checked }) => {
+const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, body, sub, onClick, onCheckboxChange, checked }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCheckboxToggle = useCallback((e: React.MouseEvent) => {
@@ -71,14 +72,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, s
         </div>
 
         {/* //* body */}
-        <div className='custom-item-body'>
-          <div>item1</div>
-          <div>item1</div>
-          <div>item1</div>
-          <div>item1</div>
-          <div>item1</div>
-          <div>item1</div>
-        </div>
+        {body}
 
         {/* //* sub section */}
         <AnimatePresence>
