@@ -78,28 +78,28 @@ const AppBar: React.FC<AppBarProps> = ({
           {showSearchButton &&
             <IonButton mode='md' shape='round' color={'medium'}
               className="app-bar-button"
-              onClick={() => router.push('/settings', 'forward', 'push')}>
+              onTouchStart={() => router.push('/settings', 'forward', 'push')}>
               <IonIcon icon={search} />
             </IonButton>
           }
           {/* {showNotificationsButton &&
             <IonButton mode='md' shape='round' color={'medium'}
               className="app-bar-button"
-              onClick={() => router.push('/settings', 'forward', 'push')}>
+              onTouchStart={() => router.push('/settings', 'forward', 'push')}>
               <IonIcon icon={notifications} />
             </IonButton>
           } */}
           {showSettingButton &&
             <IonButton mode='md' shape='round' color={'medium'}
               className="app-bar-button"
-              onClick={() => router.push('/settings', 'forward', 'push')}>
+              onTouchStart={() => router.push('/settings', 'forward', 'push')}>
               <IonIcon icon={settingsSharp} />
             </IonButton>
           }
           {showMenuButton &&
             <IonButton mode='md' shape='round' color={'medium'}
               className="app-bar-button"
-              onClick={() => router.push('/menu', 'forward', 'push')}>
+              onTouchStart={() => router.push('/menu', 'forward', 'push')}>
               <IonIcon icon={menu} />
             </IonButton>
           }

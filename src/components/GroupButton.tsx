@@ -59,7 +59,7 @@ const GroupButton: React.FC = () => {
           <button
           key={`group-button${index}`}
             ref={(el) => { (buttonRefs.current[index] = el) }}
-            onClick={() => handleClick(index)}
+            onTouchStart={() => handleClick(index)}
             className={`group-button ${selected?.value === index ? 'selected' : ''}`}
           >
             {item.oLtext} ({item.cnt})
