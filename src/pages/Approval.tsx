@@ -1,8 +1,8 @@
-import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonLabel, IonItem, IonCheckbox, IonFab, IonFabButton, IonItemSliding, IonItemOptions, IonItemOption } from '@ionic/react';
+import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonLabel, IonItem, IonCheckbox, IonFab, IonFabButton, IonItemSliding, IonItemOptions, IonItemOption, IonButtons } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline, calendar, calendarClear } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
 import { motion, AnimatePresence, color } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
@@ -165,7 +165,7 @@ const Approval: React.FC = () => {
 
     const isSelected = selectedItems.has(approval.flowNo);
     return (
-      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''}`}>
+      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''} ${index === 0 ? 'first-item' : ''}`}>
         <ApprovalItem
           key={approval.flowNo}
           approval={approval}
@@ -214,7 +214,7 @@ const Approval: React.FC = () => {
                   onClick={() => setIsStartDateOpen(true)}
                 >
                   <div className='date-toolbar-button'>
-                    <IonIcon icon={calendarClearOutline} style={{ width: '16px', marginRight: '6px', color: '#646870' }} />
+                    <IonIcon icon={calendarClear} />
                     <span>{formatDate(startDate)}</span>
                   </div>
                 </IonItem>
@@ -229,7 +229,7 @@ const Approval: React.FC = () => {
                   onClick={() => setIsEndDateOpen(true)}
                 >
                   <div className='date-toolbar-button'>
-                    <IonIcon icon={calendarClearOutline} style={{ width: '16px', marginRight: '6px', color: '#646870' }} />
+                    <IonIcon icon={calendarClear} />
                     <span>{formatDate(endDate)}</span>
                   </div>
                 </IonItem>
@@ -250,14 +250,20 @@ const Approval: React.FC = () => {
               </div>
             </IonToolbar>
             <IonToolbar>
-              <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
-                <IonCheckbox
-                  mode='md'
-                  checked={isAllSelected}
-                  style={{ pointerEvents: 'none' }}
-                />
-                <span>전체 선택 ({selectedItems.size})</span>
-              </IonItem>
+              <div className='buttons-wrapper'>
+                <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
+                  <IonCheckbox
+                    mode='md'
+                    checked={isAllSelected}
+                    style={{ pointerEvents: 'none' }}
+                  />
+                  <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
+                </IonItem>
+                <div className='approve-buttons'>
+                  <IonButton mode='md' color='light' disabled={selectedItems.size === 0}><span>반려하기</span></IonButton>
+                  <IonButton mode='md' color='primary' disabled={selectedItems.size === 0}><span>승인하기</span></IonButton>
+                </div>
+              </div>
             </IonToolbar>
 
             {/* 시작일 선택 팝오버 */}
@@ -346,6 +352,7 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
+            className='virtuso'
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={20}

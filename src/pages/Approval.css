@@ -3,10 +3,6 @@
 }
 
 .approval ion-content {
-  --padding-top: 0px;
-  --padding-bottom: 0px;
-  --padding-start: 0px;
-  --padding-end: 0px;
   --background: var(--ion-background-color2);
 }
 
@@ -37,8 +33,38 @@
   color: var(--ion-color-primary);
 }
 
+.approval .buttons-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+}
+
 .approval .select-all-button {
-  width: 50%;
+  --min-height: 28px;
+  --border-radius: 8px;
+  height: 28px;
+  flex: 1;
+}
+
+.approval .select-all-button>ion-checkbox {
+  flex: 0;
+  margin-right: 8px;
+}
+
+.approval .select-all-button>span {
+  font-size: 12px;
+}
+
+.approval .approve-buttons {
+  flex: 1;
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+}
+
+.approval .approve-buttons>ion-button {
+  height: 28px;
 }
 
 .approval .scroll-top-button {
@@ -53,36 +79,44 @@
   padding: 0px 22px 12px 22px;
 }
 
+.approval-item-wrapper.first-item {
+  padding-top: 12px;
+}
+
 .approval .search-bar {
   padding: 8px 20px;
-  --placeholder-color: var(--ion-color-secondary);
+  --placeholder-color: #898D99;
+  --placeholder-font-weight: 500;
   --background: var(--search-bar-color);
   --border-radius: 8px;
 }
 
+.approval .search-bar .searchbar-input-container {
+  height: 40px;
+}
+
 .approval .search-bar .searchbar-input {
-  padding-inline-start: 3rem !important;
+  padding-inline-start: 2.4rem !important;
   font-size: 13px !important;
 }
 
 .approval .search-bar .searchbar-search-icon {
   padding-left: 8px;
+  width: 16px;
   color: var(--ion-color-primary);
+  --ionicon-stroke-width: 48px;
 }
 
 .approval .date-toolbar-wrapper {
   display: flex;
-  padding: 0 20px;
+  padding: 8px 20px;
   align-items: center;
   gap: 8px;
 }
 
 .approval .date-toolbar-button-wrapper {
-  --min-height: 32px;
-  --height: 32px;
-  --inner-border-width: 0px;
-  --padding-start: 0px;
-  --inner-padding-end: 0px;
+  --min-height: 30px;
+  --height: 30px;
   border: 1px solid var(--search-bar-color);
   border-radius: 8px;
   box-sizing: border-box;
@@ -96,7 +130,12 @@
   justify-content: center;
 }
 
+.approval .date-toolbar-button>ion-icon {
+  width: 16px;
+  margin-right: 6px;
+  color: var(--gray-color);
+}
+
 .approval .date-toolbar-button>span {
   font-size: 13px;
 }
-

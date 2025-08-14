@@ -108,7 +108,7 @@ const WelcomeCard: React.FC = () => {
           <span>이성하님</span>
           <span>좋은 하루 보내세요</span>
         </div>
-        <IonButton className='welcome-card-button'>내 정보</IonButton>
+        <IonButton fill='clear' className='welcome-card-button'>내 정보</IonButton>
       </div>
     </IonCard>
   );
@@ -291,11 +291,9 @@ interface ApprovalItemProps {
 const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = false, index }) => {
   if (isLoading || !approvalItem) {
     return (
-      <IonItem className='menu-ion-item'>
-        <div className='menu-item'>
-          <CustomSkeleton width={200} />
-        </div>
-      </IonItem>
+      <div className='todo-summary-item-skeleton'>
+        <CustomSkeleton width={200} />
+      </div>
     );
   }
 

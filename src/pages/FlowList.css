@@ -9,9 +9,6 @@
   margin-top: 10px;
   border-radius: 12px;
   --min-height: 60px;
-  --inner-border-width: 0px;
-  --padding-start: 0px;
-  --inner-padding-end: 0px;
   display: flex;
   align-items: center;
 }

@@ -68,3 +68,86 @@ ion-datetime {
 :-moz-placeholder {
   font-size: 13px;
 }
+
+/* checkbox 관련 */
+ion-checkbox {
+  --size: 20px;
+  height: 20px;
+}
+
+ion-checkbox::part(container) {
+  border-radius: 8px;
+  border: 1px solid var(--gray-color);
+  background-image: var(--check-icon);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+ion-checkbox.checkbox-checked::part(container) {
+  border: none;
+}
+
+ion-checkbox::part(mark) {
+  translate: 2px 2px !important;
+  transform: scale(.78) !important;
+}
+
+/* 기본 스타일 빼기 */
+ion-content {
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+}
+
+ion-toolbar {
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --min-height: 0px;
+}
+
+ion-item {
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --min-height: 0px;
+  --inner-padding-end: 0px;
+  --inner-border-width: 0px;
+  --background-hover: transparent;
+  --background-hover-opacity: 0;
+}
+
+ion-button {
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  min-height: 0px;
+  --border-radius: 8px;
+  --box-shadow: none;
+  --background-hover: transparent;
+  --background-hover-opacity: 0;
+}
+
+/* 기본 버튼 - light와 dark 테마에서 동일한 색상 (fill이 solid일 때만) */
+ion-button[color="primary"]:not([fill="clear"]):not([fill="outline"]) {
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+}
+
+ion-button[color="primary"]:not([fill="clear"]):not([fill="outline"]) * {
+  color: #fff;
+}
+
+/* light 버튼 - 테마별로 다른 색상 (fill이 solid일 때만) */
+ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) {
+  --background: var(--ion-color-light);
+  --background-activated: var(--ion-color-light-shade);
+}
+
+ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) * {
+  color: var(--ion-text-color);
+}

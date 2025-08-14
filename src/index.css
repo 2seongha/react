@@ -83,6 +83,8 @@
   --custom-border-color-100: #E8E8E8;
 
   --search-bar-color: #F7F7F7;
+  --gray-color: #C1C1C1;
+  --check-icon:  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="%23C1C1C1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 }
 
 [data-theme="dark"] {
@@ -120,7 +122,8 @@
   --ion-color-step-850: #d9d9d9;
   --ion-color-step-900: #e6e6e6;
   --ion-color-step-950: #f2f2f2;
-
+  --ion-color-light: #303030;
+  
   --ion-item-background: #1C1E22;
   --ion-card-background: #1C1E22;
   --ion-toolbar-background: #1C1E22;
@@ -132,6 +135,8 @@
   --custom-border-color-100: #2E3238;
 
   --search-bar-color: #2C3035;
+  --gray-color: #646870;
+  --check-icon:  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="%23646870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 }
 
 body {

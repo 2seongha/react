@@ -121,11 +121,6 @@ ion-item.menu-ion-item {
   justify-content: center;
 }
 
-.menu-ion-item {
-  --padding-start: 0px;
-  --inner-padding-end: 0px;
-}
-
 .menu-item-content {
   display: flex;
   align-items: center;
@@ -179,9 +174,17 @@ ion-item.menu-ion-item {
 }
 
 .todo-summary-ion-item {
+  --padding-top: 8px;
+  --padding-bottom: 8px;
   --padding-start: 0px;
   --inner-padding-end: 0px;
   border: none;
+}
+
+.todo-summary-item-skeleton {
+  display: flex;
+  height: 50px;
+  align-items: center;
 }
 
 .todo-summary-item-wrapper {
