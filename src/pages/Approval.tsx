@@ -107,26 +107,23 @@ const Approval: React.FC = () => {
   }, [approvals, searchText]);
 
   // 필터링된 결과가 변경될 때 선택된 아이템 중 필터에서 제외된 것들 제거
-  const cleanSelectedItems = useMemo(() => {
-    if (!filteredApprovals || selectedItems.size === 0) return selectedItems;
-    
-    const filteredFlowNos = new Set(filteredApprovals.map(approval => approval.flowNo));
-    const newSelectedItems = new Set<string>();
-
-    selectedItems.forEach(flowNo => {
-      if (filteredFlowNos.has(flowNo)) {
-        newSelectedItems.add(flowNo);
-      }
-    });
-
-    return newSelectedItems;
-  }, [filteredApprovals, selectedItems]);
-
   useEffect(() => {
-    if (cleanSelectedItems.size !== selectedItems.size) {
-      setSelectedItems(cleanSelectedItems);
+    if (filteredApprovals && selectedItems.size > 0) {
+      const filteredFlowNos = filteredApprovals.map(approval => approval.flowNo);
+      const newSelectedItems = new Set<string>();
+
+      selectedItems.forEach(flowNo => {
+        if (filteredFlowNos.includes(flowNo)) {
+          newSelectedItems.add(flowNo);
+        }
+      });
+
+      // 선택된 아이템이 변경되었을 때만 업데이트
+      if (newSelectedItems.size !== selectedItems.size) {
+        setSelectedItems(newSelectedItems);
+      }
     }
-  }, [cleanSelectedItems, selectedItems]);
+  }, [filteredApprovals, selectedItems]);
 
   // filteredFlowNos 메모이제이션
   const filteredFlowNos = useMemo(() =>
@@ -140,7 +137,7 @@ const Approval: React.FC = () => {
     return filteredFlowNos.every(flowNo => selectedItems.has(flowNo));
   }, [selectedItems, filteredFlowNos]);
 
-  // 검색 핸들러 (debounced)
+  // 검색 핸들러
   const handleSearch = useCallback((e: CustomEvent) => {
     const searchValue = e.detail.value;
     setSearchText(searchValue);
@@ -162,19 +159,21 @@ const Approval: React.FC = () => {
 
   const renderItem = useCallback((index: number, approval: ApprovalModel) => {
     if (!approval || !approval.flowNo) {
-      return <div className="approval-item-wrapper"></div>;
+      return <div className="approval-item-wrapper">Error: Invalid item</div>;
     }
 
     const isSelected = selectedItems.has(approval.flowNo);
     return (
-      <ApprovalItem
-        key={approval.flowNo}
-        approval={approval}
-        isSelected={isSelected}
-        onSelectionChange={handleItemSelection}
-        searchText={searchText}
-        isFirstItem={index === 0}
-      />
+      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''} ${index === 0 ? 'first-item' : ''}`}>
+        <ApprovalItem
+          key={approval.flowNo}
+          approval={approval}
+          index={index}
+          isSelected={isSelected}
+          onSelectionChange={handleItemSelection}
+          searchText={searchText}
+        />
+      </div>
     );
   }, [selectedItems, handleItemSelection, searchText]);
 
@@ -198,7 +197,7 @@ const Approval: React.FC = () => {
                 onIonInput={handleSearch}
                 placeholder="제목 / 상신자"
                 showClearButton="focus"
-                debounce={200}
+                debounce={50}
                 style={{ textAlign: 'start' }}
               />
             </IonToolbar>
@@ -358,13 +357,16 @@ const Approval: React.FC = () => {
           <Virtuoso
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={10}
+            overscan={20}
             initialItemCount={10}
-            increaseViewportBy={{ top: 200, bottom: 200 }}
-            atTopStateChange={setIsTop}
-            rangeChanged={scrollCallbackRef.current ? () => {
-              scrollCallbackRef.current!();
-            } : undefined}
+            initialTopMostItemIndex={0}
+            increaseViewportBy={{ top: 500, bottom: 200 }}
+            atTopStateChange={(atTop) => setIsTop(atTop)}
+            rangeChanged={() => {
+              if (scrollCallbackRef.current) {
+                scrollCallbackRef.current();
+              }
+            }}
             itemContent={renderItem}
           />
         ) : (
@@ -452,10 +454,10 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
 
 interface ApprovalProps {
   approval: ApprovalModel;
+  index: number;
   isSelected: boolean;
   onSelectionChange: (id: string, isSelected: boolean) => void;
   searchText: string;
-  isFirstItem: boolean;
 }
 
 // 텍스트 하이라이트 헬퍼 함수 (컴포넌트 외부에서 정의하여 매번 재생성 방지)
@@ -471,7 +473,7 @@ const highlightText = (text: string, searchText: string) => {
 };
 
 // Optimized ApprovalItem with swipe actions
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, isSelected, onSelectionChange, searchText, isFirstItem }) => {
+const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -510,19 +512,17 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, isSelected
         <span>소모품비-기타</span>
       </div>
     </div>
-    , [approval.flowNo]);
+    , []);
 
   return (
-    <div className={`approval-item-wrapper ${isFirstItem ? 'first-item' : ''}`}>
-      <CustomItem
-        selectable={true}
-        checked={isSelected}
-        title={titleElement}
-        body={bodyElement}
-        onClick={() => { }}
-        onCheckboxChange={handleCheckboxChange}
-      />
-    </div>
+    <CustomItem
+      selectable={true}
+      checked={isSelected}
+      title={titleElement}
+      body={bodyElement}
+      onClick={() => { }}
+      onCheckboxChange={handleCheckboxChange}
+    />
   );
-});
+};
 
