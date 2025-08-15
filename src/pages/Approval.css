@@ -152,3 +152,7 @@
 .approval .date-toolbar-button>span {
   font-size: 13px;
 }
+
+.approval .virtuso {
+  -webkit-overflow-scrolling: touch;
+}
