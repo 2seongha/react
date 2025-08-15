@@ -8,7 +8,6 @@
   --inner-padding-top: 0;
   --inner-padding-bottom: 0;
   --inner-border-width: 0;
-  position: relative;
   background-color: var(--ion-background-color);
   border-radius: 12px;
 }
@@ -20,6 +19,7 @@
 /* 체크박스 선택 시 스타일 */
 .custom-item.selected {
   background-color: rgba(var(--ion-color-primary-rgb), 0.05);
+  box-shadow: 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.2) inset;
 }
 
 .custom-item-header {
@@ -117,13 +117,13 @@
 }
 
 .custom-item-body-line >span:first-child {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ion-color-secondary);
 }
 
 .custom-item-body-line >span:last-child {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: rgba(var(--ion-text-color-rgb), 0.6);
 }

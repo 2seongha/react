@@ -517,7 +517,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     </div>
     , []);
 
-    console.log('rebuild' + index)
   return (
     <CustomItem
       selectable={true}
