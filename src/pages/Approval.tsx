@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -360,10 +360,10 @@ const Approval: React.FC = () => {
           <Virtuoso
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={20}
+            overscan={10}
             initialItemCount={10}
             initialTopMostItemIndex={0}
-            increaseViewportBy={{ top: 500, bottom: 200 }}
+            increaseViewportBy={{ top: 200, bottom: 200 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
             rangeChanged={() => {
               if (scrollCallbackRef.current) {
@@ -476,7 +476,7 @@ const highlightText = (text: string, searchText: string) => {
 };
 
 // ApprovalItem with swipe actions
-const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange, searchText }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -494,6 +494,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
+      <IonImg src='/assets/images/no_notifications_dark.webp' style={{height: '120px', objectFit: 'cover'}}/>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
@@ -517,6 +518,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
     </div>
     , []);
 
+    console.log('rebuild' + index)
   return (
     <CustomItem
       selectable={true}
@@ -527,5 +529,5 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
       onCheckboxChange={handleCheckboxChange}
     />
   );
-};
+});
 
