@@ -67,7 +67,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
       layout
       initial={{
         opacity: 0,
-        scale: .9
+        scale: .95
       }}
       animate={{
         opacity: 1,

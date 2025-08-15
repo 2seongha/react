@@ -166,8 +166,9 @@ const Approval: React.FC = () => {
     }
 
     const isSelected = selectedItems.has(approval.flowNo);
+    const isLastItem = filteredApprovals && index === filteredApprovals.length - 1;
     return (
-      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''} ${index === 0 ? 'first-item' : ''}`}>
+      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''} ${index === 0 ? 'first-item' : ''} ${isLastItem ? 'last-item' : ''}`}>
         <ApprovalItem
           key={approval.flowNo}
           approval={approval}
@@ -178,7 +179,7 @@ const Approval: React.FC = () => {
         />
       </div>
     );
-  }, [selectedItems, handleItemSelection, searchText]);
+  }, [selectedItems, handleItemSelection, searchText, filteredApprovals]);
 
   return (
     <IonPage className='approval'>
@@ -441,7 +442,7 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
       horizontal="end"
       slot="fixed"
       style={{
-        marginBottom: '12px',
+        marginBottom: 'calc(var(--ion-safe-area-bottom) + 12px)',
         opacity: (isScrolling && !isTop) ? 1 : 0,
         transform: (isScrolling && !isTop) ? 'scale(1)' : 'scale(0.8)',
         transition: 'all 0.3s ease-in-out',

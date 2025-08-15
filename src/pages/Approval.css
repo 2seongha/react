@@ -83,6 +83,10 @@
   padding-top: 12px;
 }
 
+.approval-item-wrapper.last-item {
+  padding-bottom: calc(var(--ion-safe-area-bottom) + 12px);
+}
+
 .approval .search-bar {
   padding: 8px 20px;
   --placeholder-color: #898D99;

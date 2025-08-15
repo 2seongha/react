@@ -8,7 +8,7 @@
 
 .flow-list ion-content {
   --padding-top: 0px;
-  --padding-bottom: 12px;
+  --padding-bottom: calc(var(--ion-safe-area-bottom) + 12px);
   --padding-start: 22px;
   --padding-end: 22px;
 }
