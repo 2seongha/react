@@ -42,7 +42,7 @@ const AppBar: React.FC<AppBarProps> = ({
   const router = useIonRouter();
 
   return (
-    <IonHeader mode='ios' translucent={true} collapse="condense" className='app-bar'>
+    <IonHeader mode='ios' translucent={true} className='app-bar'>
       <IonToolbar className='app-bar-color'>
         {showBackButton &&
           <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />

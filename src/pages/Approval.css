@@ -2,15 +2,12 @@
   background-color: var(--ion-background-color);
 }
 
+.approval  ion-toolbar{
+  --background: var(--ion-background-color);
+}
+
 .approval ion-content {
   --background: var(--ion-background-color2);
-}
-
-.approval ion-header {
-  background-color: var(--ion-background-color) !important;
-}
-
-.approval ion-toolbar {
 }
 
 .approval .last-toolbar{
@@ -24,23 +21,11 @@
   height: 200px;
 }
 
-/* IonRefresher Material Design 스타일 강제 적용 */
-.approval ion-refresher {
-  --background: var(--ion-background-color);
-  /* z-index: 1; */
-}
-
-.approval ion-refresher-content {
-  --background: var(--ion-background-color);
-}
-
 /* Material Design 스타일의 리프레셔 강제 적용 */
 .approval .refresher-pulling-icon,
 .approval .refresher-refreshing-icon {
   color: var(--ion-color-primary);
 }
-
-
 
 .approval .buttons-wrapper {
   display: flex;

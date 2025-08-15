@@ -167,8 +167,8 @@ const _initWebview = async (): Promise<void> => {
 
       // 패딩 정보를 사용하여 UI 조정
       console.log('Padding received:', result);
-      document.documentElement.style.setProperty('--webview-padding-top', `${result.top}px`);
-      document.documentElement.style.setProperty('--webview-padding-bottom', `${result.bottom}px`);
+      document.documentElement.style.setProperty('--ion-safe-area-top', `${result.top}px`);
+      document.documentElement.style.setProperty('--ion-safe-area-bottom', `${result.bottom}px`);
 
       // 초기화 완료 시에만 resolver 호출
       if (paddingResolver) {

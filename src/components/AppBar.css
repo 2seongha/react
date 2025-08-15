@@ -1,3 +1,7 @@
+.app-bar {
+  /* background-color: var(--ion-background-color); */
+}
+
 .app-bar ion-icon {
   width: 24px;
   height: 24px;
@@ -10,9 +14,8 @@
 
 .app-bar ion-toolbar {
   --min-height: 48px;
-}
-.app-bar ion-toolbar.app-bar-color {
   --background: transparent;
+  --border-width: 0px !important;
 }
 
 .logo-wrapper {

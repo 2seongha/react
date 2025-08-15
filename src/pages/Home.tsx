@@ -159,13 +159,13 @@ const MenuCard: React.FC = () => {
                 }
               }}
               transition={{
-                duration: 0.4,
+                duration: 0.3,
                 delay: index * 0.05,
                 ease: "easeInOut",
-                height: { duration: 0.4 },
+                height: { duration: 0.3 },
               }}
               style={{
-                overflow: 'visible', // ← 고정
+                overflow: 'scroll', // ← 고정
               }}
             >
               {/* <IonItem button key={index} className='menu-ion-item'>

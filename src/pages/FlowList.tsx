@@ -67,11 +67,11 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
       layout
       initial={{
         opacity: 0,
-        height: '20px',
+        scale: .9
       }}
       animate={{
         opacity: 1,
-        height: '60px',
+        scale: 1
       }}
       transition={{
         duration: 0.2,
@@ -79,7 +79,8 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
         ease: "linear",
       }}
       style={{
-        overflow: 'visible', // ← 고정
+        marginTop: '10px',
+        overflow: 'hidden', // ← 고정
       }}
     >
       <IonItem button className='flow-list-item' onClick={() => { router.push('/approval', 'forward', 'push') }} mode='md'>
