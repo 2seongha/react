@@ -1,10 +1,9 @@
-import { IonBackButton, IonContent, IonHeader, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonLabel, IonItem, IonCheckbox, IonFab, IonFabButton, IonItemSliding, IonItemOptions, IonItemOption, IonButtons } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, calendarOutline, closeOutline, refresh, arrowUp, calendarClearOutline, calendar, calendarClear, close, checkmark, person } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, refresh, calendarClear, close, checkmark, person } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
-import { motion, AnimatePresence, color } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
 import CustomItem from '../components/CustomItem';
 import './Approval.css';
@@ -169,7 +168,6 @@ const Approval: React.FC = () => {
         <ApprovalItem
           key={approval.flowNo}
           approval={approval}
-          index={index}
           isSelected={isSelected}
           onSelectionChange={handleItemSelection}
           searchText={searchText}
@@ -394,149 +392,6 @@ const Approval: React.FC = () => {
 
 export default Approval;
 
-// Swipeable Item Component
-interface SwipeAction {
-  label: string;
-  color: string;
-  onClick: () => void;
-}
-
-interface SwipeableItemProps {
-  children: React.ReactNode;
-  actions: SwipeAction[];
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}
-
-const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, actions, isOpen, setIsOpen }) => {
-  const [dragX, setDragX] = useState(0);
-  const constraintsRef = useRef<HTMLDivElement>(null);
-
-  const actionWidth = 80;
-  const totalActionsWidth = actions.length * actionWidth;
-
-  const handleDragEnd = useCallback((_: any, info: any) => {
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
-
-    console.log('Drag ended - offset:', offset, 'velocity:', velocity, 'totalWidth:', totalActionsWidth);
-
-    // 거리 기준으로 30% 이상 스와이프하면 열기 (더 민감하게)
-    const distanceThreshold = totalActionsWidth * 0.01;
-    // 빠른 속도 기준
-    const velocityThreshold = -150;
-
-    // 왼쪽으로 스와이프한 경우 (음수 offset)
-    if (offset < 0) {
-      // 거리나 속도 중 하나라도 임계값을 넘으면 열기
-      if (Math.abs(offset) > distanceThreshold || velocity < velocityThreshold) {
-        console.log('Opening - distance triggered:', Math.abs(offset), '>', distanceThreshold, 'or velocity triggered:', velocity, '<', velocityThreshold);
-        setDragX(-totalActionsWidth);
-        setIsOpen(true);
-      } else {
-        console.log('Closing - thresholds not met');
-        setDragX(0);
-        setIsOpen(false);
-      }
-    } else {
-      // 오른쪽으로 스와이프하거나 이동하지 않은 경우 닫기
-      console.log('Closing - positive offset or no movement');
-      setDragX(0);
-      setIsOpen(false);
-    }
-  }, [totalActionsWidth, setIsOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setDragX(-totalActionsWidth);
-    } else {
-      setDragX(0);
-    }
-  }, [isOpen, totalActionsWidth]);
-
-  return (
-    <div
-      ref={constraintsRef}
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: '12px'
-      }}
-    >
-      {/* Action Buttons */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: totalActionsWidth,
-          display: 'flex',
-          zIndex: 1
-        }}
-      >
-        {actions.map((action, index) => (
-          <div
-            key={index}
-            onClick={action.onClick}
-            style={{
-              width: actionWidth,
-              backgroundColor: action.color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: '600',
-              fontSize: '14px',
-              cursor: 'pointer',
-              userSelect: 'none'
-            }}
-          >
-            {action.label}
-          </div>
-        ))}
-      </div>
-
-      {/* Swipeable Content */}
-      <motion.div
-        drag="x"
-        dragConstraints={{
-          left: -totalActionsWidth,
-          right: 0
-        }}
-        animate={{
-          x: dragX,
-          transition: {
-            type: "spring",
-            damping: 30,
-            stiffness: 400,
-            mass: 0.8
-          }
-        }}
-        onDragEnd={handleDragEnd}
-        dragElastic={0.05}
-        dragMomentum={false}
-        dragDirectionLock={true}
-        dragTransition={{
-          bounceStiffness: 600,
-          bounceDamping: 20
-        }}
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          backgroundColor: 'var(--ion-background-color)',
-          cursor: 'grab'
-        }}
-        whileDrag={{
-          cursor: 'grabbing'
-        }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-};
-
 // 독립적인 ScrollToTop FAB 컴포넌트
 interface ScrollToTopFabProps {
   isTop: boolean;
@@ -599,7 +454,6 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
 
 interface ApprovalProps {
   approval: ApprovalModel;
-  index: number;
   isSelected: boolean;
   onSelectionChange: (id: string, isSelected: boolean) => void;
   searchText: string;
@@ -618,22 +472,10 @@ const highlightText = (text: string, searchText: string) => {
 };
 
 // Optimized ApprovalItem with swipe actions
-const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange, searchText }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const ApprovalItem: React.FC<ApprovalProps> = ({ approval, isSelected, onSelectionChange, searchText }) => {
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
-
-  const handleApprove = useCallback(() => {
-    console.log('승인:', approval.flowNo);
-    setIsOpen(false);
-  }, [approval.flowNo]);
-
-  const handleReject = useCallback(() => {
-    console.log('반려:', approval.flowNo);
-    setIsOpen(false);
-  }, [approval.flowNo]);
 
   const titleElement = useMemo(() =>
     <div className='custom-item-title'>
@@ -672,14 +514,6 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
     , []);
 
   return (
-    // <SwipeableItem
-    //   isOpen={isOpen}
-    //   setIsOpen={setIsOpen}
-    //   actions={[
-    //     { label: '승인', color: '#4CAF50', onClick: handleApprove },
-    //     { label: '반려', color: '#F44336', onClick: handleReject }
-    //   ]}
-    // >
     <CustomItem
       selectable={true}
       checked={isSelected}
@@ -687,9 +521,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
       body={bodyElement}
       onClick={() => { }}
       onCheckboxChange={handleCheckboxChange}
-    // sub={subElement}
     />
-    // {/* </SwipeableItem> */}
   );
 };
 
