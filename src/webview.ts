@@ -135,18 +135,8 @@ const tokenPromise = new Promise<boolean>((resolve) => {
 });
 
 // 웹뷰 초기화 함수
-export const initWebview = async (
-  onPaddingReceived?: (padding: ShellPadding) => void,
-  onTokenReceived?: (tokens: { accessToken: string; refreshToken: string; deviceToken: string; deviceInfo: DeviceInfo }) => void,
-  onUserInfoReceived?: (info: { loginId: string; corp: CorpModel }) => void,
-  onKeyboardChanged?: (keyboard: KeyboardVisibility) => void
-): Promise<boolean> => {
-  await _initWebview(
-    onPaddingReceived,
-    onTokenReceived,
-    onUserInfoReceived,
-    onKeyboardChanged
-  );
+export const initWebview = async (): Promise<boolean> => {
+  await _initWebview();
 
   await Promise.all([
     paddingPromise,
@@ -157,13 +147,8 @@ export const initWebview = async (
   return true;
 };
 
-const _initWebview = async (
-  onPaddingReceived?: (padding: ShellPadding) => void,
-  onTokenReceived?: (tokens: { accessToken: string; refreshToken: string; deviceToken: string; deviceInfo: DeviceInfo }) => void,
-  onUserInfoReceived?: (info: { loginId: string; corp: CorpModel }) => void,
-  onKeyboardChanged?: (keyboard: KeyboardVisibility) => void
-): Promise<void> => {
-  const isWebView = 'N'; // 환경변수 가져오기
+const _initWebview = async (): Promise<void> => {
+  const isWebView = 'Y'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
 
   if (isWebView == 'Y') {
@@ -180,10 +165,12 @@ const _initWebview = async (
         right: Math.round(parseFloat(detail.right)),
       };
 
-      if (onPaddingReceived) {
-        onPaddingReceived(result);
-      }
+      // 패딩 정보를 사용하여 UI 조정
+      console.log('Padding received:', result);
+      document.documentElement.style.setProperty('--webview-padding-top', `${result.top}px`);
+      document.documentElement.style.setProperty('--webview-padding-bottom', `${result.bottom}px`);
 
+      // 초기화 완료 시에만 resolver 호출
       if (paddingResolver) {
         paddingResolver(true);
         paddingResolver = null;
@@ -213,9 +200,8 @@ const _initWebview = async (
       localStorage.setItem('deviceToken', tokens.deviceToken);
       localStorage.setItem('deviceInfo', JSON.stringify(tokens.deviceInfo));
 
-      if (onTokenReceived) {
-        onTokenReceived(tokens);
-      }
+      // 토큰 정보 처리
+      console.log('Tokens received:', tokens.accessToken ? 'Access token received' : 'No access token');
 
       if (tokenResolver) {
         tokenResolver(true);
@@ -238,9 +224,8 @@ const _initWebview = async (
         corp: JSON.parse(detail.corp) as CorpModel
       };
 
-      if (onUserInfoReceived) {
-        onUserInfoReceived(userInfo);
-      }
+      // 사용자 정보 처리
+      console.log('User info received:', userInfo.loginId);
 
       if (userInfoResolver) {
         userInfoResolver(true);
@@ -259,7 +244,7 @@ const _initWebview = async (
       const currentPath = window.location.pathname;
 
       // 경로가 "/app"으로 시작하면 종료 처리
-      if (currentPath.startsWith('/app')) {
+      if (currentPath.startsWith('/app/')) {
         webviewAppEnd();
       } else {
         window.history.back();
@@ -298,8 +283,12 @@ const _initWebview = async (
         height: Math.round(parseFloat(detail.keyboardHeight) || 0),
       };
 
-      if (onKeyboardChanged) {
-        onKeyboardChanged(result);
+      // 키보드 상태에 따른 UI 조정
+      console.log('Keyboard visibility:', result.isOpen, result.height);
+      if (result.isOpen) {
+        document.documentElement.style.setProperty('--keyboard-height', `${result.height}px`);
+      } else {
+        document.documentElement.style.setProperty('--keyboard-height', '0px');
       }
     };
 

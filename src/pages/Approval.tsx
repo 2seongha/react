@@ -2,7 +2,7 @@ import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSea
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, refresh, calendarClear, close, checkmark, person } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, refresh, calendarClear, close, checkmark, person, closeOutline, checkmarkOutline } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
 import { Commet } from 'react-loading-indicators';
 import CustomItem from '../components/CustomItem';
@@ -249,7 +249,7 @@ const Approval: React.FC = () => {
                 </IonItem>
               </div>
             </IonToolbar>
-            <IonToolbar>
+            <IonToolbar className='last-toolbar'>
               <div className='buttons-wrapper'>
                 <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
                   <IonCheckbox
@@ -261,11 +261,11 @@ const Approval: React.FC = () => {
                 </IonItem>
                 <div className='approve-buttons'>
                   <IonButton mode='md' color='light' disabled={selectedItems.size === 0}>
-                    <IonIcon src={close} />
+                    <IonIcon src={closeOutline} />
                     <span>반려하기</span>
                   </IonButton>
                   <IonButton mode='md' color='primary' disabled={selectedItems.size === 0}>
-                    <IonIcon src={checkmark} />
+                    <IonIcon src={checkmarkOutline} />
                     <span>승인하기</span>
                   </IonButton>
                 </div>
@@ -492,8 +492,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     </div>
     , [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
 
-    console.log('rebuild' + index);
-    
+  console.log('rebuild' + index);
+
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
       <div className='custom-item-body-line'>

@@ -61,37 +61,7 @@ const App: React.FC = () => {
 
         // 2단계: 웹뷰 초기화 (중요 이미지 로딩과 병렬 실행 가능)
         console.log('웹뷰 초기화 시작...');
-        const webviewPromise = initWebview(
-          // onPaddingReceived
-          (padding) => {
-            console.log('Padding received:', padding);
-            // 패딩 정보를 사용하여 UI 조정
-            document.documentElement.style.setProperty('--webview-padding-top', `${padding.top}px`);
-            document.documentElement.style.setProperty('--webview-padding-bottom', `${padding.bottom}px`);
-            // document.documentElement.style.setProperty('--safe-area-left', `${padding.left}px`);
-            // document.documentElement.style.setProperty('--safe-area-right', `${padding.right}px`);
-          },
-          // onTokenReceived
-          (tokens) => {
-            console.log('Tokens received:', tokens.accessToken ? 'Access token received' : 'No access token');
-            // 토큰 정보를 앱 스토어에 저장하거나 API 설정
-          },
-          // onUserInfoReceived
-          (userInfo) => {
-            console.log('User info received:', userInfo.loginId);
-            // 사용자 정보를 앱 스토어에 저장
-          },
-          // onKeyboardChanged
-          (keyboard) => {
-            console.log('Keyboard visibility:', keyboard.isOpen, keyboard.height);
-            // 키보드 상태에 따른 UI 조정
-            if (keyboard.isOpen) {
-              document.documentElement.style.setProperty('--keyboard-height', `${keyboard.height}px`);
-            } else {
-              document.documentElement.style.setProperty('--keyboard-height', '0px');
-            }
-          }
-        );
+        const webviewPromise = initWebview();
 
         // 3단계: 나머지 모든 이미지 preload (백그라운드에서)
         const allImagesPromise = preloadAllImages((loaded, total) => {

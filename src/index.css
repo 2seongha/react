@@ -49,6 +49,7 @@
   --ion-background-color: #fff;
   --ion-background-color2: #F1F2F4;
   --ion-background-color-rgb: 255, 255, 255;
+  --ion-background-color2-rgb: 241, 242, 244;
   --ion-text-color: #000000;
   --ion-text-on-color: #fff;
   --ion-text-color-rgb: 0, 0, 0;
@@ -98,7 +99,8 @@
 
   --ion-background-color: #1C1E22;
   --ion-background-color2: #111214;
-  --ion-background-color-rgb: 18, 18, 18;
+  --ion-background-color-rgb: 28, 30, 34;
+  --ion-background-color2-rgb: 17, 18, 20;
   --ion-text-color: #ffffff;
   --ion-text-on-color: #121212;
   --ion-text-color-rgb: 255, 255, 255;

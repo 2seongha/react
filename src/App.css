@@ -10,10 +10,10 @@ ion-header {
   padding-top: var(--webview-padding-top);
 }
 
-ion-app {
+/* ion-app {
   height: calc(100vh - var(--webview-padding-bottom)) !important;
   margin-bottom: var(--webview-padding-bottom) !important;
-}
+} */
 
 /* 스크롤 관련 */
 ion-content {

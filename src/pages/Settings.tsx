@@ -15,13 +15,20 @@ import {
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
+import { webviewTheme } from '../webview';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
   const setThemeMode = useAppStore(state => state.setThemeMode);
 
   const handleThemeChange = (value: string) => {
-    setThemeMode(value as 'light' | 'dark' | 'system');
+    const newTheme = value as 'light' | 'dark' | 'system';
+    
+    // AppStore에 저장 (영구적으로 localStorage에 저장됨)
+    setThemeMode(newTheme);
+    
+    // 웹뷰에 테마 변경 알림
+    webviewTheme(newTheme);
   };
 
   return (
