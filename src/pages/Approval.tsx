@@ -492,9 +492,10 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     </div>
     , [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
 
+    console.log('rebuild' + index);
+    
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
-      <IonImg src='https://d2jwv92sbda1pe.cloudfront.net/products/32644/represent/20250811-173753-0.jpg?s=720x720' style={{height: '200px', objectFit: 'fill'}}/>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
