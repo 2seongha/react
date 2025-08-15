@@ -346,6 +346,7 @@ const Approval: React.FC = () => {
         count={totalCount} />
 
       <IonContent
+        fullscreen
         scrollY={false}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>

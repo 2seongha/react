@@ -44,7 +44,7 @@ const Tabs: React.FC = () => {
       <Home display={value === 0 ? 'block' : 'none'} />
       <Notifications display={value === 1 ? 'block' : 'none'} />
       <More display={value === 2 ? 'block' : 'none'} />
-      <IonFooter>
+      <IonFooter class='bottom-navigation-wrapper'>
         <BottomNavigation
           className='bottom-navigation'
           value={value}

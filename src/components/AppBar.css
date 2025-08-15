@@ -12,7 +12,7 @@
 /* .header-ios ion-toolbar:last-of-type  */
 .app-bar ion-toolbar:last-of-type  {
   --min-height: 48px;
-  --border-width: 0px;
+  --border-width: 0px !important;
 }
 
 .logo {

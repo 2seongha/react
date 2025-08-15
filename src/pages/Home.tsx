@@ -46,7 +46,7 @@ const Home: React.FC<HomeProps> = ({ display }) => {
     setTodoSummary(null);
     setApprovals(null);
     await Promise.allSettled(([fetchMenuAreas(), fetchTodoSummary()]));
-    // event.detail.complete();
+    event.detail.complete();
   }
 
   return (
