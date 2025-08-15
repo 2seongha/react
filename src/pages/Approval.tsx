@@ -494,7 +494,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
-      {/* <div className='custom-item-body-line'>
+      <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
       </div>
@@ -513,7 +513,7 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
       <div className='custom-item-body-line'>
         <span>계정명</span>
         <span>소모품비-기타</span>
-      </div> */}
+      </div>
     </div>
     , []);
 
