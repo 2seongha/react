@@ -494,6 +494,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
+      <IonImg src='/assets/images/no_notifications_dark.webp' style={{height: '200px'}}/>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
