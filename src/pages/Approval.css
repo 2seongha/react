@@ -1,10 +1,16 @@
+.approval {
+  background-color: var(--ion-background-color);
+}
+
 .approval ion-content {
   --background: var(--ion-background-color2);
 }
 
+.approval ion-header {
+  background-color: var(--ion-background-color) !important;
+}
+
 .approval ion-toolbar {
-  --background: var(--ion-background-color) !important;
-  --opacity: 1 !important;
 }
 
 .approval .last-toolbar{

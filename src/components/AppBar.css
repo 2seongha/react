@@ -8,12 +8,11 @@
   width: 44px;
 }
 
+.app-bar ion-toolbar {
+  --min-height: 48px;
+}
 .app-bar ion-toolbar.app-bar-color {
   --background: transparent;
-}
-
-.toolbar-container {
-  height: 100%;
 }
 
 .logo-wrapper {
@@ -24,9 +23,12 @@
 
 .logo {
   height: 20px;
-  width: auto;
-  object-fit: contain;
-  padding-left: 8px;
+  width: 100px;
+  background-image: var(--logo);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-left: 16px;
 }
 
 .app-bar-button {

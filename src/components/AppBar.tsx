@@ -1,4 +1,4 @@
-import React, { useCallback, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import {
   IonHeader,
   IonToolbar,
@@ -8,7 +8,6 @@ import {
   IonButton,
   IonIcon,
   useIonRouter,
-  IonImg,
 } from '@ionic/react';
 import { arrowBack, menu, notifications, search, settings, settingsSharp } from 'ionicons/icons';
 import './AppBar.css';
@@ -41,18 +40,6 @@ const AppBar: React.FC<AppBarProps> = ({
   count = 0,
 }) => {
   const router = useIonRouter();
-  const themeMode = useAppStore(state => state.themeMode);
-
-  const getLogoSrc = useCallback(() => {
-    if (themeMode === 'dark') {
-      return '/assets/images/app_logo_light.webp';
-    } else if (themeMode === 'light') {
-      return '/assets/images/app_logo_dark.webp';
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return prefersDark ? '/assets/images/app_logo_light.webp' : '/assets/images/app_logo_dark.webp';
-    }
-  }, [themeMode]);
 
   return (
     <IonHeader mode='ios' translucent={true} collapse="condense" className='app-bar'>
@@ -63,8 +50,7 @@ const AppBar: React.FC<AppBarProps> = ({
 
         {showLogo &&
           <div className='logo-wrapper'>
-            <IonImg src={getLogoSrc()} slot='start'
-              className='logo' />
+            <div className='logo' />
           </div>
         }
 

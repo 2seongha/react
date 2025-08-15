@@ -8,6 +8,7 @@
 /* 웹앱 전체 패딩 적용 */
 ion-header {
   padding-top: var(--webview-padding-top);
+  /* padding-top: 30px; */
 }
 
 /* ion-app {

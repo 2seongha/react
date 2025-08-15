@@ -1,3 +1,11 @@
+.flow-list {
+  --background: var(--ion-background-color);
+}
+
+.flow-list ion-header {
+  --background: var(--ion-background-color);
+}
+
 .flow-list ion-content {
   --padding-top: 0px;
   --padding-bottom: 12px;
@@ -29,6 +37,6 @@
   justify-content: center;
 }
 
-.flow-list-item-icon > ion-img {
+.flow-list-item-icon>ion-img {
   width: 32px;
 }
