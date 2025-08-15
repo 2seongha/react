@@ -11,19 +11,15 @@
   position: relative;
   background-color: var(--ion-background-color);
   border-radius: 12px;
-  contain: layout style paint;
-  will-change: auto;
 }
 
 .custom-item-wrapper {
   width: 100%;
 }
 
-/* 체크박스 선택 시 스타일 - transform 기반 최적화 */
+/* 체크박스 선택 시 스타일 */
 .custom-item.selected {
   background-color: rgba(var(--ion-color-primary-rgb), 0.05);
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 .custom-item-header {

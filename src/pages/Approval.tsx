@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -16,20 +16,20 @@ const Approval: React.FC = () => {
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
   const [isTop, setIsTop] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState<string>('');
   const scrollCallbackRef = useRef<(() => void) | null>(null);
 
   useIonViewWillEnter(() => {
     setApprovals(null);
-    setSelectedItems(new Map());
+    setSelectedItems(new Set());
     setSearchText('');
     fetchApprovals();
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setApprovals(null);
-    setSelectedItems(new Map());
+    setSelectedItems(new Set());
     setSearchText('');
     await Promise.allSettled(([fetchApprovals()]));
     event.detail.complete();
@@ -82,16 +82,16 @@ const Approval: React.FC = () => {
     router.push('/flowList', 'back', 'pop');
   }, [router]);
 
-  // 아이템 선택 상태 관리 - Map으로 최적화
+  // 아이템 선택 상태 관리
   const handleItemSelection = useCallback((flowNo: string, isSelected: boolean) => {
     setSelectedItems(prev => {
-      const newMap = new Map(prev);
+      const newSet = new Set(prev);
       if (isSelected) {
-        newMap.set(flowNo, true);
+        newSet.add(flowNo);
       } else {
-        newMap.delete(flowNo);
+        newSet.delete(flowNo);
       }
-      return newMap;
+      return newSet;
     });
   }, []);
 
@@ -110,11 +110,11 @@ const Approval: React.FC = () => {
   useEffect(() => {
     if (filteredApprovals && selectedItems.size > 0) {
       const filteredFlowNos = new Set(filteredApprovals.map(approval => approval.flowNo));
-      const newSelectedItems = new Map<string, boolean>();
+      const newSelectedItems = new Set<string>();
 
-      selectedItems.forEach((_, flowNo) => {
+      selectedItems.forEach((flowNo) => {
         if (filteredFlowNos.has(flowNo)) {
-          newSelectedItems.set(flowNo, true);
+          newSelectedItems.add(flowNo);
         }
       });
 
@@ -149,14 +149,14 @@ const Approval: React.FC = () => {
 
     if (isAllSelected) {
       // 전체 해제
-      setSelectedItems(new Map());
+      setSelectedItems(new Set());
     } else {
       // 전체 선택 (필터된 결과만)
-      const newMap = new Map<string, boolean>();
+      const newSet = new Set<string>();
       filteredApprovals.forEach(approval => {
-        newMap.set(approval.flowNo, true);
+        newSet.add(approval.flowNo);
       });
-      setSelectedItems(newMap);
+      setSelectedItems(newSet);
     }
   }, [filteredApprovals, isAllSelected]);
 
@@ -360,10 +360,10 @@ const Approval: React.FC = () => {
           <Virtuoso
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={5}
-            initialItemCount={8}
+            overscan={20}
+            initialItemCount={10}
             initialTopMostItemIndex={0}
-            increaseViewportBy={{ top: 200, bottom: 100 }}
+            increaseViewportBy={{ top: 500, bottom: 200 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
             rangeChanged={() => {
               if (scrollCallbackRef.current) {
@@ -475,8 +475,8 @@ const highlightText = (text: string, searchText: string) => {
   );
 };
 
-// Optimized ApprovalItem with swipe actions
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
+// ApprovalItem with swipe actions
+const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -494,7 +494,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
-      <IonImg src='/assets/images/icon/search.webp'></IonImg>
       {/* <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
@@ -528,15 +527,5 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
       onCheckboxChange={handleCheckboxChange}
     />
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison for better memoization
-  return (
-    prevProps.approval.flowNo === nextProps.approval.flowNo &&
-    prevProps.isSelected === nextProps.isSelected &&
-    prevProps.searchText === nextProps.searchText &&
-    prevProps.approval.apprTitle === nextProps.approval.apprTitle &&
-    prevProps.approval.creatorName === nextProps.approval.creatorName &&
-    prevProps.approval.createDate === nextProps.approval.createDate
-  );
-});
+};
 
