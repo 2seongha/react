@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -494,7 +494,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
-      <div className='custom-item-body-line'>
+      <IonImg src='/assets/images/icon/search.webp'></IonImg>
+      {/* <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
       </div>
@@ -513,7 +514,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
       <div className='custom-item-body-line'>
         <span>계정명</span>
         <span>소모품비-기타</span>
-      </div>
+      </div> */}
     </div>
     , []);
 
