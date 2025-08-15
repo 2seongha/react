@@ -1,0 +1,24 @@
+.bottom-navigation {
+  border-top: 1px solid var(--custom-border-color-100);
+  position: 'fixed';
+  bottom: 0;
+  width: '100%';
+  height: 56px;
+}
+
+.MuiBottomNavigation-root {
+  background-color: var(--ion-background-color) !important;
+}
+
+.MuiBottomNavigationAction-root>* {
+  color: var( --ion-color-step-600);
+}
+
+.MuiBottomNavigationAction-root.Mui-selected >*{
+  color: var(--ion-color-primary) !important;
+}
+
+.MuiBottomNavigationAction-label {
+  padding-top: 2px;
+  font-size: 11px !important;
+}

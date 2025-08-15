@@ -24,7 +24,11 @@ import { getFlowIcon, getPlatformMode } from '../utils';
 import { ApprovalModel, AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
 
-const Home: React.FC = () => {
+interface HomeProps {
+  display?: string;
+}
+
+const Home: React.FC<HomeProps> = ({ display }) => {
   const setMenuAreas = useAppStore(state => state.setMenuAreas);
   const setTodoSummary = useAppStore(state => state.setTodoSummary);
   const setApprovals = useAppStore(state => state.setApprovals);
@@ -42,41 +46,27 @@ const Home: React.FC = () => {
     setTodoSummary(null);
     setApprovals(null);
     await Promise.allSettled(([fetchMenuAreas(), fetchTodoSummary()]));
-    event.detail.complete();
+    // event.detail.complete();
   }
 
   return (
-    <IonPage className='home'>
-      <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
-      <IonContent fullscreen={true}>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
-          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
-        </IonRefresher>
-        <motion.div initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0, ease: "easeInOut" }}>
-          <NoticeCard />
-        </motion.div>
-        <motion.div style={{ marginTop: '12px' }}
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: "easeInOut" }}>
-          <WelcomeCard />
-        </motion.div>
-        <motion.div style={{ marginTop: '12px' }}
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: "easeInOut" }}>
-          <MenuCard />
-        </motion.div>
-        <motion.div style={{ marginTop: '12px' }}
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3, ease: "easeInOut" }}>
-          <TodoSummaryCard />
-        </motion.div>
-      </IonContent>
-    </IonPage>
+    <IonContent fullscreen style={{ display: display }}>
+      <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
+        {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+      </IonRefresher>
+      <div>
+        <NoticeCard />
+      </div>
+      <div style={{ marginTop: '12px' }}>
+        <WelcomeCard />
+      </div>
+      <div style={{ marginTop: '12px' }}>
+        <MenuCard />
+      </div>
+      <div style={{ marginTop: '12px' }}>
+        <TodoSummaryCard />
+      </div>
+    </IonContent>
   );
 };
 
@@ -165,7 +155,7 @@ const MenuCard: React.FC = () => {
                 height: { duration: 0.3 },
               }}
               style={{
-                overflow: 'scroll', // ← 고정
+                overflow: 'hidden', // ← 고정
               }}
             >
               {/* <IonItem button key={index} className='menu-ion-item'>
@@ -232,8 +222,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
 
   return (
     <IonItem button className='menu-ion-item' onClick={() => {
-      router.push('/flowList');
-    }}>
+      router.push('/flowList', 'forward', 'push');
+    }} mode='md'>
       <div className='menu-item'>
         <div className='menu-item-content'>
           <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>

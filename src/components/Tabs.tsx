@@ -1,60 +1,73 @@
-import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet, useIonRouter } from '@ionic/react';
-import { home, document, notifications, menu } from 'ionicons/icons';
-import React, { useEffect, useState } from 'react';
-import { Route, Redirect, useLocation, useHistory } from 'react-router-dom';
+import { IonPage, IonFooter } from '@ionic/react';
+import React, { useState } from 'react';
+import { BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
+import { Home as HomeIcon, Notifications as NotificationsIcon, Menu as MenuIcon } from '@mui/icons-material';
 
 import Home from '../pages/Home';
 import Notifications from '../pages/Notifications';
 import More from '../pages/More';
+import AppBar from './AppBar';
+import './Tabs.css';
 
 const Tabs: React.FC = () => {
-  const location = useLocation();
-  const [selectedTab, setSelectedTab] = useState('home');
-  const router = useIonRouter();
+  const [value, setValue] = useState(0);
 
-  useEffect(() => {
-    const path = location.pathname;
-    if (path === '/app/home') setSelectedTab('home');
-    else if (path === '/app/notifications') setSelectedTab('notifications');
-    else if (path === '/app/more') setSelectedTab('more');
-    else setSelectedTab('home');
-  }, [location.pathname]);
+  const getAppBarProps = () => {
+    switch (value) {
+      case 0:
+        return { showLogo: true, showSearchButton: true, showMenuButton: true };
+      case 1:
+        return { title: <span>알림</span> };
+      case 2:
+        return { title: <span>더보기</span>, showSettingButton: true, showMenuButton: true };
+      default:
+        return { showLogo: true, showSearchButton: true, showMenuButton: true };
+    }
+  };
+
+  const getPageClassName = () => {
+    switch (value) {
+      case 0:
+        return 'home';
+      case 1:
+        return 'notifications';
+      case 2:
+        return 'more';
+      default:
+        return 'home';
+    }
+  };
 
   return (
-    <IonTabs>
-      <IonRouterOutlet>
-        <Route path="/app/home" component={Home} exact />
-        <Route path="/app/notifications" component={Notifications} exact />
-        <Route path="/app/more" component={More} exact />
-      </IonRouterOutlet>
-
-      <IonTabBar slot="bottom" mode='md'>
-        {/* <IonTabButton tab="home" onClick={() => router.push('/app/home', 'root', 'replace')} selected={selectedTab === 'home'}>
-          <IonIcon icon={home} />
-          <IonLabel style={{ fontSize: '10px' }}>홈</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="notifications" onClick={() => router.push('/app/notifications', 'root', 'replace')} selected={selectedTab === 'notifications'}>
-          <IonIcon icon={notifications} />
-          <IonLabel style={{ fontSize: '10px' }}>알림</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="more" onClick={() => router.push('/app/more', 'root', 'replace')} selected={selectedTab === 'more'}>
-          <IonIcon icon={menu} />
-          <IonLabel style={{ fontSize: '10px' }}>더보기</IonLabel>
-        </IonTabButton> */}
-         <IonTabButton tab="home" href='/app/home' selected={selectedTab === 'home'}>
-          <IonIcon icon={home} />
-          <IonLabel style={{ fontSize: '10px' }}>홈</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="notifications" href='/app/notifications' selected={selectedTab === 'notifications'}>
-          <IonIcon icon={notifications} />
-          <IonLabel style={{ fontSize: '10px' }}>알림</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="more" href='/app/more' selected={selectedTab === 'more'}>
-          <IonIcon icon={menu} />
-          <IonLabel style={{ fontSize: '10px' }}>더보기</IonLabel>
-        </IonTabButton>
-      </IonTabBar>
-    </IonTabs>
+    <IonPage className={getPageClassName()}>
+      <AppBar {...getAppBarProps()} />
+      <Home display={value === 0 ? 'block' : 'none'} />
+      <Notifications display={value === 1 ? 'block' : 'none'} />
+      <More display={value === 2 ? 'block' : 'none'} />
+      <IonFooter>
+        <BottomNavigation
+          className='bottom-navigation'
+          value={value}
+          onChange={(_, newValue) => {
+            setValue(newValue);
+          }}
+          showLabels
+        >
+          <BottomNavigationAction
+            label="홈"
+            icon={<HomeIcon />}
+          />
+          <BottomNavigationAction
+            label="알림"
+            icon={<NotificationsIcon />}
+          />
+          <BottomNavigationAction
+            label="더보기"
+            icon={<MenuIcon />}
+          />
+        </BottomNavigation>
+      </IonFooter>
+    </IonPage>
   );
 };
 

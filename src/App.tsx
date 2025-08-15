@@ -1,6 +1,6 @@
-import { IonApp, IonRouterOutlet, iosTransitionAnimation } from '@ionic/react';
+import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { Route, Redirect, BrowserRouter, HashRouter } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 
 import Tabs from './components/Tabs';
@@ -10,42 +10,12 @@ import Detail from './pages/Detail';
 import Menu from './pages/Menu';
 import Settings from './pages/Settings';
 
-import usePreviousPath from './hooks/usePreviousPath';
 import Notice from './pages/Notice';
 import useAppStore from './stores/appStore';
 import { initWebview } from './webview';
-import { preloadCriticalImages, preloadAllImages, calculateProgress, type ImagePreloadProgress } from './utils/imagePreloader';
-import { Commet } from 'react-loading-indicators';
+import { preloadCriticalImages, preloadAllImages } from './utils/imagePreloader';
 import { getPlatformMode } from './utils';
 
-const RouterOutletWithAnimation: React.FC = () => {
-  const { currentPath, prevPath } = usePreviousPath();
-
-  useEffect(() => {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-  }, []);
-
-  const animation = React.useMemo(() => {
-    if (currentPath.startsWith('/menu') || prevPath.startsWith('/menu')) {
-      return iosTransitionAnimation;
-    }
-    return undefined;
-  }, [currentPath, prevPath]);
-
-  return (
-    <IonRouterOutlet animation={animation} mode={getPlatformMode()}>
-      <Route path="/app" component={Tabs} />
-      <Route path="/flowList" component={FlowList} exact />
-      <Route path="/approval" component={Approval} exact />
-      <Route path="/detail" component={Detail} exact />
-      <Route path="/menu" component={Menu} exact />
-      <Route path="/notice" component={Notice} exact />
-      <Route path="/settings" component={Settings} exact />
-      <Redirect exact from="/" to="/app/home" />
-    </IonRouterOutlet>
-  );
-};
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
@@ -83,8 +53,9 @@ const App: React.FC = () => {
         console.error('앱 초기화 실패:', error);
       }
     };
-
     initializeApp();
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
   }, []);
 
   useEffect(() => {
@@ -108,11 +79,20 @@ const App: React.FC = () => {
     }
   }, [themeMode]);
 
-  if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)'}}/>
+  if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)' }} />
   return (
     <IonApp>
       <IonReactRouter>
-        <RouterOutletWithAnimation />
+        <IonRouterOutlet mode={getPlatformMode()}>
+          <Route path="/app" component={Tabs} />
+          <Route path="/flowList" component={FlowList} exact />
+          <Route path="/approval" component={Approval} exact />
+          <Route path="/detail" component={Detail} exact />
+          <Route path="/menu" component={Menu} exact />
+          <Route path="/notice" component={Notice} exact />
+          <Route path="/settings" component={Settings} exact />
+          <Redirect exact from="/" to="/app" />
+        </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>
   );

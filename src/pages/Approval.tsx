@@ -250,7 +250,7 @@ const Approval: React.FC = () => {
                 </IonItem>
               </div>
             </IonToolbar>
-            <IonToolbar className='last-toolbar'>
+            <IonToolbar>
               <div className='buttons-wrapper'>
                 <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
                   <IonCheckbox
@@ -346,7 +346,6 @@ const Approval: React.FC = () => {
         count={totalCount} />
 
       <IonContent
-        fullscreen
         scrollY={false}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>

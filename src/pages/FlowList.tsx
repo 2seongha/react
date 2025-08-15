@@ -1,5 +1,5 @@
 import { IonContent, IonHeader, IonImg, IonItem, IonLabel, IonList, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import { AreaModel } from '../stores/types';
@@ -14,8 +14,12 @@ const FlowList: React.FC = () => {
   const fetchFlowList = useAppStore(state => state.fetchFlowList);
   const flowList = useAppStore(state => state.flowList);
 
+  useEffect(() => {
+    return setFlowList(null);
+  }, [])
+
   useIonViewWillEnter(() => {
-    setFlowList(null);
+    // setFlowList(null);
     fetchFlowList();
   });
 
@@ -34,7 +38,7 @@ const FlowList: React.FC = () => {
     <IonPage className='flow-list'>
       <AppBar key='flow-list-app-bar' title={
         <span>미결함</span>
-      } showBackButton={true} showCount={true} count={totalCount}></AppBar>
+      } showBackButton={true} showCount={true} count={totalCount} />
 
       <IonContent fullscreen >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
@@ -67,7 +71,7 @@ const FlowListItem: React.FC<FlowListProps> = ({ area, index }) => {
       layout
       initial={{
         opacity: 0,
-        scale: .95
+        scale: .9
       }}
       animate={{
         opacity: 1,

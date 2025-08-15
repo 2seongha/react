@@ -1,5 +1,9 @@
 .home {
-background-color: var(--ion-background-color2);
+  background: var(--ion-background-color2);
+}
+
+.home .app-bar ion-toolbar {
+  --background: var(--ion-background-color2);
 }
 
 .home ion-content {
@@ -48,6 +52,7 @@ background-color: var(--ion-background-color2);
 }
 
 .welcome-card-content {
+  height: 48px;
   display: flex;
   align-items: center;
 }
@@ -113,6 +118,8 @@ ion-item.menu-ion-item {
 
 .menu-expand-button span {
   color: var(--ion-color-secondary);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .menu-expand-button ion-icon {

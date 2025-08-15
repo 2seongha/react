@@ -1,11 +1,3 @@
-.flow-list {
-  --background: var(--ion-background-color);
-}
-
-.flow-list ion-header {
-  --background: var(--ion-background-color);
-}
-
 .flow-list ion-content {
   --padding-top: 0px;
   --padding-bottom: calc(var(--ion-safe-area-bottom) + 12px);

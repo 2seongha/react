@@ -9,9 +9,8 @@ import {
   IonIcon,
   useIonRouter,
 } from '@ionic/react';
-import { arrowBack, menu, notifications, search, settings, settingsSharp } from 'ionicons/icons';
+import { menu, search, settingsSharp } from 'ionicons/icons';
 import './AppBar.css';
-import useAppStore from '../stores/appStore';
 import AnimatedBadge from './AnimatedBadge';
 
 type AppBarProps = {
@@ -49,9 +48,7 @@ const AppBar: React.FC<AppBarProps> = ({
         }
 
         {showLogo &&
-          <div className='logo-wrapper'>
-            <div className='logo' />
-          </div>
+          <div className='logo' />
         }
 
         <IonTitle>
@@ -68,13 +65,6 @@ const AppBar: React.FC<AppBarProps> = ({
               <IonIcon icon={search} />
             </IonButton>
           }
-          {/* {showNotificationsButton &&
-            <IonButton mode='md' shape='round' color={'medium'}
-              className="app-bar-button"
-              onClick={() => router.push('/settings', 'forward', 'push')}>
-              <IonIcon icon={notifications} />
-            </IonButton>
-          } */}
           {showSettingButton &&
             <IonButton mode='md' shape='round' color={'medium'}
               className="app-bar-button"

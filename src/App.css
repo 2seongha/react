@@ -32,15 +32,12 @@ ion-content::part(scroll)::-webkit-scrollbar {
 }
 
 /* TabBar 관련 */
-ion-tab-bar {
-  --border: 1px solid var(--custom-border-color-50);
+ion-tabs ion-router-outlet {
+  /* background-color: var(--ion-background-color2); */
 }
 
-/* Ripple 잔상 관련 */
-@media (hover: hover) and (pointer: fine) {
-  * {
-    --background-hover: transparent;
-  }
+ion-tab-bar {
+  --border: 1px solid var(--custom-border-color-50);
 }
 
 /* Popover 관련 */

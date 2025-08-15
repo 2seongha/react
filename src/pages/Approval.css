@@ -1,17 +1,9 @@
-.approval {
-  background-color: var(--ion-background-color);
-}
-
-.approval  ion-toolbar{
-  --background: var(--ion-background-color);
+.approval .app-bar ion-toolbar:last-of-type  {
+  --border-width: 0 0 0.55px 0;
 }
 
 .approval ion-content {
   --background: var(--ion-background-color2);
-}
-
-.approval .last-toolbar{
-  --border-width: 0 0 0.55px !important;
 }
 
 .loading-indicator-wrapper {
@@ -136,10 +128,10 @@
 
 .approval .date-toolbar-button>ion-icon {
   width: 16px;
-  margin-right: 6px;
   color: var(--gray-color);
 }
 
 .approval .date-toolbar-button>span {
+  margin-left: 6px;
   font-size: 13px;
 }
