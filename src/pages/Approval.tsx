@@ -359,9 +359,9 @@ const Approval: React.FC = () => {
             className='virtuso'
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={5}
-            initialItemCount={10}
-            increaseViewportBy={{ top: 100, bottom: 100 }}
+            overscan={20}
+            initialItemCount={20}
+            increaseViewportBy={{ top: 500, bottom: 500 }}
             atTopStateChange={setIsTop}
             rangeChanged={scrollCallbackRef.current ? () => {
               scrollCallbackRef.current!();
