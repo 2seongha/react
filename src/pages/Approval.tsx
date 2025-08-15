@@ -162,7 +162,7 @@ const Approval: React.FC = () => {
 
   const renderItem = useCallback((index: number, approval: ApprovalModel) => {
     if (!approval || !approval.flowNo) {
-      return <div className="approval-item-wrapper">Error: Invalid item</div>;
+      return <div className="approval-item-wrapper"></div>;
     }
 
     const isSelected = selectedItems.has(approval.flowNo);
@@ -356,12 +356,11 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
-            className='virtuso'
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={20}
-            initialItemCount={20}
-            increaseViewportBy={{ top: 500, bottom: 500 }}
+            overscan={10}
+            initialItemCount={10}
+            increaseViewportBy={{ top: 200, bottom: 200 }}
             atTopStateChange={setIsTop}
             rangeChanged={scrollCallbackRef.current ? () => {
               scrollCallbackRef.current!();
