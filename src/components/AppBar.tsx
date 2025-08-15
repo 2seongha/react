@@ -12,6 +12,8 @@ import {
 import { menu, search, settingsSharp } from 'ionicons/icons';
 import './AppBar.css';
 import AnimatedBadge from './AnimatedBadge';
+import useAppStore from '../stores/appStore';
+import LazyImage from './LazyImage';
 
 type AppBarProps = {
   title?: ReactNode;
@@ -39,6 +41,7 @@ const AppBar: React.FC<AppBarProps> = ({
   count = 0,
 }) => {
   const router = useIonRouter();
+  const { themeMode } = useAppStore();
 
   return (
     <IonHeader mode='ios' translucent={true} className='app-bar'>
@@ -48,7 +51,22 @@ const AppBar: React.FC<AppBarProps> = ({
         }
 
         {showLogo &&
-          <div className='logo' />
+          <div className='logo-container'>
+            <div className={`logo ${themeMode === 'light' ? 'logo-visible' : 'logo-hidden'}`}>
+              <LazyImage 
+                src='/assets/images/app_logo_dark.webp'
+                alt="App Logo Light" 
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+            <div className={`logo ${themeMode === 'dark' ? 'logo-visible' : 'logo-hidden'}`}>
+              <LazyImage 
+                src='/assets/images/app_logo_light.webp'
+                alt="App Logo Dark" 
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          </div>
         }
 
         <IonTitle>

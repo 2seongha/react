@@ -15,14 +15,28 @@
   --border-width: 0px !important;
 }
 
+.logo-container {
+  height: 20px;
+  width: 100px;
+  margin-left: 16px;
+  position: relative;
+}
+
 .logo {
   height: 20px;
   width: 100px;
-  background-image: var(--logo);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  margin-left: 16px;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.logo-visible {
+  display: block;
+}
+
+.logo-hidden {
+  display: none;
 }
 
 .app-bar-button {

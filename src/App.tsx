@@ -26,16 +26,16 @@ const App: React.FC = () => {
     const initializeApp = async () => {
       try {
         // 1단계: 중요 이미지들을 먼저 preload
-        console.log('⚡ 중요 이미지 preload 시작...');
-        await preloadCriticalImages();
+        // console.log('⚡ 중요 이미지 preload 시작...');
+        // await preloadCriticalImages();
 
-        // 2단계: 웹뷰 초기화 (중요 이미지 로딩과 병렬 실행 가능)
+        // // 2단계: 웹뷰 초기화 (중요 이미지 로딩과 병렬 실행 가능)
         console.log('웹뷰 초기화 시작...');
         const webviewPromise = initWebview();
 
-        // 3단계: 나머지 모든 이미지 preload (백그라운드에서)
-        const allImagesPromise = preloadAllImages((loaded, total) => {
-        });
+        // // 3단계: 나머지 모든 이미지 preload (백그라운드에서)
+        // const allImagesPromise = preloadAllImages((loaded, total) => {
+        // });
 
         // 웹뷰 초기화 완료 대기
         const success = await webviewPromise;
@@ -45,9 +45,9 @@ const App: React.FC = () => {
         }
 
         // 모든 이미지 로딩도 완료 대기 (앱 시작에는 필수가 아님)
-        allImagesPromise.catch(error => {
-          console.warn('일부 이미지 로딩 실패:', error);
-        });
+        // allImagesPromise.catch(error => {
+        //   console.warn('일부 이미지 로딩 실패:', error);
+        // });
 
       } catch (error) {
         console.error('앱 초기화 실패:', error);

@@ -13,6 +13,7 @@ import {
 } from '@ionic/react';
 import { personOutline, settingsOutline, logOutOutline } from 'ionicons/icons';
 import useAppStore from '../stores/appStore';
+import LazyImage from '../components/LazyImage';
 
 const MyPage: React.FC = () => {
   const { user } = useAppStore();
@@ -26,10 +27,11 @@ const MyPage: React.FC = () => {
       </IonHeader>
       <IonContent className="ion-padding">
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          <img 
+          <LazyImage 
             src="/assets/images/icon/person.webp" 
-            style={{ width: '80px', height: '80px', marginBottom: '16px' }}
-            alt="Profile"
+            style={{ width: '80px', height: '80px', marginBottom: '16px', borderRadius: '50%' }}
+            alt="프로필 이미지"
+            placeholder={<div style={{ width: '80px', height: '80px', marginBottom: '16px', backgroundColor: '#f0f0f0', borderRadius: '50%' }} />}
           />
           <h2>{user.name || '사용자'}</h2>
           <p style={{ color: 'var(--grey-text-color)' }}>

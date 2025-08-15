@@ -1,10 +1,11 @@
 .bottom-navigation-wrapper {
   padding-bottom: var(--ion-safe-area-bottom) !important;
   background-color: var(--ion-background-color) !important;
+  box-shadow: none !important;
 }
 
 .bottom-navigation {
-  border-top: 1px solid var(--custom-border-color-100);
+  border-top: .55px solid var(--custom-border-color-100);
   position: 'fixed';
   bottom: 0;
   width: '100%';
@@ -13,6 +14,7 @@
 
 .MuiBottomNavigation-root {
   background-color: var(--ion-background-color) !important;
+  box-shadow: none !important;
 }
 
 .MuiBottomNavigationAction-root>* {

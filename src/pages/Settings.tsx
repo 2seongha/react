@@ -16,6 +16,7 @@ import {
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import { webviewTheme } from '../webview';
+import LazyImage from '../components/LazyImage';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -31,16 +32,18 @@ const Settings: React.FC = () => {
     webviewTheme(newTheme);
   };
 
+
   return (
     <IonPage>
       <AppBar title={<span>설정</span>} showBackButton={true} />
       <IonContent>
         <IonList>
           <IonItem>
-            <img 
+            <LazyImage 
               src="/assets/images/icon/config/theme.webp" 
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
-              alt="Theme"
+              alt="테마 설정"
+              placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
             />
             <IonLabel>
               <h3>테마 설정</h3>
@@ -63,19 +66,21 @@ const Settings: React.FC = () => {
           </IonItem>
           
           <IonItem button>
-            <img 
+            <LazyImage 
               src="/assets/images/icon/config/bell.webp" 
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
-              alt="Notification"
+              alt="알림 설정"
+              placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
             />
             <IonLabel>알림 설정</IonLabel>
           </IonItem>
           
           <IonItem button>
-            <img 
+            <LazyImage 
               src="/assets/images/icon/config/lock.webp" 
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
-              alt="Security"
+              alt="보안 설정"
+              placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
             />
             <IonLabel>보안 설정</IonLabel>
           </IonItem>

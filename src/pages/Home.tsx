@@ -10,7 +10,6 @@ import {
   IonRefresher,
   IonRefresherContent,
   RefresherCustomEvent,
-  IonImg,
   useIonRouter,
 } from '@ionic/react';
 import React, { useState } from 'react';
@@ -23,6 +22,7 @@ import './Home.css';
 import { getFlowIcon, getPlatformMode } from '../utils';
 import { ApprovalModel, AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
+import LazyImage from '../components/LazyImage';
 
 interface HomeProps {
   display?: string;
@@ -93,7 +93,12 @@ const WelcomeCard: React.FC = () => {
   return (
     <IonCard className='home-card'>
       <div className='welcome-card-content'>
-        <IonImg src='/assets/images/icon/person.webp' style={{ width: '48px' }}></IonImg>
+        <LazyImage 
+          src='/assets/images/icon/person.webp' 
+          alt="사용자 프로필" 
+          style={{ width: '48px', height: '48px' }}
+          placeholder={<div style={{ width: '48px', height: '48px', backgroundColor: 'transparent', borderRadius: '50%' }} />}
+        />
         <div className='welcome-card-name'>
           <span>이성하님</span>
           <span>좋은 하루 보내세요</span>
@@ -227,7 +232,11 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
       <div className='menu-item'>
         <div className='menu-item-content'>
           <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
-            <IonImg src={icon.image} />
+            <LazyImage 
+              src={icon.image} 
+              alt={menuItem.oLtext || ''} 
+              placeholder={<div style={{ backgroundColor: icon.backgroundColor, width: '100%', height: '100%' }} />}
+            />
           </div>
           <span>{menuItem.oLtext}</span>
         </div>
@@ -246,14 +255,22 @@ const TodoSummaryCard: React.FC = () => {
 
     }}>
       <div className='todo-summary-title'>
-        <IonImg src={getFlowIcon('TODO').image} />
+        <LazyImage 
+          src={getFlowIcon('TODO').image} 
+          alt="미결함 아이콘" 
+          style={{ width: '24px', height: '24px' }}
+        />
         <span>미결함</span>
       </div>
       <GroupButton />
       <AnimatePresence>
         {todoSummary?.length == 0 ?
           <div className='todo-summary-no-data'>
-            <IonImg src='/assets/images/icon/search.webp' />
+            <LazyImage 
+              src='/assets/images/icon/search.webp' 
+              alt="검색 아이콘" 
+              style={{ width: '48px', height: '48px' }}
+            />
             <span>미결 항목이 없습니다.</span>
           </div> :
           Array.from({ length: !approvals ? 3 : Math.min(approvals.length, 3) }).map((_, index) => (
