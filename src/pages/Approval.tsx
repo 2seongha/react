@@ -16,20 +16,20 @@ const Approval: React.FC = () => {
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
   const [isTop, setIsTop] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());
   const [searchText, setSearchText] = useState<string>('');
   const scrollCallbackRef = useRef<(() => void) | null>(null);
 
   useIonViewWillEnter(() => {
     setApprovals(null);
-    setSelectedItems(new Set());
+    setSelectedItems(new Map());
     setSearchText('');
     fetchApprovals();
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setApprovals(null);
-    setSelectedItems(new Set());
+    setSelectedItems(new Map());
     setSearchText('');
     await Promise.allSettled(([fetchApprovals()]));
     event.detail.complete();
@@ -82,16 +82,16 @@ const Approval: React.FC = () => {
     router.push('/flowList', 'back', 'pop');
   }, [router]);
 
-  // 아이템 선택 상태 관리 - useCallback으로 최적화
+  // 아이템 선택 상태 관리 - Map으로 최적화
   const handleItemSelection = useCallback((flowNo: string, isSelected: boolean) => {
     setSelectedItems(prev => {
-      const newSet = new Set(prev);
+      const newMap = new Map(prev);
       if (isSelected) {
-        newSet.add(flowNo);
+        newMap.set(flowNo, true);
       } else {
-        newSet.delete(flowNo);
+        newMap.delete(flowNo);
       }
-      return newSet;
+      return newMap;
     });
   }, []);
 
@@ -109,12 +109,12 @@ const Approval: React.FC = () => {
   // 필터링된 결과가 변경될 때 선택된 아이템 중 필터에서 제외된 것들 제거
   useEffect(() => {
     if (filteredApprovals && selectedItems.size > 0) {
-      const filteredFlowNos = filteredApprovals.map(approval => approval.flowNo);
-      const newSelectedItems = new Set<string>();
+      const filteredFlowNos = new Set(filteredApprovals.map(approval => approval.flowNo));
+      const newSelectedItems = new Map<string, boolean>();
 
-      selectedItems.forEach(flowNo => {
-        if (filteredFlowNos.includes(flowNo)) {
-          newSelectedItems.add(flowNo);
+      selectedItems.forEach((_, flowNo) => {
+        if (filteredFlowNos.has(flowNo)) {
+          newSelectedItems.set(flowNo, true);
         }
       });
 
@@ -149,11 +149,14 @@ const Approval: React.FC = () => {
 
     if (isAllSelected) {
       // 전체 해제
-      setSelectedItems(new Set());
+      setSelectedItems(new Map());
     } else {
       // 전체 선택 (필터된 결과만)
-      const allItemIds = filteredApprovals.map((approval) => approval.flowNo);
-      setSelectedItems(new Set(allItemIds));
+      const newMap = new Map<string, boolean>();
+      filteredApprovals.forEach(approval => {
+        newMap.set(approval.flowNo, true);
+      });
+      setSelectedItems(newMap);
     }
   }, [filteredApprovals, isAllSelected]);
 
@@ -357,10 +360,10 @@ const Approval: React.FC = () => {
           <Virtuoso
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={20}
-            initialItemCount={10}
+            overscan={5}
+            initialItemCount={8}
             initialTopMostItemIndex={0}
-            increaseViewportBy={{ top: 500, bottom: 200 }}
+            increaseViewportBy={{ top: 200, bottom: 100 }}
             atTopStateChange={(atTop) => setIsTop(atTop)}
             rangeChanged={() => {
               if (scrollCallbackRef.current) {
@@ -473,7 +476,7 @@ const highlightText = (text: string, searchText: string) => {
 };
 
 // Optimized ApprovalItem with swipe actions
-const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, onSelectionChange, searchText }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -524,5 +527,15 @@ const ApprovalItem: React.FC<ApprovalProps> = ({ approval, index, isSelected, on
       onCheckboxChange={handleCheckboxChange}
     />
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison for better memoization
+  return (
+    prevProps.approval.flowNo === nextProps.approval.flowNo &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.searchText === nextProps.searchText &&
+    prevProps.approval.apprTitle === nextProps.approval.apprTitle &&
+    prevProps.approval.creatorName === nextProps.approval.creatorName &&
+    prevProps.approval.createDate === nextProps.approval.createDate
+  );
+});
 
