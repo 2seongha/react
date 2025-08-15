@@ -1,4 +1,4 @@
-import { IonCheckbox, IonIcon, IonRippleEffect, IonItem } from '@ionic/react';
+import { IonCheckbox, IonIcon, IonRippleEffect } from '@ionic/react';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
@@ -47,7 +47,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`, [sub, onClick]);
 
   return (
-    <IonItem className={itemClasses} onClick={onClick ? onClick : undefined}>
+    <div className={itemClasses} onClick={onClick ? onClick : undefined}>
       <div className='custom-item-header'>
         {selectable && (
           <IonCheckbox onClick={handleCheckboxToggle} checked={checked} mode='md' />
@@ -66,7 +66,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
           </div>
         </div>
       )}
-    </IonItem>
+    </div>
   );
 });
 
