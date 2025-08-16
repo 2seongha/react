@@ -509,7 +509,8 @@ const highlightText = (text: string, searchText: string) => {
 // ApprovalItem 초간단 버전
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false });
+  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false, isSwiping: false });
+  const [isSwipeDisabled, setIsSwipeDisabled] = useState(false);
   const router = useIonRouter();
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -529,6 +530,11 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   }, [approval.flowNo]);
 
   const handleItemClick = useCallback(() => {
+    // 스와이프 중이면 클릭 무시
+    if (touchData.current.isSwiping) {
+      console.log('스와이프 중이므로 클릭 무시');
+      return;
+    }
     console.log('아이템 클릭:', approval.flowNo);
     router.push(`/detail/${approval.flowNo}`, 'forward', 'push');
   }, [approval.flowNo, router]);
@@ -547,6 +553,12 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     const touch = touchData.current;
     if (!touch.isDragging || !scrollRef.current) return;
     const scrollLeft = scrollRef.current.scrollLeft;
+
+    // 스와이프 플래그를 잠시 후에 해제 (ripple effect 방지)
+    setTimeout(() => {
+      touch.isSwiping = false;
+      setIsSwipeDisabled(false); // pointer events 다시 활성화
+    }, 100);
 
     // 스와이프 방향과 현재 상태를 고려한 똑똑한 로직
     let targetLeft = 0;
@@ -633,7 +645,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     body: bodyElement,
     onClick: handleItemClick,
     onCheckboxChange: handleCheckboxChange,
-  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange]);
+    style: { pointerEvents: isSwipeDisabled ? 'none' : 'auto' } as React.CSSProperties,
+  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange, isSwipeDisabled]);
 
   // useEffect 간소화
   useEffect(() => {
@@ -648,6 +661,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
       const diffY = touch.startY - e.touches[0].clientY;
 
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
+        touch.isSwiping = true; // 스와이프 중임을 표시
+        setIsSwipeDisabled(true); // pointer events 비활성화
         if (e.cancelable) e.preventDefault();
         const newScrollLeft = Math.max(0, Math.min(160, touch.initialScrollLeft + diffX));
         element.scrollLeft = newScrollLeft;

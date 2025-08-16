@@ -12,13 +12,15 @@ interface CustomItemProps {
   onCheckboxChange?: (checked: boolean) => void;
   checked?: boolean;
   expandable?: boolean;
+  style?: React.CSSProperties;
 }
 
-const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, body, sub, onClick, onCheckboxChange, checked }) => {
+const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, body, sub, onClick, onCheckboxChange, checked, style }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleCheckboxToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // 부모 클릭 이벤트 방지
+    e.preventDefault(); // 기본 동작 방지
     if (onCheckboxChange) {
       onCheckboxChange(!checked);
     }
@@ -47,11 +49,16 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`, [sub, onClick]);
 
   return (
-    <IonItem button mode='md' className={itemClasses} onPointerUp={onClick ? onClick : undefined}>
+    <IonItem button mode='md' className={itemClasses} onPointerUp={onClick ? onClick : undefined} style={style}>
       <div className='custom-item-wrapper'>
         <div className='custom-item-header'>
           {selectable && (
-            <IonCheckbox onClick={handleCheckboxToggle} checked={checked} mode='md' />
+            <IonCheckbox 
+              onClick={handleCheckboxToggle} 
+              onPointerDown={handleCheckboxToggle}
+              checked={checked} 
+              mode='md' 
+            />
           )}
           <div className={contentAreaClasses} onClick={sub ? handleTitleClick : undefined} style={{ pointerEvents: sub ? 'auto' : 'none' }}>
             {title}
