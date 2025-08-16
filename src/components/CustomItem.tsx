@@ -47,7 +47,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`, [sub, onClick]);
 
   return (
-    <IonItem mode='md' className={itemClasses} onClick={onClick ? onClick : undefined}>
+    <IonItem mode='md' className={itemClasses} onTouchStart={onClick ? onClick : undefined}>
       <div className='custom-item-wrapper'>
         <div className='custom-item-header'>
           {selectable && (
