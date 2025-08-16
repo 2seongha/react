@@ -2,7 +2,7 @@
   --opacity: 1 !important;
 }
 
-.approval .app-bar ion-toolbar:last-of-type  {
+.approval .app-bar ion-toolbar:last-of-type {
   --border-width: 0 0 0.55px 0 !important;
 }
 
@@ -65,8 +65,12 @@
 }
 
 .approval-item-wrapper {
-  min-height: 1px;
-  padding: 0px 22px 12px 22px;
+  width: 100%;
+  padding: 0px 22px 12px 0px;
+}
+
+.approval-item-wrapper .custom-item {
+  margin: 0 0 0 22px
 }
 
 .approval-item-wrapper.first-item {
@@ -132,4 +136,19 @@
 .approval .date-toolbar-button>span {
   margin-left: 6px;
   font-size: 13px;
+}
+
+.approval ion-item-options {
+  border-bottom-width: 0 !important;
+  align-items: center;
+  padding-left: 8px;
+  gap: 4px;
+}
+
+.approval .slide-action {
+  height: 60px;
+  display: flex;
+  min-width: 60px;
+  border-radius: 30px;
+  overflow: hidden;
 }

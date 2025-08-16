@@ -192,28 +192,26 @@ const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, in
     initial: {
       opacity: 0,
       height: 0,
-      y: -10,
     },
     animate: {
       opacity: 1,
       height: '52px',
-      y: 0,
     },
     exit: {
       opacity: 0,
       height: 0,
-      y: -10,
       transition: {
-        duration: 0.2,
-        delay: index * 0.02, // 지연 시간 단축
-        ease: [0.4, 0, 1, 1] as const // easeInCubic
+        height: {
+          delay: .25
+        }
       }
     },
     transition: {
-      duration: 0.25, // 지속시간 단축
-      delay: index * 0.03,
-      ease: [0.25, 0.46, 0.45, 0.94] as const, // easeOutQuart
-      type: "tween" as const,
+      duration: .25,
+      opacity: {
+        delay: .25,
+        duration: .25
+      }
     },
   }), [index]);
 

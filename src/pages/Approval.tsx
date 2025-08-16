@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, IonItemSliding, IonItemOptions, IonItemOption } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -100,16 +100,41 @@ const Approval: React.FC = () => {
     });
   }, []);
 
-  // 검색어로 필터링된 결과
+  // 검색어와 날짜로 필터링된 결과
   const filteredApprovals = useMemo(() => {
     if (!approvals) return null;
-    if (!searchText.trim()) return approvals;
 
-    return approvals.filter(approval =>
-      approval.apprTitle.toLowerCase().includes(searchText.toLowerCase()) ||
-      approval.creatorName.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [approvals, searchText]);
+    let filtered = approvals;
+
+    // 날짜 필터링
+    if (startDate || endDate) {
+      filtered = filtered.filter(approval => {
+        const createDate = new Date(approval.createDate);
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+
+        // 시간을 00:00:00으로 설정하여 날짜만 비교
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+        createDate.setHours(0, 0, 0, 0);
+
+        if (start && createDate < start) return false;
+        if (end && createDate > end) return false;
+
+        return true;
+      });
+    }
+
+    // 검색어 필터링
+    if (searchText.trim()) {
+      filtered = filtered.filter(approval =>
+        approval.apprTitle.toLowerCase().includes(searchText.toLowerCase()) ||
+        approval.creatorName.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [approvals, searchText, startDate, endDate]);
 
   // 필터링된 결과가 변경될 때 선택된 아이템 중 필터에서 제외된 것들 제거
   useEffect(() => {
@@ -167,7 +192,7 @@ const Approval: React.FC = () => {
 
   const renderItem = useCallback((index: number, approval: ApprovalModel) => {
     if (!approval || !approval.flowNo) {
-      return <div className="approval-item-wrapper">Error: Invalid item</div>;
+      return <div className="approval-item-wrapper"></div>;
     }
 
     const isSelected = selectedItems.has(approval.flowNo);
@@ -289,11 +314,6 @@ const Approval: React.FC = () => {
               <IonDatetime
                 class='date-picker-pop-up'
                 value={startDate}
-                onIonChange={(e) => {
-                  if (typeof e.detail.value === 'string') {
-                    setStartDate(e.detail.value);
-                  }
-                }}
                 onClick={(e) => {
                   const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
                   const isDayButtonClicked = path?.some((el) =>
@@ -302,6 +322,9 @@ const Approval: React.FC = () => {
                   );
 
                   if (isDayButtonClicked) {
+                    if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
+                      setStartDate((e.target as any).closest('ion-datetime').value);
+                    }
                     setIsStartDateOpen(false);
                   }
                 }}
@@ -322,19 +345,16 @@ const Approval: React.FC = () => {
               <IonDatetime
                 class='date-picker-pop-up'
                 value={endDate}
-                onIonChange={(e) => {
-                  if (typeof e.detail.value === 'string') {
-                    setEndDate(e.detail.value);
-                  }
-                }}
                 onClick={(e) => {
                   const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
                   const isDayButtonClicked = path?.some((el) =>
                     el instanceof HTMLElement &&
                     el.classList.contains('calendar-day-wrapper')
                   );
-
                   if (isDayButtonClicked) {
+                    if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
+                      setEndDate((e.target as any).closest('ion-datetime').value);
+                    }
                     setIsEndDateOpen(false);
                   }
                 }}
@@ -487,6 +507,21 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
 
+  const handleApprove = useCallback(() => {
+    console.log('승인:', approval.flowNo);
+    // TODO: 승인 로직 구현
+  }, [approval.flowNo]);
+
+  const handleReject = useCallback(() => {
+    console.log('반려:', approval.flowNo);
+    // TODO: 반려 로직 구현
+  }, [approval.flowNo]);
+
+  const handleItemClick = useCallback(() => {
+    console.log('아이템 클릭:', approval.flowNo);
+    // TODO: 상세 페이지로 이동하거나 다른 액션 구현
+  }, [approval.flowNo]);
+
   const titleElement = useMemo(() =>
     <div className='custom-item-title'>
       <span>{highlightText(approval.apprTitle, searchText)}</span>
@@ -500,7 +535,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
-      <LazyImage src='https://media.triple.guide/triple-cms/c_limit,f_auto,h_1024,w_1024/b1c940cf-3f3b-48a1-9979-1460cc4761b7.jpeg' style={{ height: '300px', objectFit: 'fill' }}></LazyImage>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
@@ -525,14 +559,27 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     , []);
 
   return (
-    <CustomItem
-      selectable={true}
-      checked={isSelected}
-      title={titleElement}
-      body={bodyElement}
-      onClick={() => { }}
-      onCheckboxChange={handleCheckboxChange}
-    />
+    <IonItemSliding>
+      <CustomItem
+        selectable={true}
+        checked={isSelected}
+        title={titleElement}
+        body={bodyElement}
+        onClick={handleItemClick}
+        onCheckboxChange={handleCheckboxChange}
+      />
+      <IonItemOptions side="end">
+        <IonItemOption mode='md' color="danger" className='slide-action' onClick={handleReject}>
+          <IonIcon icon={closeOutline} style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '11px', fontWeight: '500' }}>반려</span>
+        </IonItemOption>
+        <IonItemOption mode='md' color="success" className='slide-action' onClick={handleApprove}>
+          <IonIcon icon={checkmarkOutline} style={{ fontSize: '20px' }} />
+          <span style={{ fontSize: '11px', fontWeight: '500' }}>승인</span>
+        </IonItemOption>
+      </IonItemOptions>
+    </IonItemSliding>
   );
 });
+
 
