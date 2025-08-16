@@ -501,19 +501,15 @@ const highlightText = (text: string, searchText: string) => {
   );
 };
 
-// ApprovalItem 간단한 버전
+// ApprovalItem 초간단 버전
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
-  const [initialScrollLeft, setInitialScrollLeft] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState<boolean | null>(null);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  console.log('rebuild approval item' + index);
+  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false });
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
+
+  console.log('approval item rebuild : ' + index);
 
   const handleApprove = useCallback(() => {
     console.log('승인:', approval.flowNo);
@@ -530,84 +526,35 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     // TODO: 상세 페이지로 이동하거나 다른 액션 구현
   }, [approval.flowNo]);
 
-  // 터치 이벤트 핸들러들
+  // 초간단 터치 핸들러들
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (!scrollRef.current) return;
-    setStartX(e.touches[0].clientX);
-    setStartY(e.touches[0].clientY);
-    setInitialScrollLeft(scrollRef.current.scrollLeft); // 시작할 때 스크롤 위치 저장
-    setIsDragging(true);
-    setIsHorizontalSwipe(null); // 방향 초기화
-    setSwipeDirection(null); // 스와이프 방향 초기화
+    const touch = touchData.current;
+    touch.startX = e.touches[0].clientX;
+    touch.startY = e.touches[0].clientY;
+    touch.initialScrollLeft = scrollRef.current.scrollLeft;
+    touch.isDragging = true;
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-
-    const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
-    const diffX = startX - currentX;
-    const diffY = startY - currentY;
-
-    // 첫 움직임에서 방향 결정 (10px 이상 움직였을 때)
-    if (isHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
-      const isHorizontal = Math.abs(diffX) > Math.abs(diffY);
-      setIsHorizontalSwipe(isHorizontal);
-      
-      // 스와이프 방향 설정 (diffX > 0: 왼쪽 스와이프, diffX < 0: 오른쪽 스와이프)
-      if (isHorizontal) {
-        setSwipeDirection(diffX > 0 ? 'left' : 'right');
-      }
-    }
-
-    // 가로 스와이프로 확정된 경우에만 처리
-    if (isHorizontalSwipe === true) {
-      e.preventDefault(); // 세로 스크롤 방지
-      
-      // 시작 위치 + 상대적 움직임으로 계산
-      const newScrollLeft = Math.max(0, Math.min(160, initialScrollLeft + diffX));
-      
-      scrollRef.current.scrollLeft = newScrollLeft;
-    }
-    // 세로 스크롤인 경우 아무것도 하지 않음 (자연스러운 세로 스크롤 허용)
-  }, [isDragging, startX, startY, isHorizontalSwipe, initialScrollLeft]);
-
   const handleTouchEnd = useCallback(() => {
-    if (!scrollRef.current) return;
-    
-    // 가로 스와이프였던 경우에만 스냅 처리
-    if (isHorizontalSwipe === true) {
-      const currentScrollLeft = scrollRef.current.scrollLeft;
-      
-      // 스와이프 방향과 현재 상태를 고려한 로직
-      if (swipeDirection === 'left') {
-        // 왼쪽 스와이프 = 버튼 노출하려는 의도
-        if (currentScrollLeft > 30) {
-          scrollRef.current.scrollTo({ left: 160, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        }
-      } else if (swipeDirection === 'right') {
-        // 오른쪽 스와이프 = 버튼 숨기려는 의도
-        if (currentScrollLeft < 130) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollTo({ left: 160, behavior: 'smooth' });
-        }
-      } else {
-        // 방향이 확실하지 않은 경우 기존 로직 사용
-        if (currentScrollLeft > 80) {
-          scrollRef.current.scrollTo({ left: 160, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        }
-      }
+    const touch = touchData.current;
+    if (!touch.isDragging || !scrollRef.current) return;
+    const scrollLeft = scrollRef.current.scrollLeft;
+
+    // 스와이프 방향과 현재 상태를 고려한 똑똑한 로직
+    let targetLeft = 0;
+
+    if (touch.initialScrollLeft === 0) {
+      // 닫힌 상태에서 시작: 30px만 넘어도 열기
+      targetLeft = scrollLeft > 30 ? 160 : 0;
+    } else {
+      // 열린 상태에서 시작: 130px 아래로 내려가면 닫기
+      targetLeft = scrollLeft < 130 ? 0 : 160;
     }
-    
-    setIsDragging(false);
-    setIsHorizontalSwipe(null);
-    setSwipeDirection(null);
-  }, [isHorizontalSwipe, swipeDirection]);
+
+    scrollRef.current.scrollTo({ left: targetLeft, behavior: 'smooth' });
+    touch.isDragging = false;
+  }, []);
 
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
   const titleElement = useMemo(() => (
@@ -657,35 +604,31 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     onCheckboxChange: handleCheckboxChange,
   }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange]);
 
-  // useEffect로 이벤트 리스너 등록 (passive: false 옵션 사용)
+  // useEffect 간소화
   useEffect(() => {
     const element = scrollRef.current;
     if (!element) return;
 
-    const options: AddEventListenerOptions = { passive: false };
-    
     const touchMoveHandler = (e: TouchEvent) => {
-      const syntheticEvent = {
-        touches: Array.from(e.touches).map(touch => ({
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        })),
-        preventDefault: () => {
-          if (e.cancelable) {
-            e.preventDefault();
-          }
-        }
-      } as unknown as React.TouchEvent;
-      
-      handleTouchMove(syntheticEvent);
+      const touch = touchData.current;
+      if (!touch.isDragging) return;
+
+      const diffX = touch.startX - e.touches[0].clientX;
+      const diffY = touch.startY - e.touches[0].clientY;
+
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
+        if (e.cancelable) e.preventDefault();
+        const newScrollLeft = Math.max(0, Math.min(160, touch.initialScrollLeft + diffX));
+        element.scrollLeft = newScrollLeft;
+      }
     };
-    
-    element.addEventListener('touchmove', touchMoveHandler, options);
-    
+
+    element.addEventListener('touchmove', touchMoveHandler, { passive: false });
+
     return () => {
-      element.removeEventListener('touchmove', touchMoveHandler, options);
+      element.removeEventListener('touchmove', touchMoveHandler);
     };
-  }, [handleTouchMove]);
+  }, []);
 
   return (
     <div
@@ -695,9 +638,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div style={{ width: 'calc(100% - 11px)', }}>
-        <CustomItem {...customItemProps} />
-      </div>
+      <CustomItem {...customItemProps} />
       <IonButton
         mode="md"
         color="medium"
