@@ -16,15 +16,6 @@ export async function fetchMenuAreas(): Promise<AreaModel[]> {
       { areaCode: 'CONTRACT', flowCode: 'CON001', oLtext: '계약승인', cnt: '4', pAreaCode: 'LEGAL' },
       { areaCode: 'MEETING', flowCode: 'MTG001', oLtext: '회의실예약', cnt: '18', pAreaCode: 'ADMIN' },
       { areaCode: 'EQUIP', flowCode: 'EQP001', oLtext: '장비신청', cnt: '6', pAreaCode: 'IT' },
-      { areaCode: 'TODO', flowCode: 'TODO', oLtext: '미결함', cnt: '927', pAreaCode: 'FINANCE' },
-      { areaCode: 'PURCHASE', flowCode: 'START', oLtext: '구매요청', cnt: '8', pAreaCode: 'PROCUREMENT' },
-      { areaCode: 'VACATION', flowCode: 'REJECT', oLtext: '휴가신청', cnt: '5', pAreaCode: 'HR' },
-      { areaCode: 'BUSINESS', flowCode: 'BIZ001', oLtext: '출장신청', cnt: '15', pAreaCode: 'FINANCE' },
-      { areaCode: 'OVERTIME', flowCode: 'OT001', oLtext: '초과근무', cnt: '23', pAreaCode: 'HR' },
-      { areaCode: 'TRAINING', flowCode: 'TRN001', oLtext: '교육신청', cnt: '7', pAreaCode: 'HR' },
-      { areaCode: 'CONTRACT', flowCode: 'CON001', oLtext: '계약승인', cnt: '4', pAreaCode: 'LEGAL' },
-      { areaCode: 'MEETING', flowCode: 'MTG001', oLtext: '회의실예약', cnt: '18', pAreaCode: 'ADMIN' },
-      { areaCode: 'EQUIP', flowCode: 'EQP001', oLtext: '장비신청', cnt: '6', pAreaCode: 'IT' },
     ];
 
     return mockAreas;

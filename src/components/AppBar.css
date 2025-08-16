@@ -9,34 +9,9 @@
   width: 44px;
 }
 
-/* .header-ios ion-toolbar:last-of-type  */
 .app-bar ion-toolbar:last-of-type  {
   --min-height: 48px;
   --border-width: 0px !important;
-}
-
-.logo-container {
-  height: 20px;
-  width: 100px;
-  margin-left: 16px;
-  position: relative;
-}
-
-.logo {
-  height: 20px;
-  width: 100px;
-  object-fit: contain;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.logo-visible {
-  display: block;
-}
-
-.logo-hidden {
-  display: none;
 }
 
 .app-bar-button {

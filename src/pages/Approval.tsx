@@ -9,6 +9,7 @@ import CustomItem from '../components/CustomItem';
 import './Approval.css';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { getPlatformMode } from '../utils';
+import LazyImage from '../components/LazyImage';
 
 const Approval: React.FC = () => {
   const setApprovals = useAppStore(state => state.setApprovals);
@@ -497,6 +498,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
+      <LazyImage src='https://media.triple.guide/triple-cms/c_limit,f_auto,h_1024,w_1024/b1c940cf-3f3b-48a1-9979-1460cc4761b7.jpeg' style={{height:'300px', objectFit:'fill'}}></LazyImage>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>

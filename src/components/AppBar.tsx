@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   IonHeader,
   IonToolbar,
@@ -34,7 +34,6 @@ const AppBar: React.FC<AppBarProps> = ({
   showBackButton = false,
   showLogo = false,
   showSearchButton = false,
-  // showNotificationsButton = false,
   showSettingButton = false,
   showMenuButton = false,
   showCount = false,
@@ -43,29 +42,64 @@ const AppBar: React.FC<AppBarProps> = ({
   const router = useIonRouter();
   const { themeMode } = useAppStore();
 
+  // 실제 적용된 테마 확인
+  const getActualTheme = () => {
+    if (themeMode === 'dark') return 'dark';
+    if (themeMode === 'light') return 'light';
+    
+    // system 모드일 때 실제 적용된 테마 확인
+    const htmlElement = document.documentElement;
+    const dataTheme = htmlElement.getAttribute('data-theme');
+    if (dataTheme === 'dark' || dataTheme === 'light') {
+      return dataTheme;
+    }
+    
+    // fallback으로 시스템 설정 확인
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  const actualTheme = getActualTheme();
+
+  // 로고 이미지 프리로드
+  useEffect(() => {
+    const preloadImages = [
+      '/assets/images/app_logo_dark.webp',
+      '/assets/images/app_logo_light.webp'
+    ];
+    
+    preloadImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
   return (
     <IonHeader mode='ios' translucent={true} className='app-bar'>
-      <IonToolbar className='app-bar-color'>
+      <IonToolbar>
         {showBackButton &&
-          <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
+          <IonBackButton defaultHref='/app' mode='md' color={'primary'} />
         }
 
         {showLogo &&
-          <div className='logo-container'>
-            <div className={`logo ${themeMode === 'light' ? 'logo-visible' : 'logo-hidden'}`}>
-              <LazyImage 
-                src='/assets/images/app_logo_dark.webp'
-                alt="App Logo Light" 
-                style={{ width: '100%', height: '100%' }}
-              />
-            </div>
-            <div className={`logo ${themeMode === 'dark' ? 'logo-visible' : 'logo-hidden'}`}>
-              <LazyImage 
-                src='/assets/images/app_logo_light.webp'
-                alt="App Logo Dark" 
-                style={{ width: '100%', height: '100%' }}
-              />
-            </div>
+          <div style={{ position: 'relative', width: '80px', height: '20px', marginLeft: '20px' }}>
+            <LazyImage
+              src="/assets/images/app_logo_dark.webp"
+              style={{ 
+                position: 'absolute',
+                width: '100%', 
+                height: '100%',
+                display: actualTheme === 'light' ? 'block' : 'none'
+              }}
+            />
+            <LazyImage
+              src="/assets/images/app_logo_light.webp"
+              style={{ 
+                position: 'absolute',
+                width: '100%', 
+                height: '100%',
+                display: actualTheme === 'dark' ? 'block' : 'none'
+              }}
+            />
           </div>
         }
 

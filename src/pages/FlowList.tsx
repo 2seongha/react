@@ -135,8 +135,6 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
         <div className='flow-list-item-icon' style={iconStyle}>
           <LazyImage 
             src={icon.image} 
-            alt={area.oLtext || ''} 
-            placeholder={<div style={{ backgroundColor: icon.backgroundColor, width: '100%', height: '100%' }} />}
           />
         </div>
         <span>{area.oLtext}</span>
