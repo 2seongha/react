@@ -43,6 +43,7 @@ ion-tab-bar {
 /* Popover 관련 */
 ion-popover {
   --width: 300px;
+  --backdrop-opacity: .5;
 }
 
 /* DateTime 관련 */
