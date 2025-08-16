@@ -3,7 +3,6 @@ import {
   IonPage,
   IonItem,
   IonCard,
-  IonCardContent,
   IonButton,
   IonIcon,
   useIonViewWillEnter,
@@ -14,7 +13,7 @@ import {
 } from '@ionic/react';
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { chevronDown, chevronForwardOutline, headset, person, refreshOutline } from 'ionicons/icons';
+import { chevronDown, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';

@@ -145,10 +145,15 @@
   gap: 4px;
 }
 
+.approval ion-item-sliding {
+  --transition-duration: 200ms;
+  --transition-timing-function: ease-out;
+}
+
 .approval .slide-action {
-  height: 60px;
+  height: 36px;
   display: flex;
-  min-width: 60px;
+  min-width: 36px;
   border-radius: 30px;
   overflow: hidden;
 }

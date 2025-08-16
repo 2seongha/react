@@ -522,6 +522,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     // TODO: 상세 페이지로 이동하거나 다른 액션 구현
   }, [approval.flowNo]);
 
+
   const titleElement = useMemo(() =>
     <div className='custom-item-title'>
       <span>{highlightText(approval.apprTitle, searchText)}</span>
@@ -560,22 +561,20 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   return (
     <IonItemSliding>
-      <CustomItem
-        selectable={true}
-        checked={isSelected}
-        title={titleElement}
-        body={bodyElement}
-        onClick={handleItemClick}
-        onCheckboxChange={handleCheckboxChange}
-      />
+        <CustomItem
+          selectable={true}
+          checked={isSelected}
+          title={titleElement}
+          body={bodyElement}
+          onClick={handleItemClick}
+          onCheckboxChange={handleCheckboxChange}
+        />
       <IonItemOptions side="end">
-        <IonItemOption mode='md' color="danger" className='slide-action' onClick={handleReject}>
+        <IonItemOption mode='md' color="medium" className='slide-action' onClick={handleReject}>
           <IonIcon icon={closeOutline} style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '11px', fontWeight: '500' }}>반려</span>
         </IonItemOption>
-        <IonItemOption mode='md' color="success" className='slide-action' onClick={handleApprove}>
+        <IonItemOption mode='md' color="primary" className='slide-action' onClick={handleApprove}>
           <IonIcon icon={checkmarkOutline} style={{ fontSize: '20px' }} />
-          <span style={{ fontSize: '11px', fontWeight: '500' }}>승인</span>
         </IonItemOption>
       </IonItemOptions>
     </IonItemSliding>
