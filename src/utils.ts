@@ -1,9 +1,41 @@
+import { 
+  archiveboxIcon, 
+  foldersIcon, 
+  signaturesIcon, 
+  archivebox2Icon, 
+  shreddersIcon,
+  emailmarketingIcon,
+  documentsIcon,
+  penIcon,
+  signaturesFlowIcon,
+  documentSapIcon,
+  creditcardIcon,
+  banknotesIcon,
+  calculatorIcon,
+  documentDollorIcon,
+  pasteSapIcon,
+  envelopeIcon,
+  copyIcon,
+  strategyIcon,
+  documentTaxIcon,
+  gearsIcon,
+  documentsFlowIcon,
+  docIcon,
+  jpgIcon,
+  gifIcon,
+  pdfIcon,
+  pngIcon,
+  pptIcon,
+  txtIcon,
+  xlsIcon,
+  zipIcon,
+  fileIcon
+} from './assets/images';
+
 interface MappingIcon {
   backgroundColor?: string;
   image: string;
 }
-
-const iconBasePath = '/assets/images/icon';
 
 // flow list 아이콘 매핑 가져오기
 export const getFlowIcon = (areaCode: string): MappingIcon => {
@@ -11,132 +43,132 @@ export const getFlowIcon = (areaCode: string): MappingIcon => {
     case 'TODO':
       return {
         backgroundColor: 'rgba(77, 174, 235, 0.08)',
-        image: `${iconBasePath}/home/archivebox.webp`,
+        image: archiveboxIcon,
       };
     case 'APPROVING':
       return {
         backgroundColor: 'rgba(0, 52, 125, 0.08)',
-        image: `${iconBasePath}/home/folders.webp`,
+        image: foldersIcon,
       };
     case 'START':
       return {
         backgroundColor: 'rgba(77, 103, 235, 0.08)',
-        image: `${iconBasePath}/home/signatures.webp`,
+        image: signaturesIcon,
       };
     case 'APPROVED':
       return {
         backgroundColor: 'rgba(0, 168, 98, 0.08)',
-        image: `${iconBasePath}/home/archivebox2.webp`,
+        image: archivebox2Icon,
       };
     case 'REJECT':
       return {
         backgroundColor: 'rgba(255, 43, 100, 0.08)',
-        image: `${iconBasePath}/home/shredders.webp`,
+        image: shreddersIcon,
       };
     case 'REFERENCE':
       return {
         backgroundColor: 'rgba(77, 174, 235, 0.08)',
-        image: `${iconBasePath}/home/emailmarketing.webp`,
+        image: emailmarketingIcon,
       };
     case 'ORG':
       return {
         backgroundColor: 'rgba(77, 90, 235, 0.08)',
-        image: `${iconBasePath}/home/documents.webp`,
+        image: documentsIcon,
       };
     case 'IFORD':
       return {
         backgroundColor: 'rgba(137, 77, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/pen.webp`,
+        image: penIcon,
       };
     case 'IFOR2':
       return {
         backgroundColor: 'rgba(235, 115, 77, 0.04)',
-        image: `${iconBasePath}/flowlist/signatures.webp`,
+        image: signaturesFlowIcon,
       };
     case 'IA910':
       return {
         backgroundColor: 'rgba(77, 174, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/document_sap.webp`,
+        image: documentSapIcon,
       };
     case 'IA102':
       return {
         backgroundColor: 'rgba(77, 174, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/creditcard.webp`,
+        image: creditcardIcon,
       };
     case 'IA103':
       return {
         backgroundColor: 'rgba(0, 168, 98, 0.04)',
-        image: `${iconBasePath}/flowlist/banknotes.webp`,
+        image: banknotesIcon,
       };
     case 'IA201':
       return {
         backgroundColor: 'rgba(77, 174, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/calculator.webp`,
+        image: calculatorIcon,
       };
     case 'IA602':
       return {
         backgroundColor: 'rgba(77, 90, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/document_dollor.webp`,
+        image: documentDollorIcon,
       };
     case 'IA204':
       return {
         backgroundColor: 'rgba(122, 77, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/calculator.webp`,
+        image: calculatorIcon,
       };
     case 'IA601':
       return {
         backgroundColor: 'rgba(77, 127, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/paste_sap.webp`,
+        image: pasteSapIcon,
       };
     case 'IA203':
       return {
         backgroundColor: 'rgba(77, 103, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/envelope.webp`,
+        image: envelopeIcon,
       };
     case 'IFOR3':
       return {
         backgroundColor: 'rgba(255, 43, 100, 0.04)',
-        image: `${iconBasePath}/flowlist/copy.webp`,
+        image: copyIcon,
       };
     case 'IA610':
       return {
         backgroundColor: 'rgba(77, 174, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/strategy.webp`,
+        image: strategyIcon,
       };
     case 'IA202':
       return {
         backgroundColor: 'rgba(77, 103, 235, 0.04)',
-        image: `${iconBasePath}/flowlist/document_tax.webp`,
+        image: documentTaxIcon,
       };
     case 'MA021':
       return {
         backgroundColor: 'rgba(0, 156, 255, 0.04)',
-        image: `${iconBasePath}/flowlist/gears.webp`,
+        image: gearsIcon,
       };
     case 'MA011':
       return {
         backgroundColor: 'rgba(0, 156, 255, 0.04)',
-        image: `${iconBasePath}/flowlist/gears.webp`,
+        image: gearsIcon,
       };
     case 'MA001':
       return {
         backgroundColor: 'rgba(0, 156, 255, 0.04)',
-        image: `${iconBasePath}/flowlist/gears.webp`,
+        image: gearsIcon,
       };
     case 'MA012':
       return {
         backgroundColor: 'rgba(0, 52, 125, 0.04)',
-        image: `${iconBasePath}/flowlist/gears.webp`,
+        image: gearsIcon,
       };
     case 'MA002':
       return {
         backgroundColor: 'rgba(0, 52, 125, 0.04)',
-        image: `${iconBasePath}/flowlist/gears.webp`,
+        image: gearsIcon,
       };
     default:
       return {
         backgroundColor: 'rgba(0, 156, 255, 0.04)',
-        image: `${iconBasePath}/flowlist/documents.webp`,
+        image: documentsFlowIcon,
       };
   }
 };
@@ -147,44 +179,44 @@ export const getFileTypeIcon = (fileName: string): MappingIcon => {
   
   if (lowerFileName.includes('doc')) {
     return {
-      image: `${iconBasePath}/filetype/doc.webp`,
+      image: docIcon,
     };
   } else if (lowerFileName.includes('jpg')) {
     return {
-      image: `${iconBasePath}/filetype/jpg.webp`,
+      image: jpgIcon,
     };
   } else if (lowerFileName.includes('gif')) {
     return {
-      image: `${iconBasePath}/filetype/gif.webp`,
+      image: gifIcon,
     };
   } else if (lowerFileName.includes('pdf')) {
     return {
-      image: `${iconBasePath}/filetype/pdf.webp`,
+      image: pdfIcon,
     };
   } else if (lowerFileName.includes('png')) {
     return {
-      image: `${iconBasePath}/filetype/png.webp`,
+      image: pngIcon,
     };
   } else if (lowerFileName.includes('ppt')) {
     return {
-      image: `${iconBasePath}/filetype/ppt.webp`,
+      image: pptIcon,
     };
   } else if (lowerFileName.includes('txt')) {
     return {
-      image: `${iconBasePath}/filetype/txt.webp`,
+      image: txtIcon,
     };
   } else if (lowerFileName.includes('xls')) {
     return {
-      image: `${iconBasePath}/filetype/xls.webp`,
+      image: xlsIcon,
     };
   } else if (lowerFileName.includes('zip')) {
     return {
-      image: `${iconBasePath}/filetype/zip.webp`,
+      image: zipIcon,
     };
   }
   
   return {
-    image: `${iconBasePath}/filetype/file.webp`,
+    image: fileIcon,
   };
 };
 

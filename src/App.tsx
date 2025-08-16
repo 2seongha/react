@@ -3,18 +3,18 @@ import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 
-import Tabs from './components/Tabs';
+import Home from './pages/Home';
 import FlowList from './pages/FlowList';
 import Approval from './pages/Approval';
 import Detail from './pages/Detail';
 import Menu from './pages/Menu';
 import Settings from './pages/Settings';
-
 import Notice from './pages/Notice';
 import useAppStore from './stores/appStore';
 import { initWebview } from './webview';
-import { preloadCriticalImages, preloadAllImages } from './utils/imagePreloader';
 import { getPlatformMode } from './utils';
+import Notifications from './pages/Notifications';
+import More from './pages/More';
 
 
 const App: React.FC = () => {
@@ -84,14 +84,16 @@ const App: React.FC = () => {
     <IonApp>
       <IonReactRouter>
         <IonRouterOutlet mode={getPlatformMode()}>
-          <Route path="/app" component={Tabs} />
+          <Route path="/app/home" component={Home} exact />
+          <Route path="/app/notifications" component={Notifications} exact />
+          <Route path="/app/more" component={More} exact />
           <Route path="/flowList" component={FlowList} exact />
           <Route path="/approval" component={Approval} exact />
           <Route path="/detail" component={Detail} exact />
           <Route path="/menu" component={Menu} exact />
           <Route path="/notice" component={Notice} exact />
           <Route path="/settings" component={Settings} exact />
-          <Redirect exact from="/" to="/app" />
+          <Redirect exact from="/" to="/app/home" />
         </IonRouterOutlet>
       </IonReactRouter>
     </IonApp>

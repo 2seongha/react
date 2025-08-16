@@ -1,13 +1,11 @@
 import {
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
   IonList,
   IonItem,
   IonIcon,
-  IonLabel
+  IonLabel,
+  useIonViewWillEnter
 } from '@ionic/react';
 import {
   notificationsOutline,
@@ -19,12 +17,13 @@ import {
 } from 'ionicons/icons';
 import React from 'react';
 import AppBar from '../components/AppBar';
+import BottomTabBar from '../components/BottomNavigation';
 
-interface MoreProps {
-  display?: string;
-}
+const More: React.FC = () => {
+  useIonViewWillEnter(() => {
+    console.log('more will enter');
+  });
 
-const More: React.FC<MoreProps> = ({ display }) => {
   const handleLogout = () => {
     // 로그아웃 로직 구현
     console.log('로그아웃 클릭');
@@ -35,7 +34,9 @@ const More: React.FC<MoreProps> = ({ display }) => {
   };
 
   return (
-    <IonContent fullscreen style={{ display: display }}>
+    <IonPage className="more">
+      <AppBar title={<span>더보기</span>} showSettingButton={true} showMenuButton={true} />
+      <IonContent fullscreen>
       <IonList>
         <IonItem button onClick={() => handleMenuClick('공지사항')}>
           <IonIcon icon={notificationsOutline} slot="start" />
@@ -67,7 +68,9 @@ const More: React.FC<MoreProps> = ({ display }) => {
           <IonLabel>로그아웃</IonLabel>
         </IonItem>
       </IonList>
-    </IonContent>
+      </IonContent>
+      <BottomTabBar />
+    </IonPage>
   );
 };
 

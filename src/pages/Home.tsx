@@ -23,12 +23,10 @@ import { getFlowIcon, getPlatformMode } from '../utils';
 import { ApprovalModel, AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
 import LazyImage from '../components/LazyImage';
+import BottomTabBar from '../components/BottomNavigation';
+import { personIcon, searchIcon } from '../assets/images';
 
-interface HomeProps {
-  display?: string;
-}
-
-const Home: React.FC<HomeProps> = ({ display }) => {
+const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setMenuAreas);
   const setTodoSummary = useAppStore(state => state.setTodoSummary);
   const setApprovals = useAppStore(state => state.setApprovals);
@@ -39,6 +37,7 @@ const Home: React.FC<HomeProps> = ({ display }) => {
   useIonViewWillEnter(() => {
     fetchMenuAreas();
     fetchTodoSummary();
+    console.log('home will enter');
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
@@ -50,23 +49,28 @@ const Home: React.FC<HomeProps> = ({ display }) => {
   }
 
   return (
-    <IonContent fullscreen style={{ display: display }}>
-      <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
-        {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
-      </IonRefresher>
-      <div>
-        <NoticeCard />
-      </div>
-      <div style={{ marginTop: '12px' }}>
-        <WelcomeCard />
-      </div>
-      <div style={{ marginTop: '12px' }}>
-        <MenuCard />
-      </div>
-      <div style={{ marginTop: '12px' }}>
-        <TodoSummaryCard />
-      </div>
-    </IonContent>
+    <IonPage className="home">
+      <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
+
+      <IonContent fullscreen>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
+          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+        </IonRefresher>
+        <div>
+          <NoticeCard />
+        </div>
+        <div style={{ marginTop: '12px' }}>
+          <WelcomeCard />
+        </div>
+        <div style={{ marginTop: '12px' }}>
+          <MenuCard />
+        </div>
+        <div style={{ marginTop: '12px' }}>
+          <TodoSummaryCard />
+        </div>
+      </IonContent>
+      <BottomTabBar />
+    </IonPage>
   );
 };
 
@@ -94,7 +98,7 @@ const WelcomeCard: React.FC = () => {
     <IonCard className='home-card'>
       <div className='welcome-card-content'>
         <LazyImage
-          src='/assets/images/icon/person.webp'
+          src={personIcon}
           style={{ width: '48px', height: '48px' }}
         />
         <div className='welcome-card-name'>
@@ -114,13 +118,13 @@ const MenuCard: React.FC = () => {
 
   // 메모이제이션된 계산값들
   const hasMoreMenus = useMemo(() => menuAreas && menuAreas.length > 3, [menuAreas]);
-  
-  const mainMenuItems = useMemo(() => 
+
+  const mainMenuItems = useMemo(() =>
     Array.from({ length: !menuAreas ? 3 : Math.min(menuAreas.length, 3) }),
     [menuAreas]
   );
 
-  const expandedMenuItems = useMemo(() => 
+  const expandedMenuItems = useMemo(() =>
     menuAreas ? menuAreas.slice(3) : [],
     [menuAreas]
   );
@@ -133,8 +137,8 @@ const MenuCard: React.FC = () => {
   // 메모이제이션된 애니메이션 props
   const iconRotateProps = useMemo(() => ({
     animate: { rotate: isMenuExpanded ? 180 : 0 },
-    transition: { 
-      duration: 0.25, 
+    transition: {
+      duration: 0.25,
       ease: [0.4, 0, 0.2, 1] as const // easeOutCubic
     }
   }), [isMenuExpanded]);
@@ -144,13 +148,13 @@ const MenuCard: React.FC = () => {
       {mainMenuItems.map((_, index) => (
         <MenuItem key={index} menuItem={menuAreas?.[index]} isLoading={!menuAreas} />
       ))}
-      
+
       <div style={{ overflow: 'hidden' }}>
         <AnimatePresence mode="sync">
           {isMenuExpanded && expandedMenuItems.map((menu, index) => (
-            <ExpandedMenuItem 
+            <ExpandedMenuItem
               key={`expanded-${menu.flowCode}-${index}`}
-              menu={menu} 
+              menu={menu}
               index={index}
             />
           ))}
@@ -185,18 +189,18 @@ interface ExpandedMenuItemProps {
 const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, index }) => {
   // 애니메이션 props 메모이제이션
   const motionProps = useMemo(() => ({
-    initial: { 
-      opacity: 0, 
+    initial: {
+      opacity: 0,
       height: 0,
       y: -10,
     },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       height: '48px',
       y: 0,
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       height: 0,
       y: -10,
       transition: {
@@ -294,7 +298,7 @@ const TodoSummaryCard: React.FC = () => {
         {todoSummary?.length == 0 ?
           <div className='todo-summary-no-data'>
             <LazyImage
-              src='/assets/images/icon/search.webp'
+              src={searchIcon}
               style={{ width: '48px', height: '48px' }}
             />
             <span>미결 항목이 없습니다.</span>

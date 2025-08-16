@@ -8,6 +8,7 @@ export interface AppState {
   notices: NoticeModel[] | null;
   todoSummary: AreaModel[] | null;
   notifications: NotificationModel[] | null;
+  selectedTab: number;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: User) => void;
@@ -17,6 +18,7 @@ export interface AppState {
   setNotices: (notices: NoticeModel[] | null) => void;
   setTodoSummary: (summary: AreaModel[] | null) => void;
   setNotifications: (notifications: NotificationModel[] | null) => void;
+  setSelectedTab: (tab: number) => void;
 
   fetchMenuAreas:()=>Promise<void>;
   fetchFlowList:()=>Promise<void>;

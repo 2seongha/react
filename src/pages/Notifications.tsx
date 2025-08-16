@@ -1,19 +1,20 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonContent, IonPage, useIonViewWillEnter } from '@ionic/react';
 import React, { useRef } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
 import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react';
 import AppBar from '../components/AppBar';
+import BottomTabBar from '../components/BottomNavigation';
 
-interface NotificationsProps {
-  display?: string;
-}
-
-const Notifications: React.FC<NotificationsProps> = ({ display }) => {
+const Notifications: React.FC = () => {
   const [value, setValue] = React.useState(0);
 
   const swiperRef = useRef<SwiperClass | null>(null);
+
+  useIonViewWillEnter(() => {
+    console.log('notifications will enter');
+  });
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -23,7 +24,9 @@ const Notifications: React.FC<NotificationsProps> = ({ display }) => {
   };
 
   return (
-    <IonContent fullscreen style={{ display: display }}>
+    <IonPage className="notifications">
+      <AppBar title={<span>알림</span>} />
+      <IonContent fullscreen>
       <Swiper onSwiper={(swiper) => swiperRef.current = swiper}
         onSlideChange={(swiper) => setValue(swiper.activeIndex)}
         style={{ height: "100%" }}>
@@ -37,7 +40,9 @@ const Notifications: React.FC<NotificationsProps> = ({ display }) => {
         </SwiperSlide>
         {/* 추가 슬라이드들 */}
       </Swiper>
-    </IonContent>
+      </IonContent>
+      <BottomTabBar />
+    </IonPage>
   );
 };
 

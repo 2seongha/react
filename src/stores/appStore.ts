@@ -33,6 +33,7 @@ const useAppStore = create<AppState>((set, get) => ({
   todoSummary: null,
   notificationPopupShown: false,
   notifications: null,
+  selectedTab: 0,
 
   setThemeMode: (mode) => {
     // localStorage에 저장
@@ -48,6 +49,7 @@ const useAppStore = create<AppState>((set, get) => ({
   setNotices: (notices) => set({ notices }),
   setTodoSummary: (areas) => set({ todoSummary: areas }),
   setNotifications: (notifications) => set({ notifications }),
+  setSelectedTab: (tab) => set({ selectedTab: tab }),
 
   fetchMenuAreas: async () => {
     const currentRequestId = ++requestIds.menuAreas;

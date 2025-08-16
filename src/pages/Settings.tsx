@@ -17,6 +17,7 @@ import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import { webviewTheme } from '../webview';
 import LazyImage from '../components/LazyImage';
+import { themeIcon, bellIcon, lockIcon } from '../assets/images';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -40,7 +41,7 @@ const Settings: React.FC = () => {
         <IonList>
           <IonItem>
             <LazyImage 
-              src="/assets/images/icon/config/theme.webp" 
+              src={themeIcon} 
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
               alt="테마 설정"
               placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
@@ -67,7 +68,7 @@ const Settings: React.FC = () => {
           
           <IonItem button>
             <LazyImage 
-              src="/assets/images/icon/config/bell.webp" 
+              src={bellIcon} 
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
               alt="알림 설정"
               placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
@@ -77,7 +78,7 @@ const Settings: React.FC = () => {
           
           <IonItem button>
             <LazyImage 
-              src="/assets/images/icon/config/lock.webp" 
+              src={lockIcon} 
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
               alt="보안 설정"
               placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
