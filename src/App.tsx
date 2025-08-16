@@ -20,40 +20,25 @@ import More from './pages/More';
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [completeInitWebview, setCompleteInitWebview] = useState<boolean>(false);
+  const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
+  const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    // 웹뷰 초기화와 이미지 preload를 병렬로 실행
-    const initializeApp = async () => {
+    // 웹뷰 초기화
+    const initializeWebview = async () => {
       try {
-        // 1단계: 중요 이미지들을 먼저 preload
-        // console.log('⚡ 중요 이미지 preload 시작...');
-        // await preloadCriticalImages();
-
-        // // 2단계: 웹뷰 초기화 (중요 이미지 로딩과 병렬 실행 가능)
         console.log('웹뷰 초기화 시작...');
-        const webviewPromise = initWebview();
-
-        // // 3단계: 나머지 모든 이미지 preload (백그라운드에서)
-        // const allImagesPromise = preloadAllImages((loaded, total) => {
-        // });
-
-        // 웹뷰 초기화 완료 대기
-        const success = await webviewPromise;
+        const success = await initWebview();
         if (success) {
           console.log('웹뷰 초기화 완료!');
-          setCompleteInitWebview(true);
+          setWebviewInitialized(true);
         }
-
-        // 모든 이미지 로딩도 완료 대기 (앱 시작에는 필수가 아님)
-        // allImagesPromise.catch(error => {
-        //   console.warn('일부 이미지 로딩 실패:', error);
-        // });
-
       } catch (error) {
-        console.error('앱 초기화 실패:', error);
+        console.error('웹뷰 초기화 실패:', error);
       }
     };
-    initializeApp();
+    
+    initializeWebview();
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   }, []);
@@ -77,7 +62,18 @@ const App: React.FC = () => {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
+    
+    // 테마 초기화 완료 표시
+    setThemeInitialized(true);
   }, [themeMode]);
+
+  // 웹뷰와 테마 모두 초기화 완료되었을 때 앱 초기화 완료
+  useEffect(() => {
+    if (webviewInitialized && themeInitialized) {
+      console.log('앱 초기화 완료!');
+      setCompleteInitWebview(true);
+    }
+  }, [webviewInitialized, themeInitialized]);
 
   if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)' }} />
   return (
