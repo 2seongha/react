@@ -504,7 +504,7 @@ const highlightText = (text: string, searchText: string) => {
 // ApprovalItem 초간단 버전
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false, startTime: 0 });
+  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false });
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -534,38 +534,49 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     touch.startY = e.touches[0].clientY;
     touch.initialScrollLeft = scrollRef.current.scrollLeft;
     touch.isDragging = true;
-    touch.startTime = Date.now();
   }, []);
 
   const handleTouchEnd = useCallback(() => {
     const touch = touchData.current;
     if (!touch.isDragging || !scrollRef.current) return;
-    
     const scrollLeft = scrollRef.current.scrollLeft;
-    const endTime = Date.now();
-    const timeDiff = endTime - touch.startTime;
-    const distance = touch.startX - scrollLeft;
-    
-    // 속도 계산 (px/ms)
-    const velocity = Math.abs(distance) / Math.max(timeDiff, 1);
-    
-    // 속도 기반 임계값 조정
-    const baseThreshold = 30;
-    const velocityMultiplier = Math.min(velocity * 50, 50); // 최대 50px 보너스
-    const dynamicThreshold = baseThreshold - velocityMultiplier;
-    
+
+    // 스와이프 방향과 현재 상태를 고려한 똑똑한 로직
     let targetLeft = 0;
 
     if (touch.initialScrollLeft === 0) {
-      // 닫힌 상태에서 시작: 동적 임계값 적용
-      targetLeft = scrollLeft > Math.max(dynamicThreshold, 10) ? 160 : 0;
+      // 닫힌 상태에서 시작: 30px만 넘어도 열기
+      targetLeft = scrollLeft > 30 ? 160 : 0;
     } else {
-      // 열린 상태에서 시작: 동적 임계값 적용
-      const closeThreshold = 130 + velocityMultiplier;
-      targetLeft = scrollLeft < Math.min(closeThreshold, 150) ? 0 : 160;
+      // 열린 상태에서 시작: 130px 아래로 내려가면 닫기
+      targetLeft = scrollLeft < 130 ? 0 : 160;
     }
 
-    scrollRef.current.scrollTo({ left: targetLeft, behavior: 'smooth' });
+    scrollRef.current.style.scrollBehavior = 'auto';
+    scrollRef.current.scrollTo({ left: targetLeft, behavior: 'auto' });
+    
+    // 빠른 애니메이션을 위해 requestAnimationFrame 사용
+    const startLeft = scrollLeft;
+    const distance = targetLeft - startLeft;
+    const duration = 150; // 150ms
+    const startTime = performance.now();
+    
+    const animateScroll = (currentTime: number) => {
+      if (!scrollRef.current) return; // null 체크
+      
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+      
+      const currentLeft = startLeft + (distance * easeOut);
+      scrollRef.current.scrollLeft = currentLeft;
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+    
+    requestAnimationFrame(animateScroll);
     touch.isDragging = false;
   }, []);
 
