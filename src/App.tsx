@@ -20,7 +20,6 @@ import More from './pages/More';
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [completeInitWebview, setCompleteInitWebview] = useState<boolean>(false);
-  const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
   const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
 
   useEffect(() => {
@@ -64,7 +63,7 @@ const App: React.FC = () => {
     }
 
     // 테마 초기화 완료 표시
-    setThemeInitialized(true);
+    // setThemeInitialized(true);
   }, [themeMode]);
 
   // 웹뷰와 테마 모두 초기화 완료되었을 때 앱 초기화 완료
