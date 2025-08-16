@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -26,6 +26,10 @@ const Approval: React.FC = () => {
     setSelectedItems(new Set());
     setSearchText('');
     fetchApprovals();
+  });
+
+  useIonViewWillLeave(() => {
+    setApprovals(null);
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
@@ -494,11 +498,9 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     </div>
     , [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
 
-  console.log('rebuild' + index);
-
   const bodyElement = useMemo(() =>
     <div className='custom-item-body'>
-      <LazyImage src='https://media.triple.guide/triple-cms/c_limit,f_auto,h_1024,w_1024/b1c940cf-3f3b-48a1-9979-1460cc4761b7.jpeg' style={{height:'300px', objectFit:'fill'}}></LazyImage>
+      <LazyImage src='https://media.triple.guide/triple-cms/c_limit,f_auto,h_1024,w_1024/b1c940cf-3f3b-48a1-9979-1460cc4761b7.jpeg' style={{ height: '300px', objectFit: 'fill' }}></LazyImage>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>

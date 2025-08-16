@@ -196,7 +196,7 @@ const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, in
     },
     animate: {
       opacity: 1,
-      height: '48px',
+      height: '52px',
       y: 0,
     },
     exit: {
@@ -251,7 +251,7 @@ interface MenuItemProps {
 const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
   if (isLoading || !menuItem) {
     return (
-      <div style={{ height: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ height: '52px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <CustomSkeleton width={80} />
         <CustomSkeleton width={50} />
       </div>
