@@ -37,7 +37,7 @@ const App: React.FC = () => {
         console.error('웹뷰 초기화 실패:', error);
       }
     };
-    
+
     initializeWebview();
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -62,18 +62,24 @@ const App: React.FC = () => {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
-    
+
     // 테마 초기화 완료 표시
     setThemeInitialized(true);
   }, [themeMode]);
 
   // 웹뷰와 테마 모두 초기화 완료되었을 때 앱 초기화 완료
+  // useEffect(() => {
+  //   if (webviewInitialized && themeInitialized) {
+  //     console.log('앱 초기화 완료!');
+  //     setCompleteInitWebview(true);
+  //   }
+  // }, [webviewInitialized, themeInitialized]);
   useEffect(() => {
-    if (webviewInitialized && themeInitialized) {
+    if (webviewInitialized) {
       console.log('앱 초기화 완료!');
       setCompleteInitWebview(true);
     }
-  }, [webviewInitialized, themeInitialized]);
+  }, [webviewInitialized]);
 
   if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'var(--ion-background-color)' }} />
   return (
