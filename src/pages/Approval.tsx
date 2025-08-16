@@ -201,7 +201,7 @@ const Approval: React.FC = () => {
     const isSelected = selectedItems.has(approval.flowNo);
     const isLastItem = filteredApprovals && index === filteredApprovals.length - 1;
     return (
-      <div className={`approval-item-wrapper ${isSelected ? 'selected' : ''} ${index === 0 ? 'first-item' : ''} ${isLastItem ? 'last-item' : ''}`}>
+      <div className={`approval-item-wrapper ${index === 0 ? 'first-item' : ''} ${isLastItem ? 'last-item' : ''}`}>
         <ApprovalItem
           key={approval.flowNo}
           approval={approval}
@@ -509,8 +509,8 @@ const highlightText = (text: string, searchText: string) => {
 // ApprovalItem 초간단 버전
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false, isSwiping: false });
-  const [isSwipeDisabled, setIsSwipeDisabled] = useState(false);
+  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false, isSwiping: false, isVerticalScroll: false });
+  const swipeStateRef = useRef({ isSwipeDisabled: false });
   const router = useIonRouter();
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -557,7 +557,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     // 스와이프 플래그를 잠시 후에 해제 (ripple effect 방지)
     setTimeout(() => {
       touch.isSwiping = false;
-      setIsSwipeDisabled(false); // pointer events 다시 활성화
+      swipeStateRef.current.isSwipeDisabled = false; // pointer events 다시 활성화
     }, 100);
 
     // 스와이프 방향과 현재 상태를 고려한 똑똑한 로직
@@ -597,6 +597,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
     requestAnimationFrame(animateScroll);
     touch.isDragging = false;
+    touch.isVerticalScroll = false; // 플래그 초기화
   }, []);
 
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
@@ -637,7 +638,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     </div>
   ), []); // 하드코딩된 데이터이므로 빈 의존성 배열
 
-  // CustomItem props 메모이제이션
+  // CustomItem props 메모이제이션 - state 대신 ref 사용으로 최적화
   const customItemProps = useMemo(() => ({
     selectable: true,
     checked: isSelected,
@@ -645,8 +646,9 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     body: bodyElement,
     onClick: handleItemClick,
     onCheckboxChange: handleCheckboxChange,
-    style: { pointerEvents: isSwipeDisabled ? 'none' : 'auto' } as React.CSSProperties,
-  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange, isSwipeDisabled]);
+    style: { pointerEvents: swipeStateRef.current.isSwipeDisabled ? 'none' : 'auto' } as React.CSSProperties,
+    forceHideRipple: swipeStateRef.current.isSwipeDisabled,
+  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange]);
 
   // useEffect 간소화
   useEffect(() => {
@@ -660,9 +662,16 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
       const diffX = touch.startX - e.touches[0].clientX;
       const diffY = touch.startY - e.touches[0].clientY;
 
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
+      // 세로 스크롤 감지
+      if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
+        touch.isVerticalScroll = true;
+        return; // 세로 스크롤이면 가로 스와이프 차단
+      }
+
+      // 가로 스와이프 감지 (세로 스크롤이 아닐 때만)
+      if (!touch.isVerticalScroll && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
         touch.isSwiping = true; // 스와이프 중임을 표시
-        setIsSwipeDisabled(true); // pointer events 비활성화
+        swipeStateRef.current.isSwipeDisabled = true; // pointer events 비활성화
         if (e.cancelable) e.preventDefault();
         const newScrollLeft = Math.max(0, Math.min(160, touch.initialScrollLeft + diffX));
         element.scrollLeft = newScrollLeft;

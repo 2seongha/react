@@ -1,5 +1,5 @@
-import { IonCheckbox, IonIcon, IonItem, IonRippleEffect } from '@ionic/react';
-import React, { ReactNode, useState, useMemo, useCallback } from 'react';
+import { IonCheckbox, IonIcon, IonRippleEffect } from '@ionic/react';
+import React, { ReactNode, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
 
@@ -13,14 +13,25 @@ interface CustomItemProps {
   checked?: boolean;
   expandable?: boolean;
   style?: React.CSSProperties;
+  forceHideRipple?: boolean;
 }
 
-const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, body, sub, onClick, onCheckboxChange, checked, style }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, body, sub, onClick, onCheckboxChange, checked, style, forceHideRipple }) => {
+  const [isExpanded, setIsExpanded] = useState(false); // 확장 상태는 UI 변경이 필요하므로 state 유지
+  const stateRef = useRef({ hideRipple: false });
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const handleCheckboxToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // 부모 클릭 이벤트 방지
-    e.preventDefault(); // 기본 동작 방지
+    
+    // IonRippleEffect 숨기기 - ref 사용으로 리렌더링 방지
+    stateRef.current.hideRipple = true;
+    
+    // 100ms 후 ripple 다시 보이기
+    setTimeout(() => {
+      stateRef.current.hideRipple = false;
+    }, 100);
+    
     if (onCheckboxChange) {
       onCheckboxChange(!checked);
     }
@@ -34,6 +45,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
     }
   }, [sub, isExpanded, onClick]);
 
+
   const headerButton = useMemo(() => {
     if (sub) {
       return (
@@ -46,24 +58,37 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   }, [sub, isExpanded, onClick]);
 
   const itemClasses = useMemo(() => `custom-item ${checked ? 'selected' : ''}`, [checked]);
-  const contentAreaClasses = useMemo(() => `custom-item-header-content-area ${sub || onClick ? 'ion-activatable' : ''}`, [sub, onClick]);
+  const contentAreaClasses = useMemo(() => `custom-item-header-content-area`, []);
 
   return (
-    <IonItem button mode='md' className={itemClasses} onPointerUp={onClick ? onClick : undefined} style={style}>
-      <div className='custom-item-wrapper'>
+    <div 
+      className={itemClasses} 
+      style={style}
+    >
+      <div 
+        ref={wrapperRef}
+        className='custom-item-wrapper ion-activatable'
+        onPointerUp={onClick ? (e) => {
+          onClick();
+        } : undefined}
+        style={{ width: '100%', cursor: onClick ? 'pointer' : 'default' }}
+      >
         <div className='custom-item-header'>
           {selectable && (
-            <IonCheckbox 
-              onClick={handleCheckboxToggle} 
-              onPointerDown={handleCheckboxToggle}
-              checked={checked} 
-              mode='md' 
-            />
+            <div 
+              onPointerUp={handleCheckboxToggle}
+              style={{ display: 'flex', alignItems: 'center' }}
+            >
+              <IonCheckbox 
+                checked={checked} 
+                mode='md'
+                style={{ pointerEvents: 'none' }}
+              />
+            </div>
           )}
           <div className={contentAreaClasses} onClick={sub ? handleTitleClick : undefined} style={{ pointerEvents: sub ? 'auto' : 'none' }}>
             {title}
             {headerButton}
-            {sub && <IonRippleEffect />}
           </div>
         </div>
         {body}
@@ -74,8 +99,9 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
             </div>
           </div>
         )}
+        {onClick && <IonRippleEffect style={{ display: (stateRef.current.hideRipple || forceHideRipple) ? 'none' : 'block' }} />}
       </div>
-    </IonItem>
+    </div>
   );
 });
 
