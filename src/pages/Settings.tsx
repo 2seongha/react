@@ -25,10 +25,10 @@ const Settings: React.FC = () => {
 
   const handleThemeChange = (value: string) => {
     const newTheme = value as 'light' | 'dark' | 'system';
-    
+
     // AppStore에 저장 (영구적으로 localStorage에 저장됨)
     setThemeMode(newTheme);
-    
+
     // 웹뷰에 테마 변경 알림
     webviewTheme(newTheme);
   };
@@ -40,16 +40,15 @@ const Settings: React.FC = () => {
       <IonContent>
         <IonList>
           <IonItem>
-            <LazyImage 
-              src={themeIcon} 
+            <LazyImage
+              src={themeIcon}
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
-              alt="테마 설정"
-              placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
+
             />
             <IonLabel>
               <h3>테마 설정</h3>
-              <IonSegment 
-                value={themeMode} 
+              <IonSegment
+                value={themeMode}
                 onIonChange={e => handleThemeChange(e.detail.value as string)}
                 style={{ marginTop: '8px' }}
               >
@@ -65,23 +64,21 @@ const Settings: React.FC = () => {
               </IonSegment>
             </IonLabel>
           </IonItem>
-          
+
           <IonItem button>
-            <LazyImage 
-              src={bellIcon} 
+            <LazyImage
+              src={bellIcon}
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
-              alt="알림 설정"
-              placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
+
             />
             <IonLabel>알림 설정</IonLabel>
           </IonItem>
-          
+
           <IonItem button>
-            <LazyImage 
-              src={lockIcon} 
+            <LazyImage
+              src={lockIcon}
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
-              alt="보안 설정"
-              placeholder={<div style={{ width: '24px', height: '24px', backgroundColor: '#f0f0f0', borderRadius: '4px' }} />}
+
             />
             <IonLabel>보안 설정</IonLabel>
           </IonItem>

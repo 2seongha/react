@@ -65,12 +65,11 @@
 }
 
 .approval-item-wrapper {
-  width: 100%;
-  padding: 0px 22px 12px 0px;
+  padding: 0px 0px 12px 0px;
 }
 
 .approval-item-wrapper .custom-item {
-  margin: 0 0 0 22px
+  margin: 0 11px 0 22px
 }
 
 .approval-item-wrapper.first-item {
@@ -138,22 +137,19 @@
   font-size: 13px;
 }
 
-.approval ion-item-options {
-  border-bottom-width: 0 !important;
-  align-items: center;
-  padding-left: 8px;
-  gap: 4px;
-}
-
-.approval ion-item-sliding {
-  --transition-duration: 200ms;
-  --transition-timing-function: ease-out;
-}
-
-.approval .slide-action {
-  height: 36px;
+.approval .scroll-container {
   display: flex;
-  min-width: 36px;
-  border-radius: 30px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.approval .scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.approval .scroll-container > * {
+  flex-shrink: 0;
 }

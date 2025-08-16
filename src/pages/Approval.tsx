@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, IonItemSliding, IonItemOptions, IonItemOption } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -501,8 +501,16 @@ const highlightText = (text: string, searchText: string) => {
   );
 };
 
-// ApprovalItem with swipe actions
+// ApprovalItem 간단한 버전
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [initialScrollLeft, setInitialScrollLeft] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState<boolean | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  console.log('rebuild approval item' + index);
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -522,8 +530,87 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     // TODO: 상세 페이지로 이동하거나 다른 액션 구현
   }, [approval.flowNo]);
 
+  // 터치 이벤트 핸들러들
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!scrollRef.current) return;
+    setStartX(e.touches[0].clientX);
+    setStartY(e.touches[0].clientY);
+    setInitialScrollLeft(scrollRef.current.scrollLeft); // 시작할 때 스크롤 위치 저장
+    setIsDragging(true);
+    setIsHorizontalSwipe(null); // 방향 초기화
+    setSwipeDirection(null); // 스와이프 방향 초기화
+  }, []);
 
-  const titleElement = useMemo(() =>
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = startX - currentX;
+    const diffY = startY - currentY;
+
+    // 첫 움직임에서 방향 결정 (10px 이상 움직였을 때)
+    if (isHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+      const isHorizontal = Math.abs(diffX) > Math.abs(diffY);
+      setIsHorizontalSwipe(isHorizontal);
+      
+      // 스와이프 방향 설정 (diffX > 0: 왼쪽 스와이프, diffX < 0: 오른쪽 스와이프)
+      if (isHorizontal) {
+        setSwipeDirection(diffX > 0 ? 'left' : 'right');
+      }
+    }
+
+    // 가로 스와이프로 확정된 경우에만 처리
+    if (isHorizontalSwipe === true) {
+      e.preventDefault(); // 세로 스크롤 방지
+      
+      // 시작 위치 + 상대적 움직임으로 계산
+      const newScrollLeft = Math.max(0, Math.min(160, initialScrollLeft + diffX));
+      
+      scrollRef.current.scrollLeft = newScrollLeft;
+    }
+    // 세로 스크롤인 경우 아무것도 하지 않음 (자연스러운 세로 스크롤 허용)
+  }, [isDragging, startX, startY, isHorizontalSwipe, initialScrollLeft]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!scrollRef.current) return;
+    
+    // 가로 스와이프였던 경우에만 스냅 처리
+    if (isHorizontalSwipe === true) {
+      const currentScrollLeft = scrollRef.current.scrollLeft;
+      
+      // 스와이프 방향과 현재 상태를 고려한 로직
+      if (swipeDirection === 'left') {
+        // 왼쪽 스와이프 = 버튼 노출하려는 의도
+        if (currentScrollLeft > 30) {
+          scrollRef.current.scrollTo({ left: 160, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+      } else if (swipeDirection === 'right') {
+        // 오른쪽 스와이프 = 버튼 숨기려는 의도
+        if (currentScrollLeft < 130) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollTo({ left: 160, behavior: 'smooth' });
+        }
+      } else {
+        // 방향이 확실하지 않은 경우 기존 로직 사용
+        if (currentScrollLeft > 80) {
+          scrollRef.current.scrollTo({ left: 160, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+      }
+    }
+    
+    setIsDragging(false);
+    setIsHorizontalSwipe(null);
+    setSwipeDirection(null);
+  }, [isHorizontalSwipe, swipeDirection]);
+
+  // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
+  const titleElement = useMemo(() => (
     <div className='custom-item-title'>
       <span>{highlightText(approval.apprTitle, searchText)}</span>
       <div className='custom-item-sub-title'>
@@ -532,9 +619,10 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
         <span>{approval.createDate}</span>
       </div>
     </div>
-    , [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
+  ), [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
 
-  const bodyElement = useMemo(() =>
+  // body 엘리먼트 메모이제이션 - 실제 데이터로 교체 필요
+  const bodyElement = useMemo(() => (
     <div className='custom-item-body'>
       <div className='custom-item-body-line'>
         <span>구분</span>
@@ -557,27 +645,89 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
         <span>소모품비-기타</span>
       </div>
     </div>
-    , []);
+  ), []); // 하드코딩된 데이터이므로 빈 의존성 배열
+
+  // CustomItem props 메모이제이션
+  const customItemProps = useMemo(() => ({
+    selectable: true,
+    checked: isSelected,
+    title: titleElement,
+    body: bodyElement,
+    onClick: handleItemClick,
+    onCheckboxChange: handleCheckboxChange,
+  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange]);
+
+  // useEffect로 이벤트 리스너 등록 (passive: false 옵션 사용)
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+
+    const options: AddEventListenerOptions = { passive: false };
+    
+    const touchMoveHandler = (e: TouchEvent) => {
+      const syntheticEvent = {
+        touches: Array.from(e.touches).map(touch => ({
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        })),
+        preventDefault: () => {
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+        }
+      } as unknown as React.TouchEvent;
+      
+      handleTouchMove(syntheticEvent);
+    };
+    
+    element.addEventListener('touchmove', touchMoveHandler, options);
+    
+    return () => {
+      element.removeEventListener('touchmove', touchMoveHandler, options);
+    };
+  }, [handleTouchMove]);
 
   return (
-    <IonItemSliding>
-        <CustomItem
-          selectable={true}
-          checked={isSelected}
-          title={titleElement}
-          body={bodyElement}
-          onClick={handleItemClick}
-          onCheckboxChange={handleCheckboxChange}
-        />
-      <IonItemOptions side="end">
-        <IonItemOption mode='md' color="medium" className='slide-action' onClick={handleReject}>
-          <IonIcon icon={closeOutline} style={{ fontSize: '20px' }} />
-        </IonItemOption>
-        <IonItemOption mode='md' color="primary" className='slide-action' onClick={handleApprove}>
-          <IonIcon icon={checkmarkOutline} style={{ fontSize: '20px' }} />
-        </IonItemOption>
-      </IonItemOptions>
-    </IonItemSliding>
+    <div
+      ref={scrollRef}
+      className="scroll-container"
+      style={{ width: '100%' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <div style={{ width: 'calc(100% - 11px)', }}>
+        <CustomItem {...customItemProps} />
+      </div>
+      <IonButton
+        mode="md"
+        color="medium"
+        onClick={handleReject}
+        style={{ width: '80px' }}
+      >
+        <IonIcon src={closeOutline} style={{ marginRight: '4px' }} />
+        반려
+      </IonButton>
+      <IonButton
+        mode="md"
+        color="primary"
+        onClick={handleApprove}
+        style={{ width: '80px', marginRight: '11px' }}
+      >
+        <IonIcon src={checkmarkOutline} style={{ marginRight: '4px' }} />
+        승인
+      </IonButton>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // 커스텀 비교 함수로 불필요한 리렌더링 방지
+  return (
+    prevProps.approval.flowNo === nextProps.approval.flowNo &&
+    prevProps.approval.apprTitle === nextProps.approval.apprTitle &&
+    prevProps.approval.creatorName === nextProps.approval.creatorName &&
+    prevProps.approval.createDate === nextProps.approval.createDate &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.searchText === nextProps.searchText &&
+    prevProps.index === nextProps.index
   );
 });
 
