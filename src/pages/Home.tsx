@@ -105,7 +105,7 @@ const WelcomeCard: React.FC = () => {
           <span>이성하님</span>
           <span>좋은 하루 보내세요</span>
         </div>
-        <IonButton fill='clear' className='welcome-card-button'>내 정보</IonButton>
+        <IonButton fill='clear' mode='md' className='welcome-card-button'>내 정보</IonButton>
       </div>
     </IonCard>
   );

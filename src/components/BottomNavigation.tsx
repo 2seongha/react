@@ -1,7 +1,7 @@
 import React from 'react';
 import { IonFooter, useIonRouter } from '@ionic/react';
 import { BottomNavigation as MuiBottomNavigation, BottomNavigationAction } from '@mui/material';
-import { Home as HomeIcon, Notifications as NotificationsIcon, Menu as MenuIcon } from '@mui/icons-material';
+import { HomeFilled as HomeIcon, Notifications as NotificationsIcon, MoreHoriz as MenuIcon } from '@mui/icons-material';
 import useAppStore from '../stores/appStore';
 import './BottomNavigation.css';
 

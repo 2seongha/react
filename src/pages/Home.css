@@ -82,13 +82,8 @@
   --color: var(--icon-color-secondary);
   --box-shadow: none;
   --border-radius: 20px;
-  /* --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: 0;
-  --padding-end: 0; */
-  margin: 0;
-  /* font-size: 11px; */
-  /* font-weight: 500; */
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .home-card.menu-card {
