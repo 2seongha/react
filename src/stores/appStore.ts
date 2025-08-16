@@ -1,6 +1,6 @@
-import { create } from 'zustand';
 import { AppState } from './types';
 import { fetchApprovals, fetchMenuAreas, fetchNotices, fetchNotifications } from './service';
+import { createWithEqualityFn } from 'zustand/traditional'
 
 // themeMode 초기값을 localStorage에서 가져오기
 const getInitialThemeMode = (): 'light' | 'dark' | 'system' => {
@@ -23,7 +23,7 @@ const requestIds = {
   notifications: 0,
 };
 
-const useAppStore = create<AppState>((set, get) => ({
+const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   themeMode: getInitialThemeMode(),
   user: {},
   menuAreas: null,

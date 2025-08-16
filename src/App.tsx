@@ -90,7 +90,7 @@ const App: React.FC = () => {
           <Route path="/app/more" component={More} exact />
           <Route path="/flowList" component={FlowList} exact />
           <Route path="/approval" component={Approval} exact />
-          <Route path="/detail" component={Detail} exact />
+          <Route path="/detail/:flowNo" component={Detail} exact/>
           <Route path="/menu" component={Menu} exact />
           <Route path="/notice" component={Notice} exact />
           <Route path="/settings" component={Settings} exact />

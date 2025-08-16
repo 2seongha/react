@@ -2,14 +2,13 @@ import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSea
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, refresh, calendarClear, close, checkmark, person, closeOutline, checkmarkOutline } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, checkmarkOutline } from 'ionicons/icons';
 import { ApprovalModel } from '../stores/types';
-import { Commet } from 'react-loading-indicators';
 import CustomItem from '../components/CustomItem';
+import CustomSkeleton from '../components/CustomSkeleton';
 import './Approval.css';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { getPlatformMode } from '../utils';
-import LazyImage from '../components/LazyImage';
 
 const Approval: React.FC = () => {
   const setApprovals = useAppStore(state => state.setApprovals);
@@ -21,16 +20,20 @@ const Approval: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
   const scrollCallbackRef = useRef<(() => void) | null>(null);
 
-  useIonViewWillEnter(() => {
+  useEffect(() => {
     setApprovals(null);
     setSelectedItems(new Set());
     setSearchText('');
     fetchApprovals();
-  });
 
-  useIonViewDidLeave(() => {
-    setApprovals(null);
-  });
+    return () => setApprovals(null);
+  }, []);
+
+  // useIonViewWillEnter(() => {
+  // });
+
+  // useIonViewDidLeave(() => {
+  // });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setApprovals(null);
@@ -379,8 +382,10 @@ const Approval: React.FC = () => {
         </IonRefresher>
 
         {!approvals ? (
-          <div className='loading-indicator-wrapper'>
-            <Commet color="var(--ion-color-primary)" />
+          <div className='skeleton-container'>
+            {Array.from({ length: 5 }, (_, index) => (
+              <CustomSkeleton width='100%' height='200px' style={{ marginBottom: '12px', borderRadius: '12px' }} key={`skeleton-${index}`} />
+            ))}
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
@@ -505,6 +510,8 @@ const highlightText = (text: string, searchText: string) => {
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false });
+  const router = useIonRouter();
+
   const handleCheckboxChange = useCallback((checked: boolean) => {
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
@@ -523,8 +530,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   const handleItemClick = useCallback(() => {
     console.log('아이템 클릭:', approval.flowNo);
-    // TODO: 상세 페이지로 이동하거나 다른 액션 구현
-  }, [approval.flowNo]);
+    router.push(`/detail/${approval.flowNo}`, 'forward', 'push');
+  }, [approval.flowNo, router]);
 
   // 초간단 터치 핸들러들
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -554,28 +561,28 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
     scrollRef.current.style.scrollBehavior = 'auto';
     scrollRef.current.scrollTo({ left: targetLeft, behavior: 'auto' });
-    
+
     // 빠른 애니메이션을 위해 requestAnimationFrame 사용
     const startLeft = scrollLeft;
     const distance = targetLeft - startLeft;
     const duration = 150; // 150ms
     const startTime = performance.now();
-    
+
     const animateScroll = (currentTime: number) => {
       if (!scrollRef.current) return; // null 체크
-      
+
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const easeOut = 1 - Math.pow(1 - progress, 3); // cubic ease-out
-      
+
       const currentLeft = startLeft + (distance * easeOut);
       scrollRef.current.scrollLeft = currentLeft;
-      
+
       if (progress < 1) {
         requestAnimationFrame(animateScroll);
       }
     };
-    
+
     requestAnimationFrame(animateScroll);
     touch.isDragging = false;
   }, []);

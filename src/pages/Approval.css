@@ -17,6 +17,10 @@
   height: 200px;
 }
 
+.approval .skeleton-container {
+  padding: 12px 22px;
+}
+
 .approval .buttons-wrapper {
   display: flex;
   align-items: center;
