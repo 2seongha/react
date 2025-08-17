@@ -1,6 +1,5 @@
 import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, createGesture } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useAnimationFrame } from '../utils/animationFrame';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, checkmarkOutline, headset } from 'ionicons/icons';
@@ -20,25 +19,6 @@ const Approval: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState<string>('');
   const scrollCallbackRef = useRef<(() => void) | null>(null);
-  
-  // 부드러운 스크롤을 위한 애니메이션 프레임 최적화
-  const scrollMetricsRef = useRef({
-    lastScrollTime: 0,
-    scrollVelocity: 0,
-    isScrolling: false
-  });
-
-  // 스크롤 성능 모니터링
-  useAnimationFrame(() => {
-    const now = performance.now();
-    const metrics = scrollMetricsRef.current;
-    
-    // 스크롤이 멈춘 후 정리
-    if (metrics.isScrolling && now - metrics.lastScrollTime > 150) {
-      metrics.isScrolling = false;
-      metrics.scrollVelocity = 0;
-    }
-  }, []);
 
   useEffect(() => {
     setApprovals(null);
@@ -409,6 +389,7 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
+            style={{willChange: 'transform', translate: 'translateX(0px)', width: '485px'}}
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={10}

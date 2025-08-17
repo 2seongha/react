@@ -150,48 +150,10 @@ body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
-/* 전역 폰트 설정 */
+/* 모든 텍스트 요소에 Pretendard 적용 */
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
-
-/* 애니메이션 최적화 - 선택적 적용 */
-.optimized-element {
-  backface-visibility: hidden;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
-              opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: auto;
-  transform: translateZ(0);
-}
-
-/* Ionic 컴포넌트 최적화 - 더 보수적 접근 */
-ion-app {
-  background: transparent;
-}
-
-ion-page {
-  background: var(--ion-background-color);
-}
-
-ion-content {
-  /* 스크롤 최적화만 적용 */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  scroll-behavior: auto;
-}
-
-/* 필요시에만 최적화 클래스 사용 */
-.scroll-optimized {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-.animation-optimized {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-/* 텍스트 렌더링은 기본값 사용 */
 
 /* Ionic 컴포넌트에도 폰트 적용 */
 ion-button,

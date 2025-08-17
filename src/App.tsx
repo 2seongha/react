@@ -15,7 +15,6 @@ import { initWebview } from './webview';
 import { getPlatformMode } from './utils';
 import Notifications from './pages/Notifications';
 import More from './pages/More';
-import { animationFrameManager } from './utils/animationFrame';
 
 
 const App: React.FC = () => {
@@ -42,33 +41,6 @@ const App: React.FC = () => {
     initializeWebview();
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
-    
-    // 전역 애니메이션 프레임 시스템 초기화
-    console.log('애니메이션 프레임워크 초기화');
-    
-    // 앱 전체 성능 모니터링
-    let frameCount = 0;
-    let lastTime = performance.now();
-    
-    const performanceMonitor = () => {
-      frameCount++;
-      const currentTime = performance.now();
-      
-      if (currentTime - lastTime >= 5000) { // 5초마다 체크
-        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-        console.log(`앱 FPS: ${fps}`);
-        frameCount = 0;
-        lastTime = currentTime;
-      }
-    };
-    
-    // 애니메이션 프레임워크에 성능 모니터 등록
-    const unsubscribe = animationFrameManager.subscribe(performanceMonitor);
-    
-    return () => {
-      unsubscribe();
-      console.log('애니메이션 프레임워크 정리');
-    };
   }, []);
 
   useEffect(() => {
