@@ -130,16 +130,6 @@ body {
 }
 
 /* Ionic 컴포넌트에도 시스템 폰트 적용 */
-ion-button,
-ion-item,
-ion-label,
-ion-title,
-ion-header,
-ion-content,
-ion-card,
-ion-card-content,
-ion-card-header,
-ion-card-title,
 h1,
 h2,
 h3,
@@ -147,8 +137,8 @@ h4,
 h5,
 h6,
 p,
-span,
-div {
+span {
+  transform: rotate(0.04deg);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
 
