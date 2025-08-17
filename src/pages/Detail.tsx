@@ -55,6 +55,7 @@ const Detail: React.FC = () => {
         forceOverscroll={false}
       > */}
         <div className="detail-text-container" style={{ 
+          overflow: 'scroll',
           padding: '20px', 
           lineHeight: '1.8', 
           fontSize: '16px'
