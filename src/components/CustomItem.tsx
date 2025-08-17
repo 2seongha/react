@@ -34,33 +34,6 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
     }
   }, [sub, isExpanded, onClick]);
 
-  // Long press와 click을 통합 관리
-  // let pressTimer: NodeJS.Timeout;
-
-  // useEffect(() => {
-  //   const gesture = createGesture({
-  //     el: wrapperRef.current!,
-  //     gestureName: 'long-press',
-  //     threshold: 0,
-  //     onStart: () => {
-  //       // 꾹 누르기 600ms 후 동작
-  //       pressTimer = setTimeout(() => {
-  //         console.log('🕓 꾹 누르기 감지됨 (롱프레스)');
-  //         // 👉 여기서 롱프레스 시 실행할 작업 추가
-  //       }, 600);
-  //     },
-  //     onMove: () => {
-  //       clearTimeout(pressTimer); // 움직이면 롱프레스 취소
-  //     },
-  //     onEnd: () => {
-  //       clearTimeout(pressTimer); // 손 떼면 롱프레스 취소
-  //     },
-  //   });
-
-  //   gesture.enable(true);
-  //   return () => gesture.destroy();
-  // }, []);
-
   const headerButton = useMemo(() => {
     if (sub) {
       return (
@@ -76,7 +49,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   const contentAreaClasses = useMemo(() => `custom-item-header-content-area`, []);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', background:'var(--ion-background-color)' }}>
       <div
         ref={wrapperRef}
         style={style}
@@ -111,7 +84,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
       {selectable &&
         <div
           className='custom-item-checkbox-wrapper'
-          onTouchStart={handleCheckboxToggle}
+          onPointerUp={handleCheckboxToggle}
           style={{ display: 'flex', alignItems: 'center' }}
         />
       }
