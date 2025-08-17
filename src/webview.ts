@@ -148,7 +148,7 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = 'N'; // 환경변수 가져오기
+  const isWebView = 'Y'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
 
   if (isWebView == 'Y') {
