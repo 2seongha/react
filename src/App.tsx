@@ -24,8 +24,10 @@ const App: React.FC = () => {
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    // 웹뷰 초기화
+    // 웹뷰 초기화 (테마 초기화가 완료된 후에만 실행)
     const initializeWebview = async () => {
+      if (!themeInitialized) return; // 테마 초기화가 완료될 때까지 대기
+      
       try {
         console.log('웹뷰 초기화 시작...');
         const success = await initWebview();
@@ -39,6 +41,9 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
+  }, [themeInitialized]);
+
+  useEffect(() => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
   }, []);
