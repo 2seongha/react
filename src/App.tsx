@@ -19,7 +19,7 @@ import More from './pages/More';
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
-  const [completeInitWebview, setCompleteInitWebview] = useState<boolean>(false);
+  const [completeInit, setCompleteInit] = useState<boolean>(false);
   const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
 
@@ -44,9 +44,6 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // themeMode가 없으면 아직 zustand 초기화가 안된 것이므로 대기
-    if (!themeMode) return;
-
     const html = document.documentElement;
 
     if (themeMode === 'dark') {
@@ -63,9 +60,8 @@ const App: React.FC = () => {
       };
 
       mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
     }
-
+    
     // 테마 초기화 완료 표시
     setThemeInitialized(true);
   }, [themeMode]);
@@ -74,11 +70,12 @@ const App: React.FC = () => {
   useEffect(() => {
     if (webviewInitialized && themeInitialized) {
       console.log('앱 초기화 완료!');
-      setCompleteInitWebview(true);
+
+      setCompleteInit(true);
     }
   }, [webviewInitialized, themeInitialized]);
 
-  if (!completeInitWebview) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
+  if (!completeInit) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
   return (
     <IonApp>
       <IonReactRouter>
