@@ -67,6 +67,12 @@ const Home: React.FC = () => {
         <div style={{ marginTop: '12px' }}>
           <TodoSummaryCard />
         </div>
+        <div style={{ marginTop: '12px' }}>
+          <TodoSummaryCard />
+        </div>
+        <div style={{ marginTop: '12px' }}>
+          <TodoSummaryCard />
+        </div>
       </IonContent>
       <BottomTabBar />
     </IonPage>
