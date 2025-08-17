@@ -4,6 +4,10 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+  /* 성능 최적화 */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: layout style paint;
 }
 
 .custom-item.selected {

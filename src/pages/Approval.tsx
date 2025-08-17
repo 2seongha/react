@@ -26,7 +26,32 @@ const Approval: React.FC = () => {
     setSearchText('');
     fetchApprovals();
 
-    return () => setApprovals(null);
+    // 스크롤 성능 최적화를 위한 이벤트 리스너
+    let isScrolling = false;
+    let scrollTimeout: number;
+
+    const handleScrollStart = () => {
+      if (!isScrolling) {
+        isScrolling = true;
+        document.body.classList.add('scrolling');
+      }
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+        document.body.classList.remove('scrolling');
+      }, 150) as any;
+    };
+
+    // Passive listener로 성능 향상
+    document.addEventListener('scroll', handleScrollStart, { passive: true });
+    document.addEventListener('touchmove', handleScrollStart, { passive: true });
+
+    return () => {
+      setApprovals(null);
+      document.removeEventListener('scroll', handleScrollStart);
+      document.removeEventListener('touchmove', handleScrollStart);
+      clearTimeout(scrollTimeout);
+    };
   }, []);
 
   // useIonViewWillEnter(() => {
@@ -376,6 +401,7 @@ const Approval: React.FC = () => {
       <IonContent
         fullscreen
         scrollY={false}
+        className="smooth-scroll"
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
@@ -391,10 +417,10 @@ const Approval: React.FC = () => {
           <Virtuoso
             ref={virtuosoRef}
             data={filteredApprovals}
-            overscan={10}
-            initialItemCount={10}
+            overscan={5} // 줄여서 메모리 사용량 감소
+            initialItemCount={8} // 초기 렌더링 아이템 수 최적화
             initialTopMostItemIndex={0}
-            increaseViewportBy={{ top: 200, bottom: 200 }}
+            increaseViewportBy={{ top: 400, bottom: 400 }} // 늘려서 스크롤 부드러움 증가
             atTopStateChange={(atTop) => setIsTop(atTop)}
             rangeChanged={() => {
               if (scrollCallbackRef.current) {
@@ -402,6 +428,9 @@ const Approval: React.FC = () => {
               }
             }}
             itemContent={renderItem}
+            // 성능 최적화 설정
+            fixedItemHeight={200} // 고정 높이로 계산 최적화
+            followOutput={false}
           />
         ) : (
           <div style={{
@@ -514,7 +543,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     onSelectionChange(approval.flowNo, checked);
   }, [approval.flowNo, onSelectionChange]);
 
-  console.log('approval item rebuild : ' + index);
+  // console.log('approval item rebuild : ' + index); // 성능을 위해 주석 처리
 
   const handleApprove = useCallback(() => {
     console.log('승인:', approval.flowNo);
