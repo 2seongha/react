@@ -15,6 +15,7 @@ import { initWebview } from './webview';
 import { getPlatformMode } from './utils';
 import Notifications from './pages/Notifications';
 import More from './pages/More';
+import { animationFrameManager } from './utils/animationFrame';
 
 
 const App: React.FC = () => {
@@ -24,10 +25,8 @@ const App: React.FC = () => {
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    // 웹뷰 초기화 (테마 초기화가 완료된 후에만 실행)
+    // 웹뷰 초기화
     const initializeWebview = async () => {
-      if (!themeInitialized) return; // 테마 초기화가 완료될 때까지 대기
-      
       try {
         console.log('웹뷰 초기화 시작...');
         const success = await initWebview();
@@ -41,11 +40,35 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-  }, [themeInitialized]);
-
-  useEffect(() => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
+    
+    // 전역 애니메이션 프레임 시스템 초기화
+    console.log('애니메이션 프레임워크 초기화');
+    
+    // 앱 전체 성능 모니터링
+    let frameCount = 0;
+    let lastTime = performance.now();
+    
+    const performanceMonitor = () => {
+      frameCount++;
+      const currentTime = performance.now();
+      
+      if (currentTime - lastTime >= 5000) { // 5초마다 체크
+        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+        console.log(`앱 FPS: ${fps}`);
+        frameCount = 0;
+        lastTime = currentTime;
+      }
+    };
+    
+    // 애니메이션 프레임워크에 성능 모니터 등록
+    const unsubscribe = animationFrameManager.subscribe(performanceMonitor);
+    
+    return () => {
+      unsubscribe();
+      console.log('애니메이션 프레임워크 정리');
+    };
   }, []);
 
   useEffect(() => {
@@ -75,12 +98,14 @@ const App: React.FC = () => {
   useEffect(() => {
     if (webviewInitialized && themeInitialized) {
       console.log('앱 초기화 완료!');
+      console.log(completeInit);
 
       setCompleteInit(true);
+      console.log(completeInit);
     }
   }, [webviewInitialized, themeInitialized]);
 
-  if (!completeInit) return null
+  if (!completeInit) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
   return (
     <IonApp>
       <IonReactRouter>

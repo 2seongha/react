@@ -141,28 +141,72 @@
   --logo: url('/src/assets/images/app_logo_light.webp');
 }
 
-html, body {
+body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--ion-background-color, #ffffff);
   color: var(--ion-text-color, #000000);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
-/* 테마 적용 후에만 배경색 설정 */
-[data-theme="light"] body {
-  background: var(--ion-background-color) !important;
-}
-
-[data-theme="dark"] body {
-  background: var(--ion-background-color) !important;
-}
-
-/* 모든 텍스트 요소에 Pretendard 적용 */
+/* 전역 애니메이션 최적화 */
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* 하드웨어 가속 선택적 적용 */
+  backface-visibility: hidden;
+  /* 부드러운 애니메이션 */
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 컴포지터 레이어 최적화 */
+  will-change: auto;
+  /* 픽셀 정렬 */
+  transform: translateZ(0);
+}
+
+/* 특정 요소들은 더 강한 최적화 */
+ion-app,
+ion-page,
+ion-content,
+ion-router-outlet {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  /* 스크롤 최적화 */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
+}
+
+/* 스크롤 컨테이너 최적화 */
+.virtuoso-container,
+.virtuoso-viewport,
+.virtuoso-item-list {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* 버츄얼 스크롤 아이템 최적화 */
+.approval-item-wrapper {
+  transform: translateZ(0);
+  contain: layout style;
+  will-change: transform;
+}
+
+/* 애니메이션이 자주 발생하는 요소들 */
+.custom-item,
+ion-button,
+ion-ripple-effect {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* 텍스트 렌더링 최적화 */
+body, * {
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: subpixel-antialiased;
+  font-smooth: never;
 }
 
 /* Ionic 컴포넌트에도 폰트 적용 */
