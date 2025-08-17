@@ -49,13 +49,12 @@ const Detail: React.FC = () => {
   return (
     <IonPage className="detail-page">
       <AppBar title={<span>{approval.apprTitle}</span>} showBackButton={true} />
-      {/* <IonContent 
+      <IonContent 
         className="detail-content"
         scrollEvents={false}
         forceOverscroll={false}
-      > */}
+      >
         <div className="detail-text-container" style={{ 
-          overflow: 'scroll',
           padding: '20px', 
           lineHeight: '1.8', 
           fontSize: '16px'
@@ -196,7 +195,7 @@ const Detail: React.FC = () => {
             부드러운 스크롤을 경험해보세요!
           </p>
         </div>
-      {/* </IonContent> */}
+      </IonContent>
     </IonPage>
   );
 };
