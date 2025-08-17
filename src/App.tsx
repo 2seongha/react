@@ -80,7 +80,7 @@ const App: React.FC = () => {
     }
   }, [webviewInitialized, themeInitialized]);
 
-  if (!completeInit) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
+  if (!completeInit) return null
   return (
     <IonApp>
       <IonReactRouter>

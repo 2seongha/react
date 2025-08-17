@@ -141,13 +141,23 @@
   --logo: url('/src/assets/images/app_logo_light.webp');
 }
 
-body {
+html, body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--ion-background-color, #ffffff);
+  background: transparent !important;
+  background-color: transparent !important;
   color: var(--ion-text-color, #000000);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* 테마 적용 후에만 배경색 설정 */
+[data-theme="light"] body {
+  background: var(--ion-background-color) !important;
+}
+
+[data-theme="dark"] body {
+  background: var(--ion-background-color) !important;
 }
 
 /* 모든 텍스트 요소에 Pretendard 적용 */
