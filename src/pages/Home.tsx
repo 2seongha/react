@@ -67,12 +67,6 @@ const Home: React.FC = () => {
         <div style={{ marginTop: '12px' }}>
           <TodoSummaryCard />
         </div>
-        <div style={{ marginTop: '12px' }}>
-          <TodoSummaryCard />
-        </div>
-        <div style={{ marginTop: '12px' }}>
-          <TodoSummaryCard />
-        </div>
       </IonContent>
       <BottomTabBar />
     </IonPage>
@@ -222,8 +216,6 @@ const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, in
 
   const containerStyle = useMemo(() => ({
     overflow: 'hidden' as const,
-    willChange: 'transform, opacity, height', // GPU 가속 힌트
-    transform: 'translateZ(0)', // 하드웨어 가속 강제
   }), []);
 
   return (
