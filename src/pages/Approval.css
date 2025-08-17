@@ -70,6 +70,10 @@
 
 .approval-item-wrapper {
   padding: 0px 16px 12px 16px;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000;
 }
 
 .approval-item-wrapper.first-item {

@@ -103,12 +103,10 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
     layout: true,
     initial: { 
       y: 20,
-      opacity: 0.5, 
       scale: 0.95,
     },
     animate: { 
       y: 0,
-      opacity: 1, 
       scale: 1,
     },
     transition: {

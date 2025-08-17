@@ -201,15 +201,15 @@ const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, in
       height: 0,
       transition: {
         height: {
-          delay: .25
+          delay: .3
         }
       }
     },
     transition: {
-      duration: .25,
+      duration: .3,
       opacity: {
-        delay: .25,
-        duration: .25
+        delay: .3,
+        duration: .3
       }
     },
   }), [index]);

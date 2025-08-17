@@ -551,7 +551,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   // body 엘리먼트 메모이제이션 - 실제 데이터로 교체 필요
   const bodyElement = useMemo(() => (
     <div className='custom-item-body'>
-      <div className='custom-item-body-line'>
+      {/* <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>
       </div>
@@ -570,8 +570,8 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
       <div className='custom-item-body-line'>
         <span>계정명</span>
         <span>소모품비-기타</span>
-      </div>
-      <IonImg src='https://cdn.gamey.kr/news/photo/202304/3004960_109898_511.jpg' style={{height:'200px', width:'100%', objectFit:'fill'}}></IonImg>
+      </div> */}
+      <IonImg src='https://cdn.gamey.kr/news/photo/202304/3004960_109898_511.jpg' style={{height:'400px', width:'100%', objectFit:'fill'}}></IonImg>
     </div>
   ), []); // 하드코딩된 데이터이므로 빈 의존성 배열
 
