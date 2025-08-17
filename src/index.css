@@ -27,14 +27,14 @@
 }
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  font-synthesis: none;
-  text-rendering: optimizeSpeed;
+  /* font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale; */
   --vh: 100%;
 
   /* Light theme */
@@ -147,19 +147,15 @@ body {
   min-height: 100vh;
   background: var(--ion-background-color, #ffffff);
   color: var(--ion-text-color, #000000);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
-/* 모든 텍스트 요소에 시스템 폰트 적용 */
+/* 모든 텍스트 요소에 Pretendard 적용 */
 * {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  /* 텍스트 렌더링 성능 최적화 */
-  text-rendering: optimizeSpeed;
-  font-smooth: never;
-  -webkit-font-smoothing: subpixel-antialiased;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
-/* Ionic 컴포넌트에도 시스템 폰트 적용 */
+/* Ionic 컴포넌트에도 폰트 적용 */
 ion-button,
 ion-item,
 ion-label,
@@ -179,7 +175,7 @@ h6,
 p,
 span,
 div {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
 }
 
 .loading-indicator-wrapper {
