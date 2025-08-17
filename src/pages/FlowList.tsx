@@ -54,7 +54,7 @@ const FlowList: React.FC = () => {
         <span>미결함</span>
       } showBackButton={true} showCount={true} count={totalCount} />
 
-      <IonContent fullscreen >
+      <IonContent fullscreen scrollEvents={false}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>

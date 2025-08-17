@@ -51,7 +51,7 @@ const Home: React.FC = () => {
     <IonPage className="home">
       <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
 
-      <IonContent fullscreen>
+      <IonContent fullscreen scrollEvents={false}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>

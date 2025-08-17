@@ -376,6 +376,7 @@ const Approval: React.FC = () => {
       <IonContent
         fullscreen
         scrollY={false}
+        scrollEvents={false}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
