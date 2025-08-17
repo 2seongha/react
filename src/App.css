@@ -155,3 +155,9 @@ ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) {
 ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) * {
   color: var(--ion-text-color);
 }
+
+html, body {
+  overscroll-behavior: contain; /* 튕김 제거 */
+  scroll-behavior: smooth;      /* 부드러운 이동 */
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 (Android 일부 영향 있음) */
+}
