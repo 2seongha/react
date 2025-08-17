@@ -2,25 +2,12 @@
   background-color: var(--ion-background-color);
   border-radius: 12px;
   flex-direction: column;
+  overflow: hidden;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
 }
 
-.custom-item-wrapper {
-  width: 100%;
-  position: relative;
-}
-
-/* ion-activated 클래스 효과 제거 */
-.custom-item-wrapper.ion-activated {
-  background: transparent !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-/* 체크박스 선택 시 스타일 */
 .custom-item.selected {
   background: rgba(var(--ion-color-primary-rgb), 0.05);
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
 }
 
 .custom-item-header {
@@ -37,6 +24,14 @@
 
 .custom-item-header-icon {
   color: var(--ion-color-secondary);
+}
+
+.custom-item-checkbox-wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  height: 56px;
 }
 
 .custom-item-header>ion-checkbox {

@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, createGesture } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -508,9 +508,6 @@ const highlightText = (text: string, searchText: string) => {
 
 // ApprovalItem 초간단 버전
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const touchData = useRef({ startX: 0, startY: 0, initialScrollLeft: 0, isDragging: false, isSwiping: false, isVerticalScroll: false });
-  const swipeStateRef = useRef({ isSwipeDisabled: false });
   const router = useIonRouter();
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -530,75 +527,14 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   }, [approval.flowNo]);
 
   const handleItemClick = useCallback(() => {
-    // 스와이프 중이면 클릭 무시
-    if (touchData.current.isSwiping) {
-      console.log('스와이프 중이므로 클릭 무시');
-      return;
-    }
     console.log('아이템 클릭:', approval.flowNo);
     router.push(`/detail/${approval.flowNo}`, 'forward', 'push');
   }, [approval.flowNo, router]);
 
-  // 초간단 터치 핸들러들
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (!scrollRef.current) return;
-    const touch = touchData.current;
-    touch.startX = e.touches[0].clientX;
-    touch.startY = e.touches[0].clientY;
-    touch.initialScrollLeft = scrollRef.current.scrollLeft;
-    touch.isDragging = true;
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    const touch = touchData.current;
-    if (!touch.isDragging || !scrollRef.current) return;
-    const scrollLeft = scrollRef.current.scrollLeft;
-
-    // 스와이프 플래그를 잠시 후에 해제 (ripple effect 방지)
-    setTimeout(() => {
-      touch.isSwiping = false;
-      swipeStateRef.current.isSwipeDisabled = false; // pointer events 다시 활성화
-    }, 100);
-
-    // 스와이프 방향과 현재 상태를 고려한 똑똑한 로직
-    let targetLeft = 0;
-
-    if (touch.initialScrollLeft === 0) {
-      // 닫힌 상태에서 시작: 30px만 넘어도 열기
-      targetLeft = scrollLeft > 30 ? 160 : 0;
-    } else {
-      // 열린 상태에서 시작: 130px 아래로 내려가면 닫기
-      targetLeft = scrollLeft < 130 ? 0 : 160;
-    }
-
-    scrollRef.current.style.scrollBehavior = 'auto';
-    scrollRef.current.scrollTo({ left: targetLeft, behavior: 'auto' });
-
-    // 빠른 애니메이션을 위해 requestAnimationFrame 사용
-    const startLeft = scrollLeft;
-    const distance = targetLeft - startLeft;
-    const duration = 150; // 150ms
-    const startTime = performance.now();
-
-    const animateScroll = (currentTime: number) => {
-      if (!scrollRef.current) return; // null 체크
-
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3); // cubic ease-out
-
-      const currentLeft = startLeft + (distance * easeOut);
-      scrollRef.current.scrollLeft = currentLeft;
-
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
-
-    requestAnimationFrame(animateScroll);
-    touch.isDragging = false;
-    touch.isVerticalScroll = false; // 플래그 초기화
-  }, []);
+  const handleLongPress = useCallback(() => {
+    console.log('롱프레스:', approval.flowNo);
+    // TODO: 롱프레스 로직 구현 (예: 컨텍스트 메뉴, 다중 선택 모드 등)
+  }, [approval.flowNo]);
 
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
   const titleElement = useMemo(() => (
@@ -645,74 +581,31 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     title: titleElement,
     body: bodyElement,
     onClick: handleItemClick,
+    onLongPress: handleLongPress,
     onCheckboxChange: handleCheckboxChange,
-    style: { pointerEvents: swipeStateRef.current.isSwipeDisabled ? 'none' : 'auto' } as React.CSSProperties,
-    forceHideRipple: swipeStateRef.current.isSwipeDisabled,
-  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange]);
+  }), [isSelected, titleElement, bodyElement, handleItemClick, handleLongPress, handleCheckboxChange]);
 
-  // useEffect 간소화
-  useEffect(() => {
-    const element = scrollRef.current;
-    if (!element) return;
-
-    const touchMoveHandler = (e: TouchEvent) => {
-      const touch = touchData.current;
-      if (!touch.isDragging) return;
-
-      const diffX = touch.startX - e.touches[0].clientX;
-      const diffY = touch.startY - e.touches[0].clientY;
-
-      // 세로 스크롤 감지
-      if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
-        touch.isVerticalScroll = true;
-        return; // 세로 스크롤이면 가로 스와이프 차단
-      }
-
-      // 가로 스와이프 감지 (세로 스크롤이 아닐 때만)
-      if (!touch.isVerticalScroll && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 5) {
-        touch.isSwiping = true; // 스와이프 중임을 표시
-        swipeStateRef.current.isSwipeDisabled = true; // pointer events 비활성화
-        if (e.cancelable) e.preventDefault();
-        const newScrollLeft = Math.max(0, Math.min(160, touch.initialScrollLeft + diffX));
-        element.scrollLeft = newScrollLeft;
-      }
-    };
-
-    element.addEventListener('touchmove', touchMoveHandler, { passive: false });
-
-    return () => {
-      element.removeEventListener('touchmove', touchMoveHandler);
-    };
-  }, []);
 
   return (
-    <div
-      ref={scrollRef}
-      className="scroll-container"
-      style={{ width: '100%' }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
       <CustomItem {...customItemProps} />
-      <IonButton
-        mode="md"
-        color="medium"
-        onClick={handleReject}
-        style={{ width: '80px' }}
-      >
-        <IonIcon src={closeOutline} style={{ marginRight: '4px' }} />
-        반려
-      </IonButton>
-      <IonButton
-        mode="md"
-        color="primary"
-        onClick={handleApprove}
-        style={{ width: '80px', marginRight: '11px' }}
-      >
-        <IonIcon src={checkmarkOutline} style={{ marginRight: '4px' }} />
-        승인
-      </IonButton>
-    </div>
+      // <IonButton
+      //   mode="md"
+      //   color="medium"
+      //   onClick={handleReject}
+      //   style={{ width: '80px' }}
+      // >
+      //   <IonIcon src={closeOutline} style={{ marginRight: '4px' }} />
+      //   반려
+      // </IonButton>
+      // <IonButton
+      //   mode="md"
+      //   color="primary"
+      //   onClick={handleApprove}
+      //   style={{ width: '80px', marginRight: '11px' }}
+      // >
+      //   <IonIcon src={checkmarkOutline} style={{ marginRight: '4px' }} />
+      //   승인
+      // </IonButton>
   );
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지
