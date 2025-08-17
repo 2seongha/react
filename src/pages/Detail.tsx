@@ -1,9 +1,8 @@
-import { IonContent, IonPage, IonHeader } from '@ionic/react';
-import React, { useState, useRef, useEffect } from 'react';
+import { IonContent, IonPage } from '@ionic/react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { shallow } from 'zustand/shallow';
 import AppBar from '../components/AppBar';
-import useAppStore from '../stores/appStore';
+import './Detail.css';
 
 interface DetailParams {
   flowNo: string;
@@ -11,14 +10,22 @@ interface DetailParams {
 
 const Detail: React.FC = () => {
   const { flowNo } = useParams<DetailParams>();
-  const [scrollY, setScrollY] = useState(0);
-  const contentRef = useRef<HTMLIonContentElement>(null);
+  
+  // 스크롤 상태와 contentRef 제거 - 불필요한 상태 관리 제거
+  // const [scrollY, setScrollY] = useState(0);
+  // const contentRef = useRef<HTMLIonContentElement>(null);
 
+  // 성능 테스트를 위해 Zustand 의존성 제거하고 고정 데이터 사용
+  const approval = {
+    apprTitle: "스크롤 성능 테스트",
+    flowNo: flowNo || "test"
+  };
+  
   // approvals에서 flowNo에 맞는 approval만 구독 (shallow로 최적화)
-  const approval = useAppStore(
-    state => state.approvals?.find(approval => approval.flowNo === flowNo) || null,
-    shallow
-  );
+  // const approval = useAppStore(
+  //   state => state.approvals?.find(approval => approval.flowNo === flowNo) || null,
+  //   shallow
+  // );
 
   if (!approval) {
     return (
@@ -40,10 +47,18 @@ const Detail: React.FC = () => {
   }
 
   return (
-    <IonPage>
+    <IonPage className="detail-page">
       <AppBar title={<span>{approval.apprTitle}</span>} showBackButton={true} />
-      <IonContent>
-        <div style={{ padding: '20px', lineHeight: '1.8', fontSize: '16px' }}>
+      {/* <IonContent 
+        className="detail-content"
+        scrollEvents={false}
+        forceOverscroll={false}
+      > */}
+        <div className="detail-text-container" style={{ 
+          padding: '20px', 
+          lineHeight: '1.8', 
+          fontSize: '16px'
+        }}>
           <h1 style={{ marginBottom: '30px', textAlign: 'center', color: 'var(--ion-color-primary)' }}>
             엄청 긴 스크롤 테스트 문서
           </h1>
@@ -64,7 +79,7 @@ const Detail: React.FC = () => {
             모바일 디바이스에서는 터치 스크롤링이 주요 인터랙션 방식이므로, 스크롤 성능이 더욱 중요합니다. iOS와 Android는 각각 다른 스크롤 특성을 가지고 있으며, 이를 고려한 최적화가 필요합니다. CSS의 -webkit-overflow-scrolling: touch 속성이나 will-change 속성 등을 활용하여 하드웨어 가속을 적용할 수 있습니다.
           </p>
           
-          <div style={{ height: '300px', backgroundColor: '#f0f0f0', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#666' }}>
+          <div className="detail-box" style={{ height: '300px', backgroundColor: '#f0f0f0', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#666' }}>
             📊 차트 영역 (300px 높이)
           </div>
           
@@ -84,7 +99,7 @@ const Detail: React.FC = () => {
             백페이스 가시성(backface-visibility: hidden)을 설정하면 3D 변환 시 뒷면을 숨겨 렌더링 성능을 향상시킬 수 있습니다. 또한 perspective 속성을 사용하여 3D 컨텍스트를 생성하면 하드웨어 가속을 더 효과적으로 활용할 수 있습니다.
           </p>
           
-          <div style={{ height: '200px', backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '18px' }}>
+          <div className="detail-box" style={{ height: '200px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '18px' }}>
             🎨 그라데이션 영역 (200px 높이)
           </div>
           
@@ -101,7 +116,7 @@ const Detail: React.FC = () => {
             스크롤 성능에 영향을 주는 또 다른 중요한 요소는 이미지입니다. 대용량 이미지는 메모리 사용량을 증가시키고 스크롤을 끊기게 만들 수 있습니다. 이를 해결하기 위해 lazy loading을 구현하거나, 적절한 크기의 이미지를 사용하는 것이 중요합니다.
           </p>
           
-          <div style={{ height: '250px', backgroundColor: '#e3f2fd', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#1976d2' }}>
+          <div className="detail-box" style={{ height: '250px', backgroundColor: '#e3f2fd', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#1976d2' }}>
             📷 이미지 영역 (250px 높이)
           </div>
           
@@ -122,7 +137,7 @@ const Detail: React.FC = () => {
             iOS와 Android는 각각 다른 스크롤 특성을 가지고 있습니다. iOS는 -webkit-overflow-scrolling: touch 속성을 지원하여 네이티브 스크롤링을 제공하며, momentum scrolling을 지원합니다. Android는 overscroll-behavior 속성을 통해 스크롤 바운스 효과를 제어할 수 있습니다.
           </p>
           
-          <div style={{ height: '180px', backgroundColor: '#fff3e0', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#f57c00' }}>
+          <div className="detail-box" style={{ height: '180px', backgroundColor: '#fff3e0', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#f57c00' }}>
             📱 모바일 최적화 영역 (180px 높이)
           </div>
           
@@ -143,7 +158,7 @@ const Detail: React.FC = () => {
             대형 소셜 미디어 플랫폼들은 어떻게 무한 스크롤을 최적화하고 있을까요? Facebook은 자체 개발한 가상화 기술을 사용하여 수천 개의 포스트를 부드럽게 스크롤할 수 있도록 합니다. Twitter는 타임라인의 동적 높이 계산과 이미지 lazy loading을 통해 최적화를 달성합니다.
           </p>
           
-          <div style={{ height: '220px', backgroundColor: '#f3e5f5', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#7b1fa2' }}>
+          <div className="detail-box" style={{ height: '220px', backgroundColor: '#f3e5f5', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: '#7b1fa2' }}>
             🚀 성능 최적화 영역 (220px 높이)
           </div>
           
@@ -167,7 +182,7 @@ const Detail: React.FC = () => {
             무엇보다 중요한 것은 실제 사용자 환경에서의 테스트와 측정입니다. 이론적인 최적화보다는 실제 성능 개선에 집중하고, 사용자 경험을 최우선으로 고려하는 것이 성공적인 최적화의 핵심입니다.
           </p>
           
-          <div style={{ height: '300px', backgroundColor: 'linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: 'white', fontWeight: 'bold' }}>
+          <div className="detail-box" style={{ height: '300px', background: 'linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)', margin: '30px 0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: 'white', fontWeight: 'bold' }}>
             🎯 마지막 영역 (300px 높이)
           </div>
           
@@ -180,7 +195,7 @@ const Detail: React.FC = () => {
             부드러운 스크롤을 경험해보세요!
           </p>
         </div>
-      </IonContent>
+      {/* </IonContent> */}
     </IonPage>
   );
 };
