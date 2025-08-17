@@ -1,25 +1,7 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-/* 웹앱 전체 패딩 적용 */
-/* ion-header { */
-  /* padding-top: var(--webview-padding-top); */
-  /* padding-top: 30px; */
-/* } */
-
-/* ion-app {
-  height: calc(100vh - var(--webview-padding-bottom)) !important;
-  margin-bottom: var(--webview-padding-bottom) !important;
-} */
-
 /* 스크롤 관련 */
 ion-content {
-  --offset-bottom: 1px !important;
-  --offset-top: 0px;
+  /* --offset-bottom: 1px !important; */
+  /* --offset-top: 0px; */
 }
 
 ion-content::part(scroll) {
@@ -32,10 +14,6 @@ ion-content::part(scroll)::-webkit-scrollbar {
 }
 
 /* TabBar 관련 */
-ion-tabs ion-router-outlet {
-  /* background-color: var(--ion-background-color2); */
-}
-
 ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
