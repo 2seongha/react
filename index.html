@@ -81,6 +81,12 @@
         window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'attach', value: {title: title, url: url}}));
       }
     }
+
+    function webviewBadge(badge){
+      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'webviewBadge', value: {badge: badge}}));
+      }
+    }
   
     function webviewPrivacyPolicy(){
       if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){

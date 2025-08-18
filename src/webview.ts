@@ -34,6 +34,7 @@ declare global {
     webviewNoticeOnOff: (val: string, org: string) => void;
     webviewAppEnd: () => void;
     webviewAttach: (title: string, url: string) => void;
+    webviewBadge: (badge: string) => void;
     webviewPrivacyPolicy: () => void;
     webviewTermsOfUse: () => void;
     webviewBiometrics: () => void;
@@ -96,6 +97,12 @@ export const webviewAppEnd = (): void => {
 export const webviewAttach = (title: string, url: string): void => {
   if (typeof window !== 'undefined' && window.webviewAttach) {
     window.webviewAttach(title, url);
+  }
+};
+
+export const webviewBadge = (badge: string): void => {
+  if (typeof window !== 'undefined' && window.webviewBadge) {
+    window.webviewBadge(badge);
   }
 };
 
