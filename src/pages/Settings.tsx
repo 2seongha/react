@@ -119,7 +119,7 @@ const Settings: React.FC = () => {
               expand="block" 
               onClick={handleBadgeTest}
               disabled={!badgeNumber.trim()}
-              style={{ width: '100%' }}
+              style={{ width: '100%', height: '48px' }}
             >
               webviewBadge 테스트 실행
             </IonButton>
@@ -142,7 +142,7 @@ const Settings: React.FC = () => {
               expand="block" 
               onClick={handleToastTest}
               disabled={!toastMessage.trim()}
-              style={{ width: '100%' }}
+              style={{ width: '100%', height: '48px' }}
               color="secondary"
             >
               webviewToast 테스트 실행
@@ -158,12 +158,13 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <IonItem>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
               <IonButton 
                 expand="block" 
                 fill="outline"
                 onClick={() => handleHapticTest('lightImpact')}
                 color="success"
+                style={{ height: '48px' }}
               >
                 Light Impact
               </IonButton>
@@ -173,6 +174,7 @@ const Settings: React.FC = () => {
                 fill="outline"
                 onClick={() => handleHapticTest('mediumImpact')}
                 color="warning"
+                style={{ height: '48px' }}
               >
                 Medium Impact
               </IonButton>
@@ -182,6 +184,7 @@ const Settings: React.FC = () => {
                 fill="outline"
                 onClick={() => handleHapticTest('heavyImpact')}
                 color="danger"
+                style={{ height: '48px' }}
               >
                 Heavy Impact
               </IonButton>
@@ -191,6 +194,7 @@ const Settings: React.FC = () => {
                 fill="outline"
                 onClick={() => handleHapticTest('selectionClick')}
                 color="medium"
+                style={{ height: '48px' }}
               >
                 Selection Click
               </IonButton>
@@ -200,6 +204,7 @@ const Settings: React.FC = () => {
                 fill="outline"
                 onClick={() => handleHapticTest('vibrate')}
                 color="dark"
+                style={{ height: '48px' }}
               >
                 Vibrate
               </IonButton>
