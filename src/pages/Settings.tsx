@@ -158,7 +158,7 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <IonItem>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom:'100px' }}>
               <IonButton 
                 expand="block" 
                 fill="outline"
