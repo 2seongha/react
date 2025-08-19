@@ -4,9 +4,9 @@
   font-weight: 400;
 
   font-synthesis: none;
-  text-rendering: optimizeSpeed;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
   
   /* 강제 GPU 가속 */
   transform-style: preserve-3d;
@@ -180,12 +180,6 @@ ion-text {
 
 /* 애니메이션 및 스크롤 최적화 */
 @media (orientation: portrait) {
-  body {
-    /* 세로 모드에서 추가 최적화 - body에만 적용 */
-    -webkit-perspective: 1000px;
-    perspective: 1000px;
-  }
-  
   ion-content {
     will-change: scroll-position;
   }
@@ -194,6 +188,11 @@ ion-text {
   ion-content .inner-scroll {
     transform: translate3d(0, 0, 0);
     -webkit-transform: translate3d(0, 0, 0);
+    /* 서브픽셀 렌더링 고정 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
   }
 }
 
