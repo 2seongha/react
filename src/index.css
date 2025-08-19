@@ -11,7 +11,9 @@
   font-display: swap;
   font-optical-sizing: auto;
   
-  /* 레이아웃 최적화 - 안전한 수준으로 조정 */
+  /* 레이아웃 최적화 */
+  contain: layout style paint;
+  content-visibility: auto;
   
   /* GPU 가속 강화 */
   transform-style: preserve-3d;
@@ -167,8 +169,6 @@ body {
 ion-page,
 ion-content,
 #root {
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
