@@ -11,9 +11,7 @@
   font-display: swap;
   font-optical-sizing: auto;
   
-  /* 레이아웃 최적화 */
-  contain: layout style paint;
-  content-visibility: auto;
+  /* 레이아웃 최적화 - 안전한 수준으로 조정 */
   
   /* GPU 가속 강화 */
   transform-style: preserve-3d;
