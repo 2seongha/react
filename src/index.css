@@ -1,15 +1,22 @@
-/* Pretendard 웹폰트 제거하고 시스템 폰트 사용 */
-
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   font-synthesis: none;
-  text-rendering: auto;
+  text-rendering: optimizeSpeed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --vh: 100%;
+  
+  /* 모바일 렌더링 최적화 */
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 
   /* Light theme */
   --ion-color-primary: #407EFF;
@@ -121,15 +128,41 @@ body {
   min-height: 100vh;
   background: var(--ion-background-color, #ffffff);
   color: var(--ion-text-color, #000000);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* 렌더링 성능 최적화 */
+  contain: layout style paint;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* 모든 텍스트 요소에 시스템 폰트 적용 */
+/* 모든 텍스트 요소에 Pretendard 적용 및 하드웨어 가속 */
 * {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
-/* Ionic 컴포넌트에도 시스템 폰트 적용 */
+/* 주요 컨테이너 최적화 */
+#root {
+  contain: layout style paint;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+/* Ionic 페이지 컨테이너 최적화 */
+ion-content,
+ion-page,
+ion-router-outlet {
+  contain: layout style paint;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+}
+
+/* Ionic 컴포넌트에도 Pretendard 적용 */
 h1,
 h2,
 h3,
@@ -137,8 +170,13 @@ h4,
 h5,
 h6,
 p,
-span {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+span,
+ion-label,
+ion-button,
+ion-item,
+ion-title,
+ion-text {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
 
 .loading-indicator-wrapper {
@@ -146,4 +184,41 @@ span {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 애니메이션 및 스크롤 최적화 */
+@media (orientation: portrait) {
+  * {
+    /* 세로 모드에서 추가 최적화 */
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+  }
+  
+  ion-content {
+    will-change: scroll-position;
+  }
+  
+  /* 스크롤 성능 개선 */
+  ion-content .inner-scroll {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* 버튼 및 상호작용 요소 최적화 */
+ion-button,
+button,
+.button {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+}
+
+/* 카드 및 리스트 아이템 최적화 */
+ion-card,
+ion-item,
+ion-list {
+  contain: layout style;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
