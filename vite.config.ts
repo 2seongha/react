@@ -3,7 +3,28 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      // React 렌더링 최적화
+      fastRefresh: true,
+      // JSX 런타임 최적화
+      jsxRuntime: 'automatic'
+    })
+  ],
+  
+  // 개발 서버 최적화
+  server: {
+    // HMR 최적화
+    hmr: {
+      overlay: false
+    }
+  },
+  
+  // 종속성 최적화
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@ionic/react', '@ionic/react-router'],
+    exclude: []
+  },
   build: {
     // 최대 압축 설정
     minify: 'terser',
@@ -55,10 +76,15 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     // 에셋 인라인 임계값
     assetsInlineLimit: 8192, // 8kb 이하 인라인화
-    // 압축 레벨 최대
-    target: 'es2018',
+    // 압축 레벨 최대 - 모바일 최적화
+    target: 'es2020',
     // 모든 에셋 압축
     copyPublicDir: true,
+    
+    // 렌더링 성능 최적화
+    reportCompressedSize: false, // 빌드 속도 향상
+    write: true,
+    emptyOutDir: true,
   },
   // CSS 전처리기 최적화
   css: {

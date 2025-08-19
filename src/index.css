@@ -3,10 +3,24 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* 극한 렌더링 최적화 */
   font-synthesis: none;
   text-rendering: optimizeSpeed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-display: swap;
+  font-optical-sizing: auto;
+  
+  /* 레이아웃 최적화 */
+  contain: layout style paint;
+  content-visibility: auto;
+  
+  /* GPU 가속 강화 */
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  
   --vh: 100%;
   
   /* 모바일 렌더링 최적화 */
@@ -145,9 +159,20 @@ body {
   -webkit-backface-visibility: hidden;
 }
 
-/* 모든 텍스트 요소에 Pretendard 적용 및 하드웨어 가속 */
+/* 균형잡힌 성능 최적화 */
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* 핵심 요소만 GPU 가속 */
+ion-page,
+ion-content,
+#root {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Ionic 컴포넌트에도 Pretendard 적용 */
@@ -187,19 +212,63 @@ ion-text {
   }
 }
 
-/* 버튼 및 상호작용 요소 최적화 */
+/* 극한 상호작용 요소 최적화 */
 ion-button,
 button,
 .button {
+  /* 애니메이션 최적화 */
   will-change: transform;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
+  
+  /* 터치 반응성 최적화 */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  
+  /* 레이아웃 격리 */
+  contain: layout style paint;
+  
+  /* GPU 가속 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-/* 카드 및 리스트 아이템 최적화 */
-ion-card,
-ion-item,
+/* 리스트 최적화 - 메모리 효율적 */
+ion-item {
+  /* 가벼운 최적화만 적용 */
+  contain: layout style;
+}
+
 ion-list {
+  /* 스크롤 컨테이너만 가속 */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 카드는 애니메이션 시에만 최적화 */
+ion-card {
+  transition: transform 0.2s ease-out;
+}
+
+ion-card:hover,
+ion-card:active {
+  will-change: transform;
+}
+
+/* 스크롤 컨테이너 극한 최적화 */
+.scroll-container,
+ion-content .scroll-y,
+ion-content .scroll-x {
+  /* 네이티브 스크롤 성능 */
+  -webkit-overflow-scrolling: touch;
+  
+  /* 스크롤 스냅 */
+  scroll-behavior: auto;
+  overscroll-behavior: contain;
+  
+  /* GPU 가속 */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+  
+  /* 레이아웃 최적화 */
+  contain: layout style paint;
 }
