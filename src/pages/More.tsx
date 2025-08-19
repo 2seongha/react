@@ -18,6 +18,7 @@ import {
 import React from 'react';
 import AppBar from '../components/AppBar';
 import BottomTabBar from '../components/BottomNavigation';
+import { webviewLogout } from '../webview';
 
 const More: React.FC = () => {
   useIonViewWillEnter(() => {
@@ -26,6 +27,7 @@ const More: React.FC = () => {
 
   const handleLogout = () => {
     // 로그아웃 로직 구현
+    webviewLogout();
     console.log('로그아웃 클릭');
   };
 
