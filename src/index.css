@@ -131,7 +131,6 @@ body {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   
   /* 렌더링 성능 최적화 */
-  contain: layout style paint;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   backface-visibility: hidden;
@@ -141,25 +140,6 @@ body {
 /* 모든 텍스트 요소에 Pretendard 적용 및 하드웨어 가속 */
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-}
-
-/* 주요 컨테이너 최적화 */
-#root {
-  contain: layout style paint;
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  will-change: transform;
-}
-
-/* Ionic 페이지 컨테이너 최적화 */
-ion-content,
-ion-page,
-ion-router-outlet {
-  contain: layout style paint;
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
 }
 
 /* Ionic 컴포넌트에도 Pretendard 적용 */
@@ -190,8 +170,8 @@ ion-text {
 @media (orientation: portrait) {
   * {
     /* 세로 모드에서 추가 최적화 */
-    -webkit-perspective: 1000px;
-    perspective: 1000px;
+    /* -webkit-perspective: 1000px;
+    perspective: 1000px; */
   }
   
   ion-content {
@@ -218,7 +198,6 @@ button,
 ion-card,
 ion-item,
 ion-list {
-  contain: layout style;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
