@@ -195,21 +195,15 @@ const _initWebview = async (): Promise<void> => {
       const detail = JSON.parse(customEvent.detail);
 
       const tokens = {
-        accessToken: detail.accessToken,
-        refreshToken: detail.refreshToken,
         deviceToken: detail.deviceToken,
         deviceInfo: detail.deviceInfo
       };
 
       // localStorage에 저장
-      localStorage.setItem('accessToken', tokens.accessToken);
-      localStorage.setItem('refreshToken', tokens.refreshToken);
       localStorage.setItem('deviceToken', tokens.deviceToken);
       localStorage.setItem('deviceInfo', JSON.stringify(tokens.deviceInfo));
 
       // 토큰 정보 처리
-      console.log('Tokens received:', tokens.accessToken ? 'Access token received' : 'No access token');
-
       if (tokenResolver) {
         tokenResolver(true);
         tokenResolver = null;

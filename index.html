@@ -112,10 +112,9 @@
       window.dispatchEvent(event);
     }
   
-    function receiveToken(accessToken, refreshToken, deviceToken, deviceInfo){
+    function receiveToken(deviceToken, deviceInfo){
       console.log(deviceInfo.toString());
-      const event = new CustomEvent('receiveToken', { detail: JSON.stringify({accessToken, refreshToken,
-      deviceToken, deviceInfo}) });
+      const event = new CustomEvent('receiveToken', { detail: JSON.stringify({deviceToken, deviceInfo}) });
       window.dispatchEvent(event);
     }
   
