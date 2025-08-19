@@ -216,6 +216,7 @@ const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, in
 
   const containerStyle = useMemo(() => ({
     overflow: 'hidden' as const,
+    willChange: 'transform', translate: 'translateX(0px)'
   }), []);
 
   return (

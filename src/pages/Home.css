@@ -88,6 +88,8 @@
 
 .home-card.menu-card {
   padding-bottom: 8px;
+  will-change: transform;
+  translate: translateX(0px);
 }
 
 ion-item.menu-ion-item {
