@@ -13,7 +13,10 @@ import {
   IonSegment,
   IonSegmentButton,
   IonInput,
-  IonButton
+  IonButton,
+  IonAlert,
+  IonActionSheet,
+  IonModal
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
@@ -26,6 +29,9 @@ const Settings: React.FC = () => {
   const setThemeMode = useAppStore(state => state.setThemeMode);
   const [badgeNumber, setBadgeNumber] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string>('');
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleThemeChange = (value: string) => {
     const newTheme = value as 'light' | 'dark' | 'system';
@@ -210,7 +216,163 @@ const Settings: React.FC = () => {
               </IonButton>
             </div>
           </IonItem>
+
+          {/* Dialog/Modal 테스트 섹션 */}
+          <IonItem>
+            <IonLabel>
+              <h3>Dialog & Modal 테스트</h3>
+              <p>다양한 Dialog와 Modal을 테스트해보세요</p>
+            </IonLabel>
+          </IonItem>
+
+          <IonItem>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom: '100px' }}>
+              <IonButton 
+                expand="block" 
+                onClick={() => setIsAlertOpen(true)}
+                color="primary"
+                style={{ height: '48px' }}
+              >
+                Alert Dialog 테스트
+              </IonButton>
+              
+              <IonButton 
+                expand="block" 
+                onClick={() => setIsActionSheetOpen(true)}
+                color="secondary"
+                style={{ height: '48px' }}
+              >
+                Action Sheet (Bottom Sheet) 테스트
+              </IonButton>
+              
+              <IonButton 
+                expand="block" 
+                onClick={() => setIsModalOpen(true)}
+                color="tertiary"
+                style={{ height: '48px' }}
+              >
+                Modal Dialog 테스트
+              </IonButton>
+            </div>
+          </IonItem>
         </IonList>
+
+        {/* Alert Dialog */}
+        <IonAlert
+          isOpen={isAlertOpen}
+          onDidDismiss={() => setIsAlertOpen(false)}
+          header="알림"
+          subHeader="Alert Dialog 테스트"
+          message="이것은 Alert Dialog입니다. 렌더링 성능을 확인해보세요."
+          buttons={[
+            {
+              text: '취소',
+              role: 'cancel',
+              handler: () => {
+                webviewHaptic('lightImpact');
+              }
+            },
+            {
+              text: '확인',
+              handler: () => {
+                webviewHaptic('mediumImpact');
+                webviewToast('Alert에서 확인을 눌렀습니다!');
+              }
+            }
+          ]}
+        />
+
+        {/* Action Sheet (Bottom Sheet) */}
+        <IonActionSheet
+          isOpen={isActionSheetOpen}
+          onDidDismiss={() => setIsActionSheetOpen(false)}
+          header="액션 선택"
+          subHeader="Bottom Sheet 형태의 Action Sheet입니다"
+          buttons={[
+            {
+              text: '옵션 1',
+              icon: 'document',
+              handler: () => {
+                webviewHaptic('selectionClick');
+                webviewToast('옵션 1을 선택했습니다');
+              }
+            },
+            {
+              text: '옵션 2',
+              icon: 'image',
+              handler: () => {
+                webviewHaptic('selectionClick');
+                webviewToast('옵션 2를 선택했습니다');
+              }
+            },
+            {
+              text: '옵션 3',
+              icon: 'trash',
+              role: 'destructive',
+              handler: () => {
+                webviewHaptic('heavyImpact');
+                webviewToast('삭제 옵션을 선택했습니다');
+              }
+            },
+            {
+              text: '취소',
+              role: 'cancel',
+              handler: () => {
+                webviewHaptic('lightImpact');
+              }
+            }
+          ]}
+        />
+
+        {/* Modal Dialog */}
+        <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Modal Dialog</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setIsModalOpen(false)}>닫기</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            <div style={{ padding: '20px' }}>
+              <h2>Modal Dialog 테스트</h2>
+              <p>이것은 전체 화면 Modal입니다.</p>
+              <p>렌더링 성능과 애니메이션을 확인해보세요.</p>
+              
+              <IonList>
+                <IonItem>
+                  <IonLabel>Modal 내부 리스트 아이템 1</IonLabel>
+                </IonItem>
+                <IonItem>
+                  <IonLabel>Modal 내부 리스트 아이템 2</IonLabel>
+                </IonItem>
+                <IonItem>
+                  <IonLabel>Modal 내부 리스트 아이템 3</IonLabel>
+                </IonItem>
+              </IonList>
+
+              <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                <IonButton 
+                  expand="block" 
+                  onClick={() => {
+                    webviewHaptic('mediumImpact');
+                    webviewToast('Modal에서 액션을 실행했습니다!');
+                  }}
+                >
+                  액션 실행
+                </IonButton>
+                <IonButton 
+                  expand="block" 
+                  fill="outline"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  모달 닫기
+                </IonButton>
+              </div>
+            </div>
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   );
