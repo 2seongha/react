@@ -257,13 +257,35 @@ const Settings: React.FC = () => {
           </IonItem>
         </IonList>
 
-        {/* Alert Dialog */}
+        {/* Alert Dialog with Input */}
         <IonAlert
           isOpen={isAlertOpen}
           onDidDismiss={() => setIsAlertOpen(false)}
-          header="알림"
-          subHeader="Alert Dialog 테스트"
-          message="이것은 Alert Dialog입니다. 렌더링 성능을 확인해보세요."
+          header="사용자 입력"
+          subHeader="Alert Dialog with Input 테스트"
+          message="이름을 입력해주세요:"
+          inputs={[
+            {
+              name: 'name',
+              type: 'text',
+              placeholder: '이름을 입력하세요',
+              attributes: {
+                maxlength: 20,
+              },
+            },
+            {
+              name: 'age',
+              type: 'number',
+              placeholder: '나이를 입력하세요',
+              min: 1,
+              max: 100,
+            },
+            {
+              name: 'email',
+              type: 'email',
+              placeholder: '이메일을 입력하세요',
+            }
+          ]}
           buttons={[
             {
               text: '취소',
@@ -274,40 +296,72 @@ const Settings: React.FC = () => {
             },
             {
               text: '확인',
-              handler: () => {
+              handler: (alertData) => {
                 webviewHaptic('mediumImpact');
-                webviewToast('Alert에서 확인을 눌렀습니다!');
+                const { name, age, email } = alertData;
+                webviewToast(`입력된 정보: ${name}, ${age}세, ${email}`);
               }
             }
           ]}
         />
 
-        {/* Action Sheet (Bottom Sheet) */}
+        {/* Action Sheet (Bottom Sheet) with Swipe to Dismiss */}
         <IonActionSheet
           isOpen={isActionSheetOpen}
           onDidDismiss={() => setIsActionSheetOpen(false)}
           header="액션 선택"
-          subHeader="Bottom Sheet 형태의 Action Sheet입니다"
+          subHeader="아래로 드래그하거나 옵션을 선택하세요"
+          canDismiss={true}
+          showBackdrop={true}
+          backdropDismiss={true}
+          keyboardClose={true}
+          animated={true}
+          enterAnimation={undefined}
+          leaveAnimation={undefined}
           buttons={[
             {
-              text: '옵션 1',
-              icon: 'document',
+              text: '📄 문서 보기',
+              icon: 'document-text-outline',
               handler: () => {
                 webviewHaptic('selectionClick');
-                webviewToast('옵션 1을 선택했습니다');
+                webviewToast('문서 보기를 선택했습니다');
               }
             },
             {
-              text: '옵션 2',
-              icon: 'image',
+              text: '📷 사진 촬영',
+              icon: 'camera-outline',
               handler: () => {
                 webviewHaptic('selectionClick');
-                webviewToast('옵션 2를 선택했습니다');
+                webviewToast('사진 촬영을 선택했습니다');
               }
             },
             {
-              text: '옵션 3',
-              icon: 'trash',
+              text: '📁 파일 업로드',
+              icon: 'cloud-upload-outline',
+              handler: () => {
+                webviewHaptic('selectionClick');
+                webviewToast('파일 업로드를 선택했습니다');
+              }
+            },
+            {
+              text: '🔗 링크 공유',
+              icon: 'share-outline',
+              handler: () => {
+                webviewHaptic('selectionClick');
+                webviewToast('링크 공유를 선택했습니다');
+              }
+            },
+            {
+              text: '⭐ 즐겨찾기 추가',
+              icon: 'star-outline',
+              handler: () => {
+                webviewHaptic('mediumImpact');
+                webviewToast('즐겨찾기에 추가했습니다');
+              }
+            },
+            {
+              text: '🗑️ 삭제',
+              icon: 'trash-outline',
               role: 'destructive',
               handler: () => {
                 webviewHaptic('heavyImpact');
