@@ -8,6 +8,8 @@
 
 .approval ion-content {
   --background: var(--ion-background-color2);
+  /* 네이티브 스크롤 강제 */
+  --overflow: auto !important;
 }
 
 .loading-indicator-wrapper {
