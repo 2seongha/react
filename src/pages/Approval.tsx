@@ -390,7 +390,6 @@ const Approval: React.FC = () => {
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
           <Virtuoso
-            style={{willChange: 'transform', translate: 'translateX(0px)'}}
             ref={virtuosoRef}
             data={filteredApprovals}
             overscan={10}

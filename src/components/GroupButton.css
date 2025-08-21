@@ -9,6 +9,8 @@
   gap: 8px;
   white-space: nowrap;
   border-bottom: 1px solid var(--custom-border-color-50);
+  /* 레이어 생성 방지 */
+  contain: layout style;
 }
 
 .group-button {
@@ -22,6 +24,8 @@
   cursor: pointer;
   flex-shrink: 0;
   white-space: nowrap;
+  /* 레이어 생성 방지 */
+  contain: layout style;
   /* transition: background-color 0.2s, color 0.2s; */
 }
 

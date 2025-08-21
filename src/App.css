@@ -13,6 +13,30 @@ ion-content::part(scroll)::-webkit-scrollbar {
   display: none;
 }
 
+ /* 모든 스크롤바 완전 제거 */
+* {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
 /* TabBar 관련 */
 ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
@@ -50,6 +74,12 @@ ion-datetime {
 ion-checkbox {
   --size: 20px;
   height: 20px;
+  /* 레이어 생성 방지 */
+  contain: layout style;
+  position: relative;
+  z-index: auto;
+  transform: none;
+  will-change: auto;
 }
 
 ion-checkbox::part(container) {
@@ -132,10 +162,4 @@ ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) {
 
 ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) * {
   color: var(--ion-text-color);
-}
-
-html, body {
-  overscroll-behavior: contain; /* 튕김 제거 */
-  scroll-behavior: smooth;      /* 부드러운 이동 */
-  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 (Android 일부 영향 있음) */
 }

@@ -88,10 +88,6 @@
 
 .home-card.menu-card {
   padding-bottom: 8px;
-  /* GPU 가속 적용 - 메뉴 확장/축소 애니메이션 최적화 */
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 ion-item.menu-ion-item {
