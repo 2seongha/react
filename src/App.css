@@ -1,6 +1,9 @@
 body {
-  transform: auto;
+  transform: none;
   position: relative;
+  touch-action: none;
+  text-rendering: optimizeSpeed;
+  overflow: hidden;
 }
 
 /* 스크롤 관련 */

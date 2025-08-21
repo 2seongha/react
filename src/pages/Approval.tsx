@@ -26,6 +26,19 @@ const Approval: React.FC = () => {
     setSearchText('');
     fetchApprovals();
 
+    // 스크롤 이벤트를 passive true로 설정
+    const addPassiveScrollListeners = () => {
+      const scrollElements = document.querySelectorAll('[data-virtuoso-scroller]');
+      scrollElements.forEach(element => {
+        element.addEventListener('scroll', () => {}, { passive: true });
+        element.addEventListener('touchstart', () => {}, { passive: true });
+        element.addEventListener('touchmove', () => {}, { passive: true });
+      });
+    };
+
+    // DOM이 렌더링된 후 실행
+    setTimeout(addPassiveScrollListeners, 100);
+
     return () => setApprovals(null);
   }, []);
 
@@ -375,7 +388,6 @@ const Approval: React.FC = () => {
 
       <IonContent
         fullscreen
-        scrollY={false}
         scrollEvents={false}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
@@ -389,21 +401,23 @@ const Approval: React.FC = () => {
             ))}
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
-          <Virtuoso
-            ref={virtuosoRef}
-            data={filteredApprovals}
-            overscan={10}
-            initialItemCount={10}
-            initialTopMostItemIndex={0}
-            increaseViewportBy={{ top: 200, bottom: 200 }}
-            atTopStateChange={(atTop) => setIsTop(atTop)}
-            rangeChanged={() => {
-              if (scrollCallbackRef.current) {
-                scrollCallbackRef.current();
-              }
-            }}
-            itemContent={renderItem}
-          />
+          approvals.map((approval, index)=> renderItem(index, approval))
+          // <Virtuoso
+          //   className='virtuoso'
+          //   ref={virtuosoRef}
+          //   data={filteredApprovals}
+          //   overscan={30}
+          //   initialItemCount={20}
+          //   initialTopMostItemIndex={0}
+          //   increaseViewportBy={{ top: 800, bottom: 800 }}
+          //   atTopStateChange={(atTop) => setIsTop(atTop)}
+          //   rangeChanged={() => {
+          //     if (scrollCallbackRef.current) {
+          //       scrollCallbackRef.current();
+          //     }
+          //   }}
+          //   itemContent={renderItem}
+          // />
         ) : (
           <div style={{
             display: 'flex',
