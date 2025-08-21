@@ -3,8 +3,6 @@
   --padding-bottom: calc(var(--ion-safe-area-bottom) + 12px);
   --padding-start: 22px;
   --padding-end: 22px;
-  /* 네이티브 스크롤 강제 */
-  --overflow: auto !important;
 }
 
 .flow-list-item {

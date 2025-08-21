@@ -553,7 +553,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
   // body 엘리먼트 메모이제이션 - 실제 데이터로 교체 필요
   const bodyElement = useMemo(() => (
     <div className='custom-item-body'>
-      <IonImg src='https://imgnews.pstatic.net/image/666/2025/08/21/0000081802_001_20250821170819716.jpg?type=w860' style={{height:'300px', objectFit:'cover'}}></IonImg>
       <div className='custom-item-body-line'>
         <span>구분</span>
         <span>임시전표</span>

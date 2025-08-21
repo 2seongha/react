@@ -1,9 +1,7 @@
-/* 스크롤 관련 - 네이티브 스크롤 최적화 */
+/* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px !important;
   --offset-top: 0px;
-  /* 네이티브 스크롤 강제 적용 */
-  --overflow: auto !important;
 }
 
 ion-content::part(scroll) {
@@ -137,13 +135,7 @@ ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) * {
 }
 
 html, body {
-  scroll-behavior: auto;        /* smooth 대신 auto로 네이티브 스크롤 */
-  -webkit-overflow-scrolling: touch; /* iOS 모멘텀 스크롤 */
-}
-
-/* 웹뷰 네이티브 스크롤 최적화 */
-ion-content .inner-scroll {
-  overflow: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  scroll-behavior: auto !important;
+  overscroll-behavior: contain; /* 튕김 제거 */
+  scroll-behavior: smooth;      /* 부드러운 이동 */
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 (Android 일부 영향 있음) */
 }
