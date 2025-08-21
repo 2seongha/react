@@ -7,13 +7,13 @@ import {
   IonTitle,
   IonButton,
   IonIcon,
+  IonImg,
   useIonRouter,
 } from '@ionic/react';
 import { menu, search, settingsSharp } from 'ionicons/icons';
 import './AppBar.css';
 import AnimatedBadge from './AnimatedBadge';
 import useAppStore from '../stores/appStore';
-import LazyImage from './LazyImage';
 import { appLogoDark, appLogoLight } from '../assets/images';
 
 type AppBarProps = {
@@ -70,8 +70,9 @@ const AppBar: React.FC<AppBarProps> = ({
 
         {showLogo &&
           <div style={{ position: 'relative', width: '80px', height: '20px', marginLeft: '20px' }}>
-            <LazyImage
+            <IonImg
               src={appLogoDark}
+              alt="app logo"
               style={{
                 position: 'absolute',
                 width: '100%',
@@ -79,8 +80,9 @@ const AppBar: React.FC<AppBarProps> = ({
                 display: actualTheme === 'light' ? 'block' : 'none'
               }}
             />
-            <LazyImage
+            <IonImg
               src={appLogoLight}
+              alt="app logo"
               style={{
                 position: 'absolute',
                 width: '100%',

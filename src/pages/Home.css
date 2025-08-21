@@ -88,8 +88,7 @@
 
 .home-card.menu-card {
   padding-bottom: 8px;
-  will-change: transform;
-  translate: translateX(0px);
+  /* 메뉴 확장/축소 애니메이션용으로만 유지 */
 }
 
 ion-item.menu-ion-item {

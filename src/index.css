@@ -197,27 +197,20 @@ ion-text {
   justify-content: center;
 }
 
-/* 애니메이션 및 스크롤 최적화 */
+/* 스크롤 최적화 - 실제로 필요한 곳만 */
 @media (orientation: portrait) {
   ion-content {
+    /* 스크롤이 활발한 컨텐츠에만 적용 */
     will-change: scroll-position;
-  }
-  
-  /* 스크롤 성능 개선 */
-  ion-content .inner-scroll {
-    transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
   }
 }
 
-/* 극한 상호작용 요소 최적화 */
-ion-button,
-button,
-.button {
-  /* 애니메이션 최적화 */
+/* 버튼 최적화 - 클릭 시에만 적용 */
+ion-button:active,
+button:active,
+.button:active {
+  /* 터치 시에만 GPU 가속 적용 */
   will-change: transform;
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
   
   /* 터치 반응성 최적화 */
   touch-action: manipulation;
@@ -254,19 +247,16 @@ ion-card:active {
 
 /* 스크롤 컨테이너 극한 최적화 */
 .scroll-container,
-ion-content .scroll-y,
-ion-content .scroll-x {
+/* 스크롤이 많은 리스트에만 적용 */
+.virtual-list,
+.long-scroll-list {
   /* 네이티브 스크롤 성능 */
   -webkit-overflow-scrolling: touch;
-  
-  /* 스크롤 스냅 */
   scroll-behavior: auto;
   overscroll-behavior: contain;
   
-  /* GPU 가속 */
+  /* GPU 가속 - 스크롤이 많은 곳에만 */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
-  
-  /* 레이아웃 최적화 */
   contain: layout style paint;
 }

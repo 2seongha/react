@@ -1,10 +1,7 @@
 /* Detail 페이지 최적화 CSS */
 
 .detail-page {
-  /* 하드웨어 가속 강제 적용 */
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  perspective: 1000px;
+  /* GPU 가속 제거 - 정적 페이지에는 불필요 */
 }
 
 .detail-content {
@@ -37,12 +34,11 @@
 .detail-text-container h2,
 .detail-text-container p {
   contain: layout style;
-  transform: translateZ(0); /* 각 텍스트 블록을 별도 레이어로 */
+  /* translateZ 제거 - 정적 텍스트에는 불필요 */
 }
 
 /* 그라데이션 박스 최적화 */
 .detail-box {
   contain: strict;
-  will-change: transform;
-  transform: translateZ(0);
+  /* GPU 가속 제거 - 정적 요소에는 불필요 */
 }

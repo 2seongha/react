@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
+import { IonContent, IonHeader, IonImg, IonItem, IonLabel, IonList, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
 import React, { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -8,7 +8,6 @@ import { Commet } from 'react-loading-indicators';
 import './FlowList.css';
 import { getFlowIcon, getPlatformMode } from '../utils';
 import { refreshOutline } from 'ionicons/icons';
-import LazyImage from '../components/LazyImage';
 
 const FlowList: React.FC = () => {
   const setFlowList = useAppStore(state => state.setFlowList);
@@ -131,8 +130,9 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
         mode='md'
       >
         <div className='flow-list-item-icon' style={iconStyle}>
-          <LazyImage 
+          <IonImg 
             src={icon.image} 
+            alt="flow icon"
           />
         </div>
         <span>{area.oLtext}</span>

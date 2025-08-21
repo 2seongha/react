@@ -5,6 +5,7 @@ import {
   IonCard,
   IonButton,
   IonIcon,
+  IonImg,
   useIonViewWillEnter,
   IonRefresher,
   IonRefresherContent,
@@ -13,7 +14,7 @@ import {
 } from '@ionic/react';
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { chevronDown, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
+import { chevronDown, chevronUp, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -21,7 +22,6 @@ import './Home.css';
 import { getFlowIcon, getPlatformMode } from '../utils';
 import { ApprovalModel, AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
-import LazyImage from '../components/LazyImage';
 import BottomTabBar from '../components/BottomNavigation';
 import { personIcon, searchIcon } from '../assets/images';
 
@@ -96,9 +96,10 @@ const WelcomeCard: React.FC = () => {
   return (
     <IonCard className='home-card'>
       <div className='welcome-card-content'>
-        <LazyImage
+        <IonImg
           src={personIcon}
           style={{ width: '48px', height: '48px' }}
+          alt="person"
         />
         <div className='welcome-card-name'>
           <span>이성하님</span>
@@ -133,32 +134,28 @@ const MenuCard: React.FC = () => {
     setIsMenuExpanded(prev => !prev);
   }, []);
 
-  // 메모이제이션된 애니메이션 props
-  const iconRotateProps = useMemo(() => ({
-    animate: { rotate: isMenuExpanded ? 180 : 0 },
-    transition: {
-      duration: 0.25,
-      ease: [0.4, 0, 0.2, 1] as const // easeOutCubic
-    }
-  }), [isMenuExpanded]);
-
   return (
     <IonCard className='home-card menu-card'>
       {mainMenuItems.map((_, index) => (
         <MenuItem key={index} menuItem={menuAreas?.[index]} isLoading={!menuAreas} />
       ))}
 
-      <div style={{ overflow: 'hidden' }}>
-        <AnimatePresence mode="sync">
-          {isMenuExpanded && expandedMenuItems.map((menu, index) => (
-            <ExpandedMenuItem
-              key={`expanded-${menu.flowCode}-${index}`}
-              menu={menu}
-              index={index}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
+      <motion.div
+        style={{ overflow: 'hidden' }}
+        animate={{
+          height: isMenuExpanded ? 'auto' : 0,
+          opacity: isMenuExpanded ? 1 : 0
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        {expandedMenuItems.map((menu, index) => (
+          <ExpandedMenuItem
+            key={`expanded-${menu.flowCode}-${index}`}
+            menu={menu}
+            index={index}
+          />
+        ))}
+      </motion.div>
 
       <IonButton
         color='medium'
@@ -168,12 +165,7 @@ const MenuCard: React.FC = () => {
         disabled={!hasMoreMenus}
       >
         <span>{isMenuExpanded ? '메뉴 접기' : '메뉴 펼치기'}</span>
-        <motion.div
-          style={{ paddingLeft: '4px' }}
-          {...iconRotateProps}
-        >
-          <IonIcon icon={chevronDown} />
-        </motion.div>
+        <IonIcon icon={isMenuExpanded ? chevronUp : chevronDown} style={{ width: '14px', marginLeft: '2px' }} />
       </IonButton>
     </IonCard>
   );
@@ -185,55 +177,16 @@ interface ExpandedMenuItemProps {
   index: number;
 }
 
-const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu, index }) => {
-  // 애니메이션 props 메모이제이션
-  const motionProps = useMemo(() => ({
-    initial: {
-      opacity: 0,
-      height: 0,
-    },
-    animate: {
-      opacity: 1,
-      height: '52px',
-    },
-    exit: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        height: {
-          delay: .3
-        }
-      }
-    },
-    transition: {
-      duration: .3,
-      opacity: {
-        delay: .3,
-        duration: .3
-      }
-    },
-  }), [index]);
-
-  const containerStyle = useMemo(() => ({
-    overflow: 'hidden' as const,
-    willChange: 'transform', translate: 'translateX(0px)'
-  }), []);
-
+const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu }) => {
   return (
-    <motion.div
-      {...motionProps}
-      style={containerStyle}
-    >
-      <MenuItem menuItem={menu} isLoading={false} />
-    </motion.div>
+    <MenuItem menuItem={menu} isLoading={false} />
   );
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지
   return (
     prevProps.menu.flowCode === nextProps.menu.flowCode &&
     prevProps.menu.oLtext === nextProps.menu.oLtext &&
-    prevProps.menu.cnt === nextProps.menu.cnt &&
-    prevProps.index === nextProps.index
+    prevProps.menu.cnt === nextProps.menu.cnt
   );
 });
 
@@ -264,8 +217,9 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
       <div className='menu-item'>
         <div className='menu-item-content'>
           <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
-            <LazyImage
+            <IonImg
               src={icon.image}
+              alt="menu icon"
             />
           </div>
           <span>{menuItem.oLtext}</span>
@@ -283,9 +237,10 @@ const TodoSummaryCard: React.FC = () => {
   return (
     <IonCard className='home-card todo-summary-card'>
       <div className='todo-summary-title'>
-        <LazyImage
+        <IonImg
           src={getFlowIcon('TODO').image}
           style={{ width: '24px', height: '24px' }}
+          alt="todo icon"
         />
         <span>미결함</span>
       </div>
@@ -293,9 +248,10 @@ const TodoSummaryCard: React.FC = () => {
       <AnimatePresence>
         {todoSummary?.length == 0 ?
           <div className='todo-summary-no-data'>
-            <LazyImage
+            <IonImg
               src={searchIcon}
               style={{ width: '48px', height: '48px' }}
+              alt="search icon"
             />
             <span>미결 항목이 없습니다.</span>
           </div> :

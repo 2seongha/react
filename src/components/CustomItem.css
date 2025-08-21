@@ -3,9 +3,7 @@
   border-radius: 12px;
   flex-direction: column;
   overflow: hidden;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
+  /* GPU 가속 제거 - 정적 아이템에는 불필요 */
 }
 
 .custom-item.selected {

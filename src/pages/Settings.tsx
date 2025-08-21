@@ -13,6 +13,7 @@ import {
   IonSegment,
   IonSegmentButton,
   IonInput,
+  IonImg,
   IonButton,
   IonAlert,
   IonActionSheet,
@@ -21,7 +22,6 @@ import {
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import { webviewTheme, webviewBadge, webviewToast, webviewHaptic } from '../webview';
-import LazyImage from '../components/LazyImage';
 import { themeIcon, bellIcon, lockIcon } from '../assets/images';
 
 const Settings: React.FC = () => {
@@ -65,9 +65,10 @@ const Settings: React.FC = () => {
       <IonContent>
         <IonList>
           <IonItem>
-            <LazyImage
+            <IonImg
               src={themeIcon}
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
+              alt="theme icon"
 
             />
             <IonLabel>
@@ -91,18 +92,20 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <IonItem button>
-            <LazyImage
+            <IonImg
               src={bellIcon}
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
+              alt="notification icon"
 
             />
             <IonLabel>알림 설정</IonLabel>
           </IonItem>
 
           <IonItem button>
-            <LazyImage
+            <IonImg
               src={lockIcon}
               style={{ width: '24px', height: '24px', marginRight: '16px' }}
+              alt="security icon"
 
             />
             <IonLabel>보안 설정</IonLabel>
