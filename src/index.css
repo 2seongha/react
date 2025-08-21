@@ -11,16 +11,6 @@
   font-display: swap;
   font-optical-sizing: auto;
   
-  /* 레이아웃 최적화 */
-  contain: layout style paint;
-  content-visibility: auto;
-  
-  /* GPU 가속 강화 */
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  
   --vh: 100%;
   
   /* 모바일 렌더링 최적화 */
@@ -147,30 +137,13 @@
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
   background: var(--ion-background-color, #ffffff);
   color: var(--ion-text-color, #000000);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  
-  /* 렌더링 성능 최적화 */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
-/* 균형잡힌 성능 최적화 */
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  box-sizing: border-box;
-}
-
-/* 핵심 요소만 GPU 가속 */
-ion-page,
-ion-content,
-#root {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 /* Ionic 컴포넌트에도 Pretendard 적용 */
@@ -195,68 +168,4 @@ ion-text {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* 스크롤 최적화 - 실제로 필요한 곳만 */
-@media (orientation: portrait) {
-  ion-content {
-    /* 스크롤이 활발한 컨텐츠에만 적용 */
-    will-change: scroll-position;
-  }
-}
-
-/* 버튼 최적화 - 클릭 시에만 적용 */
-ion-button:active,
-button:active,
-.button:active {
-  /* 터치 시에만 GPU 가속 적용 */
-  will-change: transform;
-  
-  /* 터치 반응성 최적화 */
-  touch-action: manipulation;
-  -webkit-touch-callout: none;
-  
-  /* 레이아웃 격리 */
-  contain: layout style paint;
-  
-  /* GPU 가속 */
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-/* 리스트 최적화 - 메모리 효율적 */
-ion-item {
-  /* 가벼운 최적화만 적용 */
-  contain: layout style;
-}
-
-ion-list {
-  /* 스크롤 컨테이너만 가속 */
-  -webkit-overflow-scrolling: touch;
-}
-
-/* 카드는 애니메이션 시에만 최적화 */
-ion-card {
-  transition: transform 0.2s ease-out;
-}
-
-ion-card:hover,
-ion-card:active {
-  will-change: transform;
-}
-
-/* 스크롤 컨테이너 극한 최적화 */
-.scroll-container,
-/* 스크롤이 많은 리스트에만 적용 */
-.virtual-list,
-.long-scroll-list {
-  /* 네이티브 스크롤 성능 */
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: auto;
-  overscroll-behavior: contain;
-  
-  /* GPU 가속 - 스크롤이 많은 곳에만 */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  contain: layout style paint;
 }

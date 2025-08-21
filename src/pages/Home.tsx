@@ -141,12 +141,20 @@ const MenuCard: React.FC = () => {
       ))}
 
       <motion.div
-        style={{ overflow: 'hidden' }}
+        initial={{
+          height: 0,
+          opacity: 0
+        }}
+        style={{ 
+          overflow: 'hidden',
+          willChange: 'height, opacity',
+          transform: 'translateZ(0)'
+        }}
         animate={{
           height: isMenuExpanded ? 'auto' : 0,
           opacity: isMenuExpanded ? 1 : 0
         }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
         {expandedMenuItems.map((menu, index) => (
           <ExpandedMenuItem

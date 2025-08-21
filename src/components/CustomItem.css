@@ -121,5 +121,6 @@
 .custom-item-body-line>span:last-child {
   font-size: 13px;
   font-weight: 500;
-  color: rgba(var(--ion-text-color-rgb), 0.6);
+  /* color: rgba(var(--ion-text-color-rgb), 0.6); */
+  /* color: rgba(var(--ion-text-color-rgb), 0.6); */
 }
