@@ -23,7 +23,7 @@ const GroupButton: React.FC = () => {
         // 새로 선택된 버튼으로 스크롤
         setTimeout(() => {
           const button = buttonRefs.current[newIndex.value];
-          button?.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+          button?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }, 0);
       }
       setSelected(newIndex);
@@ -42,7 +42,7 @@ const GroupButton: React.FC = () => {
     setApprovals(null);
     setSelected({ value: index });
     const button = buttonRefs.current[index];
-    button?.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+    button?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   };
 
   if (todoSummary && todoSummary.length === 0) {

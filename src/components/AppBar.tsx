@@ -62,7 +62,7 @@ const AppBar: React.FC<AppBarProps> = ({
   const actualTheme = getActualTheme();
 
   return (
-    <IonHeader mode='ios' translucent={true} className='app-bar'>
+    <IonHeader mode='ios' translucent={false} className='app-bar'>
       <IonToolbar>
         {showBackButton &&
           <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />

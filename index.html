@@ -4,14 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <!-- 웹뷰 렌더링 최적화 -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no">
-    
-    <title>test</title>
+    <title>iFLOW5</title>
     
     <!-- Pretendard 폰트 preload (중요 웨이트만) -->
     <link rel="preload" href="/assets/fonts/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -100,120 +93,120 @@
       setupIonicReact();
     </script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      function initWebview(){
+         if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+            window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'padding'}));
+            window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'token'}));
+            window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'userInfo'}));
+         }
+      }
+    
+      function webviewTheme(theme){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'theme',value:theme}));
+        }
+      }
+    
+      function webviewLogout(){
+         if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+           window.flutter_inappwebview.callHandler('Auth',JSON.stringify({key:'logout'}));
+         }
+      }
+    
+      function webviewPushSetting(){
+         if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+           window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'pushSetting'}));
+         }
+      }
+    
+      function webviewToast(msg){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'toast',value:msg}));
+        }
+      }
+    
+      function webviewHaptic(type){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'haptic',value:type}));
+        }
+      }
+    
+      function webviewNoticeOnOff(val, org){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'noticeOnOff',value:
+          {val: val, org: org}}));
+        }
+      }
+    
+      function webviewAppEnd(value){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'appEnd'}));
+        }
+      }
+    
+      function webviewAttach(title, url){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'attach', value: {title: title, url: url}}));
+        }
+      }
+  
+      function webviewBadge(badge){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'badge', value: {badge: badge}}));
+        }
+      }
+    
+      function webviewPrivacyPolicy(){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'privacyPolicy'}));
+        }
+      }
+    
+      function webviewTermsOfUse(){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'termsOfUse'}));
+        }
+      }
+    
+       function webviewBiometrics(){
+        if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
+          window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'biometrics'}));
+        }
+      }
+    
+      function receivePadding(top,bottom,left,right){
+        const event = new CustomEvent('receivePadding', { detail: JSON.stringify({top, bottom, left,
+        right}) });
+        window.dispatchEvent(event);
+      }
+    
+      function receiveToken(deviceToken, deviceInfo){
+        console.log(deviceInfo.toString());
+        const event = new CustomEvent('receiveToken', { detail: JSON.stringify({deviceToken, deviceInfo}) });
+        window.dispatchEvent(event);
+      }
+    
+      function receiveUserInfo(loginId, corp) {
+        const event = new CustomEvent('receiveUserInfo', { detail: JSON.stringify({loginId, corp}) });
+        window.dispatchEvent(event);
+      }
+    
+      function receiveBack(){
+        const event = new CustomEvent('receiveBack', { detail: {} });
+        window.dispatchEvent(event);
+      }
+    
+      function receiveBiometrics(didAuthenticate){
+        const event = new CustomEvent('receiveBiometrics', { detail: JSON.stringify
+        ({didAuthenticate}) });
+        window.dispatchEvent(event);
+      }
+    
+       function receiveKeyboard(isOpen, keyboardHeight){
+        const event = new CustomEvent('receiveKeyboard', { detail: JSON.stringify({isOpen, keyboardHeight}) });
+        window.dispatchEvent(event);
+      }
+    </script>
   </body>
-  <script>
-    function initWebview(){
-       if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
-          window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'padding'}));
-          window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'token'}));
-          window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'userInfo'}));
-       }
-    }
-  
-    function webviewTheme(theme){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Init',JSON.stringify({key:'theme',value:theme}));
-      }
-    }
-  
-    function webviewLogout(){
-       if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-         window.flutter_inappwebview.callHandler('Auth',JSON.stringify({key:'logout'}));
-       }
-    }
-  
-    function webviewPushSetting(){
-       if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-         window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'pushSetting'}));
-       }
-    }
-  
-    function webviewToast(msg){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'toast',value:msg}));
-      }
-    }
-  
-    function webviewHaptic(type){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'haptic',value:type}));
-      }
-    }
-  
-    function webviewNoticeOnOff(val, org){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'noticeOnOff',value:
-        {val: val, org: org}}));
-      }
-    }
-  
-    function webviewAppEnd(value){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key:'appEnd'}));
-      }
-    }
-  
-    function webviewAttach(title, url){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'attach', value: {title: title, url: url}}));
-      }
-    }
-
-    function webviewBadge(badge){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'badge', value: {badge: badge}}));
-      }
-    }
-  
-    function webviewPrivacyPolicy(){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'privacyPolicy'}));
-      }
-    }
-  
-    function webviewTermsOfUse(){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'termsOfUse'}));
-      }
-    }
-  
-     function webviewBiometrics(){
-      if(window.flutter_inappwebview && window.flutter_inappwebview.callHandler){
-        window.flutter_inappwebview.callHandler('Base',JSON.stringify({key: 'biometrics'}));
-      }
-    }
-  
-    function receivePadding(top,bottom,left,right){
-      const event = new CustomEvent('receivePadding', { detail: JSON.stringify({top, bottom, left,
-      right}) });
-      window.dispatchEvent(event);
-    }
-  
-    function receiveToken(deviceToken, deviceInfo){
-      console.log(deviceInfo.toString());
-      const event = new CustomEvent('receiveToken', { detail: JSON.stringify({deviceToken, deviceInfo}) });
-      window.dispatchEvent(event);
-    }
-  
-    function receiveUserInfo(loginId, corp) {
-      const event = new CustomEvent('receiveUserInfo', { detail: JSON.stringify({loginId, corp}) });
-      window.dispatchEvent(event);
-    }
-  
-    function receiveBack(){
-      const event = new CustomEvent('receiveBack', { detail: {} });
-      window.dispatchEvent(event);
-    }
-  
-    function receiveBiometrics(didAuthenticate){
-      const event = new CustomEvent('receiveBiometrics', { detail: JSON.stringify
-      ({didAuthenticate}) });
-      window.dispatchEvent(event);
-    }
-  
-     function receiveKeyboard(isOpen, keyboardHeight){
-      const event = new CustomEvent('receiveKeyboard', { detail: JSON.stringify({isOpen, keyboardHeight}) });
-      window.dispatchEvent(event);
-    }
-  </script>
 </html>

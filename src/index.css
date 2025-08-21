@@ -1,34 +1,6 @@
 :root {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  /* 극한 렌더링 최적화 */
-  font-synthesis: none;
-  text-rendering: optimizeSpeed;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-display: swap;
-  font-optical-sizing: auto;
-  
-  --vh: 100%;
-  
-  /* 모바일 렌더링 최적화 */
-  -webkit-overflow-scrolling: touch;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  
-  /* 웹뷰 특화 최적화 */
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  -webkit-font-feature-settings: "kern" 1;
-  font-feature-settings: "kern" 1;
-  font-kerning: normal;
+  /* --vh: 100%; */
 
   /* Light theme */
   --ion-color-primary: #407EFF;
@@ -132,27 +104,6 @@
   --gray-color: #646870;
   --check-icon:  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="%23646870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
   --logo: url('/src/assets/images/app_logo_light.webp');
-}
-
-* {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Ionic 컴포넌트에도 Pretendard 적용 */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-span,
-ion-label,
-ion-button,
-ion-item,
-ion-title,
-ion-text {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
 
 .loading-indicator-wrapper {
