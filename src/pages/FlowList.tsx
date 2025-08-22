@@ -37,12 +37,12 @@ const FlowList: React.FC = () => {
   // 렌더링할 리스트 아이템들 메모이제이션
   const renderedItems = useMemo(() => {
     if (!flowList) return null;
-    
+
     return flowList.map((area, index) => (
-      <FlowListItem 
-        key={`flow-list-item-${area.flowCode}-${index}`} 
-        area={area} 
-        index={index} 
+      <FlowListItem
+        key={`flow-list-item-${area.flowCode}-${index}`}
+        area={area}
+        index={index}
       />
     ));
   }, [flowList]);
@@ -52,16 +52,21 @@ const FlowList: React.FC = () => {
       <AppBar key='flow-list-app-bar' title={
         <span>미결함</span>
       } showBackButton={true} showCount={true} count={totalCount} />
-
-      <IonContent fullscreen scrollEvents={false}>
+      <IonContent scrollEvents={false} scrollX={false}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        {!flowList ? (
+
+        {!flowList ?
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
           </div>
-        ) : renderedItems}
+          :
+          <div style={{ transform: 'translateZ(0)'}}>
+            {renderedItems}
+          </div>
+        }
+
       </IonContent>
     </IonPage>
   );
@@ -76,35 +81,33 @@ interface FlowListProps {
 
 const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
   const router = useIonRouter();
-  
+
   // 아이콘 정보 메모이제이션
   const icon = useMemo(() => getFlowIcon(area.flowCode!), [area.flowCode]);
-  
+
   // 클릭 핸들러 최적화
   const handleClick = useCallback(() => {
     router.push('/approval', 'forward', 'push');
   }, [router]);
 
   // 스타일 객체 메모이제이션
-  const iconStyle = useMemo(() => ({ 
-    backgroundColor: icon.backgroundColor 
+  const iconStyle = useMemo(() => ({
+    backgroundColor: icon.backgroundColor
   }), [icon.backgroundColor]);
 
   const containerStyle = useMemo(() => ({
     marginTop: '10px',
     overflow: 'hidden' as const,
-    willChange: 'transform, opacity', // GPU 가속 힌트
-    transform: 'translateZ(0)', // 하드웨어 가속 강제
   }), []);
 
   // 애니메이션 props 메모이제이션 (GPU 가속 최적화)
   const motionProps = useMemo(() => ({
     layout: true,
-    initial: { 
+    initial: {
       y: 20,
       scale: 0.95,
     },
-    animate: { 
+    animate: {
       y: 0,
       scale: 1,
     },
@@ -123,15 +126,15 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
       {...motionProps}
       style={containerStyle}
     >
-      <IonItem 
-        button 
-        className='flow-list-item' 
-        onClick={handleClick} 
+      <IonItem
+        button
+        className='flow-list-item'
+        onClick={handleClick}
         mode='md'
       >
         <div className='flow-list-item-icon' style={iconStyle}>
-          <IonImg 
-            src={icon.image} 
+          <IonImg
+            src={icon.image}
             alt="flow icon"
           />
         </div>

@@ -1,9 +1,9 @@
 .custom-item {
   background-color: var(--ion-background-color);
-  border-radius: 12px;
+  border-radius: 8px;
   flex-direction: column;
   overflow: hidden;
-  /* GPU 가속 제거 - 정적 아이템에는 불필요 */
+  position: relative;
 }
 
 .custom-item.selected {

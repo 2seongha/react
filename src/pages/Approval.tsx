@@ -30,9 +30,9 @@ const Approval: React.FC = () => {
     const addPassiveScrollListeners = () => {
       const scrollElements = document.querySelectorAll('[data-virtuoso-scroller]');
       scrollElements.forEach(element => {
-        element.addEventListener('scroll', () => {}, { passive: true });
-        element.addEventListener('touchstart', () => {}, { passive: true });
-        element.addEventListener('touchmove', () => {}, { passive: true });
+        element.addEventListener('scroll', () => { }, { passive: true });
+        element.addEventListener('touchstart', () => { }, { passive: true });
+        element.addEventListener('touchmove', () => { }, { passive: true });
       });
     };
 
@@ -94,9 +94,43 @@ const Approval: React.FC = () => {
 
   //* 스크롤 관련
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const contentRef = useRef<HTMLIonContentElement>(null);
+
   const scrollToTop = () => {
-    virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
+    contentRef.current?.scrollToTop(500);
   };
+
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    const handleScroll = () => {
+      content.getScrollElement().then((scrollElement) => {
+        if (scrollElement) {
+          const scrollTop = scrollElement.scrollTop;
+          setIsTop(scrollTop < 100);
+
+          if (scrollCallbackRef.current) {
+            scrollCallbackRef.current();
+          }
+        }
+      });
+    };
+
+    content.getScrollElement().then((scrollElement) => {
+      if (scrollElement) {
+        scrollElement.addEventListener('scroll', handleScroll, { passive: true });
+      }
+    });
+
+    return () => {
+      content.getScrollElement().then((scrollElement) => {
+        if (scrollElement) {
+          scrollElement.removeEventListener('scroll', handleScroll);
+        }
+      });
+    };
+  }, []);
 
   // 네비게이션 핸들러 - useCallback으로 최적화
   const handleBackNavigation = useCallback(() => {
@@ -386,10 +420,12 @@ const Approval: React.FC = () => {
         showCount={true}
         count={totalCount} />
 
-      <IonContent
+      <div className='content'>
+        {/* <IonContent
+        ref={contentRef}
         fullscreen
         scrollEvents={false}
-      >
+      > */}
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -401,7 +437,7 @@ const Approval: React.FC = () => {
             ))}
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
-          approvals.map((approval, index)=> renderItem(index, approval))
+          approvals.map((approval, index) => renderItem(index, approval))
           // <Virtuoso
           //   className='virtuoso'
           //   ref={virtuosoRef}
@@ -434,7 +470,8 @@ const Approval: React.FC = () => {
           onScrollToTop={scrollToTop}
           scrollCallbackRef={scrollCallbackRef}
         />
-      </IonContent>
+        {/* </IonContent> */}
+      </div>
     </IonPage >
   );
 };
@@ -603,7 +640,7 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
 
   return (
-      <CustomItem {...customItemProps} />
+    <CustomItem {...customItemProps} />
   );
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지
