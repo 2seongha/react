@@ -38,7 +38,6 @@ const Detail: React.FC = memo(() => {
     let gestureDirection: 'up' | 'down' | null = null;
     let isHeaderIntersecting = false;
     let previousY = 0;
-    let previousScrollTop = 0;
     let isScrollBlocked = false;
 
     // IntersectionObserver로 header 가시성 감지
@@ -56,25 +55,6 @@ const Detail: React.FC = memo(() => {
       { threshold: 0, rootMargin: '0px' }
     );
     observer.observe(headerElement);
-
-    // 스크롤 이벤트 - top 도달 감지
-    const handleScroll = () => {
-      const scrollTop = scrollContainer.scrollTop;
-
-      // display none 상태에서 scroll이 top(0)에 도달하면 header 복원 및 스크롤 차단
-      if (scrollTop === 0 && headerElement.style.display === 'none') {
-        console.log('Top 도달, header 복원 및 스크롤 차단');
-        headerElement.style.display = 'block';
-        scrollContainer.scrollTop = 280;
-
-        // 스크롤 차단 활성화 및 제스처 카운트 리셋
-        isScrollBlocked = true;
-        scrollContainer.style.overflow = 'hidden';
-        console.log('스크롤 차단 활성화, 제스처 필요');
-      }
-
-      previousScrollTop = scrollTop;
-    };
 
     // 제스처 처리
     const gesture = createGesture({
@@ -120,10 +100,6 @@ const Detail: React.FC = memo(() => {
         console.log('스크롤 차단 활성화, 제스처 필요');
         return;
       }
-      // if (isScrollBlocked) {
-      //   console.log('스크롤 차단 상태이므로 snap 기능 비활성화');
-      //   return;
-      // }
 
       if (!gestureDirection || !isHeaderIntersecting) return;
 
@@ -138,13 +114,11 @@ const Detail: React.FC = memo(() => {
     };
 
     gesture.enable();
-    // scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
     scrollContainer.addEventListener('scrollend', handleScrollEnd, { passive: true });
 
     return () => {
       gesture.destroy();
       observer.disconnect();
-      // scrollContainer.removeEventListener('scroll', handleScroll);
       scrollContainer.removeEventListener('scrollend', handleScrollEnd);
     };
   }, []);
@@ -216,7 +190,14 @@ const Detail: React.FC = memo(() => {
             style={{ minHeight: 'calc(100% - 48px)' }}
             autoHeight
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
-            onSlideChange={useCallback((swiper: SwiperClass) => setValue(swiper.activeIndex), [])}
+            onSlideChange={useCallback((swiper: SwiperClass) => {
+              setValue(swiper.activeIndex);
+              const activeSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
+              const hasScroll = activeSlide.offsetHeight > (contentRef.current?.offsetHeight ?? 0) - 48;
+              if (!hasScroll && headerRef.current) {
+                headerRef.current.style.display = 'block';
+              }
+            }, [])}
           >
             <SwiperSlide style={{ height: 'auto' }}>
               <div >
@@ -256,8 +237,17 @@ const Detail: React.FC = memo(() => {
             </SwiperSlide>
             <SwiperSlide style={{ minHeight: (contentRef.current?.offsetHeight ?? 0) - 48 }}>
               <div >
-                <h2>부서공지</h2>
-                <p>부서공지 콘텐츠</p>
+                {Array.from({ length: 10 }, (_, i) => (
+                  <div key={i} style={{
+                    marginBottom: '20px',
+                    padding: '20px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '8px'
+                  }}>
+                    <h4>항목 {i + 1}</h4>
+                    <p>스크롤하면 상단 영역이 스크롤 이동거리만큼 줄어들고 늘어납니다.</p>
+                  </div>
+                ))}
               </div>
             </SwiperSlide>
           </Swiper>
