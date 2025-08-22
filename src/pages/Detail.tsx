@@ -106,10 +106,24 @@ const Detail: React.FC = memo(() => {
     // scrollend 핸들러 (snap 기능)
     const handleScrollEnd = () => {
       // 스크롤이 차단된 상태에서는 snap 기능 비활성화
-      if (isScrollBlocked) {
-        console.log('스크롤 차단 상태이므로 snap 기능 비활성화');
+      const scrollTop = scrollContainer.scrollTop;
+
+      // display none 상태에서 scroll이 top(0)에 도달하면 header 복원 및 스크롤 차단
+      if (scrollTop === 0 && headerElement.style.display === 'none') {
+        console.log('Top 도달, header 복원 및 스크롤 차단');
+        headerElement.style.display = 'block';
+        scrollContainer.scrollTop = 280;
+
+        // 스크롤 차단 활성화 및 제스처 카운트 리셋
+        isScrollBlocked = true;
+        scrollContainer.style.overflow = 'hidden';
+        console.log('스크롤 차단 활성화, 제스처 필요');
         return;
       }
+      // if (isScrollBlocked) {
+      //   console.log('스크롤 차단 상태이므로 snap 기능 비활성화');
+      //   return;
+      // }
 
       if (!gestureDirection || !isHeaderIntersecting) return;
 
@@ -124,13 +138,13 @@ const Detail: React.FC = memo(() => {
     };
 
     gesture.enable();
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    // scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
     scrollContainer.addEventListener('scrollend', handleScrollEnd, { passive: true });
 
     return () => {
       gesture.destroy();
       observer.disconnect();
-      scrollContainer.removeEventListener('scroll', handleScroll);
+      // scrollContainer.removeEventListener('scroll', handleScroll);
       scrollContainer.removeEventListener('scrollend', handleScrollEnd);
     };
   }, []);
@@ -199,12 +213,12 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-          style={{minHeight:'calc(100% - 48px)'}}
-          autoHeight={true}
+            style={{ minHeight: 'calc(100% - 48px)' }}
+            autoHeight
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => setValue(swiper.activeIndex), [])}
           >
-            <SwiperSlide>
+            <SwiperSlide style={{ height: 'auto' }}>
               <div >
                 <h2>전표 상세</h2>
                 <div style={{ marginBottom: '30px' }}>
@@ -233,17 +247,17 @@ const Detail: React.FC = memo(() => {
                 ))}
               </div>
             </SwiperSlide>
-            <SwiperSlide style={{minHeight: 'calc(100vh - 96px)'}}>
+            <SwiperSlide style={{ minHeight: (contentRef.current?.offsetHeight ?? 0) - 48 }}>
               <div >
-              <h2>부서공지</h2>
-              <p>부서공지 콘텐츠</p>
+                <h2>부서공지</h2>
+                <p>부서공지 콘텐츠</p>
               </div>
-              
+
             </SwiperSlide>
-            <SwiperSlide style={{minHeight: 'calc(100vh - 96px)'}}>
-          <div style={{minHeight: '100%'}}>
-              <h2>부서공지</h2>
-              <p>부서공지 콘텐츠</p>
+            <SwiperSlide style={{ minHeight: (contentRef.current?.offsetHeight ?? 0) - 48 }}>
+              <div >
+                <h2>부서공지</h2>
+                <p>부서공지 콘텐츠</p>
               </div>
             </SwiperSlide>
           </Swiper>

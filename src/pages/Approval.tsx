@@ -1,4 +1,4 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, createGesture } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar,  RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, createGesture } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -7,7 +7,6 @@ import { ApprovalModel } from '../stores/types';
 import CustomItem from '../components/CustomItem';
 import CustomSkeleton from '../components/CustomSkeleton';
 import './Approval.css';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { getPlatformMode } from '../utils';
 
 const Approval: React.FC = () => {
@@ -25,19 +24,6 @@ const Approval: React.FC = () => {
     setSelectedItems(new Set());
     setSearchText('');
     fetchApprovals();
-
-    // 스크롤 이벤트를 passive true로 설정
-    const addPassiveScrollListeners = () => {
-      const scrollElements = document.querySelectorAll('[data-virtuoso-scroller]');
-      scrollElements.forEach(element => {
-        element.addEventListener('scroll', () => { }, { passive: true });
-        element.addEventListener('touchstart', () => { }, { passive: true });
-        element.addEventListener('touchmove', () => { }, { passive: true });
-      });
-    };
-
-    // DOM이 렌더링된 후 실행
-    setTimeout(addPassiveScrollListeners, 100);
 
     return () => setApprovals(null);
   }, []);
@@ -93,7 +79,6 @@ const Approval: React.FC = () => {
   }, [defaultStartDate, defaultEndDate]);
 
   //* 스크롤 관련
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
 
   const scrollToTop = () => {
@@ -153,7 +138,6 @@ const Approval: React.FC = () => {
   // 검색어와 날짜로 필터링된 결과
   const filteredApprovals = useMemo(() => {
     if (!approvals) return null;
-
     let filtered = approvals;
 
     // 날짜 필터링
@@ -240,26 +224,7 @@ const Approval: React.FC = () => {
     }
   }, [filteredApprovals, isAllSelected]);
 
-  const renderItem = useCallback((index: number, approval: ApprovalModel) => {
-    if (!approval || !approval.flowNo) {
-      return <div className="approval-item-wrapper"></div>;
-    }
-
-    const isSelected = selectedItems.has(approval.flowNo);
-    const isLastItem = filteredApprovals && index === filteredApprovals.length - 1;
-    return (
-      <div className={`approval-item-wrapper ${index === 0 ? 'first-item' : ''} ${isLastItem ? 'last-item' : ''}`}>
-        <ApprovalItem
-          key={approval.flowNo}
-          approval={approval}
-          index={index}
-          isSelected={isSelected}
-          onSelectionChange={handleItemSelection}
-          searchText={searchText}
-        />
-      </div>
-    );
-  }, [selectedItems, handleItemSelection, searchText, filteredApprovals]);
+  // renderItem 함수 제거하고 직접 렌더링
 
   return (
     <IonPage className='approval'>
@@ -435,7 +400,18 @@ const Approval: React.FC = () => {
             ))}
           </div>
         ) : filteredApprovals && filteredApprovals.length > 0 ? (
-          approvals.map((approval, index) => renderItem(index, approval))
+          approvals.map((approval, index) => (
+            <ApprovalItem
+              key={approval.flowNo}
+              approval={approval}
+              index={index}
+              isSelected={selectedItems.has(approval.flowNo)}
+              onSelectionChange={handleItemSelection}
+              searchText={searchText}
+              isFirstItem={index === 0}
+              isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
+            />
+          ))
           // <Virtuoso
           //   className='virtuoso'
           //   ref={virtuosoRef}
@@ -541,6 +517,8 @@ interface ApprovalProps {
   isSelected: boolean;
   onSelectionChange: (id: string, isSelected: boolean) => void;
   searchText: string;
+  isFirstItem: boolean;
+  isLastItem: boolean;
 }
 
 // 텍스트 하이라이트 헬퍼 함수 (컴포넌트 외부에서 정의하여 매번 재생성 방지)
@@ -555,8 +533,8 @@ const highlightText = (text: string, searchText: string) => {
   );
 };
 
-// ApprovalItem 초간단 버전
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText }) => {
+// ApprovalItem 컴포넌트 - wrapper div 포함
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText, isFirstItem, isLastItem }) => {
   const router = useIonRouter();
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
@@ -565,20 +543,10 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
   console.log('approval item rebuild : ' + index);
 
-  const handleApprove = useCallback(() => {
-    console.log('승인:', approval.flowNo);
-    // TODO: 승인 로직 구현
-  }, [approval.flowNo]);
-
-  const handleReject = useCallback(() => {
-    console.log('반려:', approval.flowNo);
-    // TODO: 반려 로직 구현
-  }, [approval.flowNo]);
-
   const handleItemClick = useCallback(() => {
     console.log('아이템 클릭:', approval.flowNo);
     router.push(`/detail/${approval.flowNo}`, 'forward', 'push');
-  }, [approval.flowNo, router]);
+  }, [approval.flowNo]); // router 의존성 제거
 
   const handleLongPress = useCallback(() => {
     console.log('롱프레스:', approval.flowNo);
@@ -637,7 +605,9 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
 
 
   return (
-    <CustomItem {...customItemProps} />
+    <div className={`approval-item-wrapper ${isFirstItem ? 'first-item' : ''} ${isLastItem ? 'last-item' : ''}`}>
+      <CustomItem {...customItemProps} />
+    </div>
   );
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지
@@ -648,7 +618,9 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     prevProps.approval.createDate === nextProps.approval.createDate &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.searchText === nextProps.searchText &&
-    prevProps.index === nextProps.index
+    prevProps.index === nextProps.index &&
+    prevProps.isFirstItem === nextProps.isFirstItem &&
+    prevProps.isLastItem === nextProps.isLastItem
   );
 });
 
