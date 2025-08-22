@@ -3,7 +3,7 @@
   height: 24px;
 }
 
-.app-bar ion-buttons {
+.app-bar ion-buttons > ion-button:last-child {
   margin-right: 8px;
 }
 

@@ -10,7 +10,7 @@ import {
   IonImg,
   useIonRouter,
 } from '@ionic/react';
-import { menu, search, settingsSharp } from 'ionicons/icons';
+import { headset, menu, search, settingsSharp } from 'ionicons/icons';
 import './AppBar.css';
 import AnimatedBadge from './AnimatedBadge';
 import useAppStore from '../stores/appStore';
@@ -63,7 +63,14 @@ const AppBar: React.FC<AppBarProps> = ({
 
   return (
     <IonHeader mode='ios' translucent={false} className='app-bar'>
+
       <IonToolbar>
+        <IonTitle style={{ height: '48px' }}>
+          <div className='app-bar-title-wrapper'>
+            {title}
+            {showCount ? <AnimatedBadge count={count} key={count} /> : null}
+          </div>
+        </IonTitle>
         {showBackButton &&
           <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
         }
@@ -92,13 +99,6 @@ const AppBar: React.FC<AppBarProps> = ({
             />
           </div>
         }
-
-        <IonTitle>
-          <div className='app-bar-title-wrapper'>
-            {title}
-            {showCount ? <AnimatedBadge count={count} key={count} /> : null}
-          </div>
-        </IonTitle>
         <IonButtons slot="end">
           {showSearchButton &&
             <IonButton mode='md' shape='round' color={'medium'}
@@ -122,8 +122,8 @@ const AppBar: React.FC<AppBarProps> = ({
             </IonButton>
           }
         </IonButtons>
+        {bottom}
       </IonToolbar>
-      {bottom}
     </IonHeader>
   );
 };

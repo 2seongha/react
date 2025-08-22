@@ -273,7 +273,7 @@ const Approval: React.FC = () => {
         }
         bottom={
           <>
-            <IonToolbar >
+            {/* <IonToolbar > */}
               <IonSearchbar
                 mode='ios'
                 class='search-bar'
@@ -284,9 +284,9 @@ const Approval: React.FC = () => {
                 debounce={50}
                 style={{ textAlign: 'start' }}
               />
-            </IonToolbar>
+            {/* </IonToolbar> */}
             {/* 날짜 선택 섹션 */}
-            <IonToolbar >
+            {/* <IonToolbar > */}
               <div className='date-toolbar-wrapper'>
                 <IonItem
                   button
@@ -329,8 +329,8 @@ const Approval: React.FC = () => {
                   </div>
                 </IonItem>
               </div>
-            </IonToolbar>
-            <IonToolbar>
+            {/* </IonToolbar> */}
+            {/* <IonToolbar> */}
               <div className='buttons-wrapper'>
                 <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
                   <IonCheckbox
@@ -351,7 +351,7 @@ const Approval: React.FC = () => {
                   </IonButton>
                 </div>
               </div>
-            </IonToolbar>
+            {/* </IonToolbar> */}
 
             {/* 시작일 선택 팝오버 */}
             <IonPopover
@@ -420,12 +420,10 @@ const Approval: React.FC = () => {
         showCount={true}
         count={totalCount} />
 
-      <div className='content'>
-        {/* <IonContent
+      <IonContent
         ref={contentRef}
-        fullscreen
         scrollEvents={false}
-      > */}
+      >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
           {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -470,8 +468,7 @@ const Approval: React.FC = () => {
           onScrollToTop={scrollToTop}
           scrollCallbackRef={scrollCallbackRef}
         />
-        {/* </IonContent> */}
-      </div>
+      </IonContent>
     </IonPage >
   );
 };

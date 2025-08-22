@@ -27,14 +27,17 @@ const BottomNavigation: React.FC = () => {
         showLabels
       >
         <BottomNavigationAction
+          disableRipple
           label="홈"
           icon={<HomeIcon />}
         />
         <BottomNavigationAction
+          disableRipple
           label="알림"
           icon={<NotificationsIcon />}
         />
         <BottomNavigationAction
+          disableRipple
           label="더보기"
           icon={<MenuIcon />}
         />

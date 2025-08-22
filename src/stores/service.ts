@@ -3,7 +3,7 @@ import { ApprovalModel, AreaModel, NoticeModel, NotificationModel } from "./type
 export async function fetchMenuAreas(): Promise<AreaModel[]> {
   try {
     // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Mock API call with realistic menu area data
     const mockAreas: AreaModel[] = [
@@ -29,7 +29,7 @@ export async function fetchMenuAreas(): Promise<AreaModel[]> {
 export async function fetchApprovals(): Promise<ApprovalModel[]> {
   try {
     // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Mock API call with realistic menu area data
     const mockApprovals: ApprovalModel[] = [
@@ -111,7 +111,7 @@ export async function fetchApprovals(): Promise<ApprovalModel[]> {
 export async function fetchNotifications(): Promise<NotificationModel[]> {
   try {
     // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Mock API call with realistic notice data
     const mockNotifications: NotificationModel[] = [
@@ -176,7 +176,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
 export async function fetchNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Mock API call with realistic notice data
     const mockNotices: NoticeModel[] = [
