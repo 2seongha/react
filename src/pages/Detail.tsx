@@ -1,5 +1,5 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonRefresher, IonRefresherContent, createGesture } from '@ionic/react';
-import React, { useRef, useState, useEffect } from 'react';
+import { IonContent, IonPage, createGesture } from '@ionic/react';
+import React, { useRef, useCallback, useEffect, memo } from 'react';
 import { useParams } from 'react-router-dom';
 import AppBar from '../components/AppBar';
 import './Detail.css';
@@ -13,7 +13,7 @@ interface DetailParams {
   flowNo: string;
 }
 
-const Detail: React.FC = () => {
+const Detail: React.FC = memo(() => {
   const { flowNo } = useParams<DetailParams>();
   const approval = useAppStore(useShallow(state => state.approvals?.find(approval => approval.flowNo === flowNo) || null));
   const [value, setValue] = React.useState(0);
@@ -22,69 +22,114 @@ const Detail: React.FC = () => {
   const tabsRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  
-  const handleTabChange = React.useCallback((event: React.SyntheticEvent, newValue: number) => {
+
+  const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-    if (swiperRef.current) {
-      swiperRef.current.slideTo(newValue);
-    }
+    swiperRef.current?.slideTo(newValue);
   }, []);
 
-  // gesture로 방향만 감지하고 header 가시성 확인 후 snap 기능
+  // Header display 제어 및 제스처 관리
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     const headerElement = headerRef.current;
-    if (!scrollContainer || !headerElement) return;
+    const tabsElement = tabsRef.current;
+    if (!scrollContainer || !headerElement || !tabsElement) return;
 
     let gestureDirection: 'up' | 'down' | null = null;
-    let isHeaderVisible = false;
+    let isHeaderIntersecting = false;
+    let previousY = 0;
+    let previousScrollTop = 0;
+    let isScrollBlocked = false;
 
     // IntersectionObserver로 header 가시성 감지
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          isHeaderVisible = entry.isIntersecting;
-        });
+        isHeaderIntersecting = entries[0].isIntersecting;
+
+        // 아래로 스크롤 시 header가 화면에서 사라지면 display none
+        if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
+          console.log('Header 숨김 - display none');
+          headerElement.style.display = 'none';
+        }
       },
-      { threshold: 0 }
+      { threshold: 0, rootMargin: '0px' }
     );
     observer.observe(headerElement);
 
-    // 제스처로 방향만 감지 (마지막 방향으로 업데이트)
+    // 스크롤 이벤트 - top 도달 감지
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
+
+      // display none 상태에서 scroll이 top(0)에 도달하면 header 복원 및 스크롤 차단
+      if (scrollTop === 0 && headerElement.style.display === 'none') {
+        console.log('Top 도달, header 복원 및 스크롤 차단');
+        headerElement.style.display = 'block';
+        scrollContainer.scrollTop = 280;
+
+        // 스크롤 차단 활성화 및 제스처 카운트 리셋
+        isScrollBlocked = true;
+        scrollContainer.style.overflow = 'hidden';
+        console.log('스크롤 차단 활성화, 제스처 필요');
+      }
+
+      previousScrollTop = scrollTop;
+    };
+
+    // 제스처 처리
     const gesture = createGesture({
       el: scrollContainer,
       threshold: 0,
       gestureName: 'direction-detect',
-      onMove: (detail) => {
-        const deltaY = detail.deltaY;
-        
-        // 실시간으로 마지막 방향 업데이트
-        if (Math.abs(deltaY) > 10) {
-          gestureDirection = deltaY > 0 ? 'down' : 'up';
+      onStart: (detail) => {
+        previousY = detail.currentY;
+        gestureDirection = null;
+
+        if (isScrollBlocked) {
+          isScrollBlocked = false;
+          scrollContainer.style.overflow = 'auto'
         }
-      }
+      },
+      onMove: (detail) => {
+        const deltaY = detail.currentY - previousY;
+
+        if (Math.abs(deltaY) > 10) {
+          const newDirection = deltaY > 0 ? 'down' : 'up';
+          if (gestureDirection !== newDirection) {
+            gestureDirection = newDirection;
+          }
+          previousY = detail.currentY;
+        }
+      },
     });
 
-    // scrollend 이벤트로 스크롤 종료 감지 후 snap 기능 (header 보일 때만)
+    // scrollend 핸들러 (snap 기능)
     const handleScrollEnd = () => {
-      if (gestureDirection && isHeaderVisible) {
-        if (gestureDirection === 'down') {
-          // 아래 방향 제스처 후 스크롤 종료 시 접기
-          scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (gestureDirection === 'up') {
-          // 위 방향 제스처 후 스크롤 종료 시 펼치기
-          tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        gestureDirection = null;
+      // 스크롤이 차단된 상태에서는 snap 기능 비활성화
+      if (isScrollBlocked) {
+        console.log('스크롤 차단 상태이므로 snap 기능 비활성화');
+        return;
       }
+
+      if (!gestureDirection || !isHeaderIntersecting) return;
+
+      if (gestureDirection === 'down') {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (gestureDirection === 'up') {
+        const tabsTop = tabsElement.offsetTop;
+        scrollContainer.scrollTo({ top: tabsTop, behavior: 'smooth' });
+      }
+
+      gestureDirection = null;
     };
 
     gesture.enable();
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
     scrollContainer.addEventListener('scrollend', handleScrollEnd, { passive: true });
 
     return () => {
       gesture.destroy();
       observer.disconnect();
+      scrollContainer.removeEventListener('scroll', handleScroll);
       scrollContainer.removeEventListener('scrollend', handleScrollEnd);
     };
   }, []);
@@ -119,13 +164,18 @@ const Detail: React.FC = () => {
         scrollY={false}
         scrollEvents={false}
       >
-        <div ref={scrollContainerRef} style={{ overflow: 'auto', height: '100%' }}>
+        <div ref={scrollContainerRef} style={{
+          overflow: 'auto',
+          height: '100%',
+          WebkitOverflowScrolling: 'touch',
+          contain: 'layout style paint'
+        }}>
           <div ref={headerRef} style={{
             background: '#666',
-            height: `280px`,
+            height: '280px',
             overflow: 'hidden',
-            transition: 'none',
-            willChange: 'height, opacity'
+            willChange: 'transform',
+            contain: 'layout style paint'
           }}>
             <span>{approval.apprTitle}</span>
             <div>
@@ -138,15 +188,18 @@ const Detail: React.FC = () => {
             position: 'sticky',
             top: 0,
             background: 'var(--ion-background-color)',
-            zIndex: 2
+            zIndex: 2,
+            willChange: 'transform',
+            contain: 'layout style'
           }}>
             <Tab label="상세" />
             <Tab label="결재선" />
             <Tab label="첨부파일" />
           </Tabs>
 
-          <Swiper onSwiper={(swiper) => swiperRef.current = swiper}
-            onSlideChange={(swiper) => setValue(swiper.activeIndex)}
+          <Swiper
+            onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
+            onSlideChange={useCallback((swiper: SwiperClass) => setValue(swiper.activeIndex), [])}
           >
             <SwiperSlide>
               <div >
@@ -186,7 +239,7 @@ const Detail: React.FC = () => {
       </IonContent>
     </IonPage >
   );
-};
+});
 
 export default Detail;
 
