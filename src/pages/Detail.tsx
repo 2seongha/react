@@ -21,6 +21,7 @@ const Detail: React.FC = () => {
   const contentRef = useRef<HTMLIonContentElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   
   const handleTabChange = React.useCallback((event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -29,32 +30,47 @@ const Detail: React.FC = () => {
     }
   }, []);
 
-  // ion gesture로 snap 제어
+  // gesture로 방향만 감지하고 스크롤 종료 시 snap 기능
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
 
+    let gestureDirection: 'up' | 'down' | null = null;
+
+    // 제스처로 방향만 감지
     const gesture = createGesture({
       el: scrollContainer,
       threshold: 0,
-      gestureName: 'scroll-snap',
+      gestureName: 'direction-detect',
       onEnd: (detail) => {
         const deltaY = detail.deltaY;
         
-        if (Math.abs(deltaY) > 10) { // 10px 이상 움직였을 때만
-          if (deltaY > 0) { // 아래 방향으로 제스처하면 접기 (Tabs를 최상단으로)
-            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-          } else { // 위 방향으로 제스처하면 펼치기 (완전히 보이기)
-            tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+        if (Math.abs(deltaY) > 10) {
+          gestureDirection = deltaY > 0 ? 'down' : 'up';
         }
       }
     });
 
+    // scrollend 이벤트로 스크롤 종료 감지 후 snap 기능
+    const handleScrollEnd = () => {
+      if (gestureDirection) {
+        if (gestureDirection === 'down') {
+          // 아래 방향 제스처 후 스크롤 종료 시 접기
+          scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (gestureDirection === 'up') {
+          // 위 방향 제스처 후 스크롤 종료 시 펼치기
+          tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        gestureDirection = null;
+      }
+    };
+
     gesture.enable();
+    scrollContainer.addEventListener('scrollend', handleScrollEnd, { passive: true });
 
     return () => {
       gesture.destroy();
+      scrollContainer.removeEventListener('scrollend', handleScrollEnd);
     };
   }, []);
 
@@ -89,7 +105,7 @@ const Detail: React.FC = () => {
         scrollEvents={false}
       >
         <div ref={scrollContainerRef} style={{ overflow: 'auto', height: '100%' }}>
-          <div style={{
+          <div ref={headerRef} style={{
             background: '#666',
             height: `280px`,
             overflow: 'hidden',
