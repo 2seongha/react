@@ -50,14 +50,15 @@ const Detail: React.FC = () => {
     );
     observer.observe(headerElement);
 
-    // 제스처로 방향만 감지
+    // 제스처로 방향만 감지 (마지막 방향으로 업데이트)
     const gesture = createGesture({
       el: scrollContainer,
       threshold: 0,
       gestureName: 'direction-detect',
-      onEnd: (detail) => {
+      onMove: (detail) => {
         const deltaY = detail.deltaY;
         
+        // 실시간으로 마지막 방향 업데이트
         if (Math.abs(deltaY) > 10) {
           gestureDirection = deltaY > 0 ? 'down' : 'up';
         }
