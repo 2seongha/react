@@ -50,6 +50,7 @@ const Detail: React.FC = memo(() => {
         if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
           console.log('Header 숨김 - display none');
           headerElement.style.display = 'none';
+          scrollContainer.scrollTop = 0;
         }
       },
       { threshold: 0, rootMargin: '0px' }
@@ -198,6 +199,8 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
+          style={{minHeight:'calc(100% - 48px)'}}
+          autoHeight={true}
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => setValue(swiper.activeIndex), [])}
           >
@@ -230,9 +233,18 @@ const Detail: React.FC = memo(() => {
                 ))}
               </div>
             </SwiperSlide>
-            <SwiperSlide>
+            <SwiperSlide style={{minHeight: 'calc(100vh - 96px)'}}>
+              <div >
               <h2>부서공지</h2>
               <p>부서공지 콘텐츠</p>
+              </div>
+              
+            </SwiperSlide>
+            <SwiperSlide style={{minHeight: 'calc(100vh - 96px)'}}>
+          <div style={{minHeight: '100%'}}>
+              <h2>부서공지</h2>
+              <p>부서공지 콘텐츠</p>
+              </div>
             </SwiperSlide>
           </Swiper>
         </div>
