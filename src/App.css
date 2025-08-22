@@ -1,18 +1,3 @@
-/* html {
-  width: 100%;
-  height: 100%;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%
-}
-
-html.ion-ce body {
-  display: block;
-}
-
-html.plt-pwa {
-  height: 100vh
-}
-
 body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
@@ -38,10 +23,10 @@ body {
   overscroll-behavior-y: none;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
-  will-change: auto;  
+  /* will-change: auto;  
   contain: strict;
-  transform: none;
-} */
+  transform: none; */
+}
 
 /* 스크롤 관련 */
 ion-content {
@@ -62,6 +47,7 @@ ion-content::part(scroll)::-webkit-scrollbar {
 * {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+  touch-action: none !important;
 }
 
 *::-webkit-scrollbar {
