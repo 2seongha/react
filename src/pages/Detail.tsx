@@ -30,12 +30,25 @@ const Detail: React.FC = () => {
     }
   }, []);
 
-  // gesture로 방향만 감지하고 스크롤 종료 시 snap 기능
+  // gesture로 방향만 감지하고 header 가시성 확인 후 snap 기능
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
+    const headerElement = headerRef.current;
+    if (!scrollContainer || !headerElement) return;
 
     let gestureDirection: 'up' | 'down' | null = null;
+    let isHeaderVisible = false;
+
+    // IntersectionObserver로 header 가시성 감지
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isHeaderVisible = entry.isIntersecting;
+        });
+      },
+      { threshold: 0 }
+    );
+    observer.observe(headerElement);
 
     // 제스처로 방향만 감지
     const gesture = createGesture({
@@ -51,9 +64,9 @@ const Detail: React.FC = () => {
       }
     });
 
-    // scrollend 이벤트로 스크롤 종료 감지 후 snap 기능
+    // scrollend 이벤트로 스크롤 종료 감지 후 snap 기능 (header 보일 때만)
     const handleScrollEnd = () => {
-      if (gestureDirection) {
+      if (gestureDirection && isHeaderVisible) {
         if (gestureDirection === 'down') {
           // 아래 방향 제스처 후 스크롤 종료 시 접기
           scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
@@ -70,6 +83,7 @@ const Detail: React.FC = () => {
 
     return () => {
       gesture.destroy();
+      observer.disconnect();
       scrollContainer.removeEventListener('scrollend', handleScrollEnd);
     };
   }, []);
