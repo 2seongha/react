@@ -73,7 +73,6 @@ const App: React.FC = () => {
       console.log(completeInit);
 
       setCompleteInit(true);
-      console.log(completeInit);
     }
   }, [webviewInitialized, themeInitialized]);
 
