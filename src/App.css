@@ -20,7 +20,7 @@ html.plt-pwa {
   height: 100vh
 } */
 
-/* body {
+body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   margin-left: 0;
@@ -48,7 +48,7 @@ html.plt-pwa {
   will-change: auto;  
   contain: strict;
   transform: none;
-} */
+}
 
 /* 스크롤 관련 */
 ion-content {
