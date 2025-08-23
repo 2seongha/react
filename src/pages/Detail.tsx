@@ -39,39 +39,6 @@ const Detail: React.FC = memo(() => {
     let isHeaderIntersecting = false;
     let previousY = 0;
     let isScrollBlocked = false;
-    let lastY = 0;
-    let scrollEndTimer: number | null = null;
-    let isPreventScrollActive = false;
-
-    // 스크롤 차단 함수
-    const touchStart = (e: TouchEvent) => {
-      lastY = e.touches[0].clientY;
-    };
-
-    const preventScroll = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const deltaY = lastY - currentY;
-      lastY = currentY;
-      e.preventDefault();
-      
-      // 부모 컨테이너로 스크롤 전달
-      scrollContainer.scrollTop += deltaY;
-      
-      // preventScroll이 활성화되어 있으면 scrollend 차단
-      isPreventScrollActive = true;
-      
-      // 타이머 초기화 후 재설정
-      if (scrollEndTimer) {
-        clearTimeout(scrollEndTimer);
-      }
-      
-      scrollEndTimer = setTimeout(() => {
-        isPreventScrollActive = false;
-        // 마지막 preventScroll 후 scrollend 트리거
-        const scrollEndEvent = new Event('scrollend', { bubbles: true });
-        scrollContainer.dispatchEvent(scrollEndEvent);
-      }, 150);
-    };
 
     // IntersectionObserver로 header 가시성 감지
     const observer = new IntersectionObserver(
@@ -82,13 +49,12 @@ const Detail: React.FC = memo(() => {
         if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
           console.log('Header 숨김 - display none');
           headerElement.style.display = 'none';
-          scrollContainer.scrollTop = 0;
+          // scrollContainer.scrollTop = 0;
 
           // SwiperSlide 안의 div들의 스크롤 이벤트 리스너 제거 (스크롤 허용)
-          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide > div') as NodeListOf<HTMLElement>;
+          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
           slideContentDivs.forEach(div => {
-            div.removeEventListener('touchstart', touchStart);
-            div.removeEventListener('touchmove', preventScroll);
+            // div.style.maxHeight = '100%';
           });
           console.log('SwiperSlide 내부 스크롤 허용');
         }
@@ -96,10 +62,9 @@ const Detail: React.FC = memo(() => {
         // header가 다시 보이면 스크롤 차단
         if (isHeaderIntersecting) {
           // SwiperSlide 안의 div들의 스크롤 이벤트 차단
-          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide > div') as NodeListOf<HTMLElement>;
+          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
           slideContentDivs.forEach(div => {
-            div.addEventListener('touchstart', touchStart, { passive: true });
-            div.addEventListener('touchmove', preventScroll, { passive: false });
+            // div.style.maxHeight = '0';
           });
           console.log('SwiperSlide 내부 스크롤 차단');
         }
@@ -137,9 +102,6 @@ const Detail: React.FC = memo(() => {
 
     // scrollend 핸들러 (snap 기능)
     const handleScrollEnd = () => {
-      // preventScroll이 활성화된 상태에서는 scrollend 차단
-      if (isPreventScrollActive) return;
-      
       const scrollTop = scrollContainer.scrollTop;
 
       // display none 상태에서 scroll이 top(0)에 도달하면 header 복원 및 스크롤 차단
@@ -179,18 +141,6 @@ const Detail: React.FC = memo(() => {
       gesture.destroy();
       observer.disconnect();
       scrollContainer.removeEventListener('scrollend', handleScrollEnd);
-      
-      // 타이머 정리
-      if (scrollEndTimer) {
-        clearTimeout(scrollEndTimer);
-      }
-      
-      // SwiperSlide div들의 이벤트 리스너 정리
-      const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide > div') as NodeListOf<HTMLElement>;
-      slideContentDivs.forEach(div => {
-        div.removeEventListener('touchstart', touchStart);
-        div.removeEventListener('touchmove', preventScroll);
-      });
     };
   }, []);
 
@@ -258,8 +208,7 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}
-            allowTouchMove={false}
+            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
