@@ -49,7 +49,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   const contentAreaClasses = useMemo(() => `custom-item-header-content-area`, []);
 
   return (
-    <div style={{background: 'var(--ion-background-color)', borderRadius: '8px' }}>
+    <div style={{background: 'var(--ion-background-color)', borderRadius: '8px', position:'relative' }}>
       <div
         ref={wrapperRef}
         style={style}

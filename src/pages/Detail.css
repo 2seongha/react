@@ -42,3 +42,7 @@
   contain: strict;
   /* GPU 가속 제거 - 정적 요소에는 불필요 */
 }
+
+.swiper-wrapper {
+  /* height: 100% !important; */
+}

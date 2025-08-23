@@ -2,12 +2,12 @@ import { IonContent, IonPage, createGesture } from '@ionic/react';
 import React, { useRef, useCallback, useEffect, memo } from 'react';
 import { useParams } from 'react-router-dom';
 import AppBar from '../components/AppBar';
-import './Detail.css';
 import useAppStore from '../stores/appStore';
 import { useShallow } from 'zustand/shallow'
 import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react';
 import Tabs from '@mui/material/Tabs';
 import { Tab } from '@mui/material';
+import './Detail.css';
 
 interface DetailParams {
   flowNo: string;
@@ -39,17 +39,69 @@ const Detail: React.FC = memo(() => {
     let isHeaderIntersecting = false;
     let previousY = 0;
     let isScrollBlocked = false;
+    let lastY = 0;
+    let scrollEndTimer: number | null = null;
+    let isPreventScrollActive = false;
+
+    // 스크롤 차단 함수
+    const touchStart = (e: TouchEvent) => {
+      lastY = e.touches[0].clientY;
+    };
+
+    const preventScroll = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = lastY - currentY;
+      lastY = currentY;
+      e.preventDefault();
+      
+      // 부모 컨테이너로 스크롤 전달
+      scrollContainer.scrollTop += deltaY;
+      
+      // preventScroll이 활성화되어 있으면 scrollend 차단
+      isPreventScrollActive = true;
+      
+      // 타이머 초기화 후 재설정
+      if (scrollEndTimer) {
+        clearTimeout(scrollEndTimer);
+      }
+      
+      scrollEndTimer = setTimeout(() => {
+        isPreventScrollActive = false;
+        // 마지막 preventScroll 후 scrollend 트리거
+        const scrollEndEvent = new Event('scrollend', { bubbles: true });
+        scrollContainer.dispatchEvent(scrollEndEvent);
+      }, 150);
+    };
 
     // IntersectionObserver로 header 가시성 감지
     const observer = new IntersectionObserver(
       (entries) => {
         isHeaderIntersecting = entries[0].isIntersecting;
 
-        // 아래로 스크롤 시 header가 화면에서 사라지면 display none
+        // header가 화면에서 사라지면
         if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
           console.log('Header 숨김 - display none');
           headerElement.style.display = 'none';
           scrollContainer.scrollTop = 0;
+
+          // SwiperSlide 안의 div들의 스크롤 이벤트 리스너 제거 (스크롤 허용)
+          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide > div') as NodeListOf<HTMLElement>;
+          slideContentDivs.forEach(div => {
+            div.removeEventListener('touchstart', touchStart);
+            div.removeEventListener('touchmove', preventScroll);
+          });
+          console.log('SwiperSlide 내부 스크롤 허용');
+        }
+
+        // header가 다시 보이면 스크롤 차단
+        if (isHeaderIntersecting) {
+          // SwiperSlide 안의 div들의 스크롤 이벤트 차단
+          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide > div') as NodeListOf<HTMLElement>;
+          slideContentDivs.forEach(div => {
+            div.addEventListener('touchstart', touchStart, { passive: true });
+            div.addEventListener('touchmove', preventScroll, { passive: false });
+          });
+          console.log('SwiperSlide 내부 스크롤 차단');
         }
       },
       { threshold: 0, rootMargin: '0px' }
@@ -73,7 +125,7 @@ const Detail: React.FC = memo(() => {
       onMove: (detail) => {
         const deltaY = detail.currentY - previousY;
 
-        if (Math.abs(deltaY) > 10) {
+        if (Math.abs(deltaY) > 1) {
           const newDirection = deltaY > 0 ? 'down' : 'up';
           if (gestureDirection !== newDirection) {
             gestureDirection = newDirection;
@@ -85,7 +137,9 @@ const Detail: React.FC = memo(() => {
 
     // scrollend 핸들러 (snap 기능)
     const handleScrollEnd = () => {
-      // 스크롤이 차단된 상태에서는 snap 기능 비활성화
+      // preventScroll이 활성화된 상태에서는 scrollend 차단
+      if (isPreventScrollActive) return;
+      
       const scrollTop = scrollContainer.scrollTop;
 
       // display none 상태에서 scroll이 top(0)에 도달하면 header 복원 및 스크롤 차단
@@ -93,6 +147,11 @@ const Detail: React.FC = memo(() => {
         console.log('Top 도달, header 복원 및 스크롤 차단');
         headerElement.style.display = 'block';
         scrollContainer.scrollTop = 280;
+
+        // Swiper 터치 이동 비활성화
+        if (swiperRef.current) {
+          swiperRef.current.allowTouchMove = false;
+        }
 
         // 스크롤 차단 활성화 및 제스처 카운트 리셋
         isScrollBlocked = true;
@@ -120,6 +179,18 @@ const Detail: React.FC = memo(() => {
       gesture.destroy();
       observer.disconnect();
       scrollContainer.removeEventListener('scrollend', handleScrollEnd);
+      
+      // 타이머 정리
+      if (scrollEndTimer) {
+        clearTimeout(scrollEndTimer);
+      }
+      
+      // SwiperSlide div들의 이벤트 리스너 정리
+      const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide > div') as NodeListOf<HTMLElement>;
+      slideContentDivs.forEach(div => {
+        div.removeEventListener('touchstart', touchStart);
+        div.removeEventListener('touchmove', preventScroll);
+      });
     };
   }, []);
 
@@ -187,8 +258,8 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ minHeight: 'calc(100% - 48px)' }}
-            autoHeight
+            style={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}
+            allowTouchMove={false}
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
@@ -199,7 +270,7 @@ const Detail: React.FC = memo(() => {
               }
             }, [])}
           >
-            <SwiperSlide style={{ height: 'auto' }}>
+            <SwiperSlide style={{overflow:'auto'}}>
               <div >
                 <h2>전표 상세</h2>
                 <div style={{ marginBottom: '30px' }}>
@@ -228,14 +299,14 @@ const Detail: React.FC = memo(() => {
                 ))}
               </div>
             </SwiperSlide>
-            <SwiperSlide style={{ minHeight: (contentRef.current?.offsetHeight ?? 0) - 48 }}>
+            <SwiperSlide>
               <div >
                 <h2>부서공지</h2>
                 <p>부서공지 콘텐츠</p>
               </div>
 
             </SwiperSlide>
-            <SwiperSlide style={{ minHeight: (contentRef.current?.offsetHeight ?? 0) - 48 }}>
+            <SwiperSlide>
               <div >
                 {Array.from({ length: 10 }, (_, i) => (
                   <div key={i} style={{
