@@ -197,7 +197,7 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}
+            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
