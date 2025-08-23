@@ -26,6 +26,7 @@
     "react-loading-indicators": "^1.0.1",
     "react-loading-skeleton": "^3.5.0",
     "react-router-dom": "^5.3.4",
+    "react-scroll": "^1.9.3",
     "react-slot-counter": "^3.3.1",
     "react-virtuoso": "^4.14.0",
     "swiper": "^11.2.10",

@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/shallow'
 import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react';
 import Tabs from '@mui/material/Tabs';
 import { Tab } from '@mui/material';
+import { useSnapScroll } from '../hooks/useScrollDelegate';
 import './Detail.css';
 
 interface DetailParams {
@@ -27,6 +28,13 @@ const Detail: React.FC = memo(() => {
     setValue(newValue);
     swiperRef.current?.slideTo(newValue);
   }, []);
+
+  // 스냅 스크롤 hook 사용
+  const { snapToPosition } = useSnapScroll({
+    scrollContainer: scrollContainerRef.current,
+    tabsElement: tabsRef.current,
+    isHeaderVisible: true // 초기값
+  });
 
   // Header display 제어 및 제스처 관리
   useEffect(() => {
@@ -49,24 +57,7 @@ const Detail: React.FC = memo(() => {
         if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
           console.log('Header 숨김 - display none');
           headerElement.style.display = 'none';
-          // scrollContainer.scrollTop = 0;
-
-          // SwiperSlide 안의 div들의 스크롤 이벤트 리스너 제거 (스크롤 허용)
-          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
-          slideContentDivs.forEach(div => {
-            // div.style.maxHeight = '100%';
-          });
-          console.log('SwiperSlide 내부 스크롤 허용');
-        }
-
-        // header가 다시 보이면 스크롤 차단
-        if (isHeaderIntersecting) {
-          // SwiperSlide 안의 div들의 스크롤 이벤트 차단
-          const slideContentDivs = scrollContainer.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
-          slideContentDivs.forEach(div => {
-            // div.style.maxHeight = '0';
-          });
-          console.log('SwiperSlide 내부 스크롤 차단');
+          scrollContainer.scrollTop = 0;
         }
       },
       { threshold: 0, rootMargin: '0px' }
@@ -98,9 +89,21 @@ const Detail: React.FC = memo(() => {
           previousY = detail.currentY;
         }
       },
+      onEnd: (detail) => {
+        // touchend 시 즉시 snap 실행
+        if (gestureDirection && isHeaderIntersecting) {
+          console.log('Touch end - immediate snap:', gestureDirection);
+          if (gestureDirection === 'down') {
+            snapToPosition('down');
+          } else if (gestureDirection === 'up') {
+            snapToPosition('up');
+          }
+        }
+        gestureDirection = null;
+      }
     });
 
-    // scrollend 핸들러 (snap 기능)
+    // scrollend 핸들러 (header 복원만)
     const handleScrollEnd = () => {
       const scrollTop = scrollContainer.scrollTop;
 
@@ -110,11 +113,6 @@ const Detail: React.FC = memo(() => {
         headerElement.style.display = 'block';
         scrollContainer.scrollTop = 280;
 
-        // Swiper 터치 이동 비활성화
-        if (swiperRef.current) {
-          swiperRef.current.allowTouchMove = false;
-        }
-
         // 스크롤 차단 활성화 및 제스처 카운트 리셋
         isScrollBlocked = true;
         scrollContainer.style.overflow = 'hidden';
@@ -122,16 +120,7 @@ const Detail: React.FC = memo(() => {
         return;
       }
 
-      if (!gestureDirection || !isHeaderIntersecting) return;
-
-      if (gestureDirection === 'down') {
-        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (gestureDirection === 'up') {
-        const tabsTop = tabsElement.offsetTop;
-        scrollContainer.scrollTo({ top: tabsTop, behavior: 'smooth' });
-      }
-
-      gestureDirection = null;
+      // snap은 이제 touchend(onEnd)에서 처리
     };
 
     gesture.enable();
@@ -208,7 +197,7 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
+            style={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}
             onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
