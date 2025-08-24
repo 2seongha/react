@@ -61,14 +61,14 @@ const Detail: React.FC = memo(() => {
       const delta = currentScrollTop - lastScrollTop;
     
       if (delta !== 0) {
-        // 부모에 delta만큼 스크롤 적용
-        scrollContainer.scrollTop += delta;
-    
-        // transform 즉시 적용
-        if (!isHeaderHidden) {
-          accumulatedPaddingTop += delta;
-          firstChild.style.transform = `translateY(${accumulatedPaddingTop}px)`;
-        }
+        requestAnimationFrame(() => {
+          scrollContainer.scrollTop += delta;
+      
+          if (!isHeaderHidden) {
+            accumulatedPaddingTop += delta;
+            firstChild.style.transform = `translateY(${accumulatedPaddingTop}px)`;
+          }
+        });
       }
     
       // 헤더 숨김 조건
@@ -228,7 +228,7 @@ const Detail: React.FC = memo(() => {
             }, [])}
           >
             <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px' }}>
+              <div style={{ padding: '20px', willChange:'transform' }}>
                 <h2>전표 상세</h2>
                 <div style={{ marginBottom: '30px' }}>
                   <h3>결재 제목</h3>
@@ -257,7 +257,7 @@ const Detail: React.FC = memo(() => {
               </div>
             </SwiperSlide>
             <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px' }}>
+              <div style={{ padding: '20px' , willChange:'transform'}}>
                 <h2>부서공지</h2>
                 <p>부서공지 콘텐츠</p>
                 {Array.from({ length: 15 }, (_, i) => (
@@ -274,7 +274,7 @@ const Detail: React.FC = memo(() => {
               </div>
             </SwiperSlide>
             <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px' }}>
+              <div style={{ padding: '20px' , willChange:'transform'}}>
                 <h2>첨부파일</h2>
                 {Array.from({ length: 12 }, (_, i) => (
                   <div key={i} style={{
