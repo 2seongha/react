@@ -21,13 +21,13 @@ const Detail: React.FC = memo(() => {
   const [value, setValue] = React.useState(0);
   const swiperRef = useRef<SwiperClass | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScroll = useRef(false);
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-    // swiperRef.current?.slideTo(newValue);
+    swiperRef.current?.slideTo(newValue);
   }, []);
 
   // 스냅 스크롤 hook 사용
@@ -41,83 +41,126 @@ const Detail: React.FC = memo(() => {
   useEffect(() => {
     const headerElement = headerRef.current;
     const scrollContainer = scrollContainerRef.current;
+    // let isSnapping = false;
 
     if (!headerElement || !scrollContainer) return;
 
     // wrapper scroll 이벤트 - delta 값으로 스크롤 위임
-    let lastScrollTop = 0;
-    let accumulatedPaddingTop = 0;
-    let isHeaderHidden = false; // <- 추가된 상태 변수
+    // let lastScrollTop = 0;
+    // let accumulatedPaddingTop = 0;
+    // let isHeaderHidden = false; // <- 추가된 상태 변수
+
+    // const handleScroll = (e: Event) => {
+    //   if (isSnapping) return;
+    //   const headerElement = headerRef.current;
+    //   const target = e.target as HTMLElement;
+    //   const firstChild = target.firstElementChild as HTMLElement;
+    //   const scrollContainer = scrollContainerRef.current;
+
+    //   if (!scrollContainer || !headerElement) return;
+
+    //   const currentScrollTop = target.scrollTop;
+    //   const delta = currentScrollTop - lastScrollTop;
+
+    //   if (delta !== 0) {
+    //     if (!isHeaderHidden) {
+    //       accumulatedPaddingTop += delta;
+    //       firstChild.style.transform = `translateY(${accumulatedPaddingTop}px)`;
+    //     }
+    //     scrollContainer.scrollTop += delta;
+    //   }
+
+    //   // 헤더 숨김 조건
+    //   if (
+    //     scrollContainer.scrollTop >= headerElement.offsetHeight &&
+    //     !isHeaderHidden
+    //   ) {
+    //     headerElement.style.display = 'none';
+    //     firstChild.style.transform = `translateY(0px)`;
+    //     accumulatedPaddingTop = 0;
+    //     isHeaderHidden = true;
+    //     console.log('Header 숨김');
+    //     requestAnimationFrame(() => {
+    //       target.scrollTop = 0;
+    //     })
+    //   }
+
+    //   lastScrollTop = currentScrollTop;
+    // };
+
+    // const handleScrollEnd = (e: Event) => {
+    //   const target = e.target as HTMLElement;
+    //   const scrollContainer = scrollContainerRef.current;
+    //   const headerElement = headerRef.current;
+    //   if (!scrollContainer || !headerElement) return;
+
+    //   // 스크롤이 top에 도달하고 헤더가 숨겨져 있을 때만 헤더 복구
+    //   if (target.scrollTop === 0 && isHeaderHidden) {
+    //     headerElement.style.display = 'block';
+    //     isHeaderHidden = false;
+
+    //     // 강제로 scrollTop을 보정할 필요 없이 자연스럽게 보여지게
+    //     // (필요하면 아래 코드 활성화)
+    //     scrollContainer.scrollTop = headerElement.offsetHeight;
+
+    //     console.log('Header 살림');
+    //   }
+    // };
+
+    const handleScrollEnd2 = (e: Event) => {
+      if (isProgrammaticScroll.current) {
+        console.log('Ignoring programmatic scrollend');
+        return; // 무조건 빠져나가기
+      }
     
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const firstChild = target.firstElementChild as HTMLElement;
-      const scrollContainer = scrollContainerRef.current;
-      const headerElement = headerRef.current;
+      if (headerElement.style.display !== 'none') {
+        const scrollTop = scrollContainer.scrollTop;
     
-      if (!scrollContainer || !headerElement) return;
+        if (scrollTop < 140) {
+          console.log('Snapping to top');
+          isProgrammaticScroll.current = true;
     
-      const currentScrollTop = target.scrollTop;
-      const delta = currentScrollTop - lastScrollTop;
+          scroll.scrollTo(0, {
+            containerId: 'scroll-container',
+            duration: 150,
+            smooth: 'easeOutQuad',
+          });
+        } else {
+          const tabsTop = tabsRef.current?.offsetTop ?? 0;
+          console.log('Snapping to tabs:', tabsTop);
+          isProgrammaticScroll.current = true;
     
-      if (delta !== 0) {
-        requestAnimationFrame(() => {
-          scrollContainer.scrollTop += delta;
-      
-          if (!isHeaderHidden) {
-            accumulatedPaddingTop += delta;
-            firstChild.style.transform = `translateY(${accumulatedPaddingTop}px)`;
+          scroll.scrollTo(tabsTop, {
+            containerId: 'scroll-container',
+            duration: 150,
+            smooth: 'easeOutQuad',
+          });
+        }
+        setTimeout(() => {
+          if (isProgrammaticScroll.current) {
+            console.log('Fallback: Assuming scroll complete');
+            isProgrammaticScroll.current = false;
           }
-        });
-      }
-    
-      // 헤더 숨김 조건
-      if (
-        scrollContainer.scrollTop >= headerElement.offsetHeight &&
-        !isHeaderHidden
-      ) {
-        headerElement.style.display = 'none';
-        firstChild.style.transform = `translateY(0px)`;
-        accumulatedPaddingTop = 0;
-        isHeaderHidden = true;
-        console.log('Header 숨김');
-        requestAnimationFrame(()=>{
-          target.scrollTop = 0;
-        })
-      }
-    
-      lastScrollTop = currentScrollTop;
-    };
-    
-    const handleScrollEnd = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const scrollContainer = scrollContainerRef.current;
-      const headerElement = headerRef.current;
-    
-      if (!scrollContainer || !headerElement) return;
-    
-      // 스크롤이 top에 도달하고 헤더가 숨겨져 있을 때만 헤더 복구
-      if (target.scrollTop === 0 && isHeaderHidden) {
-        headerElement.style.display = 'block';
-        isHeaderHidden = false;
-    
-        // 강제로 scrollTop을 보정할 필요 없이 자연스럽게 보여지게
-        // (필요하면 아래 코드 활성화)
-        scrollContainer.scrollTop = headerElement.offsetHeight;
-    
-        console.log('Header 살림');
+        }, 160);
       }
     };
-    // let isSnapping = false;
+    
+    // 이벤트 등록
+    scrollContainer.addEventListener('scrollend', handleScrollEnd2, { passive: true });
+    // const slides = scrollContainer.querySelectorAll('.swiper-slide');
+    // slides.forEach(slide => {
+    //   slide.addEventListener('scroll', handleScroll, { passive: false });
+    //   slide.addEventListener('scrollend', handleScrollEnd, { passive: false });
+    // });
 
-    // const handleScrollEnd2 = (e: Event) => {
-    //   if (isResettingScroll || isSnapping) return;
-
-    //   if (headerElement.style.display != 'none') {
-    //     const scrollTop = scrollContainer.scrollTop;
-
-    //     if (scrollTop > 140) {
-    //       isSnapping = true;
+    // const gesture = createGesture({
+    //   el: scrollContainer,
+    //   gestureName: 'custom-swipe',
+    //   threshold: 0,
+    //   onEnd: () => {
+    //     if (headerElement.style.display == 'none') return;
+    //     isSnapping = true;
+    //     if (scrollContainer.scrollTop < 140) {
     //       console.log('Snapping to top');
     //       scroll.scrollTo(0, {
     //         containerId: 'scroll-container',
@@ -129,30 +172,28 @@ const Detail: React.FC = memo(() => {
     //       });
     //     } else {
     //       const tabsTop = tabsRef.current?.offsetTop ?? 0;
-    //       isSnapping = true;
     //       console.log('Snapping to tabs:', tabsTop);
     //       scroll.scrollTo(tabsTop, {
     //         containerId: 'scroll-container',
     //         duration: 150,
     //         smooth: 'easeOutQuad',
     //         onComplete: () => {
-    //           isSnapping = false;
+    //           isSnapping = false; // 스냅 완료 후 플래그 해제
     //         }
     //       });
     //     }
-    //   }
-    // };
+    //   },
+    // });
 
-    // scrollContainer.addEventListener('scrollend', handleScrollEnd2, { passive: false });
-    const slides = scrollContainer.querySelectorAll('.swiper-slide');
-    slides.forEach(slide => {
-      slide.addEventListener('scroll', handleScroll, { passive: false });
-      slide.addEventListener('scrollend', handleScrollEnd, { passive: false });
-    });
+    // gesture.enable(true);
 
     return () => {
-      // wrapper.removeEventListener('scroll', handleScroll);
-      // wrapper.removeEventListener('scrollend', handleScrollEnd);
+      // gesture.destroy();
+      // const slides = scrollContainer.querySelectorAll('.swiper-slide');
+      // slides.forEach(slide => {
+      //   slide.removeEventListener('scroll', handleScroll);
+      //   slide.removeEventListener('scrollend', handleScrollEnd);
+      // });
     };
   }, []);
 
@@ -189,7 +230,7 @@ const Detail: React.FC = memo(() => {
           overflow: 'auto',
           height: '100%',
           position: 'relative',
-        }}>
+        }} id='scroll-container'>
           <div ref={headerRef} style={{
             background: '#666',
             height: '280px',
@@ -227,8 +268,8 @@ const Detail: React.FC = memo(() => {
               setValue(swiper.activeIndex);
             }, [])}
           >
-            <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px', willChange:'transform' }}>
+            <SwiperSlide style={{ overflow: 'auto' }}>
+              <div style={{ padding: '20px', willChange: 'transform' }}>
                 <h2>전표 상세</h2>
                 <div style={{ marginBottom: '30px' }}>
                   <h3>결재 제목</h3>
@@ -257,7 +298,7 @@ const Detail: React.FC = memo(() => {
               </div>
             </SwiperSlide>
             <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px' , willChange:'transform'}}>
+              <div style={{ padding: '20px', willChange: 'transform' }}>
                 <h2>부서공지</h2>
                 <p>부서공지 콘텐츠</p>
                 {Array.from({ length: 15 }, (_, i) => (
@@ -274,7 +315,7 @@ const Detail: React.FC = memo(() => {
               </div>
             </SwiperSlide>
             <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px' , willChange:'transform'}}>
+              <div style={{ padding: '20px', willChange: 'transform' }}>
                 <h2>첨부파일</h2>
                 {Array.from({ length: 12 }, (_, i) => (
                   <div key={i} style={{
