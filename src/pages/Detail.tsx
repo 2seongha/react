@@ -21,6 +21,7 @@ const Detail: React.FC = memo(() => {
   const swiperRef = useRef<SwiperClass | null>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const isHeaderIntersectingRef = useRef(true);
@@ -37,105 +38,125 @@ const Detail: React.FC = memo(() => {
     isHeaderVisible: true // 초기값
   });
 
-  // Header display 제어 및 제스처 관리
+  // wrapper scroll event로 실제 스크롤 위임
   useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
+    const wrapper = wrapperRef.current;
     const headerElement = headerRef.current;
-    const tabsElement = tabsRef.current;
-    if (!scrollContainer || !headerElement || !tabsElement) return;
+    const scrollContainer = scrollContainerRef.current;
 
-    let gestureDirection: 'up' | 'down' | null = null;
-    let isHeaderIntersecting = false;
-    let previousY = 0;
-    let isScrollBlocked = false;
+    if (!wrapper || !headerElement || !scrollContainer) return;
+
+    const headerHeight = 280;
+    let isHeaderVisible = true;
+
+    // wrapper의 더미 콘텐츠 높이를 실제 콘텐츠 높이에 맞춰 계산
+    const updateWrapperHeight = () => {
+      const headerHeight = headerElement.offsetHeight || 280;
+      const tabsHeight = tabsRef.current?.offsetHeight || 48;
+      const activeSlide = scrollContainer.querySelector('.swiper-slide-active') as HTMLElement;
+      const activeSlideScrollHeight = activeSlide?.scrollHeight || 0;
+      
+      const totalHeight = headerHeight + tabsHeight + activeSlideScrollHeight;
+      
+      const dummyContent = wrapper.querySelector('div') as HTMLElement;
+      if (dummyContent) {
+        dummyContent.style.height = `${totalHeight}px`;
+        console.log('Wrapper height updated:', totalHeight);
+      }
+    };
 
     // IntersectionObserver로 header 가시성 감지
     const observer = new IntersectionObserver(
       (entries) => {
-        isHeaderIntersecting = entries[0].isIntersecting;
-        isHeaderIntersectingRef.current = isHeaderIntersecting; // ref 업데이트
+        isHeaderVisible = entries[0].isIntersecting;
+        isHeaderIntersectingRef.current = isHeaderVisible;
 
-        // header가 화면에서 사라지면
-        if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
-          console.log('Header 숨김 - display none');
+        if (!isHeaderVisible) {
           headerElement.style.display = 'none';
-          scrollContainer.scrollTop = 0;
+          updateWrapperHeight(); // 헤더 숨김 시 높이 재계산
+          console.log('Header 숨김');
+        } else {
+          updateWrapperHeight(); // 헤더 표시 시 높이 재계산
         }
       },
       { threshold: 0, rootMargin: '0px' }
     );
+
     observer.observe(headerElement);
 
-    // 제스처 처리
-    const gesture = createGesture({
-      el: scrollContainer,
-      threshold: 0,
-      gestureName: 'direction-detect',
-      onStart: (detail) => {
-        previousY = detail.currentY;
-        gestureDirection = null;
+    // wrapper scroll 이벤트 - delta 값으로 스크롤 위임
+    let lastScrollTop = 0;
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const currentScrollTop = target.scrollTop;
+      const delta = currentScrollTop - lastScrollTop;
+      
+      console.log('Wrapper scroll:', { currentScrollTop, lastScrollTop, delta, isHeaderVisible });
 
-        if (isScrollBlocked) {
-          isScrollBlocked = false;
-          scrollContainer.style.overflow = 'auto'
+      if (isHeaderVisible) {
+        // 헤더가 보일 때: scrollContainer에 delta 적용
+        scrollContainer.scrollTop += delta;
+      } else {
+        // 헤더가 없을 때: swiper에 delta 적용
+        const activeSlide = scrollContainer.querySelector('.swiper-slide-active') as HTMLElement;
+        if (activeSlide) {
+          activeSlide.scrollTop += delta;
         }
-      },
-      onMove: (detail) => {
-        const deltaY = detail.currentY - previousY;
-
-        if (Math.abs(deltaY) > 1) {
-          const newDirection = deltaY > 0 ? 'down' : 'up';
-          if (gestureDirection !== newDirection) {
-            gestureDirection = newDirection;
-          }
-          previousY = detail.currentY;
-        }
-      },
-      onEnd: () => {
-        if (gestureDirection && isHeaderIntersecting) {
-          if (gestureDirection === 'down') {
-            snapToPosition('down');
-          } else if (gestureDirection === 'up') {
-            snapToPosition('up');
-          }
-        }
-        gestureDirection = null;
       }
-    });
-
-    // scrollend 핸들러 (header 복원만)
-    const handleScrollEnd = () => {
-      const scrollTop = scrollContainer.scrollTop;
-
-      // display none 상태에서 scroll이 top(0)에 도달하면 header 복원 및 스크롤 차단
-      if (scrollTop === 0 && headerElement.style.display === 'none') {
-        console.log('Top 도달, header 복원 및 스크롤 차단');
-        headerElement.style.display = 'block';
-        scrollContainer.scrollTop = 280;
-
-        // 스크롤 차단 활성화 및 제스처 카운트 리셋
-        console.log('스크롤 차단 활성화, 제스처 필요');
-        return;
-      }
-
-      // if (gestureDirection && isHeaderIntersecting) {
-      //   if (gestureDirection === 'down') {
-      //     snapToPosition('down');
-      //   } else if (gestureDirection === 'up') {
-      //     snapToPosition('up');
-      //   }
-      // }
-      // gestureDirection = null;
-      // snap은 이제 touchend(onEnd)에서 처리
+      
+      lastScrollTop = currentScrollTop;
     };
 
-    gesture.enable();
-    scrollContainer.addEventListener('scrollend', handleScrollEnd, { passive: true });
+    // scrollend에서 header 복원 처리
+    const handleScrollEnd = () => {
+      const scrollTop = wrapper.scrollTop;
+
+      if (!isHeaderVisible && scrollTop === 0) {
+        // 맨 위로 스크롤되면 header 복원
+        headerElement.style.display = 'block';
+        // wrapper.scrollTop = 280; // headerHeight 상수 사용
+        // scrollContainer.scrollTop = 280;
+        // updateWrapperHeight(); // 헤더 복원 시 높이 재계산
+
+        console.log('Header 복원');
+      }
+    };
+
+    // 초기 높이 설정 및 슬라이드 변경 시 높이 업데이트
+    updateWrapperHeight();
+    
+    // Swiper 슬라이드 변경 감지 및 스크롤 동기화
+    if (swiperRef.current) {
+      swiperRef.current.on('slideChange', () => {
+        setTimeout(() => {
+          updateWrapperHeight(); // DOM 업데이트 후 높이 재계산
+          
+          // 새로운 활성 슬라이드의 스크롤 위치와 wrapper 동기화
+          const newActiveSlide = scrollContainer.querySelector('.swiper-slide-active') as HTMLElement;
+          if (newActiveSlide && !isHeaderVisible) {
+            // 헤더가 없을 때: 활성 슬라이드의 스크롤 위치를 wrapper에 반영
+            const currentSlideScrollTop = newActiveSlide.scrollTop;
+            wrapper.scrollTop = currentSlideScrollTop;
+            lastScrollTop = currentSlideScrollTop; // lastScrollTop도 업데이트
+            console.log('Slide changed - sync scroll:', { currentSlideScrollTop });
+          } else if (isHeaderVisible) {
+            // 헤더가 있을 때: scrollContainer의 스크롤 위치를 wrapper에 반영
+            const currentContainerScrollTop = scrollContainer.scrollTop;
+            wrapper.scrollTop = currentContainerScrollTop;
+            lastScrollTop = currentContainerScrollTop;
+            console.log('Slide changed - sync container scroll:', { currentContainerScrollTop });
+          }
+        }, 100);
+      });
+    }
+
+    wrapper.addEventListener('scroll', handleScroll, { passive: false });
+    wrapper.addEventListener('scrollend', handleScrollEnd, { passive: true });
 
     return () => {
-      gesture.destroy();
       observer.disconnect();
-      scrollContainer.removeEventListener('scrollend', handleScrollEnd);
+      wrapper.removeEventListener('scroll', handleScroll);
+      wrapper.removeEventListener('scrollend', handleScrollEnd);
     };
   }, []);
 
@@ -173,8 +194,9 @@ const Detail: React.FC = memo(() => {
           overflow: 'auto',
           height: '100%',
           WebkitOverflowScrolling: 'touch',
-          contain: 'layout style paint'
+          position: 'relative'
         }}>
+         
           <div ref={headerRef} style={{
             background: '#666',
             height: '280px',
@@ -189,6 +211,7 @@ const Detail: React.FC = memo(() => {
               </div>
             </div>
           </div>
+
           <Tabs ref={tabsRef} value={value} onChange={handleTabChange} variant="fullWidth" style={{
             position: 'sticky',
             top: 0,
@@ -203,56 +226,16 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
+            style={{ height: 'calc(100% - 40px)' }}
             onSwiper={useCallback((swiper: SwiperClass) => {
               swiperRef.current = swiper;
-
-              // 각 swiper-slide에 scroll 이벤트 추가
-              // const swiperSlides = swiper.el.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
-              // let lastScrollTop = 0;
-
-              // const handleSlideScroll = (e: Event) => {
-              //   const target = e.target as HTMLElement;
-              //   const parent = scrollContainerRef.current;
-
-              //   if (!parent || !target) return;
-
-              //   const currentScrollTop = target.scrollTop;
-              //   const delta = currentScrollTop - lastScrollTop;
-
-              //   console.log('Scroll event:', { currentScrollTop, lastScrollTop, delta, isHeaderVisible: isHeaderIntersectingRef.current });
-
-              //   // isHeaderIntersecting이 true일 때만 스크롤 위임
-              //   if (isHeaderIntersectingRef.current && delta !== 0) {
-              //     // e.preventDefault();
-              //     // 부모로 스크롤 위임
-              //     parent.scrollTop += delta;
-                  
-              //     // 자식 스크롤을 원래 위치로 되돌리기 (setTimeout으로 비동기 처리)
-              //     requestAnimationFrame(() => {
-              //       target.scrollTop = lastScrollTop; // 또는 target.scrollTop = 0;
-              //     });
-              //   }
-
-              //   lastScrollTop = currentScrollTop;
-              // };
-
-              // swiperSlides.forEach(slide => {
-              //   slide.addEventListener('scroll', handleSlideScroll, { passive: false });
-              // });
-
             }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
-              // const activeSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
-              // const hasScroll = activeSlide.offsetHeight > (contentRef.current?.offsetHeight ?? 0) - 48;
-              // if (!hasScroll && headerRef.current) {
-              //   headerRef.current.style.display = 'block';
-              // }
             }, [])}
           >
-            <SwiperSlide style={{ overflow: 'auto' }}>
-              <div >
+            <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ padding: '20px' }}>
                 <h2>전표 상세</h2>
                 <div style={{ marginBottom: '30px' }}>
                   <h3>결재 제목</h3>
@@ -267,7 +250,7 @@ const Detail: React.FC = memo(() => {
                   <p>{approval.createDate}</p>
                 </div>
 
-                {Array.from({ length: 10 }, (_, i) => (
+                {Array.from({ length: 20 }, (_, i) => (
                   <div key={i} style={{
                     marginBottom: '20px',
                     padding: '20px',
@@ -280,29 +263,54 @@ const Detail: React.FC = memo(() => {
                 ))}
               </div>
             </SwiperSlide>
-            <SwiperSlide>
-              <div >
+            <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ padding: '20px' }}>
                 <h2>부서공지</h2>
                 <p>부서공지 콘텐츠</p>
-              </div>
-
-            </SwiperSlide>
-            <SwiperSlide>
-              <div >
-                {Array.from({ length: 10 }, (_, i) => (
+                {Array.from({ length: 15 }, (_, i) => (
                   <div key={i} style={{
                     marginBottom: '20px',
                     padding: '20px',
-                    backgroundColor: '#f8f9fa',
+                    backgroundColor: '#e8f5e8',
                     borderRadius: '8px'
                   }}>
-                    <h4>항목 {i + 1}</h4>
-                    <p>스크롤하면 상단 영역이 스크롤 이동거리만큼 줄어들고 늘어납니다.</p>
+                    <h4>공지 {i + 1}</h4>
+                    <p>부서 공지사항 내용입니다.</p>
+                  </div>
+                ))}
+              </div>
+            </SwiperSlide>
+            <SwiperSlide style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ padding: '20px' }}>
+                <h2>첨부파일</h2>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <div key={i} style={{
+                    marginBottom: '20px',
+                    padding: '20px',
+                    backgroundColor: '#fff3e0',
+                    borderRadius: '8px'
+                  }}>
+                    <h4>파일 {i + 1}</h4>
+                    <p>첨부파일 관련 내용입니다.</p>
                   </div>
                 ))}
               </div>
             </SwiperSlide>
           </Swiper>
+          <div ref={wrapperRef} style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1,
+            pointerEvents: 'auto',
+            overflow: 'auto',
+            WebkitOverflowScrolling: 'touch'
+          }}>
+            {/* 동적 높이 더미 콘텐츠 */}
+            <div></div>
+          </div>
         </div>
       </IonContent>
     </IonPage >
