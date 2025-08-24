@@ -46,63 +46,68 @@ const Detail: React.FC = memo(() => {
 
     // wrapper scroll 이벤트 - delta 값으로 스크롤 위임
     let lastScrollTop = 0;
-    let isResettingScroll = false;
     let accumulatedPaddingTop = 0;
+    let isHeaderHidden = false; // <- 추가된 상태 변수
+    
     const handleScroll = (e: Event) => {
-      if (isResettingScroll) return;
-
       const target = e.target as HTMLElement;
       const firstChild = target.firstElementChild as HTMLElement;
       const scrollContainer = scrollContainerRef.current;
       const headerElement = headerRef.current;
-
+    
       if (!scrollContainer || !headerElement) return;
-
-      // const currentScrollTop = target.scrollTop;
+    
       const currentScrollTop = target.scrollTop;
       const delta = currentScrollTop - lastScrollTop;
-
+    
       if (delta !== 0) {
         // 부모에 delta만큼 스크롤 적용
         scrollContainer.scrollTop += delta;
-
-        // 자식 스크롤 리셋을 다음 프레임으로 지연
-        isResettingScroll = true;
-        requestAnimationFrame(() => {
-          // padding-top 누적
-          if (headerElement.style.display != 'none') {
-            accumulatedPaddingTop += delta;
-            // target.style.paddingTop = `${accumulatedPaddingTop}px`;
-            firstChild.style.transform = `translateY(${accumulatedPaddingTop}px)`;
-          }
-
-          isResettingScroll = false;
-        });
+    
+        // transform 즉시 적용
+        if (!isHeaderHidden) {
+          accumulatedPaddingTop += delta;
+          firstChild.style.transform = `translateY(${accumulatedPaddingTop}px)`;
+        }
       }
-
+    
       // 헤더 숨김 조건
-      if (scrollContainer.scrollTop >= headerElement.offsetHeight && headerElement.style.display != 'none') {
+      if (
+        scrollContainer.scrollTop >= headerElement.offsetHeight &&
+        !isHeaderHidden
+      ) {
         headerElement.style.display = 'none';
-        // target.style.paddingTop = `0px`;
         firstChild.style.transform = `translateY(0px)`;
-        target.scrollTop = 0;
+        accumulatedPaddingTop = 0;
+        isHeaderHidden = true;
         console.log('Header 숨김');
+        requestAnimationFrame(()=>{
+          target.scrollTop = 0;
+        })
       }
-
+    
       lastScrollTop = currentScrollTop;
     };
-
+    
     const handleScrollEnd = (e: Event) => {
-      if (isResettingScroll) return;
-      accumulatedPaddingTop = 0;
       const target = e.target as HTMLElement;
-      if (target.scrollTop == 0 && headerElement.style.display == 'none') {
+      const scrollContainer = scrollContainerRef.current;
+      const headerElement = headerRef.current;
+    
+      if (!scrollContainer || !headerElement) return;
+    
+      // 스크롤이 top에 도달하고 헤더가 숨겨져 있을 때만 헤더 복구
+      if (target.scrollTop === 0 && isHeaderHidden) {
         headerElement.style.display = 'block';
-        scrollContainer.scrollTop = 280;
+        isHeaderHidden = false;
+    
+        // 강제로 scrollTop을 보정할 필요 없이 자연스럽게 보여지게
+        // (필요하면 아래 코드 활성화)
+        scrollContainer.scrollTop = headerElement.offsetHeight;
+    
         console.log('Header 살림');
       }
-    }
-
+    };
     // let isSnapping = false;
 
     // const handleScrollEnd2 = (e: Event) => {
