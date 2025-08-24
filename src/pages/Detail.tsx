@@ -114,8 +114,6 @@ const Detail: React.FC = memo(() => {
         scrollContainer.scrollTop = 280;
 
         // 스크롤 차단 활성화 및 제스처 카운트 리셋
-        isScrollBlocked = true;
-        scrollContainer.style.overflow = 'hidden';
         console.log('스크롤 차단 활성화, 제스처 필요');
         return;
       }
@@ -205,43 +203,43 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}
+            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
             onSwiper={useCallback((swiper: SwiperClass) => {
               swiperRef.current = swiper;
 
               // 각 swiper-slide에 scroll 이벤트 추가
-              const swiperSlides = swiper.el.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
-              let lastScrollTop = 0;
+              // const swiperSlides = swiper.el.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
+              // let lastScrollTop = 0;
 
-              const handleSlideScroll = (e: Event) => {
-                const target = e.target as HTMLElement;
-                const parent = scrollContainerRef.current;
+              // const handleSlideScroll = (e: Event) => {
+              //   const target = e.target as HTMLElement;
+              //   const parent = scrollContainerRef.current;
 
-                if (!parent || !target) return;
+              //   if (!parent || !target) return;
 
-                const currentScrollTop = target.scrollTop;
-                const delta = currentScrollTop - lastScrollTop;
+              //   const currentScrollTop = target.scrollTop;
+              //   const delta = currentScrollTop - lastScrollTop;
 
-                console.log('Scroll event:', { currentScrollTop, lastScrollTop, delta, isHeaderVisible: isHeaderIntersectingRef.current });
+              //   console.log('Scroll event:', { currentScrollTop, lastScrollTop, delta, isHeaderVisible: isHeaderIntersectingRef.current });
 
-                // isHeaderIntersecting이 true일 때만 스크롤 위임
-                if (isHeaderIntersectingRef.current && delta !== 0) {
-                  // e.preventDefault();
-                  // 부모로 스크롤 위임
-                  parent.scrollTop += delta;
+              //   // isHeaderIntersecting이 true일 때만 스크롤 위임
+              //   if (isHeaderIntersectingRef.current && delta !== 0) {
+              //     // e.preventDefault();
+              //     // 부모로 스크롤 위임
+              //     parent.scrollTop += delta;
                   
-                  // 자식 스크롤을 원래 위치로 되돌리기 (setTimeout으로 비동기 처리)
-                  requestAnimationFrame(() => {
-                    target.scrollTop = lastScrollTop; // 또는 target.scrollTop = 0;
-                  });
-                }
+              //     // 자식 스크롤을 원래 위치로 되돌리기 (setTimeout으로 비동기 처리)
+              //     requestAnimationFrame(() => {
+              //       target.scrollTop = lastScrollTop; // 또는 target.scrollTop = 0;
+              //     });
+              //   }
 
-                lastScrollTop = currentScrollTop;
-              };
+              //   lastScrollTop = currentScrollTop;
+              // };
 
-              swiperSlides.forEach(slide => {
-                slide.addEventListener('scroll', handleSlideScroll, { passive: false });
-              });
+              // swiperSlides.forEach(slide => {
+              //   slide.addEventListener('scroll', handleSlideScroll, { passive: false });
+              // });
 
             }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
