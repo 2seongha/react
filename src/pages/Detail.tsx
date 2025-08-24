@@ -46,11 +46,8 @@ const Detail: React.FC = memo(() => {
 
     // wrapper scroll 이벤트 - delta 값으로 스크롤 위임
     let lastScrollTop = 0;
-    let isResettingScroll = false;
     let accumulatedPaddingTop = 0;
     const handleScroll = (e: Event) => {
-      if (isResettingScroll) return;
-
       const target = e.target as HTMLElement;
       const scrollContainer = scrollContainerRef.current;
       const headerElement = headerRef.current;
@@ -66,16 +63,11 @@ const Detail: React.FC = memo(() => {
         scrollContainer.scrollTop += delta;
 
         // 자식 스크롤 리셋을 다음 프레임으로 지연
-        isResettingScroll = true;
-        requestAnimationFrame(() => {
-          // padding-top 누적
-          if (headerElement.style.display != 'none') {
-            accumulatedPaddingTop += delta;
-            target.style.paddingTop = `${accumulatedPaddingTop}px`;
-          }
-
-          isResettingScroll = false;
-        });
+        // padding-top 누적
+        if (headerElement.style.display != 'none') {
+          accumulatedPaddingTop += delta;
+          target.style.paddingTop = `${accumulatedPaddingTop}px`;
+        }
       }
 
       // 헤더 숨김 조건
@@ -90,7 +82,6 @@ const Detail: React.FC = memo(() => {
     };
 
     const handleScrollEnd = (e: Event) => {
-      if (isResettingScroll) return;
       accumulatedPaddingTop = 0;
       const target = e.target as HTMLElement;
       if (target.scrollTop == 0 && headerElement.style.display == 'none') {
