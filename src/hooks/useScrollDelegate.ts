@@ -22,7 +22,7 @@ export const useSnapScroll = ({
       console.log('Snapping to top');
       scroll.scrollTo(0, {
         containerId: 'scroll-container',
-        duration: 300,
+        duration: 150,
         smooth: 'easeOutQuad'
       });
     } else {
@@ -32,7 +32,7 @@ export const useSnapScroll = ({
         console.log('Snapping to tabs:', tabsTop);
         scroll.scrollTo(tabsTop, {
           containerId: 'scroll-container',
-          duration: 300,
+          duration: 150,
           smooth: 'easeOutQuad'
         });
       }
