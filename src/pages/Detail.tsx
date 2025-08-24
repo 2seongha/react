@@ -226,7 +226,7 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 40px)' }}
+            style={{ height: 'calc(100% - 48px)' }}
             onSwiper={useCallback((swiper: SwiperClass) => {
               swiperRef.current = swiper;
             }, [])}
