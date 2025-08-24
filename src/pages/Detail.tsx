@@ -89,18 +89,6 @@ const Detail: React.FC = memo(() => {
           previousY = detail.currentY;
         }
       },
-      onEnd: (detail) => {
-        // touchend 시 즉시 snap 실행
-        if (gestureDirection && isHeaderIntersecting) {
-          console.log('Touch end - immediate snap:', gestureDirection);
-          if (gestureDirection === 'down') {
-            snapToPosition('down');
-          } else if (gestureDirection === 'up') {
-            snapToPosition('up');
-          }
-        }
-        gestureDirection = null;
-      }
     });
 
     // scrollend 핸들러 (header 복원만)
@@ -120,6 +108,15 @@ const Detail: React.FC = memo(() => {
         return;
       }
 
+      // if (gestureDirection && isHeaderIntersecting) {
+      //   // console.log('Touch end - immediate snap:', gestureDirection);
+      //   if (gestureDirection === 'down') {
+      //     snapToPosition('down');
+      //   } else if (gestureDirection === 'up') {
+      //     snapToPosition('up');
+      //   }
+      // }
+      // gestureDirection = null;
       // snap은 이제 touchend(onEnd)에서 처리
     };
 
@@ -197,15 +194,49 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            // style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
-            onSwiper={useCallback((swiper: SwiperClass) => { swiperRef.current = swiper; }, [])}
+            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
+            onSwiper={useCallback((swiper: SwiperClass) => { 
+              swiperRef.current = swiper;
+              
+              // 각 swiper-slide에 scroll 이벤트 추가
+              const swiperSlides = swiper.el.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
+              let lastScrollTop = 0;
+
+              const handleSlideScroll = (e: Event) => {
+                const target = e.target as HTMLElement;
+                const parent = scrollContainerRef.current;
+                const headerVisible = headerRef.current?.style.display !== 'none';
+              
+                if (!parent || !target || !headerVisible) return;
+              
+                const currentScrollTop = target.scrollTop;
+                const delta = currentScrollTop - lastScrollTop;
+              
+                // 부모 스크롤이 아직 남아있을 때만 스크롤 위임
+                const headerHeight = 280; // 헤더 높이 고정 값
+                if (parent.scrollTop < headerHeight) {
+                  e.preventDefault();
+                  e.stopPropagation();
+              
+                  parent.scrollTop = Math.min(parent.scrollTop + delta, headerHeight);
+                  target.scrollTop = 0; // 자식 스크롤 롤백
+                }
+              
+                lastScrollTop = target.scrollTop; // 다음 delta 계산을 위해 저장
+              };
+              
+              swiperSlides.forEach(slide => {
+                slide.addEventListener('scroll', handleSlideScroll, { passive: false });
+              });
+              
+            }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
-              const activeSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
-              const hasScroll = activeSlide.offsetHeight > (contentRef.current?.offsetHeight ?? 0) - 48;
-              if (!hasScroll && headerRef.current) {
-                headerRef.current.style.display = 'block';
-              }
+              // const activeSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
+              // const hasScroll = activeSlide.offsetHeight > (contentRef.current?.offsetHeight ?? 0) - 48;
+              // if (!hasScroll && headerRef.current) {
+              //   headerRef.current.style.display = 'block';
+              // }
             }, [])}
           >
             <SwiperSlide style={{overflow:'auto'}}>
