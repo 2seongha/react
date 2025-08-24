@@ -23,6 +23,7 @@ const Detail: React.FC = memo(() => {
   const tabsRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const isHeaderIntersectingRef = useRef(true);
 
   const handleTabChange = useCallback((_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -52,6 +53,7 @@ const Detail: React.FC = memo(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         isHeaderIntersecting = entries[0].isIntersecting;
+        isHeaderIntersectingRef.current = isHeaderIntersecting; // ref 업데이트
 
         // header가 화면에서 사라지면
         if (!isHeaderIntersecting && headerElement.style.display !== 'none') {
@@ -89,6 +91,16 @@ const Detail: React.FC = memo(() => {
           previousY = detail.currentY;
         }
       },
+      // onEnd: () => {
+      //   if (gestureDirection && isHeaderIntersecting) {
+      //     if (gestureDirection === 'down') {
+      //       snapToPosition('down');
+      //     } else if (gestureDirection === 'up') {
+      //       snapToPosition('up');
+      //     }
+      //   }
+      //   gestureDirection = null;
+      // }
     });
 
     // scrollend 핸들러 (header 복원만)
@@ -109,7 +121,6 @@ const Detail: React.FC = memo(() => {
       }
 
       // if (gestureDirection && isHeaderIntersecting) {
-      //   // console.log('Touch end - immediate snap:', gestureDirection);
       //   if (gestureDirection === 'down') {
       //     snapToPosition('down');
       //   } else if (gestureDirection === 'up') {
@@ -194,52 +205,103 @@ const Detail: React.FC = memo(() => {
           </Tabs>
 
           <Swiper
-            style={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}
-            onSwiper={useCallback((swiper: SwiperClass) => { 
+            style={{ height: 'calc(100% - 40px)', overflow: 'hidden' }}
+            onSwiper={useCallback((swiper: SwiperClass) => {
               swiperRef.current = swiper;
-              
-              // 각 swiper-slide에 scroll 이벤트 추가
-              const swiperSlides = swiper.el.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
-              let lastScrollTop = 0;
 
-              const handleSlideScroll = (e: Event) => {
-                const target = e.target as HTMLElement;
+              // 각 swiper-slide에 touchmove 이벤트 추가
+              const swiperSlides = swiper.el.querySelectorAll('.swiper-slide') as NodeListOf<HTMLElement>;
+              let lastTouchY = 0;
+              let lastTimestamp = 0;
+              let velocity = 0;
+              let isFlinging = false;
+              let flingAnimationId: number | null = null;
+
+              const handleTouchStart = (e: TouchEvent) => {
+                lastTouchY = e.touches[0].clientY;
+                lastTimestamp = Date.now();
+                velocity = 0;
+                
+                // 플링 애니메이션 중단
+                if (flingAnimationId) {
+                  cancelAnimationFrame(flingAnimationId);
+                  flingAnimationId = null;
+                  isFlinging = false;
+                }
+              };
+
+              const handleTouchMove = (e: TouchEvent) => {
                 const parent = scrollContainerRef.current;
-                const headerVisible = headerRef.current?.style.display !== 'none';
-              
-                if (!parent || !target || !headerVisible) return;
-              
-                const currentScrollTop = target.scrollTop;
-                const delta = currentScrollTop - lastScrollTop;
-              
-                // 부모 스크롤이 아직 남아있을 때만 스크롤 위임
-                const headerHeight = 280; // 헤더 높이 고정 값
-                if (parent.scrollTop < headerHeight) {
+                if (!parent) return;
+
+                const currentTouchY = e.touches[0].clientY;
+                const currentTimestamp = Date.now();
+                const deltaY = lastTouchY - currentTouchY;
+                const deltaTime = currentTimestamp - lastTimestamp;
+                
+                // 속도 계산 (픽셀/밀리초)
+                if (deltaTime > 0) {
+                  velocity = deltaY / deltaTime;
+                }
+                
+                lastTouchY = currentTouchY;
+                lastTimestamp = currentTimestamp;
+
+                console.log('Touch event:', { deltaY, velocity, isHeaderVisible: isHeaderIntersectingRef.current });
+
+                // isHeaderIntersecting이 true일 때만 스크롤 위임
+                if (isHeaderIntersectingRef.current) {
                   e.preventDefault();
                   e.stopPropagation();
-              
-                  parent.scrollTop = Math.min(parent.scrollTop + delta, headerHeight);
-                  target.scrollTop = 0; // 자식 스크롤 롤백
+                  
+                  // 부모로 스크롤 위임
+                  parent.scrollTop += deltaY;
                 }
-              
-                lastScrollTop = target.scrollTop; // 다음 delta 계산을 위해 저장
               };
-              
+
+              const handleTouchEnd = () => {
+                const parent = scrollContainerRef.current;
+                if (!parent || !isHeaderIntersectingRef.current) return;
+
+                // 최소 속도 임계값 설정 (픽셀/밀리초)
+                const minVelocity = 0.3;
+                const friction = 0.92; // 마찰계수 (더 강한 마찰)
+                
+                if (Math.abs(velocity) > minVelocity) {
+                  isFlinging = true;
+                  
+                  const fling = () => {
+                    if (!isFlinging || Math.abs(velocity) < 0.05) {
+                      isFlinging = false;
+                      flingAnimationId = null;
+                      return;
+                    }
+                    
+                    // 플링 스크롤 적용 (속도 감소)
+                    parent.scrollTop += velocity * 8; // 속도 절반으로 감소
+                    
+                    // 마찰력 적용
+                    velocity *= friction;
+                    
+                    flingAnimationId = requestAnimationFrame(fling);
+                  };
+                  
+                  fling();
+                }
+              };
+
               swiperSlides.forEach(slide => {
-                slide.addEventListener('scroll', handleSlideScroll, { passive: false });
+                slide.addEventListener('touchstart', handleTouchStart, { passive: true });
+                slide.addEventListener('touchmove', handleTouchMove, { passive: false });
+                slide.addEventListener('touchend', handleTouchEnd, { passive: true });
               });
-              
+
             }, [])}
             onSlideChange={useCallback((swiper: SwiperClass) => {
               setValue(swiper.activeIndex);
-              // const activeSlide = swiper.slides[swiper.activeIndex] as HTMLElement;
-              // const hasScroll = activeSlide.offsetHeight > (contentRef.current?.offsetHeight ?? 0) - 48;
-              // if (!hasScroll && headerRef.current) {
-              //   headerRef.current.style.display = 'block';
-              // }
             }, [])}
           >
-            <SwiperSlide style={{overflow:'auto'}}>
+            <SwiperSlide style={{ overflow: 'auto' }}>
               <div >
                 <h2>전표 상세</h2>
                 <div style={{ marginBottom: '30px' }}>
