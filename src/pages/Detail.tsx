@@ -8,7 +8,7 @@ import { Swiper as SwiperClass } from "swiper";
 import "swiper/css";
 import AppBar from "../components/AppBar";
 
-const HEADER_EXPANDED_HEIGHT = 200;
+const HEADER_EXPANDED_HEIGHT = 300;
 const HEADER_COLLAPSED_HEIGHT = 48;
 const COLLAPSE_RANGE = HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT;
 
@@ -57,6 +57,16 @@ const Detail: React.FC = () => {
     });
   }, []);
 
+  // 헤더 스냅 처리 함수
+  const snapHeader = useCallback((scrollTop: number, element: HTMLDivElement) => {
+    const midPoint = COLLAPSE_RANGE / 2;
+    const targetScroll = scrollTop < midPoint ? 0 : COLLAPSE_RANGE;
+    
+    if (scrollTop !== targetScroll) {
+      element.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    }
+  }, [scrollY]);
+
   // 슬라이드 스크롤 이벤트
   const handleScrollYChange = useCallback(
     (scrollTop: number, key: string) => {
@@ -75,6 +85,17 @@ const Detail: React.FC = () => {
     },
     [scrollY, adjustAllScrollsOnHeaderStateChange]
   );
+
+  // 스크롤 끝날 때 스냅 처리
+  const handleScrollEnd = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget;
+    const scrollTop = element.scrollTop;
+    
+    // 헤더 영역에서만 스냅 처리
+    if (scrollTop > 0 && scrollTop < COLLAPSE_RANGE) {
+      snapHeader(scrollTop, element);
+    }
+  }, [snapHeader]);
 
   // 슬라이드 전환 시, 스크롤 위치 복구
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
@@ -155,6 +176,7 @@ const Detail: React.FC = () => {
               <div
                 ref={(el) => { scrollRefs.current[index] = el; }}
                 onScroll={(e) => handleScrollYChange(e.currentTarget.scrollTop, key)}
+                onScrollEnd={handleScrollEnd}
                 style={{
                   overflowY: "auto",
                   height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT}px)`,
