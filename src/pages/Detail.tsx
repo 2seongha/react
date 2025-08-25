@@ -125,6 +125,24 @@ const Detail: React.FC = () => {
         {/* 상단 헤더 */}
         <motion.div
           ref={headerRef}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            headerRef.current?.setAttribute('data-start-y', touch.clientY.toString());
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const startY = parseFloat(headerRef.current?.getAttribute('data-start-y') || '0');
+            const deltaY = touch.clientY - startY;
+            
+            // 현재 활성 슬라이드에 스크롤 이벤트 전달 (감도 조정)
+            const activeIndex = TAB_KEYS.indexOf(activeTab);
+            const activeSlideElement = scrollRefs.current[activeIndex];
+            if (activeSlideElement && Math.abs(deltaY) > 5) { // 최소 5px 움직임 필요
+              activeSlideElement.scrollTop += deltaY * 0.1; // 감도 낮춤
+              headerRef.current?.setAttribute('data-start-y', touch.clientY.toString());
+            }
+          }}
           style={{
             position: "fixed",
             top: 0,
@@ -142,7 +160,7 @@ const Detail: React.FC = () => {
             boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
           }}
         >
-          Collapsing Header
+          결재 헤더
           <IonSegment value={activeTab} mode="md" style={{position:'absolute', bottom: '-48px', backgroundColor: 'var(--ion-background-color)'}} onIonChange={(e) => {
             const selectedTab = e.detail.value as string;
             const tabIndex = TAB_KEYS.indexOf(selectedTab);
