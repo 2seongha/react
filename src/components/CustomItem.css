@@ -111,14 +111,13 @@
 }
 
 .custom-item-body-line>span:first-child {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--ion-color-secondary);
 }
 
 .custom-item-body-line>span:last-child {
-  font-size: 13px;
-  font-weight: 500;
-  /* color: rgba(var(--ion-text-color-rgb), 0.6); */
-  /* color: rgba(var(--ion-text-color-rgb), 0.6); */
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(var(--ion-text-color-rgb), 0.6);
 }

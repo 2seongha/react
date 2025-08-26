@@ -588,7 +588,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
         <span>계정명</span>
         <span>소모품비-기타</span>
       </div>
-      {/* <IonImg src='https://cdn.gamey.kr/news/photo/202304/3004960_109898_511.jpg' style={{height:'400px', width:'100%', objectFit:'fill'}}></IonImg> */}
     </div>
   ), []); // 하드코딩된 데이터이므로 빈 의존성 배열
 

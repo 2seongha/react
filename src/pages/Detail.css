@@ -1,48 +1,24 @@
-/* Detail 페이지 최적화 CSS */
-
-.detail-page {
-  /* GPU 가속 제거 - 정적 페이지에는 불필요 */
+.detail .app-bar ion-toolbar {
+  --background: transparent;
 }
 
-.detail-content {
-  /* 네이티브 스크롤링 최적화 */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  scroll-behavior: auto; /* smooth 대신 auto로 더 빠른 스크롤 */
+.detail .grap-indicator-wrapper {
+  position: absolute;
+  height: 28px;
+  pointer-events: none;
+  background-color: var(--ion-background-color);
+  bottom: 0px;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.detail-text-container {
-  /* 텍스트 렌더링 최적화 */
-  text-rendering: optimizeSpeed; /* 속도 우선 */
-  font-smooth: never;
-  -webkit-font-smoothing: subpixel-antialiased;
-  
-  /* 레이아웃 최적화 */
-  contain: layout style;
-  will-change: auto; /* will-change 제거로 메모리 사용량 줄이기 */
+.detail .segment {
+  position: absolute;
+  bottom: -48px;
+  background-color: var(--ion-background-color);
+  pointer-events: all;
 }
 
-/* 불필요한 애니메이션 비활성화 */
-.detail-text-container * {
-  transition: none !important;
-  animation-duration: 0s !important;
-  animation-delay: 0s !important;
-}
-
-/* 텍스트 요소 최적화 */
-.detail-text-container h1,
-.detail-text-container h2,
-.detail-text-container p {
-  contain: layout style;
-  /* translateZ 제거 - 정적 텍스트에는 불필요 */
-}
-
-/* 그라데이션 박스 최적화 */
-.detail-box {
-  contain: strict;
-  /* GPU 가속 제거 - 정적 요소에는 불필요 */
-}
-
-.swiper-wrapper {
-  /* height: 100% !important; */
-}

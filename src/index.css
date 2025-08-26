@@ -48,6 +48,7 @@
   --custom-border-color-50: #f2f2f2;
   --custom-border-color-100: #E8E8E8;
 
+  --grab-indicator-color: #F7F7F7;
   --gray-color: #C1C1C1;
   --check-icon:  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="%23C1C1C1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
   --logo: url('/src/assets/images/app_logo_dark.webp');
@@ -101,6 +102,7 @@
   --custom-border-color-50: #2E3238;
   --custom-border-color-100: #2E3238;
 
+  --grab-indicator-color: #2C2E35;
   --gray-color: #646870;
   --check-icon:  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke="%23646870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
   --logo: url('/src/assets/images/app_logo_light.webp');

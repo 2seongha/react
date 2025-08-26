@@ -1,16 +1,24 @@
 
 
-import React, { useRef, useState, useEffect, useCallback } from "react";
-import { IonPage, IonContent, IonSegment, IonSegmentButton, IonLabel } from "@ionic/react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { IonPage, IonContent, IonSegment, IonSegmentButton, IonLabel, IonBackButton, IonImg, IonIcon } from "@ionic/react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperClass } from "swiper";
+import { useShallow } from 'zustand/shallow'
 import "swiper/css";
 import AppBar from "../components/AppBar";
+import "./Detail.css";
+import { getFlowIcon } from "../utils";
+import { useParams } from "react-router-dom";
+import useAppStore from "../stores/appStore";
+import { person } from "ionicons/icons";
 
-const HEADER_EXPANDED_HEIGHT = 300;
-const HEADER_COLLAPSED_HEIGHT = 48;
-const COLLAPSE_RANGE = HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT;
+interface DetailParams {
+  flowNo: string;
+}
+
+const HEADER_COLLAPSED_HEIGHT = 48 + 28;
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -30,17 +38,7 @@ const Detail: React.FC = () => {
 
   // 슬라이드별 스크롤 영역 참조
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // MotionValue (헤더 애니메이션용)
   const scrollY = useMotionValue(0);
-
-  // 헤더의 동적 높이
-  const headerHeight = useTransform(
-    scrollY,
-    [0, COLLAPSE_RANGE],
-    [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
-    { clamp: true }
-  );
 
   // 헤더 상태 변화에 따른 모든 슬라이드 스크롤 조정
   const adjustAllScrollsOnHeaderStateChange = useCallback((newScrollTop: number) => {
@@ -57,19 +55,11 @@ const Detail: React.FC = () => {
     });
   }, []);
 
-  // 헤더 스냅 처리 함수
-  const snapHeader = useCallback((scrollTop: number, element: HTMLDivElement) => {
-    const midPoint = COLLAPSE_RANGE / 2;
-    const targetScroll = scrollTop < midPoint ? 0 : COLLAPSE_RANGE;
-    
-    if (scrollTop !== targetScroll) {
-      element.scrollTo({ top: targetScroll, behavior: 'smooth' });
-    }
-  }, [scrollY]);
-
   // 슬라이드 스크롤 이벤트
   const handleScrollYChange = useCallback(
     (scrollTop: number, key: string) => {
+      console.log('scroll move')
+
       const prevScrollY = scrollY.get();
       scrollPositions.current[key] = scrollTop;
       scrollY.set(scrollTop);
@@ -86,7 +76,38 @@ const Detail: React.FC = () => {
     [scrollY, adjustAllScrollsOnHeaderStateChange]
   );
 
-  // 스크롤 끝날 때 스냅 처리
+  
+
+  // 슬라이드 전환 시, 스크롤 위치 복구
+  const handleSlideChange = useCallback((swiper: SwiperClass) => {
+    const newIndex = swiper.activeIndex;
+    const newKey = TAB_KEYS[newIndex];
+    setActiveTab(newKey);
+  }, [scrollY]);
+
+  const swiperRef = useRef<SwiperClass | null>(null);
+  const expandedHeaderRef = useRef<HTMLDivElement | null>(null);
+  const [expandedHeight, setExpandedHeight] = useState(0);
+  
+  
+  const { flowNo } = useParams<DetailParams>();
+  const approval = useAppStore(useShallow(state => state.approvals?.find(approval => approval.flowNo === flowNo) || null));
+  const icon = useMemo(() => getFlowIcon('TODO'), [/*area.flowCode*/]);
+  
+  const HEADER_EXPANDED_HEIGHT = expandedHeight;
+  const COLLAPSE_RANGE = HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT;
+  
+    // 헤더 스냅 처리 함수
+    const snapHeader = useCallback((scrollTop: number, element: HTMLDivElement) => {
+      const midPoint = COLLAPSE_RANGE / 2;
+      const targetScroll = scrollTop < midPoint ? 0 : COLLAPSE_RANGE;
+      
+      if (scrollTop !== targetScroll) {
+        element.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      }
+    }, [scrollY, COLLAPSE_RANGE]);
+
+    // 스크롤 끝날 때 스냅 처리
   const handleScrollEnd = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const element = e.currentTarget;
     const scrollTop = element.scrollTop;
@@ -97,75 +118,154 @@ const Detail: React.FC = () => {
     }
   }, [snapHeader]);
 
-  // 슬라이드 전환 시, 스크롤 위치 복구
-  const handleSlideChange = useCallback((swiper: SwiperClass) => {
-    const newIndex = swiper.activeIndex;
-    const newKey = TAB_KEYS[newIndex];
-    setActiveTab(newKey);
+  // 헤더의 동적 높이
+  const headerHeight = useTransform(
+    scrollY,
+    [0, COLLAPSE_RANGE],
+    [HEADER_EXPANDED_HEIGHT, HEADER_COLLAPSED_HEIGHT],
+    { clamp: true }
+  );
   
-    // const el = scrollRefs.current[newIndex];
-    // const storedPos = scrollPositions.current[newKey] || 0;
-    // const currentHeaderScroll = scrollY.get();
-    
-    // if (el) {
-    //   // 저장된 위치로 복구 (이미 초기화된 경우 0이 될 것)
-    //   const targetScroll = Math.max(storedPos, currentHeaderScroll);
-    //   el.scrollTop = targetScroll;
-    // }
-  }, [scrollY]);
-
-  const swiperRef = useRef<SwiperClass | null>(null);
-  const headerRef = useRef<HTMLDivElement | null>(null);
+  // 펼쳐진 헤더 opacity
+  const expandedHeaderOpacity = useTransform(
+    scrollY,
+    [0, COLLAPSE_RANGE / 2],
+    [1, 0],
+    { clamp: true }
+  );
   
+  // 접힌 헤더 opacity
+  const collapsedHeaderOpacity = useTransform(
+    scrollY,
+    [COLLAPSE_RANGE / 2, COLLAPSE_RANGE],
+    [0, 1],
+    { clamp: true }
+  );
+  
+  // 펼쳐진 헤더 스케일 (0.8 ~ 1.0)
+  const expandedHeaderScale = useTransform(
+    scrollY,
+    [0, COLLAPSE_RANGE / 2],
+    [1, 0.8],
+    { clamp: true }
+  );
+  
+  // 첫 렌더링 시 펼쳐진 헤더의 실제 높이 측정
+  useEffect(() => {
+    if (expandedHeaderRef.current) {
+      // DOM 렌더링 완료 후 측정
+      setTimeout(() => {
+        if (expandedHeaderRef.current) {
+          const height = expandedHeaderRef.current.scrollHeight; // offsetHeight 대신 scrollHeight 사용
+          console.log('Measured height:', height);
+          if (height > 0 && height !== expandedHeight) {
+            setExpandedHeight(height + 48 + 22);
+          }
+        }
+      }, 0);
+    }
+  }, [approval]); // expandedHeight 의존성 제거로 무한 루프 방지
 
   return (
-    <IonPage>
-      <AppBar showBackButton={true}/>
+    <IonPage className="detail">
       <IonContent fullscreen>
+      <AppBar showBackButton={true}/>
         {/* 상단 헤더 */}
         <motion.div
-          ref={headerRef}
-          onTouchStart={(e) => {
-            const touch = e.touches[0];
-            headerRef.current?.setAttribute('data-start-y', touch.clientY.toString());
-          }}
-          onTouchMove={(e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const startY = parseFloat(headerRef.current?.getAttribute('data-start-y') || '0');
-            const deltaY = touch.clientY - startY;
-            
-            // 현재 활성 슬라이드에 스크롤 이벤트 전달 (감도 조정)
-            const activeIndex = TAB_KEYS.indexOf(activeTab);
-            const activeSlideElement = scrollRefs.current[activeIndex];
-            if (activeSlideElement && Math.abs(deltaY) > 5) { // 최소 5px 움직임 필요
-              activeSlideElement.scrollTop += deltaY * 0.1; // 감도 낮춤
-              headerRef.current?.setAttribute('data-start-y', touch.clientY.toString());
-            }
-          }}
           style={{
             position: "fixed",
             top: 0,
             left: 0,
             right: 0,
             height: headerHeight,
-            backgroundColor: "#3880ff",
-            color: "white",
+            backgroundColor: "var(--ion-background-color2)",
             zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 24,
-            fontWeight: "bold",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            pointerEvents: 'none',
+            paddingBottom: '28px'
           }}
         >
-          결재 헤더
-          <IonSegment value={activeTab} mode="md" style={{position:'absolute', bottom: '-48px', backgroundColor: 'var(--ion-background-color)'}} onIonChange={(e) => {
+          {/* 펼쳐진 헤더 */}
+          <motion.div
+            ref={expandedHeaderRef}
+            style={{
+              position: "absolute",
+              top: '42px',
+              left: 0,
+              right: 0,
+              display: "flex",
+              alignItems: "start",
+              justifyContent: "center",
+              flexDirection: 'column',
+              padding: "12px 22px 22px 22px",
+              opacity: expandedHeaderOpacity,
+              scale: expandedHeaderScale
+            }}
+          >
+            {
+              <>
+              <div style={{display:'flex', alignItems:'center', gap:'4px', marginBottom: '8px'}}>
+                <IonImg src={icon.image} style={{width:'20px'}}/>
+                <span style={{fontSize:'13px', fontWeight: '500'}}>미결함</span>
+                <span style={{margin:'0 4px', color:'var(--gray-color)', fontSize:'11px'}}>|</span>
+                <span style={{fontSize:'13px', fontWeight: '500', color:'var(--ion-color-secondary)'}}>전자세금계산서</span>
+              </div>
+              <span style={{fontSize:'16px', fontWeight:'600', width:'100%'}}>{approval?.apprTitle}</span>
+              <div style={{marginTop:'22px', backgroundColor:'var(--ion-background-color)', width:'100%', borderRadius:'12px', overflow:'hidden'}}>
+                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px', backgroundColor:'#2E3C52'}}>
+                  <div style={{display:'flex', gap:'4px'}}><IonIcon src={person} style={{width:'12px', color:'var(--ion-color-secondary)'}}/><span style={{color:'#fff',fontSize:'13px', fontWeight: '500'}}>최재웅</span></div>
+                  <span style={{color:'#fff',fontSize:'13px', fontWeight: '500'}}>{approval?.createDate}</span>
+                </div>
+                <div className='custom-item-body'>
+                  <div className='custom-item-body-line'>
+                    <span>구분</span>
+                    <span>임시전표</span>
+                  </div>
+                  <div className='custom-item-body-line'>
+                    <span>전표 번호</span>
+                    <span>1900000165</span>
+                  </div>
+                  <div className='custom-item-body-line'>
+                    <span>거래처</span>
+                    <span>현대 법인카드_7430820</span>
+                  </div>
+                  <div className='custom-item-body-line'>
+                    <span>기본적요</span>
+                    <span>소모품비</span>
+                  </div>
+                  <div className='custom-item-body-line'>
+                    <span>계정명</span>
+                    <span>소모품비-기타</span>
+                  </div>
+                </div>
+              </div>
+              </>
+            }
+         
+          </motion.div>
+
+          {/* 접힌 헤더 */}
+          <motion.div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: HEADER_COLLAPSED_HEIGHT - 28,
+              opacity: collapsedHeaderOpacity,
+            }}
+          >
+            접힌 헤더 내용
+          </motion.div>
+          <div className="grap-indicator-wrapper">
+            <span style={{display:'block', width: '60px', height:'4px', background:'var(--grab-indicator-color)'}} />
+          </div>
+          <IonSegment className="segment" value={activeTab} mode="md" onIonChange={(e) => {
             const selectedTab = e.detail.value as string;
             const tabIndex = TAB_KEYS.indexOf(selectedTab);
             if (tabIndex !== -1) {
-              
               setActiveTab(selectedTab);
               swiperRef.current?.slideTo(tabIndex);
             }
@@ -197,7 +297,7 @@ const Detail: React.FC = () => {
                 onScrollEnd={handleScrollEnd}
                 style={{
                   overflowY: "auto",
-                  height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT}px)`,
+                  height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT - 28}px)`,
                   paddingTop: HEADER_EXPANDED_HEIGHT,
                   boxSizing: "border-box",
                   background: "#fff",
