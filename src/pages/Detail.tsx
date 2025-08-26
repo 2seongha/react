@@ -117,30 +117,30 @@ const Detail: React.FC = () => {
     }, [scrollY, COLLAPSE_RANGE]);
 
     // iOS에서 scrollend 이벤트 대신 touchend 사용
-  const handleTouchEnd = useCallback(() => {
-    console.log('touchEnd');
+  // const handleTouchEnd = useCallback(() => {
+  //   console.log('touchEnd');
     
-    // 스냅 중이면 무시
-    if (isSnapping.current) {
-      console.log('ignoring touchEnd during snap');
-      return;
-    }
+  //   // 스냅 중이면 무시
+  //   if (isSnapping.current) {
+  //     console.log('ignoring touchEnd during snap');
+  //     return;
+  //   }
     
-    // 현재 활성 슬라이드의 스크롤 위치 확인
-    const activeIndex = TAB_KEYS.indexOf(activeTab);
-    const element = scrollRefs.current[activeIndex];
+  //   // 현재 활성 슬라이드의 스크롤 위치 확인
+  //   const activeIndex = TAB_KEYS.indexOf(activeTab);
+  //   const element = scrollRefs.current[activeIndex];
     
-    if (element) {
-      const scrollTop = element.scrollTop;
+  //   if (element) {
+  //     const scrollTop = element.scrollTop;
       
-      // 헤더 영역에서만 스냅 처리
-      if (scrollTop > 0 && scrollTop < COLLAPSE_RANGE) {
-        setTimeout(() => {
-          snapHeader(scrollTop, element);
-        }, 100); // iOS momentum 스크롤 후 스냅
-      }
-    }
-  }, [snapHeader, activeTab]);
+  //     // 헤더 영역에서만 스냅 처리
+  //     if (scrollTop > 0 && scrollTop < COLLAPSE_RANGE) {
+  //       setTimeout(() => {
+  //         snapHeader(scrollTop, element);
+  //       }, 100); // iOS momentum 스크롤 후 스냅
+  //     }
+  //   }
+  // }, [snapHeader, activeTab]);
 
     // 스크롤 끝날 때 스냅 처리 (백업)
   const handleScrollEnd = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -357,7 +357,7 @@ const Detail: React.FC = () => {
                 ref={(el) => { scrollRefs.current[index] = el; }}
                 onScroll={(e) => handleScrollYChange(e.currentTarget.scrollTop, key)}
                 onScrollEnd={handleScrollEnd}
-                onTouchEnd={handleTouchEnd}
+                // onTouchEnd={handleTouchEnd}
                 style={{
                   overflowY: "auto",
                   height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT - 28 - 48}px)`,
