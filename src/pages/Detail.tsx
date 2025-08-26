@@ -185,7 +185,7 @@ const Detail: React.FC = () => {
 
   return (
     <IonPage className="detail">
-      <IonContent fullscreen>
+      <IonContent style={{paddingTop:'var(--ion-safe-area-top)'}}>
       <AppBar showBackButton={true}/>
         {/* 상단 헤더 */}
         <motion.div
@@ -198,7 +198,6 @@ const Detail: React.FC = () => {
             backgroundColor: "var(--ion-background-color2)",
             zIndex: 2,
             pointerEvents: 'none',
-            paddingTop: 'var(--ion-safe-area-top)',
             paddingBottom: '76px',
             willChange: 'height',
             contain: 'layout style paint',
@@ -285,7 +284,10 @@ const Detail: React.FC = () => {
               backfaceVisibility: 'hidden'
             }}
           >
-            접힌 헤더 내용
+            <div>
+              <span>미결함</span>
+              <span>{approval?.apprTitle}</span>
+            </div>
           </motion.div>
           <div 
             className="grap-indicator-wrapper"
