@@ -55,29 +55,6 @@ const Detail: React.FC = () => {
     });
   }, []);
 
-  // 슬라이드 스크롤 이벤트
-  const handleScrollYChange = useCallback(
-    (scrollTop: number, key: string) => {
-      console.log('scroll move')
-
-      const prevScrollY = scrollY.get();
-      scrollPositions.current[key] = scrollTop;
-      scrollY.set(scrollTop);
-      
-      // 헤더가 완전히 펼쳐지는 순간 (축소된 상태에서 0으로)
-      if (prevScrollY > 0 && scrollTop === 0) {
-        adjustAllScrollsOnHeaderStateChange(0);
-      }
-      // 헤더가 완전히 접히는 순간 (0에서 COLLAPSE_RANGE로)
-      else if (prevScrollY < COLLAPSE_RANGE && scrollTop >= COLLAPSE_RANGE) {
-        adjustAllScrollsOnHeaderStateChange(COLLAPSE_RANGE);
-      }
-    },
-    [scrollY, adjustAllScrollsOnHeaderStateChange]
-  );
-
-  
-
   // 슬라이드 전환 시, 스크롤 위치 복구
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
     const newIndex = swiper.activeIndex;
@@ -97,6 +74,29 @@ const Detail: React.FC = () => {
   
   const HEADER_EXPANDED_HEIGHT = expandedHeight;
   const COLLAPSE_RANGE = HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT;
+
+   // 슬라이드 스크롤 이벤트
+   const handleScrollYChange = useCallback(
+    (scrollTop: number, key: string) => {
+      console.log('scroll move')
+
+      const prevScrollY = scrollY.get();
+      scrollPositions.current[key] = scrollTop;
+      scrollY.set(scrollTop);
+      
+      // 헤더가 완전히 펼쳐지는 순간 (축소된 상태에서 0으로)
+      if (prevScrollY > 0 && scrollTop === 0) {
+        adjustAllScrollsOnHeaderStateChange(0);
+      }
+      // 헤더가 완전히 접히는 순간 (0에서 COLLAPSE_RANGE로)
+      else if (prevScrollY < COLLAPSE_RANGE && scrollTop >= COLLAPSE_RANGE) {
+        console.log(COLLAPSE_RANGE)
+        adjustAllScrollsOnHeaderStateChange(COLLAPSE_RANGE);
+      }
+    },
+    [scrollY, adjustAllScrollsOnHeaderStateChange]
+  );
+
   
     // 헤더 스냅 처리 함수
     const snapHeader = useCallback((scrollTop: number, element: HTMLDivElement) => {
@@ -116,31 +116,8 @@ const Detail: React.FC = () => {
       }
     }, [scrollY, COLLAPSE_RANGE]);
 
-  // iOS 호환 스크롤 완료 감지
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     handleScrollYChange(e.currentTarget.scrollTop, activeTab);
-    
-    // 기존 타이머 클리어
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    
-    // 150ms 후 스크롤이 멈춘 것으로 간주
-    scrollTimeoutRef.current = setTimeout(() => {
-      if (isSnapping.current) return;
-      
-      const element = e.currentTarget;
-      const scrollTop = element.scrollTop;
-      
-      console.log('scroll stopped (timeout method)');
-      
-      // 헤더 영역에서만 스냅 처리
-      if (scrollTop > 0 && scrollTop < COLLAPSE_RANGE) {
-        snapHeader(scrollTop, element);
-      }
-    }, 150);
   }, [handleScrollYChange, activeTab, snapHeader]);
 
     // 스크롤 끝날 때 스냅 처리 (백업)
@@ -218,13 +195,14 @@ const Detail: React.FC = () => {
         <motion.div
           style={{
             position: "fixed",
-            top: 0,
+            top: 'calc(var(--ion-safe-area-top))',
             left: 0,
             right: 0,
             height: headerHeight,
             backgroundColor: "var(--ion-background-color2)",
             zIndex: 2,
             pointerEvents: 'none',
+            // marginTop: 'calc(var(--ion-safe-area-top))',
             paddingBottom: '76px',
             willChange: 'height',
             contain: 'layout style paint',
@@ -351,6 +329,7 @@ const Detail: React.FC = () => {
           style={{ height: "100%" }}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={handleSlideChange}
+          resistanceRatio={0}
         >
           {TAB_KEYS.map((key, index) => (
             <SwiperSlide key={key}>

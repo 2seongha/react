@@ -157,8 +157,8 @@ export const initWebview = async (): Promise<boolean> => {
 const _initWebview = async (): Promise<void> => {
   const isWebView = 'Y'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
-  // document.documentElement.style.setProperty('--ion-safe-area-top', `40px`);
-  // document.documentElement.style.setProperty('--ion-safe-area-bottom', `58px`);
+  document.documentElement.style.setProperty('--ion-safe-area-top', `40px`);
+  document.documentElement.style.setProperty('--ion-safe-area-bottom', `58px`);
 
   if (isWebView == 'Y') {
     // 패딩 정보 수신

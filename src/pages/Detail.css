@@ -1,3 +1,7 @@
+.detail ion-content {
+  --background: var(--ion-background-color2);
+}
+
 .detail .app-bar ion-toolbar {
   --background: transparent;
 }
@@ -23,11 +27,3 @@
   background-color: var(--ion-background-color);
   pointer-events: all;
 }
-
-/* iOS momentum 스크롤 비활성화 */
-.detail .swiper-slide > div {
-  -webkit-overflow-scrolling: auto !important;
-  overscroll-behavior: none;
-  scroll-behavior: auto;
-}
-
