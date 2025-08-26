@@ -16,6 +16,8 @@
 }
 
 .detail .segment {
+  will-change: transform;
+  transform: translateZ(0);
   position: absolute;
   bottom: -48px;
   background-color: var(--ion-background-color);

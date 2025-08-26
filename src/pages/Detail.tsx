@@ -18,7 +18,7 @@ interface DetailParams {
   flowNo: string;
 }
 
-const HEADER_COLLAPSED_HEIGHT = 48 + 28;
+const HEADER_COLLAPSED_HEIGHT = 48 + 28 + 48;
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -88,6 +88,7 @@ const Detail: React.FC = () => {
   const swiperRef = useRef<SwiperClass | null>(null);
   const expandedHeaderRef = useRef<HTMLDivElement | null>(null);
   const [expandedHeight, setExpandedHeight] = useState(0);
+  const isSnapping = useRef(false);
   
   
   const { flowNo } = useParams<DetailParams>();
@@ -99,16 +100,32 @@ const Detail: React.FC = () => {
   
     // 헤더 스냅 처리 함수
     const snapHeader = useCallback((scrollTop: number, element: HTMLDivElement) => {
+      if (isSnapping.current) return; // 이미 스냅 중이면 무시
+      
       const midPoint = COLLAPSE_RANGE / 2;
       const targetScroll = scrollTop < midPoint ? 0 : COLLAPSE_RANGE;
       
       if (scrollTop !== targetScroll) {
+        isSnapping.current = true;
         element.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        
+        // 스냅 완료 후 플래그 해제
+        setTimeout(() => {
+          isSnapping.current = false;
+        }, 300); // smooth 애니메이션 시간고려
       }
     }, [scrollY, COLLAPSE_RANGE]);
 
     // 스크롤 끝날 때 스냅 처리
   const handleScrollEnd = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    console.log('scrollEnd');
+    
+    // 스냅 중이면 무시
+    if (isSnapping.current) {
+      console.log('ignoring scrollEnd during snap');
+      return;
+    }
+    
     const element = e.currentTarget;
     const scrollTop = element.scrollTop;
     
@@ -159,7 +176,7 @@ const Detail: React.FC = () => {
           const height = expandedHeaderRef.current.scrollHeight; // offsetHeight 대신 scrollHeight 사용
           console.log('Measured height:', height);
           if (height > 0 && height !== expandedHeight) {
-            setExpandedHeight(height + 48 + 22);
+            setExpandedHeight(height + 48 + 22 + 48);
           }
         }
       }, 0);
@@ -181,7 +198,11 @@ const Detail: React.FC = () => {
             backgroundColor: "var(--ion-background-color2)",
             zIndex: 2,
             pointerEvents: 'none',
-            paddingBottom: '28px'
+            paddingTop: 'var(--ion-safe-area-top)',
+            paddingBottom: '76px',
+            willChange: 'height',
+            contain: 'layout style paint',
+            isolation: 'isolate'
           }}
         >
           {/* 펼쳐진 헤더 */}
@@ -198,7 +219,10 @@ const Detail: React.FC = () => {
               flexDirection: 'column',
               padding: "12px 22px 22px 22px",
               opacity: expandedHeaderOpacity,
-              scale: expandedHeaderScale
+              scale: expandedHeaderScale,
+              willChange: 'opacity, transform',
+              contain: 'layout style paint',
+              backfaceVisibility: 'hidden'
             }}
           >
             {
@@ -252,34 +276,44 @@ const Detail: React.FC = () => {
               right: 0,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              height: HEADER_COLLAPSED_HEIGHT - 28,
+              justifyContent: "start",
+              paddingLeft: '64px',
+              height: HEADER_COLLAPSED_HEIGHT - 28 - 48,
               opacity: collapsedHeaderOpacity,
+              willChange: 'opacity',
+              contain: 'layout style paint',
+              backfaceVisibility: 'hidden'
             }}
           >
             접힌 헤더 내용
           </motion.div>
-          <div className="grap-indicator-wrapper">
+          <div 
+            className="grap-indicator-wrapper"
+            style={{
+              willChange: 'transform',
+              transform: 'translateZ(0)', // GPU 레이어 생성
+            }}
+          >
             <span style={{display:'block', width: '60px', height:'4px', background:'var(--grab-indicator-color)'}} />
           </div>
-          <IonSegment className="segment" value={activeTab} mode="md" onIonChange={(e) => {
-            const selectedTab = e.detail.value as string;
-            const tabIndex = TAB_KEYS.indexOf(selectedTab);
-            if (tabIndex !== -1) {
-              setActiveTab(selectedTab);
-              swiperRef.current?.slideTo(tabIndex);
-            }
-          }}>
-          <IonSegmentButton value="tab1">
-            <IonLabel>상세</IonLabel>
-          </IonSegmentButton>
-          <IonSegmentButton value="tab2">
-            <IonLabel>결재선</IonLabel>
-          </IonSegmentButton>
-          <IonSegmentButton value="tab3">
-            <IonLabel>첨부파일</IonLabel>
-          </IonSegmentButton>
-        </IonSegment>
+            <IonSegment className="segment" value={activeTab} mode="md" onIonChange={(e) => {
+              const selectedTab = e.detail.value as string;
+              const tabIndex = TAB_KEYS.indexOf(selectedTab);
+              if (tabIndex !== -1) {
+                setActiveTab(selectedTab);
+                swiperRef.current?.slideTo(tabIndex);
+              }
+            }}>
+            <IonSegmentButton value="tab1">
+              <IonLabel>상세</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="tab2">
+              <IonLabel>결재선</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="tab3">
+              <IonLabel>첨부파일</IonLabel>
+            </IonSegmentButton>
+          </IonSegment>
         </motion.div>
        
         {/* Swiper 탭 콘텐츠 */}
@@ -297,8 +331,8 @@ const Detail: React.FC = () => {
                 onScrollEnd={handleScrollEnd}
                 style={{
                   overflowY: "auto",
-                  height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT - 28}px)`,
-                  paddingTop: HEADER_EXPANDED_HEIGHT,
+                  height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT - 28 - 48}px)`,
+                  paddingTop: HEADER_EXPANDED_HEIGHT - 48,
                   boxSizing: "border-box",
                   background: "#fff",
                 }}
