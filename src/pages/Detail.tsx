@@ -116,31 +116,32 @@ const Detail: React.FC = () => {
       }
     }, [scrollY, COLLAPSE_RANGE]);
 
-    // iOS에서 scrollend 이벤트 대신 touchend 사용
-  // const handleTouchEnd = useCallback(() => {
-  //   console.log('touchEnd');
+  // iOS 호환 스크롤 완료 감지
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    handleScrollYChange(e.currentTarget.scrollTop, activeTab);
     
-  //   // 스냅 중이면 무시
-  //   if (isSnapping.current) {
-  //     console.log('ignoring touchEnd during snap');
-  //     return;
-  //   }
+    // 기존 타이머 클리어
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
     
-  //   // 현재 활성 슬라이드의 스크롤 위치 확인
-  //   const activeIndex = TAB_KEYS.indexOf(activeTab);
-  //   const element = scrollRefs.current[activeIndex];
-    
-  //   if (element) {
-  //     const scrollTop = element.scrollTop;
+    // 150ms 후 스크롤이 멈춘 것으로 간주
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (isSnapping.current) return;
       
-  //     // 헤더 영역에서만 스냅 처리
-  //     if (scrollTop > 0 && scrollTop < COLLAPSE_RANGE) {
-  //       setTimeout(() => {
-  //         snapHeader(scrollTop, element);
-  //       }, 100); // iOS momentum 스크롤 후 스냅
-  //     }
-  //   }
-  // }, [snapHeader, activeTab]);
+      const element = e.currentTarget;
+      const scrollTop = element.scrollTop;
+      
+      console.log('scroll stopped (timeout method)');
+      
+      // 헤더 영역에서만 스냅 처리
+      if (scrollTop > 0 && scrollTop < COLLAPSE_RANGE) {
+        snapHeader(scrollTop, element);
+      }
+    }, 150);
+  }, [handleScrollYChange, activeTab, snapHeader]);
 
     // 스크롤 끝날 때 스냅 처리 (백업)
   const handleScrollEnd = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -355,9 +356,8 @@ const Detail: React.FC = () => {
             <SwiperSlide key={key}>
               <div
                 ref={(el) => { scrollRefs.current[index] = el; }}
-                onScroll={(e) => handleScrollYChange(e.currentTarget.scrollTop, key)}
+                onScroll={handleScroll}
                 onScrollEnd={handleScrollEnd}
-                // onTouchEnd={handleTouchEnd}
                 style={{
                   overflowY: "auto",
                   height: `calc(100vh - ${HEADER_COLLAPSED_HEIGHT - 28 - 48}px)`,
