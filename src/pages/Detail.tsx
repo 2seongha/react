@@ -63,7 +63,7 @@ const Detail: React.FC = () => {
 
   // IonContent 스크롤 시 각 슬라이드를 translateY로 이동
   const handleContentScroll = useCallback((e: any) => {
-    const headerHeight = 268;
+    const headerHeight = expandedHeight;
     const scrollTop = e.detail.scrollTop;
     scrollY.set(scrollTop);
     const contentScrollTop = scrollTop - headerHeight;
@@ -81,19 +81,19 @@ const Detail: React.FC = () => {
         }
       });
     }
-  }, [activeTab]);
+  }, [activeTab, expandedHeight]);
 
   const handleContentScrollEnd = useCallback(async (e: any) => {
-    const headerHeight = 268;
+    const headerHeight = expandedHeight;
     const scrollElement = await ionContentRef.current.getScrollElement();
     const scrollTop = scrollElement.scrollTop;
     if (scrollTop >= headerHeight) return;
     if (scrollTop > headerHeight / 2) {
-      ionContentRef.current.scrollToPoint(0, 268, 200);
+      ionContentRef.current.scrollToPoint(0, expandedHeight, 200);
     } else {
       ionContentRef.current.scrollToTop(200);
     }
-  }, []);
+  }, [expandedHeight]);
 
   // 슬라이드 변경 핸들러 - 위치 정상화 포함
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
@@ -116,10 +116,10 @@ const Detail: React.FC = () => {
     });
 
     const scrollElement = await ionContentRef.current.getScrollElement();
-    if (scrollElement.scrollTop >= 268) ionContentRef.current.scrollToPoint(0, 268, 0);
+    if (scrollElement.scrollTop >= expandedHeight) ionContentRef.current.scrollToPoint(0, expandedHeight, 0);
 
     console.log(`슬라이드 ${newIndex + 1} 전환 완료 후 위치 초기화`);
-  }, [adjustSwiperHeight]);
+  }, [adjustSwiperHeight, expandedHeight]);
 
   // 헤더 높이 측정
   useEffect(() => {
@@ -129,7 +129,7 @@ const Detail: React.FC = () => {
       if (expandedHeaderRef.current) {
         const height = expandedHeaderRef.current.scrollHeight;
         if (height > 0 && height !== expandedHeight) {
-          setExpandedHeight(height + 48 + 22 + 48);
+          setExpandedHeight(height);
         }
       }
     };
@@ -151,10 +151,9 @@ const Detail: React.FC = () => {
   // 스크롤 감지 (전체 문서 기준)
   const scrollY = useMotionValue(0);
   // opacity: 0~100px까지 1 → 0
-  const opacity = useTransform(scrollY, [0, 268/1.8], [1, 0]);
+  const opacity = useTransform(scrollY, [0, expandedHeight/1.8], [1, 0]);
   // scale: 0~100px까지 1 → 0.95
-  const scale = useTransform(scrollY, [0, 268/1.8], [1, 0.5]);
-  const translateY = useTransform(scrollY, (y) => y * (1 - 0.3));
+  const scale = useTransform(scrollY, [0, expandedHeight/1.8], [1, 0.5]);
 
   return (
     <IonPage className="detail">
@@ -198,7 +197,6 @@ const Detail: React.FC = () => {
             padding: "12px 22px 22px 22px",
             opacity,
             scale,
-            y: translateY,
             willChange: 'opacity, transform',
           }}
         >
