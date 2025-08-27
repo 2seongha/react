@@ -84,6 +84,7 @@ const Detail: React.FC = () => {
   }, [activeTab, expandedHeight]);
 
   const handleContentScrollEnd = useCallback(async (e: any) => {
+    console.log(e)
     const headerHeight = expandedHeight;
     const scrollElement = await ionContentRef.current.getScrollElement();
     const scrollTop = scrollElement.scrollTop;
@@ -123,19 +124,20 @@ const Detail: React.FC = () => {
 
   // 헤더 높이 측정
   useEffect(() => {
-    if (!expandedHeaderRef.current || !approval) return;
+    if (!expandedHeaderRef.current) return;
 
-    const measureHeight = () => {
-      if (expandedHeaderRef.current) {
-        const height = expandedHeaderRef.current.scrollHeight;
-        if (height > 0 && height !== expandedHeight) {
-          setExpandedHeight(height);
-        }
+    const observer = new ResizeObserver(([entry]) => {
+      const newHeight = entry.contentRect.height;
+      if (newHeight > 0 && newHeight !== expandedHeight) {
+        setExpandedHeight(newHeight + 34);
+        console.log("ResizeObserver 측정:", newHeight + 34);
       }
-    };
+    });
 
-    setTimeout(measureHeight, 0);
-  }, [approval, expandedHeight]);
+    observer.observe(expandedHeaderRef.current);
+
+    return () => observer.disconnect();
+  }, []);
 
   // 초기 로드 시 첫 번째 탭의 높이 설정
   useEffect(() => {
@@ -151,9 +153,9 @@ const Detail: React.FC = () => {
   // 스크롤 감지 (전체 문서 기준)
   const scrollY = useMotionValue(0);
   // opacity: 0~100px까지 1 → 0
-  const opacity = useTransform(scrollY, [0, expandedHeight/1.8], [1, 0]);
+  const opacity = useTransform(scrollY, [0, expandedHeight / 1.8], [1, 0]);
   // scale: 0~100px까지 1 → 0.95
-  const scale = useTransform(scrollY, [0, expandedHeight/1.8], [1, 0.5]);
+  const scale = useTransform(scrollY, [0, expandedHeight / 1.8], [1, 0.5]);
 
   return (
     <IonPage className="detail">
