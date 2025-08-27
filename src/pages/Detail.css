@@ -3,7 +3,8 @@
 }
 
 .detail .app-bar ion-toolbar {
-  --background: transparent;
+  /* --background: transparent; */
+  --background: var(--ion-background-color2);
 }
 
 .detail .grap-indicator-wrapper {
