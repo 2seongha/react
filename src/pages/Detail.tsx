@@ -13,6 +13,7 @@ import { getFlowIcon } from "../utils";
 import { useParams } from "react-router-dom";
 import useAppStore from "../stores/appStore";
 import { person } from "ionicons/icons";
+import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
 
 interface DetailParams {
   flowNo: string;
@@ -35,35 +36,13 @@ const Detail: React.FC = () => {
   const scrollRefs = useRef<(HTMLDivElement | null)[]>([]);
   const swiperRef = useRef<SwiperClass | null>(null);
   const expandedHeaderRef = useRef<HTMLDivElement | null>(null);
+  const ionContentRef = useRef<HTMLIonContentElement | null>(null);
   const slideContentRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // 스냅 관련 상태
-  const scrollTimeout = useRef<number | null>(null);
-  const touching = useRef(false);
-
-  // 각 슬라이드별 translateY 위치 저장
-  const slideTranslateY = useRef<number[]>([0, 0, 0]);
-  // 공통 스크롤 위치 (IonContent 스크롤)
-  const commonScrollPosition = useRef<number>(0);
 
   // Constants
   const { flowNo } = useParams<DetailParams>();
   const approval = useAppStore(useShallow(state => state.approvals?.find(approval => approval.flowNo === flowNo) || null));
   const icon = useMemo(() => getFlowIcon('TODO'), []);
-
-  const HEADER_EXPANDED_HEIGHT = expandedHeight;
-  const COLLAPSE_RANGE = HEADER_EXPANDED_HEIGHT - HEADER_COLLAPSED_HEIGHT;
-
-  // 각 슬라이드의 최대 스크롤 높이 계산
-  const getMaxScrollTop = useCallback((slideIndex: number) => {
-    const scrollElement = scrollRefs.current[slideIndex];
-    if (scrollElement) {
-      // scrollHeight - clientHeight = 실제 스크롤 가능한 거리
-      const maxScrollTop = scrollElement.scrollHeight - scrollElement.clientHeight;
-      return Math.max(0, maxScrollTop);
-    }
-    return 0;
-  }, []);
 
   // 콘텐츠 크기에 맞는 Swiper 높이 계산 및 설정
   const adjustSwiperHeight = useCallback((slideIndex: number) => {
@@ -82,62 +61,65 @@ const Detail: React.FC = () => {
     }
   }, []);
 
-
-
   // IonContent 스크롤 시 각 슬라이드를 translateY로 이동
   const handleContentScroll = useCallback((e: any) => {
-    console.log(e)
-    const deltaY = e.detail.scrollTop;
-    console.log(deltaY)
+    const headerHeight = 268;
+    const scrollTop = e.detail.scrollTop;
+    scrollY.set(scrollTop);
+    const contentScrollTop = scrollTop - headerHeight;
     const currentActiveIndex = TAB_KEYS.indexOf(activeTab);
-    
+    if (contentScrollTop <= 0) return;
     if (currentActiveIndex !== -1) {
-      // 스크롤 변화량 계산
-      // 현재 활성 슬라이드는 그대로, 다른 슬라이드들은 translateY로 반대 이동
       scrollRefs.current.forEach((element, index) => {
-        if (element) {
-          if (index === currentActiveIndex) {
-            // 현재 활성 슬라이드는 translateY 0 유지
-            slideTranslateY.current[index] = 0;
-            element.style.transform = 'translateY(0px)';
-          } else {
-            // 다른 슬라이드들은 반대 방향으로 translateY 이동
-            slideTranslateY.current[index] = deltaY -268;
-            element.style.transform = `translateY(${slideTranslateY.current[index]}px)`;
-          }
+        if (!element) return;
+
+        if (index === currentActiveIndex) {
+          element.style.transform = 'translateY(0px)';
+        } else {
+          // 비활성 슬라이드는 스크롤 위치에 따라 이동
+          element.style.transform = `translateY(${contentScrollTop}px)`;
         }
       });
-      
-      console.log('각 슬라이드 translateY:', slideTranslateY.current);
     }
   }, [activeTab]);
+
+  const handleContentScrollEnd = useCallback(async (e: any) => {
+    const headerHeight = 268;
+    const scrollElement = await ionContentRef.current.getScrollElement();
+    const scrollTop = scrollElement.scrollTop;
+    if (scrollTop >= headerHeight) return;
+    if (scrollTop > headerHeight / 2) {
+      ionContentRef.current.scrollToPoint(0, 268, 200);
+    } else {
+      ionContentRef.current.scrollToTop(200);
+    }
+  }, []);
 
   // 슬라이드 변경 핸들러 - 위치 정상화 포함
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
     const newIndex = swiper.activeIndex;
     const newTab = TAB_KEYS[newIndex];
-
     setActiveTab(newTab);
-      adjustSwiperHeight(newIndex);
 
-    // 새 슬라이드의 콘텐츠 크기에 맞춰 Swiper 높이 조정
-    // setTimeout(() => {
-      
-    //   // 모든 슬라이드 위치 정상화 (translateY 초기화)
-    //   scrollRefs.current.forEach((element, index) => {
-    //     if (element) {
-    //       slideTranslateY.current[index] = 0;
-    //       element.style.transform = 'translateY(0px)';
-    //     }
-    //   });
-      
-    //   // 공통 스크롤 위치도 초기화
-    //   commonScrollPosition.current = 0;
-      
-    //   console.log(`슬라이드 ${newIndex + 1}로 전환 완료, 모든 위치 정상화`);
-    // }, 50);
+  }, []);
+
+  const handleSlideTransitionEnd = useCallback(async (swiper: SwiperClass) => {
+    const newIndex = swiper.activeIndex;
+
+    // 높이 동기화
+    adjustSwiperHeight(newIndex);
+
+    // 모든 슬라이드 위치 초기화
+    scrollRefs.current.forEach((element, index) => {
+      if (!element) return;
+      element.style.transform = 'translateY(0px)';
+    });
+
+    const scrollElement = await ionContentRef.current.getScrollElement();
+    if (scrollElement.scrollTop >= 268) ionContentRef.current.scrollToPoint(0, 268, 0);
+
+    console.log(`슬라이드 ${newIndex + 1} 전환 완료 후 위치 초기화`);
   }, [adjustSwiperHeight]);
-
 
   // 헤더 높이 측정
   useEffect(() => {
@@ -164,10 +146,27 @@ const Detail: React.FC = () => {
     return () => clearTimeout(timer);
   }, [adjustSwiperHeight]);
 
+
+  // 헤더 애니메이션
+  // 스크롤 감지 (전체 문서 기준)
+  const scrollY = useMotionValue(0);
+  // opacity: 0~100px까지 1 → 0
+  const opacity = useTransform(scrollY, [0, 268/1.8], [1, 0]);
+  // scale: 0~100px까지 1 → 0.95
+  const scale = useTransform(scrollY, [0, 268/1.8], [1, 0.5]);
+  const translateY = useTransform(scrollY, (y) => y * (1 - 0.3));
+
   return (
     <IonPage className="detail">
       <AppBar showBackButton={true} />
-      <IonContent scrollEvents={true} scrollY={true} scrollX={false} onIonScroll={handleContentScroll}>
+      <IonContent
+        scrollEvents={true}
+        scrollY={true}
+        scrollX={false}
+        ref={ionContentRef}
+        onIonScroll={handleContentScroll}
+        onIonScrollEnd={handleContentScrollEnd}
+      >
         {/* 상단 헤더 */}
         {/* <motion.div
           style={{
@@ -189,23 +188,18 @@ const Detail: React.FC = () => {
           }}
         > */}
         {/* 펼쳐진 헤더 */}
-        <div
+        <motion.div
           ref={expandedHeaderRef}
           style={{
-            // position: "absolute",
-            // top: '42px',
-            // left: 0,
-            // right: 0,
             display: "flex",
             alignItems: "start",
             justifyContent: "center",
             flexDirection: 'column',
             padding: "12px 22px 22px 22px",
-            // opacity: expandedOpacity,
-            // scale: expandedScale,
-            // willChange: 'opacity, transform',
-            // contain: 'layout style paint',
-            backfaceVisibility: 'hidden'
+            opacity,
+            scale,
+            y: translateY,
+            willChange: 'opacity, transform',
           }}
         >
           {
@@ -248,7 +242,7 @@ const Detail: React.FC = () => {
             </>
           }
 
-        </div>
+        </motion.div>
 
         {/* 접힌 헤더 */}
         {/* <motion.div
@@ -303,23 +297,6 @@ const Detail: React.FC = () => {
             if (tabIndex !== -1) {
               setActiveTab(selectedTab);
               swiperRef.current?.slideTo(tabIndex);
-
-              // 새 슬라이드의 콘텐츠 크기에 맞춰 Swiper 높이만 조정
-              setTimeout(() => {
-                adjustSwiperHeight(tabIndex);
-                
-                // 슬라이드 전환 시 모든 위치 정상화
-                setTimeout(() => {
-                  scrollRefs.current.forEach((element, index) => {
-                    if (element) {
-                      slideTranslateY.current[index] = 0;
-                      element.style.transform = 'translateY(0px)';
-                    }
-                  });
-                  commonScrollPosition.current = 0;
-                  console.log(`탭 전환: 슬라이드 ${tabIndex + 1}로 이동, 모든 위치 정상화`);
-                }, 50);
-              }, 50);
             }
           }}>
             <IonSegmentButton value="tab1">
@@ -342,6 +319,7 @@ const Detail: React.FC = () => {
           }}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={handleSlideChange}
+          onSlideChangeTransitionEnd={handleSlideTransitionEnd}
           resistanceRatio={0}
         >
           {TAB_KEYS.map((key, index) => (
