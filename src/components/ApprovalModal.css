@@ -20,3 +20,7 @@
 .approval-modal-content-wrapper {
   padding: 22px;
 }
+
+.approval-modal-ion-content {
+  --offset-bottom: -50px;
+}
