@@ -1,9 +1,3 @@
-body {
-  transform: none;
-  position: unset;
-  touch-action: auto;
-}
-
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;
