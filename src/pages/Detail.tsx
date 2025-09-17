@@ -431,7 +431,7 @@ const Detail: React.FC = () => {
             style={{
               position: 'fixed',
               bottom: 0,
-              height: '65px',
+              height: 'calc(65px + var(--ion-safe-area-bottom))',
               width: '100%',
               backgroundColor: 'var(--ion-background-color)',
               zIndex: '1',
