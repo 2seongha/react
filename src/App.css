@@ -3,6 +3,12 @@ ion-content {
   --offset-bottom: 1px;
   --offset-top: 0px;
 }
+html, body {
+  overflow: hidden;
+  position: fixed;
+  height: 0;
+}
+
 
 ion-content::part(scroll) {
   scrollbar-color: transparent transparent;
