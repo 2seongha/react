@@ -1,46 +1,68 @@
-import { IonContent, IonHeader, IonImg, IonItem, IonLabel, IonList, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
-import React, { useEffect, useCallback, useMemo, useRef, useState } from 'react';
-import AppBar from '../components/AppBar';
-import useAppStore from '../stores/appStore';
-import { AreaModel } from '../stores/types';
+import { IonContent, IonImg, IonItem, IonPage, IonRefresher, IonRefresherContent, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, isPlatform } from '@ionic/react';
+import { useParams } from 'react-router-dom';
+import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Commet } from 'react-loading-indicators';
-import './FlowList.css';
-import { getFlowIcon, getPlatformMode } from '../utils';
 import { refreshOutline } from 'ionicons/icons';
+import { useShallow } from 'zustand/shallow';
+import useAppStore from '../stores/appStore';
+import { AreaModel } from '../stores/types';
+import { getFlowIcon } from '../utils';
+import NoData from '../components/NoData';
+import AppBar from '../components/AppBar';
+import './FlowList.css';
 
 const FlowList: React.FC = () => {
-  const setFlowList = useAppStore(state => state.setFlowList);
-  const fetchFlowList = useAppStore(state => state.fetchFlowList);
-  const flowList = useAppStore(state => state.flowList);
-  useEffect(() => {
-    return setFlowList(null);
-  }, [])
+  const { AREA_CODE } = useParams<{ AREA_CODE: string }>();
+  const setAreas = useAppStore(state => state.setAreas);
+  const fetchAreas = useAppStore(state => state.fetchAreas);
+  const flowList = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === AREA_CODE) || null));
+
+  // 캐싱된 타이틀 ref
+  const cachedTitleRef = useRef<string>('');
 
   useIonViewWillEnter(() => {
-    // setFlowList(null);
-    fetchFlowList();
+    fetchAreas('');
   });
 
   // 새로고침 핸들러 최적화
   const handleRefresh = useCallback(async (event: RefresherCustomEvent) => {
-    setFlowList(null);
-    await Promise.allSettled([fetchFlowList()]);
+    setAreas(null);
+    if (AREA_CODE) {
+      await Promise.allSettled([fetchAreas('')]);
+    }
     event.detail.complete();
-  }, [setFlowList, fetchFlowList]);
+  }, [setAreas, fetchAreas, AREA_CODE]);
 
-  // flowList의 전체 카운트 계산 (메모이제이션)
-  const totalCount = useMemo(() => {
-    return flowList ? flowList.reduce((sum, area) => sum + parseInt(area.cnt!), 0) : 0;
-  }, [flowList]);
+  // 애니메이션을 위한 count 상태
+  const [totalCount, seTotalCount] = useState(0);
+
+  // totalCount 변경 시 애니메이션으로 업데이트
+  useEffect(() => {
+    seTotalCount(0);
+    setTimeout(() => {
+      seTotalCount(flowList?.CNT ? Number(flowList.CNT) : 0);
+    }, 200)
+  }, [flowList?.CNT]);
+
+  // title 메모이제이션
+  const titleElement = useMemo(() => {
+    // flowList가 로드되면 캐싱
+    if (flowList?.O_LTEXT) {
+      cachedTitleRef.current = flowList.O_LTEXT;
+    }
+    // flowList가 없으면 캐싱된 값 사용, 그것도 없으면 빈 문자열
+    const title = flowList?.O_LTEXT || cachedTitleRef.current || '';
+    return <span>{title}</span>;
+  }, [flowList?.O_LTEXT]);
 
   // 렌더링할 리스트 아이템들 메모이제이션
   const renderedItems = useMemo(() => {
     if (!flowList) return null;
 
-    return flowList.map((area, index) => (
+    return flowList.CHILDREN?.map((area, index) => (
       <FlowListItem
-        key={`flow-list-item-${area.flowCode}-${index}`}
+        key={`flow-list-item-${area.AREA_CODE}-${index}`}
         area={area}
         index={index}
       />
@@ -49,22 +71,28 @@ const FlowList: React.FC = () => {
 
   return (
     <IonPage className='flow-list'>
-      <AppBar key='flow-list-app-bar' title={
-        <span>미결함</span>
-      } showBackButton={true} showCount={true} count={totalCount} />
+      <AppBar
+        key='flow-list-app-bar'
+        title={titleElement}
+        showBackButton={true}
+        showCount={true}
+        count={totalCount}
+      />
       <IonContent scrollEvents={false} scrollX={false}>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
-          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
 
         {!flowList ?
           <div className='loading-indicator-wrapper'>
             <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
           </div>
-          :
-          <div style={{ transform: 'translateZ(0)'}}>
-            {renderedItems}
-          </div>
+          : (!flowList.CHILDREN || flowList.CHILDREN.length === 0) ?
+            <NoData message="해당 항목에 대한 데이터가 없습니다." />
+            :
+            <div>
+              {renderedItems}
+            </div>
         }
 
       </IonContent>
@@ -83,11 +111,11 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
   const router = useIonRouter();
 
   // 아이콘 정보 메모이제이션
-  const icon = useMemo(() => getFlowIcon(area.flowCode!), [area.flowCode]);
+  const icon = useMemo(() => getFlowIcon(area.FLOWCODE!), [area.FLOWCODE]);
 
   // 클릭 핸들러 최적화
   const handleClick = useCallback(() => {
-    router.push('/approval', 'forward', 'push');
+    router.push(`/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${area.P_AREA_CODE_TXT}/${area.O_LTEXT}`, 'forward', 'push');
   }, [router]);
 
   // 스타일 객체 메모이제이션
@@ -122,35 +150,35 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
   }), [index]);
 
   return (
-    <motion.div
-      {...motionProps}
-      style={containerStyle}
+    // <motion.div
+    //   {...motionProps}
+    //   style={containerStyle}
+    // >
+    <IonItem
+      button
+      className='flow-list-item'
+      onClick={handleClick}
+      mode='md'
     >
-      <IonItem
-        button
-        className='flow-list-item'
-        onClick={handleClick}
-        mode='md'
-      >
-        <div className='flow-list-item-icon' style={iconStyle}>
-          <IonImg
-            src={icon.image}
-            alt="flow icon"
-          />
-        </div>
-        <span>{area.oLtext}</span>
-        <div className='animated-badge'>
-          <span>{Number(area.cnt)}</span>
-        </div>
-      </IonItem>
-    </motion.div>
+      <div className='flow-list-item-icon' style={iconStyle}>
+        <IonImg
+          src={icon.image}
+          alt="flow icon"
+        />
+      </div>
+      <span>{area.O_LTEXT}</span>
+      <div className='animated-badge'>
+        <span>{Number(area.CNT)}</span>
+      </div>
+    </IonItem>
+    // </motion.div>
   );
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지
   return (
-    prevProps.area.flowCode === nextProps.area.flowCode &&
-    prevProps.area.oLtext === nextProps.area.oLtext &&
-    prevProps.area.cnt === nextProps.area.cnt &&
+    prevProps.area.FLOWCODE === nextProps.area.FLOWCODE &&
+    prevProps.area.O_LTEXT === nextProps.area.O_LTEXT &&
+    prevProps.area.CNT === nextProps.area.CNT &&
     prevProps.index === nextProps.index
   );
 });

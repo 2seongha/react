@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import SlotCounter from 'react-slot-counter';
 import './AnimatedBadge.css';
 
@@ -7,14 +7,20 @@ interface AnimatedBadgeProps {
 }
 
 const AnimatedBadge: React.FC<AnimatedBadgeProps> = ({ count }) => {
-
+  if (count === 0) {
+    return (
+      <div className='animated-badge'>
+        <span>0</span>
+      </div>
+    );
+  }
   return (
     <div className='animated-badge'>
-      {count == 0 ? <span>0</span> : <SlotCounter
+      <SlotCounter
         value={count}
-        startValue={0}
-        autoAnimationStart={true}
-      />}
+        duration={0.3}
+        useMonospaceWidth={true}
+      />
     </div>
   );
 };

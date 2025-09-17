@@ -8,11 +8,12 @@
 
 .custom-item.selected {
   background: rgba(var(--ion-color-primary-rgb), 0.05);
+  outline: 1px solid rgba(var(--ion-color-primary-rgb), 0.2);
 }
 
 .custom-item-header {
   display: flex;
-  align-items: start;
+  align-items: center;
   justify-content: center;
   gap: 8px;
   overflow: hidden;
@@ -114,10 +115,14 @@
   font-size: 12px;
   font-weight: 400;
   color: var(--ion-color-secondary);
+  max-width: 30%;
+  text-align: start;
 }
 
 .custom-item-body-line>span:last-child {
   font-size: 12px;
   font-weight: 400;
   color: rgba(var(--ion-text-color-rgb), 0.6);
+  max-width: 70%;
+  text-align: end;
 }

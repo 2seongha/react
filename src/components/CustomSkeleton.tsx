@@ -9,6 +9,7 @@ interface CustomSkeletonProps extends SkeletonProps {
 const CustomSkeleton: React.FC<CustomSkeletonProps> = ({ className, ...props }) => {
   return (
     <Skeleton
+      duration={.8}
       className={className}
       baseColor="var(--skeleton-base-color)"
       highlightColor="var(--skeleton-hilight-color)"

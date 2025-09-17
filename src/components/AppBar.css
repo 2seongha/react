@@ -3,8 +3,8 @@
   height: 24px;
 }
 
-.app-bar ion-buttons > ion-button:last-child {
-  margin-right: 8px;
+.app-bar ion-buttons>ion-button:last-child {
+  /* margin-right: 8px; */
 }
 
 .app-bar ion-back-button {
@@ -13,7 +13,7 @@
   width: 44px;
 }
 
-.app-bar ion-toolbar:last-of-type  {
+.app-bar ion-toolbar:last-of-type {
   --min-height: 48px;
   --border-width: 0px !important;
 }
@@ -30,17 +30,25 @@
 }
 
 .app-bar-button ion-icon {
-  color: rgba(100, 109, 123, .48);
+  color: rgba(100, 109, 123, .48) !important;
 }
 
 .app-bar-title-wrapper {
   display: flex;
-  justify-content: center;
+  justify-content: end;
   align-items: center;
   gap: 4px;
+  flex: 1;
+  position: absolute;
+  height: 48px;
+  width: 100%;
+}
+
+.app-bar-title-wrapper span {
+  font-weight: 600;
 }
 
 .app-bar-sub-title {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ion-color-secondary);
 }

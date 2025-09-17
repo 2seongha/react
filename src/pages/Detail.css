@@ -28,3 +28,51 @@
   background-color: var(--ion-background-color);
   pointer-events: all;
 }
+
+.detail ion-segment-button {
+  --indicator-color: var(--ion-text-color);
+  --ion-color-base: var(--ion-text-color);
+}
+
+.detail ion-segment-button .detail-segment-label>span:first-child {
+  font-size: 14px;
+  color: var(--ion-color-step-650);
+  font-weight: 400;
+  /* transition: font-weight .1s; */
+}
+
+.detail ion-segment-button .detail-segment-label>span:last-child {
+  font-size: 14px;
+  color: var(--ion-color-step-650);
+  font-weight: 400;
+  /* transition: font-weight .1s; */
+}
+
+.detail ion-segment-button.segment-button-checked .detail-segment-label>span:first-child {
+  font-size: 14px;
+  color: var(--ion-text-color);
+  font-weight: 500;
+}
+
+.detail ion-segment-button.segment-button-checked .detail-segment-label>span:last-child {
+  font-size: 14px;
+  color: var(--ion-color-secondary);
+  font-weight: 500;
+}
+
+.profit-dialog-line {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.profit-dialog-line>span:first-child {
+  font-weight: 500;
+  color: var(--ion-color-secondary);
+}
+
+.profit-dialog-line>span:last-child {
+  width: 70%;
+  text-align: end;
+}

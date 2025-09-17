@@ -1,26 +1,5 @@
-// webview.ts
-// 웹뷰일 때 실행되는 메소드들
-
-interface ShellPadding {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-}
-
-interface KeyboardVisibility {
-  isOpen: boolean;
-  height: number;
-}
-
-interface CorpModel {
-  // 필요한 corp 모델 속성들 정의
-  [key: string]: any;
-}
-
-interface DeviceInfo {
-  [key: string]: any;
-}
+import useAppStore from "./stores/appStore";
+import { CorpModel, DeviceInfo, KeyboardVisibility, ShellPadding } from "./stores/types";
 
 // 글로벌 웹뷰 함수들 선언
 declare global {
@@ -155,12 +134,36 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = 'Y'; // 환경변수 가져오기
+  const isWebView = 'N'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
-  // document.documentElement.style.setProperty('--ion-safe-area-top', `40px`);
-  // document.documentElement.style.setProperty('--ion-safe-area-bottom', `58px`);
 
-  if (isWebView == 'Y') {
+  if (isWebView == 'N') {
+    // 개발용
+    const setCorp = useAppStore.getState().setCorp;
+    const fetchUser = useAppStore.getState().fetchUser;
+    setCorp({
+      corpId: 'IRISBRIGHT',
+      corpNm: '아이리스브라이트',
+      system: {
+        apiEndpoint: 'http://localhost:4001/v1/api',
+        apiKey: ''
+      }
+    });
+    await fetchUser('w_usl_@irisbr.com');
+    // 웹뷰가 아닌 경우 바로 완료 처리
+    if (paddingResolver) {
+      paddingResolver(true);
+      paddingResolver = null;
+    }
+    if (tokenResolver) {
+      tokenResolver(true);
+      tokenResolver = null;
+    }
+    if (userInfoResolver) {
+      userInfoResolver(true);
+      userInfoResolver = null;
+    }
+  } else if (isWebView == 'Y') {
     // 패딩 정보 수신
     const receivePadding = (event: Event) => {
       console.log('----- webview receivePadding Start -----');
@@ -217,18 +220,30 @@ const _initWebview = async (): Promise<void> => {
     window.addEventListener('receiveToken', receiveToken);
 
     // 사용자 정보 수신
-    const receiveUserInfo = (event: Event) => {
+    const receiveUserInfo = async (event: Event) => {
       console.log('----- webview receiveUserInfo Start -----');
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
+      const corp = detail.corp;
+      const loginId = detail.loginId;
 
-      const userInfo = {
-        loginId: detail.loginId,
-        corp: JSON.parse(detail.corp) as CorpModel
-      };
+      // const setCorp = useAppStore.getState().setCorp;
+      // const fetchUser = useAppStore.getState().fetchUser;
+      // setCorp(corp);
+      // await fetchUser(loginId);
 
-      // 사용자 정보 처리
-      console.log('User info received:', userInfo.loginId);
+      // 개발용
+      const setCorp = useAppStore.getState().setCorp;
+      const fetchUser = useAppStore.getState().fetchUser;
+      setCorp({
+        corpId: 'IRIS_BRIGHT',
+        corpNm: '아이리스 브라이트',
+        system: {
+          apiEndpoint: 'https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/',
+          apiKey: ''
+        }
+      });
+      await fetchUser('w_usl_@irisbr.com');
 
       if (userInfoResolver) {
         userInfoResolver(true);
@@ -301,20 +316,6 @@ const _initWebview = async (): Promise<void> => {
     // 웹뷰 초기화 완료 신호
     if (typeof window !== 'undefined' && window.initWebview) {
       window.initWebview();
-    }
-  } else {
-    // 웹뷰가 아닌 경우 바로 완료 처리
-    if (paddingResolver) {
-      paddingResolver(true);
-      paddingResolver = null;
-    }
-    if (tokenResolver) {
-      tokenResolver(true);
-      tokenResolver = null;
-    }
-    if (userInfoResolver) {
-      userInfoResolver(true);
-      userInfoResolver = null;
     }
   }
 };

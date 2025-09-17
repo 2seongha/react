@@ -1,39 +1,53 @@
 // Types
 export interface AppState {
   themeMode: 'light' | 'dark' | 'system';
-  user: User;
-  menuAreas: AreaModel[] | null;
-  flowList: AreaModel[] | null;
-  approvals: ApprovalModel[] | null;
+  user: UserModel | null;
+  corp: CorpModel | null;
+  areas: AreaModel[] | null;
+  approvals: ApprovalModel | null;
   notices: NoticeModel[] | null;
-  todoSummary: AreaModel[] | null;
   notifications: NotificationModel[] | null;
   selectedTab: number;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
-  setUser: (user: User) => void;
-  setMenuAreas: (areas: AreaModel[] | null) => void;
-  setFlowList: (areas: AreaModel[] | null) => void;
-  setApprovals: (areas: ApprovalModel[] | null) => void;
+  setUser: (user: UserModel) => void;
+  setCorp: (user: CorpModel) => void;
+  setAreas: (areas: AreaModel[] | null) => void;
+  setApprovals: (approvals: ApprovalModel | null) => void;
   setNotices: (notices: NoticeModel[] | null) => void;
-  setTodoSummary: (summary: AreaModel[] | null) => void;
   setNotifications: (notifications: NotificationModel[] | null) => void;
   setSelectedTab: (tab: number) => void;
 
-  fetchMenuAreas:()=>Promise<void>;
-  fetchFlowList:()=>Promise<void>;
-  fetchApprovals:()=>Promise<void>;
-  fetchNotices:()=>Promise<void>;
-  fetchTodoSummary:()=>Promise<void>;
-  fetchNotifications:()=>Promise<void>;
+  fetchUser: (LOGIN_ID: string) => Promise<void>;
+  fetchAreas: (P_AREA_CODE: string) => Promise<void>;
+  fetchApprovals: (P_AREA_CODE: string, AREA_CODE: string) => Promise<void>;
+  fetchNotices: () => Promise<void>;
+  fetchNotifications: () => Promise<void>;
 }
 
-export interface User {
-  name?: string;
-  loginId?: string;
-  bukrs?: string;
-  dept?: string;
-  position?: string;
+export interface UserModel {
+  BUKRS?: string;
+  LOGIN_ID?: string;
+  NAME?: string;
+  PERNR?: string;
+  ORGEH?: string;
+  ORGTX?: string;
+  RANK?: string;
+  RANK_NAME?: string;
+  POSITIONN?: string;
+  POSITIONN_NAME?: string;
+  KOSTL?: string;
+  KOSTL_NAME?: string;
+  LAND1?: string;
+  MAIL?: string;
+  PHONE?: string;
+  PASS?: string;
+  PASS01?: string;
+  PASS02?: string;
+  PASS03?: string;
+  PASS04?: string;
+  PASS05?: string;
+  PASS06?: string;
 }
 
 export interface NotificationModel {
@@ -53,16 +67,53 @@ export interface NoticeModel {
 }
 
 export interface AreaModel {
-  areaCode?: string;
-  flowCode?: string;
-  oLtext?: string;
-  cnt?: string;
-  pAreaCode?: string;
+  P_AREA_CODE?: string;
+  P_AREA_CODE_TXT?: string;
+  AREA_CODE?: string;
+  O_LTEXT?: string;
+  CNT?: number;
+  FLOWCODE?: string;
+  CHILDREN?: AreaModel[] | undefined;
 }
 
 export interface ApprovalModel {
-  apprTitle: string;
-  flowNo: string;
-  createDate: string;
-  creatorName: string;
+  LOGIN_ID: string;
+  FLOWCODE: string;
+  FLOWCODE_TXT: string;
+  P_AREA_CODE: string;
+  P_AREA_CODE_TXT: string;
+  AREA_CODE: string;
+  AREA_CODE_TXT: string;
+  LIST: any;
+  TITLE: {
+    TITLE_H: string[],
+    TITLE_I: string[],
+    TITLE_S: string[],
+  }
+}
+
+export interface ShellPadding {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+}
+
+export interface KeyboardVisibility {
+  isOpen: boolean;
+  height: number;
+}
+
+export interface CorpModel {
+  // 필요한 corp 모델 속성들 정의
+  corpId: string;
+  corpNm: string;
+  system: {
+    apiEndpoint: string;
+    apiKey: string;
+  }
+}
+
+export interface DeviceInfo {
+  [key: string]: any;
 }

@@ -1,5 +1,5 @@
-import { AppState } from './types';
-import { fetchApprovals, fetchMenuAreas, fetchNotices, fetchNotifications } from './service';
+import { AppState, AreaModel } from './types';
+import { fetchApprovals, fetchAreas, fetchNotices, fetchNotifications, fetchUser } from './service';
 import { createWithEqualityFn } from 'zustand/traditional'
 
 // themeMode 초기값을 localStorage에서 가져오기
@@ -15,7 +15,7 @@ const getInitialThemeMode = (): 'light' | 'dark' | 'system' => {
 
 // Request ID를 관리하는 객체
 const requestIds = {
-  menuAreas: 0,
+  areas: 0,
   flowList: 0,
   approvals: 0,
   notices: 0,
@@ -25,12 +25,11 @@ const requestIds = {
 
 const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   themeMode: getInitialThemeMode(),
-  user: {},
-  menuAreas: null,
-  flowList: null,
+  user: null,
+  corp: null,
+  areas: null,
   approvals: null,
   notices: null,
-  todoSummary: null,
   notificationPopupShown: false,
   notifications: null,
   selectedTab: 0,
@@ -42,37 +41,36 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
     }
     set({ themeMode: mode });
   },
-  setUser: (user) => set({ user }),
-  setMenuAreas: (areas) => set({ menuAreas: areas }),
-  setFlowList: (areas) => set({ flowList: areas }),
+  setUser: (user) => set({ user: user }),
+  setCorp: (corp) => set({ corp: corp }),
+  setAreas: (areas) => set({ areas: areas }),
   setApprovals: (approvals) => set({ approvals: approvals }),
   setNotices: (notices) => set({ notices }),
-  setTodoSummary: (areas) => set({ todoSummary: areas }),
   setNotifications: (notifications) => set({ notifications }),
   setSelectedTab: (tab) => set({ selectedTab: tab }),
 
-  fetchMenuAreas: async () => {
-    const currentRequestId = ++requestIds.menuAreas;
-    const areas = await fetchMenuAreas();
-    
+  fetchUser: async (LOGIN_ID: string) => {
+    const currentRequestId = ++requestIds.areas;
+    const user = await fetchUser(LOGIN_ID);
+
     // 마지막 요청인지 확인
-    if (currentRequestId === requestIds.menuAreas) {
-      set({ menuAreas: areas });
+    if (currentRequestId === requestIds.areas) {
+      set({ user: user });
     }
   },
-  fetchFlowList: async () => {
-    const currentRequestId = ++requestIds.flowList;
-    const areas = await fetchMenuAreas();
-    
+  fetchAreas: async (P_AREA_CODE: string) => {
+    const currentRequestId = ++requestIds.areas;
+    const areas = await fetchAreas(P_AREA_CODE);
+
     // 마지막 요청인지 확인
-    if (currentRequestId === requestIds.flowList) {
-      set({ flowList: areas });
+    if (currentRequestId === requestIds.areas) {
+      set({ areas: areas });
     }
   },
-  fetchApprovals: async () => {
+  fetchApprovals: async (P_AREA_CODE: string, AREA_CODE: string) => {
     const currentRequestId = ++requestIds.approvals;
-    const approvals = await fetchApprovals();
-    
+    let approvals = await fetchApprovals(P_AREA_CODE, AREA_CODE);
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.approvals) {
       set({ approvals: approvals });
@@ -81,25 +79,16 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   fetchNotices: async () => {
     const currentRequestId = ++requestIds.notices;
     const notices = await fetchNotices();
-    
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.notices) {
       set({ notices });
     }
   },
-  fetchTodoSummary: async () => {
-    const currentRequestId = ++requestIds.todoSummary;
-    const areas = await fetchMenuAreas();
-    
-    // 마지막 요청인지 확인
-    if (currentRequestId === requestIds.todoSummary) {
-      set({ todoSummary: areas });
-    }
-  },
   fetchNotifications: async () => {
     const currentRequestId = ++requestIds.notifications;
     const notifications = await fetchNotifications();
-    
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.notifications) {
       set({ notifications });

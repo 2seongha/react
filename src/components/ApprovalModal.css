@@ -1,0 +1,22 @@
+.approval-modal::part(handle) {
+  display: none;
+}
+
+.approval-modal ion-toolbar {
+  padding: 0 !important;
+}
+
+.approval-modal-title-wrapper {
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+}
+
+.approval-modal-title-wrapper>span {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.approval-modal-content-wrapper {
+  padding: 22px;
+}

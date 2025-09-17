@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import './GroupButton.css';
 import useAppStore from '../stores/appStore';
 import CustomSkeleton from './CustomSkeleton';
+import { useShallow } from 'zustand/shallow';
 
 const GroupButton: React.FC = () => {
   const [selected, setSelected] = useState<{ value: number } | null>(null);
@@ -9,7 +10,7 @@ const GroupButton: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const todoSummary = useAppStore(state => state.todoSummary);
+  const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
   const setApprovals = useAppStore(state => state.setApprovals);
   const fetchApprovals = useAppStore(state => state.fetchApprovals);
 
@@ -35,10 +36,14 @@ const GroupButton: React.FC = () => {
   useEffect(() => {
     if (selected == null) return;
     console.log("선택변경");
-    fetchApprovals();
+    if (todoSummary) {
+      fetchApprovals('TODO', todoSummary[selected.value].AREA_CODE!);
+    }
   }, [selected]);
 
   const handleClick = (index: number) => {
+    if (selected?.value === index) return; // 같은 버튼 클릭 시 무시
+
     setApprovals(null);
     setSelected({ value: index });
     const button = buttonRefs.current[index];
@@ -57,12 +62,12 @@ const GroupButton: React.FC = () => {
       {todoSummary ? (
         todoSummary.map((item, index) => (
           <button
-          key={`group-button${index}`}
+            key={`group-button${index}`}
             ref={(el) => { (buttonRefs.current[index] = el) }}
             onClick={() => handleClick(index)}
             className={`group-button ${selected?.value === index ? 'selected' : ''}`}
           >
-            {item.oLtext} ({item.cnt})
+            {item.O_LTEXT} ({item.CNT})
           </button>
         ))
       ) : (

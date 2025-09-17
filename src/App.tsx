@@ -1,4 +1,4 @@
-import { IonApp, IonRouterOutlet } from '@ionic/react';
+import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
@@ -15,6 +15,8 @@ import { initWebview } from './webview';
 import { getPlatformMode } from './utils';
 import Notifications from './pages/Notifications';
 import More from './pages/More';
+import MyPage from './pages/MyPage';
+import Search from './pages/Search';
 
 
 const App: React.FC = () => {
@@ -61,7 +63,7 @@ const App: React.FC = () => {
 
       mediaQuery.addEventListener('change', handleChange);
     }
-    
+
     // 테마 초기화 완료 표시
     setThemeInitialized(true);
   }, [themeMode]);
@@ -80,16 +82,18 @@ const App: React.FC = () => {
   return (
     <IonApp>
       <IonReactRouter>
-        <IonRouterOutlet mode={getPlatformMode()}>
+        <Menu />
+        <IonRouterOutlet mode={getPlatformMode()} id="main-content">
           <Route path="/app/home" component={Home} exact />
           <Route path="/app/notifications" component={Notifications} exact />
           <Route path="/app/more" component={More} exact />
-          <Route path="/flowList" component={FlowList} exact />
-          <Route path="/approval" component={Approval} exact />
-          <Route path="/detail/:flowNo" component={Detail} exact/>
-          <Route path="/menu" component={Menu} exact />
+          <Route path="/flowList/:AREA_CODE" component={FlowList} exact />
+          <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
+          <Route path="/detail/:FLOWNO" component={Detail} exact />
           <Route path="/notice" component={Notice} exact />
           <Route path="/settings" component={Settings} exact />
+          <Route path="/myPage" component={MyPage} exact />
+          <Route path="/search" component={Search} exact />
           <Redirect exact from="/" to="/app/home" />
         </IonRouterOutlet>
       </IonReactRouter>

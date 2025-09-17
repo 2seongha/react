@@ -1,8 +1,7 @@
 import { IonCheckbox, IonIcon, IonRippleEffect } from '@ionic/react';
-import React, { ReactNode, useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { ReactNode, useState, useMemo, useCallback, useRef } from 'react';
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
-import { createGesture } from '@ionic/react';
 interface CustomItemProps {
   title?: ReactNode;
   body?: ReactNode;
@@ -14,9 +13,21 @@ interface CustomItemProps {
   checked?: boolean;
   expandable?: boolean;
   style?: React.CSSProperties;
+  checkboxCenter?: boolean;
 }
 
-const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, body, sub, onClick, onLongPress, onCheckboxChange, checked, style }) => {
+const CustomItem: React.FC<CustomItemProps> = React.memo(({
+  selectable,
+  title,
+  body,
+  sub,
+  onClick,
+  onLongPress,
+  onCheckboxChange,
+  checked,
+  style,
+  checkboxCenter = true
+}) => {
   const [isExpanded, setIsExpanded] = useState(false); // 확장 상태는 UI 변경이 필요하므로 state 유지
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +60,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
   const contentAreaClasses = useMemo(() => `custom-item-header-content-area`, []);
 
   return (
-    <div style={{background: 'var(--ion-background-color)', borderRadius: '8px', position:'relative' }}>
+    <div style={{ borderRadius: '8px', position: 'relative' }}>
       <div
         ref={wrapperRef}
         style={style}
@@ -58,7 +69,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
           onClick();
         } : undefined}
       >
-        <div className='custom-item-header'>
+        <div className='custom-item-header' style={{ alignItems: checkboxCenter ? 'center' : 'start' }}>
           {selectable && (
             <IonCheckbox
               checked={checked}
@@ -66,7 +77,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({ selectable, title, b
               style={{ pointerEvents: 'none' }}
             />
           )}
-          <div className={contentAreaClasses} onClick={sub ? handleTitleClick : undefined} style={{ pointerEvents: sub ? 'auto' : 'none' }}>
+          <div className={contentAreaClasses} onClick={sub ? handleTitleClick : undefined} /*style={{ pointerEvents: sub ? 'auto' : 'none' }}*/>
             {title}
             {headerButton}
           </div>

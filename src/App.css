@@ -64,19 +64,19 @@ ion-datetime {
 
 /* input placeholoder 관련 */
 ::-webkit-input-placeholder {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 ::-moz-placeholder {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 :-ms-input-placeholder {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 :-moz-placeholder {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 /* checkbox 관련 */
@@ -89,6 +89,7 @@ ion-checkbox {
   z-index: auto;
   transform: none;
   will-change: auto;
+  --checkbox-background: transparent;
 }
 
 ion-checkbox::part(container) {
@@ -147,10 +148,14 @@ ion-button {
   --padding-end: 12px;
   --padding-top: 8px;
   --padding-bottom: 8px; */
-  --border-radius: 8px;
+  --border-radius: 12px;
   --box-shadow: none;
   --background-hover: transparent;
   --background-hover-opacity: 0;
+}
+
+ion-button::part(native) {
+  transition: .1s;
 }
 
 /* 기본 버튼 - light와 dark 테마에서 동일한 색상 (fill이 solid일 때만) */
@@ -159,9 +164,11 @@ ion-button[color="primary"]:not([fill="clear"]):not([fill="outline"]) {
   --background-activated: var(--ion-color-primary-shade);
 }
 
+
 ion-button[color="primary"]:not([fill="clear"]):not([fill="outline"]) * {
   color: #fff;
 }
+
 
 /* light 버튼 - 테마별로 다른 색상 (fill이 solid일 때만) */
 ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) {
@@ -171,4 +178,44 @@ ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) {
 
 ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) * {
   color: var(--ion-text-color);
+}
+
+/* disabled */
+ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]),
+ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]) {
+  --ion-color-base: var(--disabled-bg-color) !important;
+  opacity: 1;
+}
+
+ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]) *,
+ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]) * {
+  color: var(--disabled-fg-color);
+}
+
+ion-list.list-md {
+  padding-top: 0;
+  padding-bottom: 0;
+  /* -webkit-padding-start: 22px;
+  -webkit-padding-end: 22px; */
+}
+
+.sc-ion-buttons-ios-s ion-button {
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+}
+
+ion-title {
+  padding-inline-start: '48px';
+  padding-inline-end: '0';
+}
+
+/* refresh indicator */
+ion-refresher.refresher-native .refresher-pulling-icon,
+ion-refresher.refresher-native .refresher-refreshing-icon {
+  background-color: var(--grab-indicator-color) !important;
+  border-color: var(--custom-border-color-50) !important;
 }

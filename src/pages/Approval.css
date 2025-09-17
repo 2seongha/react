@@ -2,10 +2,6 @@
   --opacity: 1 !important;
 }
 
-.approval .app-bar ion-toolbar:last-of-type {
-  --border-width: 0 0 0.55px 0 !important;
-}
-
 .approval ion-content {
   --background: var(--ion-background-color2);
 }
@@ -48,7 +44,7 @@
   flex: 1;
   display: flex;
   justify-content: end;
-  gap: 8px;
+  gap: 4px;
 }
 
 .approval .approve-buttons>ion-button {
@@ -70,7 +66,6 @@
 
 .approval-item-wrapper {
   padding: 0px 16px 12px 16px;
-  /* GPU 가속 제거 - 리스트 아이템에는 불필요 */
 }
 
 .approval-item-wrapper.first-item {
@@ -81,7 +76,11 @@
   padding-bottom: calc(var(--ion-safe-area-bottom) + 12px);
 }
 
-.approval .search-bar {
+.search .search-bar {
+  --border-radius: 20px;
+}
+
+.search-bar {
   padding: 8px 20px;
   --placeholder-color: #898D99;
   --placeholder-font-weight: 500;
@@ -89,20 +88,30 @@
   --border-radius: 8px;
 }
 
-.approval .search-bar .searchbar-input-container {
+.search-bar .searchbar-input-container {
   height: 40px;
 }
 
-.approval .search-bar .searchbar-input {
-  padding-inline-start: 2.4rem !important;
-  font-size: 13px !important;
+.search-bar .searchbar-input {
+  padding-inline-start: 2.6rem !important;
+  font-size: 15px !important;
 }
 
-.approval .search-bar .searchbar-search-icon {
+
+.search-bar .searchbar-search-icon {
   padding-left: 8px;
-  width: 16px;
+  width: 20px;
   color: var(--ion-color-primary);
   --ionicon-stroke-width: 48px;
+}
+
+.search-bar .searchbar-clear-button.sc-ion-searchbar-ios {
+  margin-right: 4px;
+}
+
+.search-bar .searchbar-clear-icon.sc-ion-searchbar-ios {
+  width: 24px;
+  margin-right: 12px;
 }
 
 .approval .date-toolbar-wrapper {

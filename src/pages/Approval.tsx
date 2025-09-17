@@ -1,19 +1,23 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar,  RefresherCustomEvent, useIonRouter, useIonViewWillEnter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, IonImg, useIonViewWillLeave, useIonViewDidLeave, createGesture } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, RefresherCustomEvent, useIonRouter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, isPlatform, IonHeader, useIonViewWillLeave } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, checkmarkOutline, headset } from 'ionicons/icons';
-import { ApprovalModel } from '../stores/types';
+import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, checkmarkOutline } from 'ionicons/icons';
 import CustomItem from '../components/CustomItem';
 import CustomSkeleton from '../components/CustomSkeleton';
 import './Approval.css';
-import { getPlatformMode } from '../utils';
+import { useParams } from 'react-router-dom';
+import NoData from '../components/NoData';
+import _ from 'lodash';
 
 const Approval: React.FC = () => {
+  const { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
   const setApprovals = useAppStore(state => state.setApprovals);
   const fetchApprovals = useAppStore(state => state.fetchApprovals);
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
+
+  // 캐싱된 타이틀들
   const [isTop, setIsTop] = useState(true);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState<string>('');
@@ -23,13 +27,18 @@ const Approval: React.FC = () => {
     setApprovals(null);
     setSelectedItems(new Set());
     setSearchText('');
-    fetchApprovals();
+    fetchApprovals(P_AREA_CODE, AREA_CODE);
 
     return () => setApprovals(null);
+    // return;
   }, []);
 
   // useIonViewWillEnter(() => {
   // });
+
+  useIonViewWillLeave(() => {
+    // setApprovals(null);
+  })
 
   // useIonViewDidLeave(() => {
   // });
@@ -38,11 +47,13 @@ const Approval: React.FC = () => {
     setApprovals(null);
     setSelectedItems(new Set());
     setSearchText('');
-    await Promise.allSettled(([fetchApprovals()]));
+    await Promise.allSettled(([fetchApprovals(P_AREA_CODE, AREA_CODE)]));
     event.detail.complete();
   }
 
-  const totalCount = approvals?.length ?? 0;
+  const totalCount = useMemo(() => {
+    return approvals?.LIST?.length ? Number(approvals?.LIST?.length) : 0;
+  }, [approvals]);
 
   //* 날짜 관련
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -119,7 +130,7 @@ const Approval: React.FC = () => {
 
   // 네비게이션 핸들러 - useCallback으로 최적화
   const handleBackNavigation = useCallback(() => {
-    router.push('/flowList', 'back', 'pop');
+    router.push(`/flowList/${P_AREA_CODE}`, 'back', 'pop');
   }, [router]);
 
   // 아이템 선택 상태 관리
@@ -137,13 +148,13 @@ const Approval: React.FC = () => {
 
   // 검색어와 날짜로 필터링된 결과
   const filteredApprovals = useMemo(() => {
-    if (!approvals) return null;
-    let filtered = approvals;
+    if (!approvals || approvals instanceof Error) return null;
+    let filtered = approvals.LIST;
 
     // 날짜 필터링
     if (startDate || endDate) {
-      filtered = filtered.filter(approval => {
-        const createDate = new Date(approval.createDate);
+      filtered = filtered.filter((approval: any) => {
+        const createDate = new Date(approval.CREATE_DATE);
         const start = startDate ? new Date(startDate) : null;
         const end = endDate ? new Date(endDate) : null;
 
@@ -161,19 +172,18 @@ const Approval: React.FC = () => {
 
     // 검색어 필터링
     if (searchText.trim()) {
-      filtered = filtered.filter(approval =>
-        approval.apprTitle.toLowerCase().includes(searchText.toLowerCase()) ||
-        approval.creatorName.toLowerCase().includes(searchText.toLowerCase())
+      filtered = filtered.filter((approval: any) =>
+        approval.TITLE.toLowerCase().includes(searchText.toLowerCase()) ||
+        approval.NAME.toLowerCase().includes(searchText.toLowerCase())
       );
     }
-
     return filtered;
   }, [approvals, searchText, startDate, endDate]);
 
   // 필터링된 결과가 변경될 때 선택된 아이템 중 필터에서 제외된 것들 제거
   useEffect(() => {
     if (filteredApprovals && selectedItems.size > 0) {
-      const filteredFlowNos = new Set(filteredApprovals.map(approval => approval.flowNo));
+      const filteredFlowNos = new Set(filteredApprovals.map((approval: any) => approval.FLOWNO));
       const newSelectedItems = new Set<string>();
 
       selectedItems.forEach((flowNo) => {
@@ -191,14 +201,14 @@ const Approval: React.FC = () => {
 
   // filteredFlowNos 메모이제이션
   const filteredFlowNos = useMemo(() =>
-    filteredApprovals?.map(approval => approval.flowNo) ?? [],
+    filteredApprovals?.map((approval: any) => approval.FLOWNO) ?? [],
     [filteredApprovals]
   );
 
   // 전체 선택 상태 계산
   const isAllSelected = useMemo(() => {
     if (filteredFlowNos.length === 0) return false;
-    return filteredFlowNos.every(flowNo => selectedItems.has(flowNo));
+    return filteredFlowNos.every((flowNo: any) => selectedItems.has(flowNo));
   }, [selectedItems, filteredFlowNos]);
 
   // 검색 핸들러
@@ -217,228 +227,223 @@ const Approval: React.FC = () => {
     } else {
       // 전체 선택 (필터된 결과만)
       const newSet = new Set<string>();
-      filteredApprovals.forEach(approval => {
-        newSet.add(approval.flowNo);
+      filteredApprovals.forEach((approval: any) => {
+        newSet.add(approval.FLOWNO);
       });
       setSelectedItems(newSet);
     }
   }, [filteredApprovals, isAllSelected]);
 
-  // renderItem 함수 제거하고 직접 렌더링
-
   return (
     <IonPage className='approval'>
       <AppBar
         title={
-          <div className='app-bar-title-wrapper'>
-            <span className='app-bar-sub-title' onClick={handleBackNavigation}>미결함</span>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span className='app-bar-sub-title' onClick={handleBackNavigation}>{approvals?.P_AREA_CODE_TXT ?? P_AREA_CODE_TXT}</span>
             <IonIcon src={chevronForwardOutline} style={{ width: 16, color: 'var(--ion-color-secondary)' }} />
-            <span>SAP 전표</span>
+            <span>{approvals?.AREA_CODE_TXT ?? AREA_CODE_TXT}</span>
           </div>
-        }
-        bottom={
-          <>
-            {/* <IonToolbar > */}
-              <IonSearchbar
-                mode='ios'
-                class='search-bar'
-                value={searchText}
-                onIonInput={handleSearch}
-                placeholder="제목 / 상신자"
-                showClearButton="focus"
-                debounce={50}
-                style={{ textAlign: 'start' }}
-              />
-            {/* </IonToolbar> */}
-            {/* 날짜 선택 섹션 */}
-            {/* <IonToolbar > */}
-              <div className='date-toolbar-wrapper'>
-                <IonItem
-                  button
-                  mode='md'
-                  className='date-toolbar-button-wrapper'
-                  id="start-date-trigger"
-                  style={{ flex: 1 }}
-                  onClick={() => setIsStartDateOpen(true)}
-                >
-                  <div className='date-toolbar-button'>
-                    <IonIcon icon={calendarClear} />
-                    <span>{formatDate(startDate)}</span>
-                  </div>
-                </IonItem>
-                <span>~</span>
-                <IonItem
-                  button
-                  mode='md'
-                  className='date-toolbar-button-wrapper'
-                  id="end-date-trigger"
-                  style={{ flex: 1 }}
-                  onClick={() => setIsEndDateOpen(true)}
-                >
-                  <div className='date-toolbar-button'>
-                    <IonIcon icon={calendarClear} />
-                    <span>{formatDate(endDate)}</span>
-                  </div>
-                </IonItem>
-
-                <IonItem
-                  button
-                  style={{ width: '36px' }}
-                  mode='md'
-                  className='date-toolbar-button-wrapper'
-                  onClick={resetDates}
-                  disabled={startDate === defaultStartDate && endDate === defaultEndDate}
-                >
-                  <div className='date-toolbar-button'>
-                    <IonIcon icon={refresh} style={{ width: '18px', color: 'var(--ion-color-secondary)' }} />
-                  </div>
-                </IonItem>
-              </div>
-            {/* </IonToolbar> */}
-            {/* <IonToolbar> */}
-              <div className='buttons-wrapper'>
-                <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
-                  <IonCheckbox
-                    mode='md'
-                    checked={isAllSelected}
-                    style={{ pointerEvents: 'none' }}
-                  />
-                  <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
-                </IonItem>
-                <div className='approve-buttons'>
-                  <IonButton mode='md' color='light' disabled={selectedItems.size === 0}>
-                    <IonIcon src={closeOutline} />
-                    <span>반려하기</span>
-                  </IonButton>
-                  <IonButton mode='md' color='primary' disabled={selectedItems.size === 0}>
-                    <IonIcon src={checkmarkOutline} />
-                    <span>승인하기</span>
-                  </IonButton>
-                </div>
-              </div>
-            {/* </IonToolbar> */}
-
-            {/* 시작일 선택 팝오버 */}
-            <IonPopover
-              side="bottom" alignment="center"
-              trigger="start-date-trigger"
-              isOpen={isStartDateOpen}
-              onDidDismiss={() => setIsStartDateOpen(false)}
-              showBackdrop={true}
-            >
-              <IonDatetime
-                class='date-picker-pop-up'
-                value={startDate}
-                onClick={(e) => {
-                  const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
-                  const isDayButtonClicked = path?.some((el) =>
-                    el instanceof HTMLElement &&
-                    el.classList.contains('calendar-day-wrapper')
-                  );
-
-                  if (isDayButtonClicked) {
-                    if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
-                      setStartDate((e.target as any).closest('ion-datetime').value);
-                    }
-                    setIsStartDateOpen(false);
-                  }
-                }}
-                presentation="date"
-                locale="ko-KR"
-                max={endDate || defaultEndDate}
-              />
-            </IonPopover>
-
-            {/* 종료일 선택 팝오버 */}
-            <IonPopover
-              side="bottom" alignment="center"
-              trigger="end-date-trigger"
-              isOpen={isEndDateOpen}
-              onDidDismiss={() => setIsEndDateOpen(false)}
-              showBackdrop={true}
-            >
-              <IonDatetime
-                class='date-picker-pop-up'
-                value={endDate}
-                onClick={(e) => {
-                  const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
-                  const isDayButtonClicked = path?.some((el) =>
-                    el instanceof HTMLElement &&
-                    el.classList.contains('calendar-day-wrapper')
-                  );
-                  if (isDayButtonClicked) {
-                    if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
-                      setEndDate((e.target as any).closest('ion-datetime').value);
-                    }
-                    setIsEndDateOpen(false);
-                  }
-                }}
-                presentation="date"
-                locale="ko-KR"
-                min={startDate || undefined}
-                max={defaultEndDate}
-              />
-            </IonPopover>
-          </>
         }
         showBackButton={true}
         showCount={true}
         count={totalCount} />
+      <IonHeader mode='ios'>
+        <div style={{
+          backgroundColor: 'var(--ion-background-color)',
+          borderBottom: '0.55px solid var(--custom-border-color-50)'
+        }}>
+          <IonSearchbar
+            mode='ios'
+            class='search-bar'
+            value={searchText}
+            onIonInput={handleSearch}
+            placeholder="제목 / 상신자"
+            showClearButton="focus"
+            clearIcon={closeOutline}
+            debounce={50}
+            style={{ textAlign: 'start' }}
+          />
+          {/* </IonToolbar> */}
+          {/* 날짜 선택 섹션 */}
+          {/* <IonToolbar > */}
+          <div className='date-toolbar-wrapper'>
+            <IonItem
+              button
+              mode='md'
+              className='date-toolbar-button-wrapper'
+              id="start-date-trigger"
+              style={{ flex: 1 }}
+              onClick={() => setIsStartDateOpen(true)}
+            >
+              <div className='date-toolbar-button'>
+                <IonIcon icon={calendarClear} />
+                <span>{formatDate(startDate)}</span>
+              </div>
+            </IonItem>
+            <span>~</span>
+            <IonItem
+              button
+              mode='md'
+              className='date-toolbar-button-wrapper'
+              id="end-date-trigger"
+              style={{ flex: 1 }}
+              onClick={() => setIsEndDateOpen(true)}
+            >
+              <div className='date-toolbar-button'>
+                <IonIcon icon={calendarClear} />
+                <span>{formatDate(endDate)}</span>
+              </div>
+            </IonItem>
 
+            <IonItem
+              button
+              style={{ width: '36px' }}
+              mode='md'
+              className='date-toolbar-button-wrapper'
+              onClick={resetDates}
+              disabled={startDate === defaultStartDate && endDate === defaultEndDate}
+            >
+              <div className='date-toolbar-button'>
+                <IonIcon icon={refresh} style={{ width: '18px', color: 'var(--ion-color-secondary)' }} />
+              </div>
+            </IonItem>
+          </div>
+          {/* </IonToolbar> */}
+          {/* <IonToolbar> */}
+          {P_AREA_CODE === 'TODO' && <div className='buttons-wrapper'>
+            <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
+              <IonCheckbox
+                mode='md'
+                checked={isAllSelected}
+                style={{ pointerEvents: 'none' }}
+              />
+              <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
+            </IonItem>
+            <div className='approve-buttons'>
+              <IonButton mode='md' color='light' disabled={selectedItems.size === 0} style={{ '--border-radius': '8px' }}>
+                {/* <IonIcon src={closeOutline} /> */}
+                <span style={{ padding: '0 4px' }}>반려하기</span>
+              </IonButton>
+              <IonButton mode='md' color='primary' disabled={selectedItems.size === 0} style={{ '--border-radius': '8px' }}>
+                {/* <IonIcon src={checkmarkOutline} /> */}
+                <span style={{ padding: '0 4px' }}>승인하기</span>
+              </IonButton>
+            </div>
+          </div>
+          }
+          {/* </IonToolbar> */}
+
+          {/* 시작일 선택 팝오버 */}
+          <IonPopover
+            side="bottom" alignment="center"
+            trigger="start-date-trigger"
+            isOpen={isStartDateOpen}
+            onDidDismiss={() => setIsStartDateOpen(false)}
+            showBackdrop={true}
+          >
+            <IonDatetime
+              class='date-picker-pop-up'
+              value={startDate}
+              onClick={(e) => {
+                const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
+                const isDayButtonClicked = path?.some((el) =>
+                  el instanceof HTMLElement &&
+                  el.classList.contains('calendar-day-wrapper')
+                );
+
+                if (isDayButtonClicked) {
+                  if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
+                    setStartDate((e.target as any).closest('ion-datetime').value);
+                  }
+                  setIsStartDateOpen(false);
+                }
+              }}
+              presentation="date"
+              locale="ko-KR"
+              max={endDate || defaultEndDate}
+            />
+          </IonPopover>
+
+          {/* 종료일 선택 팝오버 */}
+          <IonPopover
+            side="bottom" alignment="center"
+            trigger="end-date-trigger"
+            isOpen={isEndDateOpen}
+            onDidDismiss={() => setIsEndDateOpen(false)}
+            showBackdrop={true}
+          >
+            <IonDatetime
+              class='date-picker-pop-up'
+              value={endDate}
+              onClick={(e) => {
+                const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
+                const isDayButtonClicked = path?.some((el) =>
+                  el instanceof HTMLElement &&
+                  el.classList.contains('calendar-day-wrapper')
+                );
+                if (isDayButtonClicked) {
+                  if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
+                    setEndDate((e.target as any).closest('ion-datetime').value);
+                  }
+                  setIsEndDateOpen(false);
+                }
+              }}
+              presentation="date"
+              locale="ko-KR"
+              min={startDate || undefined}
+              max={defaultEndDate}
+            />
+          </IonPopover>
+        </div>
+      </IonHeader >
       <IonContent
         ref={contentRef}
         scrollEvents={false}
       >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()} disabled={!isTop}>
-          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!isTop}>
+          {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-
-        {!approvals ? (
-          <div className='skeleton-container'>
-            {Array.from({ length: 5 }, (_, index) => (
-              <CustomSkeleton width='100%' height='200px' style={{ marginBottom: '12px', borderRadius: '12px' }} key={`skeleton-${index}`} />
-            ))}
-          </div>
-        ) : filteredApprovals && filteredApprovals.length > 0 ? (
-          approvals.map((approval, index) => (
-            <ApprovalItem
-              key={approval.flowNo}
-              approval={approval}
-              index={index}
-              isSelected={selectedItems.has(approval.flowNo)}
-              onSelectionChange={handleItemSelection}
-              searchText={searchText}
-              isFirstItem={index === 0}
-              isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
-            />
-          ))
-          // <Virtuoso
-          //   className='virtuoso'
-          //   ref={virtuosoRef}
-          //   data={filteredApprovals}
-          //   overscan={30}
-          //   initialItemCount={20}
-          //   initialTopMostItemIndex={0}
-          //   increaseViewportBy={{ top: 800, bottom: 800 }}
-          //   atTopStateChange={(atTop) => setIsTop(atTop)}
-          //   rangeChanged={() => {
-          //     if (scrollCallbackRef.current) {
-          //       scrollCallbackRef.current();
-          //     }
-          //   }}
-          //   itemContent={renderItem}
-          // />
-        ) : (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '200px',
-            color: 'var(--ion-color-medium)'
-          }}>
-            {searchText ? '검색 결과가 없습니다.' : '데이터가 없습니다.'}
-          </div>
-        )}
+        {
+          approvals instanceof Error ?
+            <NoData message="예상치 못한 오류가 발생했습니다." />
+            :
+            !approvals?.LIST ? (
+              <div className='skeleton-container'>
+                {Array.from({ length: 5 }, (_, index) => (
+                  <CustomSkeleton width='100%' height='160px' style={{ marginBottom: '12px', borderRadius: '12px' }} key={`skeleton-${index}`} />
+                ))}
+              </div>
+            ) : filteredApprovals && filteredApprovals.length > 0 ? (
+              filteredApprovals.map((approval: any, index: number) => (
+                <ApprovalItem
+                  key={approval.FLOWNO}
+                  selectable={P_AREA_CODE === 'TODO'}
+                  approval={approval}
+                  index={index}
+                  isSelected={selectedItems.has(approval.FLOWNO)}
+                  onSelectionChange={handleItemSelection}
+                  searchText={searchText}
+                  isFirstItem={index === 0}
+                  isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
+                />
+              ))
+              // <Virtuoso
+              //   className='virtuoso'
+              //   ref={virtuosoRef}
+              //   data={filteredApprovals}
+              //   overscan={30}
+              //   initialItemCount={20}
+              //   initialTopMostItemIndex={0}
+              //   increaseViewportBy={{ top: 800, bottom: 800 }}
+              //   atTopStateChange={(atTop) => setIsTop(atTop)}
+              //   rangeChanged={() => {
+              //     if (scrollCallbackRef.current) {
+              //       scrollCallbackRef.current();
+              //     }
+              //   }}
+              //   itemContent={renderItem}
+              // />
+            ) : <NoData message="해당 항목에 대한 데이터가 없습니다." />}
         <ScrollToTopFab
           isTop={isTop}
           onScrollToTop={scrollToTop}
@@ -512,8 +517,9 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
 });
 
 interface ApprovalProps {
-  approval: ApprovalModel;
   index: number;
+  approval: any;
+  selectable: boolean;
   isSelected: boolean;
   onSelectionChange: (id: string, isSelected: boolean) => void;
   searchText: string;
@@ -534,72 +540,65 @@ const highlightText = (text: string, searchText: string) => {
 };
 
 // ApprovalItem 컴포넌트 - wrapper div 포함
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isSelected, onSelectionChange, searchText, isFirstItem, isLastItem }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, selectable, isSelected, onSelectionChange, searchText, isFirstItem, isLastItem }) => {
   const router = useIonRouter();
+  const titles = useAppStore(state => state.approvals?.TITLE.TITLE_H);
+  const flds = _(approval)
+    .pickBy((_, key) => /^FLD\d+$/.test(key))
+    .toPairs()
+    .sortBy(([key]) => parseInt(key.replace('FLD', ''), 10))
+    .map(([_, value]) => value)
+    .value();
 
   const handleCheckboxChange = useCallback((checked: boolean) => {
-    onSelectionChange(approval.flowNo, checked);
-  }, [approval.flowNo, onSelectionChange]);
+    onSelectionChange(approval.FLOWNO, checked);
+  }, [approval.FLOWNO, onSelectionChange]);
 
   console.log('approval item rebuild : ' + index);
 
   const handleItemClick = useCallback(() => {
-    console.log('아이템 클릭:', approval.flowNo);
-    router.push(`/detail/${approval.flowNo}`, 'forward', 'push');
-  }, [approval.flowNo]); // router 의존성 제거
+    console.log('아이템 클릭:', approval.FLOWNO);
+    router.push(`/detail/${approval.FLOWNO}`, 'forward', 'push');
+  }, [approval.FLOWNO]); // router 의존성 제거
 
   const handleLongPress = useCallback(() => {
-    console.log('롱프레스:', approval.flowNo);
+    console.log('롱프레스:', approval.FLOWNO);
     // TODO: 롱프레스 로직 구현 (예: 컨텍스트 메뉴, 다중 선택 모드 등)
-  }, [approval.flowNo]);
+  }, [approval.FLOWNO]);
 
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
   const titleElement = useMemo(() => (
     <div className='custom-item-title'>
-      <span>{highlightText(approval.apprTitle, searchText)}</span>
+      <span>{highlightText(approval.TITLE, searchText)}</span>
       <div className='custom-item-sub-title'>
         <IonIcon src={person} />
-        <span>{highlightText(approval.creatorName, searchText)} ・ </span>
-        <span>{approval.createDate}</span>
+        <span>{highlightText(approval.NAME, searchText)}({approval.ORGTX}) ・ </span>
+        <span>{approval.CREATE_DATE}</span>
       </div>
     </div>
-  ), [approval.apprTitle, approval.creatorName, approval.createDate, searchText]);
+  ), [approval.TITLE, approval.NAME, approval.CREATE_DATE, searchText]);
 
-  // body 엘리먼트 메모이제이션 - 실제 데이터로 교체 필요
   const bodyElement = useMemo(() => (
     <div className='custom-item-body'>
-      <div className='custom-item-body-line'>
-        <span>구분</span>
-        <span>임시전표</span>
-      </div>
-      <div className='custom-item-body-line'>
-        <span>전표 번호</span>
-        <span>1900000165</span>
-      </div>
-      <div className='custom-item-body-line'>
-        <span>거래처</span>
-        <span>현대 법인카드_7430820</span>
-      </div>
-      <div className='custom-item-body-line'>
-        <span>기본적요</span>
-        <span>소모품비</span>
-      </div>
-      <div className='custom-item-body-line'>
-        <span>계정명</span>
-        <span>소모품비-기타</span>
-      </div>
+      {titles?.map((title, index) => {
+        return <div className='custom-item-body-line' key={approval.FLOWNO + index}>
+          <span>{title}</span>
+          <span>{flds[index] || '-'}</span>
+        </div>;
+      })}
     </div>
-  ), []); // 하드코딩된 데이터이므로 빈 의존성 배열
+  ), [titles]);
 
   // CustomItem props 메모이제이션 - state 대신 ref 사용으로 최적화
   const customItemProps = useMemo(() => ({
-    selectable: true,
+    selectable: selectable,
     checked: isSelected,
     title: titleElement,
     body: bodyElement,
     onClick: handleItemClick,
     onLongPress: handleLongPress,
     onCheckboxChange: handleCheckboxChange,
+    checkboxCenter: false,
   }), [isSelected, titleElement, bodyElement, handleItemClick, handleLongPress, handleCheckboxChange]);
 
 
@@ -607,19 +606,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ approval, index, isS
     <div className={`approval-item-wrapper ${isFirstItem ? 'first-item' : ''} ${isLastItem ? 'last-item' : ''}`}>
       <CustomItem {...customItemProps} />
     </div>
-  );
-}, (prevProps, nextProps) => {
-  // 커스텀 비교 함수로 불필요한 리렌더링 방지
-  return (
-    prevProps.approval.flowNo === nextProps.approval.flowNo &&
-    prevProps.approval.apprTitle === nextProps.approval.apprTitle &&
-    prevProps.approval.creatorName === nextProps.approval.creatorName &&
-    prevProps.approval.createDate === nextProps.approval.createDate &&
-    prevProps.isSelected === nextProps.isSelected &&
-    prevProps.searchText === nextProps.searchText &&
-    prevProps.index === nextProps.index &&
-    prevProps.isFirstItem === nextProps.isFirstItem &&
-    prevProps.isLastItem === nextProps.isLastItem
   );
 });
 

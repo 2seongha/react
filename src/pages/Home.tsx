@@ -11,39 +11,37 @@ import {
   IonRefresherContent,
   RefresherCustomEvent,
   useIonRouter,
+  isPlatform,
 } from '@ionic/react';
 import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { chevronDown, chevronUp, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import './Home.css';
-import { getFlowIcon, getPlatformMode } from '../utils';
-import { ApprovalModel, AreaModel } from '../stores/types';
+import { getFlowIcon } from '../utils';
+import { AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
 import BottomTabBar from '../components/BottomNavigation';
 import { personIcon, searchIcon } from '../assets/images';
+import { useShallow } from 'zustand/shallow';
 
 const Home: React.FC = () => {
-  const setMenuAreas = useAppStore(state => state.setMenuAreas);
-  const setTodoSummary = useAppStore(state => state.setTodoSummary);
+  const setMenuAreas = useAppStore(state => state.setAreas);
   const setApprovals = useAppStore(state => state.setApprovals);
 
-  const fetchMenuAreas = useAppStore(state => state.fetchMenuAreas);
-  const fetchTodoSummary = useAppStore(state => state.fetchTodoSummary);
+  const fetchAreas = useAppStore(state => state.fetchAreas);
 
   useIonViewWillEnter(() => {
-    fetchMenuAreas();
-    fetchTodoSummary();
+    fetchAreas('');
     console.log('home will enter');
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setMenuAreas(null);
-    setTodoSummary(null);
     setApprovals(null);
-    await Promise.allSettled(([fetchMenuAreas(), fetchTodoSummary()]));
+    await Promise.allSettled(([fetchAreas('')]));
     event.detail.complete();
   }
 
@@ -52,12 +50,12 @@ const Home: React.FC = () => {
       <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
 
       <IonContent scrollEvents={false} scrollX={false} scrollY={true}>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} mode={getPlatformMode()}>
-          {getPlatformMode() === 'md' ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        <div>
+        {/* <div>
           <NoticeCard />
-        </div>
+        </div> */}
         <div style={{ marginTop: '12px' }}>
           <WelcomeCard />
         </div>
@@ -93,6 +91,9 @@ const NoticeCard: React.FC = () => {
 }
 
 const WelcomeCard: React.FC = () => {
+  const name = useAppStore(state => state.user?.NAME);
+  const router = useIonRouter();
+
   return (
     <IonCard className='home-card'>
       <div className='welcome-card-content'>
@@ -102,10 +103,12 @@ const WelcomeCard: React.FC = () => {
           alt="person"
         />
         <div className='welcome-card-name'>
-          <span>이성하님</span>
-          <span>좋은 하루 보내세요</span>
+          <span>{name}님</span>
+          <span>좋은 하루 보내세요!</span>
         </div>
-        <IonButton fill='clear' mode='md' className='welcome-card-button'>내 정보</IonButton>
+        <IonButton fill='clear' mode='md' className='welcome-card-button' onClick={() => {
+          router.push(`/myPage`, 'forward', 'push');
+        }}>내 정보</IonButton>
       </div>
     </IonCard>
   );
@@ -113,7 +116,7 @@ const WelcomeCard: React.FC = () => {
 
 
 const MenuCard: React.FC = () => {
-  const menuAreas = useAppStore(state => state.menuAreas);
+  const menuAreas = useAppStore(state => state.areas);
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
 
   // 메모이제이션된 계산값들
@@ -158,7 +161,7 @@ const MenuCard: React.FC = () => {
       >
         {expandedMenuItems.map((menu, index) => (
           <ExpandedMenuItem
-            key={`expanded-${menu.flowCode}-${index}`}
+            key={`expanded-${menu.AREA_CODE}-${index}`}
             menu={menu}
             index={index}
           />
@@ -192,9 +195,9 @@ const ExpandedMenuItem: React.FC<ExpandedMenuItemProps> = React.memo(({ menu }) 
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지
   return (
-    prevProps.menu.flowCode === nextProps.menu.flowCode &&
-    prevProps.menu.oLtext === nextProps.menu.oLtext &&
-    prevProps.menu.cnt === nextProps.menu.cnt
+    prevProps.menu.AREA_CODE === nextProps.menu.AREA_CODE &&
+    prevProps.menu.O_LTEXT === nextProps.menu.O_LTEXT &&
+    prevProps.menu.CNT === nextProps.menu.CNT
   );
 });
 
@@ -215,12 +218,12 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
     );
   }
 
-  const icon = getFlowIcon(menuItem.flowCode!);
+  const icon = getFlowIcon(menuItem.AREA_CODE!);
   const router = useIonRouter();
 
   return (
     <IonItem button className='menu-ion-item' onClick={() => {
-      router.push('/flowList', 'forward', 'push');
+      router.push(`/flowList/${menuItem.AREA_CODE}`, 'forward', 'push');
     }} mode='md'>
       <div className='menu-item'>
         <div className='menu-item-content'>
@@ -230,17 +233,18 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
               alt="menu icon"
             />
           </div>
-          <span>{menuItem.oLtext}</span>
+          <span>{menuItem.O_LTEXT}</span>
         </div>
-        <span className='menu-item-count'>{menuItem.cnt}건</span>
+        <span className='menu-item-count'>{menuItem.CNT ?? 0}건</span>
       </div>
     </IonItem>
   );
 };
 
 const TodoSummaryCard: React.FC = () => {
-  const todoSummary = useAppStore(state => state.todoSummary);
+  const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
   const approvals = useAppStore(state => state.approvals);
+  const router = useIonRouter();
 
   return (
     <IonCard className='home-card todo-summary-card'>
@@ -253,25 +257,37 @@ const TodoSummaryCard: React.FC = () => {
         <span>미결함</span>
       </div>
       <GroupButton />
-      <AnimatePresence>
-        {todoSummary?.length == 0 ?
+      {
+        approvals instanceof Error ?
           <div className='todo-summary-no-data'>
             <IonImg
               src={searchIcon}
               style={{ width: '48px', height: '48px' }}
               alt="search icon"
             />
-            <span>미결 항목이 없습니다.</span>
-          </div> :
-          Array.from({ length: !approvals ? 3 : Math.min(approvals.length, 3) }).map((_, index) => (
-            <ApprovalItem key={index} approvalItem={approvals?.[index]} isLoading={!approvals} index={index} />
-          ))}
-      </AnimatePresence>
+            <span>예상치 못한 오류가 발생했습니다.</span>
+          </div>
+          :
+          todoSummary?.length == 0 ?
+            <div className='todo-summary-no-data'>
+              <IonImg
+                src={searchIcon}
+                style={{ width: '48px', height: '48px' }}
+                alt="search icon"
+              />
+              <span>미결 항목이 없습니다.</span>
+            </div> :
+            Array.from({ length: !approvals?.LIST ? 3 : Math.min(approvals?.LIST.length, 3) }).map((_, index) => (
+              <ApprovalItem key={index} approvalItem={approvals?.LIST?.[index]} isLoading={!approvals?.LIST} index={index} />
+            ))
+      }
       <IonButton
         color='medium'
         className='menu-expand-button'
         fill="clear"
-        onClick={() => { }}
+        onClick={() => {
+          router.push(`/approval/${approvals?.P_AREA_CODE}/${approvals?.AREA_CODE}/${approvals?.P_AREA_CODE_TXT}/${approvals?.AREA_CODE_TXT}`);
+        }}
         disabled={!todoSummary || !todoSummary.length}
       >
         <span>자세히 보기</span>
@@ -282,12 +298,14 @@ const TodoSummaryCard: React.FC = () => {
 }
 
 interface ApprovalItemProps {
-  approvalItem?: ApprovalModel;
+  approvalItem?: any;
   isLoading?: boolean;
   index: number;
 }
 
 const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = false, index }) => {
+  const router = useIonRouter();
+
   if (isLoading || !approvalItem) {
     return (
       <div className='todo-summary-item-skeleton '>
@@ -297,15 +315,18 @@ const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = f
   }
 
   return (
-    <IonItem button className='todo-summary-ion-item'>
+    <IonItem button className='todo-summary-ion-item' onClick={() => {
+      router.push(`/detail/${approvalItem.FLOWNO}`, 'forward', 'push');
+
+    }}>
       <div className='todo-summary-item-wrapper'>
         <span className='todo-summary-index'>{`${index + 1}.`}</span>
         <div className='todo-summary-content'>
-          <span className='todo-summary-item-title'>{approvalItem.apprTitle}</span>
+          <span className='todo-summary-item-title'>{approvalItem.TITLE}</span>
           <div className='todo-summary-item-sub-wrapper'>
-            <span>{approvalItem.createDate + '・'}</span>
+            <span>{approvalItem.CREATE_DATE + '・'}</span>
             <IonIcon src={person} ></IonIcon>
-            <span>{approvalItem.creatorName}</span>
+            <span>{approvalItem.NAME}</span>
           </div>
         </div>
       </div>
