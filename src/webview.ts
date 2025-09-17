@@ -239,7 +239,7 @@ const _initWebview = async (): Promise<void> => {
         corpId: 'IRIS_BRIGHT',
         corpNm: '아이리스 브라이트',
         system: {
-          apiEndpoint: 'https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/',
+          apiEndpoint: 'https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api',
           apiKey: ''
         }
       });
