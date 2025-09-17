@@ -134,7 +134,7 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = 'Y'; // 환경변수 가져오기
+  const isWebView = 'N'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
 
   if (isWebView == 'N') {
@@ -145,7 +145,8 @@ const _initWebview = async (): Promise<void> => {
       corpId: 'IRISBRIGHT',
       corpNm: '아이리스브라이트',
       system: {
-        apiEndpoint: 'http://localhost:4001/v1/api',
+        // apiEndpoint: 'http://localhost:4001/v1/api',
+        apiEndpoint: 'https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api',
         apiKey: ''
       }
     });
