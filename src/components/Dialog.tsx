@@ -1,23 +1,11 @@
-import { IonButton } from '@ionic/react';
-import {
-  Dialog,
-  Slide,
-} from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
-import React, { ReactNode } from 'react';
+import { IonButton, IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar } from '@ionic/react';
+import { close } from 'ionicons/icons';
+import AppBar from './AppBar';
+import React, { ReactNode, useEffect, useRef, useMemo, useState } from 'react';
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface CustomDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  trigger: string;
   title?: ReactNode;
   message?: ReactNode;
   body?: ReactNode;
@@ -52,11 +40,12 @@ interface CustomDialogProps {
 
   // 기능
   preventClose?: boolean; // ESC나 외부 클릭으로 닫기 방지
+  onDidDismiss?: () => void;
 }
 
 const CustomDialog: React.FC<CustomDialogProps> = ({
-  isOpen,
-  onClose,
+  trigger,
+  onDidDismiss,
   title,
   message,
   body,
@@ -82,18 +71,62 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   contentStyle,
   preventClose = false
 }) => {
+  const modal = useRef<HTMLIonModalElement>(null);
+  const [canDismiss, setCanDismiss] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const historyPushedRef = useRef(false);
+  const closedByBackButtonRef = useRef(false);
 
-  const handleClose = () => {
-    if (!preventClose) {
-      onClose();
-    }
+  function dismiss() {
+    modal.current?.dismiss();
+  }
+
+  const handleModalWillPresent = () => {
+    setIsModalOpen(true);
+    // 모달이 열릴 때 히스토리 추가
+    const currentState = window.history.state;
+    window.history.pushState({ ...currentState, modalOpen: true }, '');
+    historyPushedRef.current = true;
+    closedByBackButtonRef.current = false;
   };
+
+  const handleModalDidDismiss = () => {
+    setIsModalOpen(false);
+    // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
+    if (historyPushedRef.current && !closedByBackButtonRef.current) {
+      if (window.history.state?.modalOpen) {
+        window.history.back();
+      }
+    }
+    historyPushedRef.current = false;
+    closedByBackButtonRef.current = false;
+    onDidDismiss?.();
+  };
+
+  // 브라우저 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (isModalOpen) {
+        // 뒤로가기로 인한 모달 닫기
+        closedByBackButtonRef.current = true;
+        dismiss();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isModalOpen]);
 
   const handleFirstButton = () => {
     if (onFirstButtonClick) {
       onFirstButtonClick();
     } else {
-      onClose();
+      dismiss();
     }
   };
 
@@ -101,7 +134,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
     if (onSecondButtonClick) {
       onSecondButtonClick();
     } else {
-      onClose();
+      dismiss();
     }
   };
 
@@ -109,9 +142,22 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
     if (onSingleButtonClick) {
       onSingleButtonClick();
     } else {
-      onClose();
+      dismiss();
     }
   };
+
+  // 닫기 버튼 컴포넌트
+  const closeButton = useMemo(() => (
+    <IonButton
+      mode='md'
+      shape='round'
+      color={'medium'}
+      className="app-bar-button"
+      onClick={dismiss}
+    >
+      <IonIcon icon={close} />
+    </IonButton>
+  ), []);
 
   const renderContent = () => {
     if (body) return body;
@@ -180,41 +226,42 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={handleClose}
-      maxWidth={maxWidth}
-      fullWidth={fullWidth}
-      slots={{
-        transition: Transition,
-      }}
-      sx={{
-        '& .MuiDialog-paper': {
-          borderRadius: '18px',
-          margin: '16px',
-          backgroundColor: 'var(--ion-item-background)',
-          color: 'var(--ion-text-color)',
-          boxShadow: 'none',
-          ...dialogStyle
-        }
+    <IonModal
+      onIonModalWillPresent={handleModalWillPresent}
+      onIonModalDidDismiss={handleModalDidDismiss}
+      className='custom-dialog'
+      mode='ios'
+      ref={modal}
+      trigger={trigger}
+      canDismiss={canDismiss}
+      style={{
+        alignItems: 'center',
+        '--height': 'auto',
+        '--background': 'transparent'
       }}
     >
-      <div style={{ padding: '16px', ...contentStyle }}>
-        {title && (
-          <div style={{
-            textAlign: titleAlign,
-            width: '100%',
-            margin: '8px 0',
-            fontSize: '16px',
-            fontWeight: '600'
-          }}>
-            {title}
-          </div>
-        )}
-        {renderContent()}
-        {(showFirstButton || showSecondButton || singleButton) && renderButtons()}
+      <div style={{ width: '100%', padding: '0 40px' }}>
+        <div style={{ padding: '16px', ...contentStyle, backgroundColor: 'var(--ion-background-color)', borderRadius: '18px' }}>
+          {title && (
+            <div style={{
+              textAlign: titleAlign,
+              width: '100%',
+              marginBottom: '16px',
+              fontSize: '18px',
+              fontWeight: '600'
+            }}>
+              {title}
+            </div>
+          )}
+          {renderContent()}
+          {(showFirstButton || showSecondButton || singleButton) && (
+            <div style={{ marginTop: '16px' }}>
+              {renderButtons()}
+            </div>
+          )}
+        </div>
       </div>
-    </Dialog>
+    </IonModal>
   );
 }
 

@@ -1,24 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  Dialog,
-} from '@mui/material';
-import { IonButtons, IonContent, IonHeader, IonIcon, IonModal, IonTextarea, IonTitle, IonToolbar } from '@ionic/react';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
+import { IonContent, IonIcon, IonModal, IonTextarea } from '@ionic/react';
 import { IonButton } from '@ionic/react';
 import AppBar from './AppBar';
 import { close } from 'ionicons/icons';
 import './ApprovalModal.css';
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
 interface ApprovalModalProps {
   isOpen: boolean;
   trigger: string;
@@ -54,30 +39,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   required = false,
   page = undefined,
 }) => {
-
-  // 브라우저 뒤로가기 버튼 처리
-  // useEffect(() => {
-  //   if (!isOpen) return;
-
-  //   // 팝업이 열릴 때 history에 가상 상태 추가
-  //   const currentState = window.history.state;
-  //   window.history.pushState({ ...currentState, modalOpen: true }, '');
-
-  //   const handlePopState = (event: PopStateEvent) => {
-  //     if (isOpen) {
-  //       handleCancel();
-  //     }
-  //   };
-
-  //   window.addEventListener('popstate', handlePopState);
-
-  //   return () => {
-  //     window.removeEventListener('popstate', handlePopState);
-  //   };
-  // }, [isOpen]);
   const modal = useRef<HTMLIonModalElement>(null);
   const [canDismiss, setCanDismiss] = useState(true);
   const [textValue, setTextValue] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const historyPushedRef = useRef(false);
+  const closedByBackButtonRef = useRef(false);
 
   function dismiss() {
     modal.current?.dismiss();
@@ -90,7 +57,44 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
   const handelModalWillPresent = () => {
     setTextValue('');
+    setIsModalOpen(true);
+    // 모달이 열릴 때 히스토리 추가
+    const currentState = window.history.state;
+    window.history.pushState({ ...currentState, modalOpen: true }, '');
+    historyPushedRef.current = true;
+    closedByBackButtonRef.current = false;
   };
+
+  const handelModalDidDismiss = () => {
+    setIsModalOpen(false);
+    // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
+    if (historyPushedRef.current && !closedByBackButtonRef.current) {
+      if (window.history.state?.modalOpen) {
+        window.history.back();
+      }
+    }
+    historyPushedRef.current = false;
+    closedByBackButtonRef.current = false;
+  };
+
+  // 브라우저 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (isModalOpen) {
+        // 뒤로가기로 인한 모달 닫기
+        closedByBackButtonRef.current = true;
+        dismiss();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isModalOpen]);
 
   // 닫기 버튼 컴포넌트 - AppBar 버튼과 동일한 스타일
   const closeButton = useMemo(() => (
@@ -108,6 +112,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   return (
     <IonModal
       onIonModalWillPresent={handelModalWillPresent}
+      onIonModalDidDismiss={handelModalDidDismiss}
       className='approval-modal'
       mode='ios'
       ref={modal}

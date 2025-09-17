@@ -102,7 +102,7 @@ const Search: React.FC = () => {
       style={{
         height: '40px',
         padding: 0,
-        wordBreak:'keep-all'
+        wordBreak: 'keep-all'
       }}>
       <span style={{ fontSize: '16px', fontWeight: '600' }}>닫기</span>
     </IonButton>
@@ -112,7 +112,7 @@ const Search: React.FC = () => {
   return (
     <IonPage className='search'>
       <IonContent>
-        <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent:'center' }}>
+        <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent: 'center', paddingTop: 'var(--ion-safe-area-top)' }}>
           <IonSearchbar
             ref={searchbarRef}
             mode='ios'
@@ -126,7 +126,7 @@ const Search: React.FC = () => {
             style={{
               textAlign: 'start',
               padding: '0px 0px 0px 21px',
-              minHeight:'40px'
+              minHeight: '40px'
             }}
           />
           {closeButton}

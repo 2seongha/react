@@ -302,11 +302,13 @@ const Detail: React.FC = () => {
                         onSelectionChange={() => { }}
                         onProfitDialogOpen={(profitData) => {
                           setSelectedProfitData(profitData);
-                          setProfitDialogOpen(true);
+                          // 숨김 버튼을 클릭해서 Dialog 열기
+                          document.getElementById('profit-dialog-trigger')?.click();
                         }}
                         onAttendeeDialogOpen={(attendeeData) => {
                           setSelectedAttendeeData(attendeeData);
-                          setAttendeeDialogOpen(true);
+                          // 숨김 버튼을 클릭해서 Dialog 열기
+                          document.getElementById('attendee-dialog-trigger')?.click();
                         }}
                       />
                     ))
@@ -438,7 +440,7 @@ const Detail: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '8px',
+              padding: '8px 8px calc(8px + var(--ion-safe-area-bottom)) 8px',
               gap: '8px'
             }}>
             <IonButton
@@ -506,10 +508,12 @@ const Detail: React.FC = () => {
           page={page}
           trigger="reject-modal"
         />
+        {/* 수익성 Dialog Trigger Button (숨김) */}
+        <IonButton id="profit-dialog-trigger" style={{ display: 'none' }}></IonButton>
         {/* 수익성 Dialog */}
         <CustomDialog
-          isOpen={profitDialogOpen}
-          onClose={() => {
+          trigger="profit-dialog-trigger"
+          onDidDismiss={() => {
             setProfitDialogOpen(false);
             setSelectedProfitData(null);
           }}
@@ -532,7 +536,7 @@ const Detail: React.FC = () => {
                 <span>플랜트</span>
                 <span>{selectedProfitData.RKE_WERKS ? selectedProfitData.RKE_WERKS + ' | ' + selectedProfitData.RKE_WERKS_TX : '-'}</span>
               </div>
-              <div className="profit-dialog-line">
+              <div className="profit-dialog-line" style={{ margin: 0 }}>
                 <span>자재</span>
                 <span>{selectedProfitData.RKE_ARTNR ? selectedProfitData.RKE_ARTNR + ' | ' + selectedProfitData.RKE_ARTNR_TX : '-'}</span>
               </div>
@@ -542,21 +546,23 @@ const Detail: React.FC = () => {
           singleButtonText="닫기"
           singleButtonColor="light"
         />
+        {/* 참석자 Dialog Trigger Button (숨김) */}
+        <IonButton id="attendee-dialog-trigger" style={{ display: 'none' }}></IonButton>
         {/* 참석자 Dialog */}
         <CustomDialog
-          isOpen={attendeeDialogOpen}
-          onClose={() => {
+          trigger="attendee-dialog-trigger"
+          onDidDismiss={() => {
             setAttendeeDialogOpen(false);
             setSelectedAttendeeData(null);
           }}
           title="참석자"
           body={
-            <div style={{ padding: '8px 16px 8px 16px' }}>
-              <span style={{ color: 'var(--ion-color-secondary)', fontSize: '14px' }}>참석자 수: {selectedAttendeeData?.length}</span>
+            <div style={{ padding: '0 16px' }}>
+              <span style={{ color: 'var(--ion-color-secondary)', fontSize: '13px' }}>참석자 수: {selectedAttendeeData?.length}</span>
               <div style={{ padding: '0px 0 0px 0', maxHeight: '300px', overflow: 'auto', margin: ' 16px 0 8px 0' }}>
                 {selectedAttendeeData && selectedAttendeeData.map((attend: any, index: number) => (
                   <div style={{ display: 'flex', alignItems: 'center', marginTop: index === 0 ? '0px' : '16px' }} key={`attendee-list-${index}`}>
-                    <div style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ion-color-step-50)', borderRadius: '24px', marginRight: '8px' }}>
+                    <div style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ion-color-step-50)', borderRadius: '21px', marginRight: '8px' }}>
                       <IonIcon icon={person} style={{ color: 'var(--ion-color-step-150)', fontSize: '18ㅅpx' }}></IonIcon>
                     </div>
                     <div style={{ marginTop: '4px' }}>
