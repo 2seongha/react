@@ -41,29 +41,142 @@ const App: React.FC = () => {
 
     initializeWebview();
     
-    // Flutter web 스타일의 간단한 viewport 처리
-    const setupFlutterWebStyle = () => {
-      // 동적 viewport height 설정
-      const setViewportHeight = () => {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    // Visual Viewport를 고정해서 키보드가 올라와도 스크롤 방지 (iOS 최적화)
+    const setupViewportFixed = () => {
+      // 초기 viewport 높이를 고정
+      const initialHeight = window.innerHeight;
+      document.documentElement.style.setProperty('--vh', `${initialHeight * 0.01}px`);
+      document.documentElement.style.height = `${initialHeight}px`;
+      document.body.style.height = `${initialHeight}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+      
+      // iOS에서 즉시 스크롤 차단을 위한 동기 처리
+      const immediateScrollReset = () => {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       };
       
-      setViewportHeight();
-      
-      // resize 이벤트만 처리 (과도한 이벤트 차단 없이)
-      window.addEventListener('resize', setViewportHeight);
-      window.addEventListener('orientationchange', setViewportHeight);
-      
-      return () => {
-        window.removeEventListener('resize', setViewportHeight);
-        window.removeEventListener('orientationchange', setViewportHeight);
-      };
+      // Visual Viewport 이벤트로 스크롤 완전 차단 (iOS 최적화)
+      if (window.visualViewport) {
+        let rafId: number;
+        
+        const handleViewportChange = () => {
+          // 즉시 동기 스크롤 리셋 (깜빡임 방지)
+          immediateScrollReset();
+          
+          // 추가적인 비동기 보정
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+          }
+          
+          rafId = requestAnimationFrame(() => {
+            immediateScrollReset();
+            
+            // iOS에서 Visual Viewport offset 보정
+            if (window.visualViewport) {
+              const offsetX = window.visualViewport.offsetLeft;
+              const offsetY = window.visualViewport.offsetTop;
+              if (offsetX !== 0 || offsetY !== 0) {
+                window.scrollTo(-offsetX, -offsetY);
+              }
+            }
+          });
+        };
+        
+        const handleViewportResize = () => {
+          immediateScrollReset();
+          
+          // 리사이즈 완료 후 추가 보정
+          setTimeout(() => {
+            immediateScrollReset();
+          }, 10);
+          
+          handleViewportChange();
+        };
+        
+        // Visual Viewport 이벤트 리스닝
+        window.visualViewport.addEventListener('scroll', handleViewportChange);
+        window.visualViewport.addEventListener('resize', handleViewportResize);
+        
+        return () => {
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+          }
+          window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+          window.visualViewport?.removeEventListener('resize', handleViewportResize);
+        };
+      }
     };
     
-    const cleanup = setupFlutterWebStyle();
+    const cleanup = setupViewportFixed();
     
-    return cleanup;
+    // viewport 스크롤 완전 차단 (iOS 최적화)
+    let isScrollPreventing = false;
+    
+    const preventViewportScroll = (e: Event) => {
+      const target = e.target as Element;
+      const isInsideIonContent = target?.closest?.('ion-content');
+      
+      if (!isInsideIonContent && !isScrollPreventing) {
+        isScrollPreventing = true;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        // 즉시 스크롤 위치 고정 (동기)
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        
+        // 추가 보정 (비동기)
+        requestAnimationFrame(() => {
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
+          isScrollPreventing = false;
+        });
+        
+        return false;
+      }
+    };
+    
+    const preventTouchMove = (e: TouchEvent) => {
+      const target = e.target as Element;
+      const isInsideIonContent = target?.closest?.('ion-content');
+      
+      if (!isInsideIonContent) {
+        // 즉시 스크롤 위치 고정
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    };
+    
+    // 모든 스크롤 관련 이벤트 차단 (더 적극적)
+    window.addEventListener('scroll', preventViewportScroll, { passive: false });
+    window.addEventListener('touchmove', preventTouchMove, { passive: false });
+    window.addEventListener('wheel', preventViewportScroll, { passive: false });
+    document.addEventListener('scroll', preventViewportScroll, { passive: false });
+    document.body.addEventListener('scroll', preventViewportScroll, { passive: false });
+    document.documentElement.addEventListener('scroll', preventViewportScroll, { passive: false });
+    
+    return () => {
+      cleanup?.();
+      window.removeEventListener('scroll', preventViewportScroll);
+      window.removeEventListener('touchmove', preventTouchMove);
+      window.removeEventListener('wheel', preventViewportScroll);
+      document.removeEventListener('scroll', preventViewportScroll);
+      document.body.removeEventListener('scroll', preventViewportScroll);
+      document.documentElement.removeEventListener('scroll', preventViewportScroll);
+    };
   }, []);
 
   useEffect(() => {
