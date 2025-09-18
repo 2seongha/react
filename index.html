@@ -88,12 +88,7 @@
   </head>
   <body style="height: 100vh; position: fixed; top: 0; left: 0; right: 0; overflow: hidden;">
     <style>
-      /* 추가 viewport 고정 CSS */
-      * {
-        /* touch-action: manipulation;
-        overscroll-behavior: none; */
-      }
-      
+      /* #root 컨테이너만 고정, 내부 요소들은 자유롭게 */
       #root {
         height: 100vh;
         height: calc(var(--vh, 1vh) * 100);
@@ -102,6 +97,12 @@
         left: 0;
         right: 0;
         overflow: hidden;
+      }
+      
+      /* IonContent 내부에서는 정상적인 스크롤 허용 */
+      ion-content * {
+        touch-action: auto;
+        overscroll-behavior: auto;
       }
     </style>
     <div id="root"></div>

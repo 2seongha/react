@@ -14,10 +14,9 @@ html, body {
   right: 0 !important;
   overflow: hidden !important;
   overscroll-behavior: none !important;
-  -webkit-overflow-scrolling: auto !important;
 }
 
-/* IonApp도 동일하게 고정 */
+/* IonApp도 동일하게 고정하되 내부 스크롤은 허용 */
 ion-app {
   height: 100vh !important;
   height: calc(var(--vh, 1vh) * 100) !important;
@@ -26,6 +25,14 @@ ion-app {
   left: 0 !important;
   right: 0 !important;
   overflow: hidden !important;
+}
+
+/* IonContent는 정상적으로 스크롤 가능하도록 */
+ion-content {
+  height: 100% !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
 }
 
 ion-content::part(scroll) {

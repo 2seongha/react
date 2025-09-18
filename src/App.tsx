@@ -75,19 +75,20 @@ const App: React.FC = () => {
     
     const cleanup = preventViewportScroll();
     
-    // 추가 스크롤 방지
-    const preventScroll = (e: Event) => {
-      e.preventDefault();
-      window.scrollTo(0, 0);
+    // body/html 레벨 스크롤만 방지 (IonContent 스크롤은 허용)
+    const preventBodyScroll = (e: Event) => {
+      // IonContent 내부 스크롤은 허용, body/html 스크롤만 차단
+      if (e.target === document || e.target === document.body || e.target === document.documentElement) {
+        e.preventDefault();
+        window.scrollTo(0, 0);
+      }
     };
     
-    window.addEventListener('scroll', preventScroll, { passive: false });
-    window.addEventListener('touchmove', preventScroll, { passive: false });
+    window.addEventListener('scroll', preventBodyScroll, { passive: false });
     
     return () => {
       cleanup?.();
-      window.removeEventListener('scroll', preventScroll);
-      window.removeEventListener('touchmove', preventScroll);
+      window.removeEventListener('scroll', preventBodyScroll);
     };
   }, []);
 
