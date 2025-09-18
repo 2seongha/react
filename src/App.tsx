@@ -194,53 +194,73 @@ const App: React.FC = () => {
     
     const cleanup = setupViewportReplacement();
     
-    // resize 이벤트도 완전 차단
-    const blockResize = (e: Event) => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return false;
-    };
-    
-    // 스크롤 이벤트 차단 (ion-content 제외)
-    const preventScroll = (e: Event) => {
+    // 완전한 스크롤 및 이벤트 차단 (추가 보안)
+    const preventAllMovement = (e: Event) => {
       const target = e.target as Element;
       const isInsideIonContent = target?.closest?.('ion-content');
+      const isInputElement = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.closest?.('ion-input') || target?.closest?.('ion-textarea');
       
-      if (!isInsideIonContent) {
+      // ion-content 내부이거나 입력 요소가 아닌 경우 모두 차단
+      if (!isInsideIonContent && !isInputElement) {
         e.preventDefault();
+        e.stopPropagation();
         e.stopImmediatePropagation();
+        
+        // 즉시 스크롤 위치 고정
         window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        
         return false;
       }
     };
     
-    // 터치 이벤트 차단 (ion-content 제외)
-    const preventTouch = (e: TouchEvent) => {
-      const target = e.target as Element;
-      const isInsideIonContent = target?.closest?.('ion-content');
-      
-      if (!isInsideIonContent) {
-        e.preventDefault();
-        return false;
+    // 모든 동작 관련 이벤트 차단
+    const allEvents = [
+      'scroll', 'touchmove', 'wheel', 'touchstart', 'touchend',
+      'resize', 'orientationchange', 'gesturestart', 'gesturechange', 'gestureend',
+      'drag', 'dragstart', 'dragend', 'drop'
+    ];
+    
+    const allTargets = [window, document, document.body, document.documentElement];
+    
+    allTargets.forEach(target => {
+      allEvents.forEach(eventType => {
+        target.addEventListener(eventType, preventAllMovement, { 
+          passive: false, 
+          capture: true 
+        });
+      });
+    });
+    
+    // 지속적인 스크롤 위치 감시 및 복원
+    const maintainPosition = () => {
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+      }
+      if (document.body.scrollTop !== 0 || document.body.scrollLeft !== 0) {
+        document.body.scrollTop = 0;
+        document.body.scrollLeft = 0;
+      }
+      if (document.documentElement.scrollTop !== 0 || document.documentElement.scrollLeft !== 0) {
+        document.documentElement.scrollTop = 0;
+        document.documentElement.scrollLeft = 0;
       }
     };
     
-    // 모든 viewport 변화 관련 이벤트 차단
-    window.addEventListener('resize', blockResize, { passive: false });
-    window.addEventListener('orientationchange', blockResize, { passive: false });
-    window.addEventListener('scroll', preventScroll, { passive: false });
-    window.addEventListener('touchmove', preventTouch, { passive: false });
-    document.addEventListener('scroll', preventScroll, { passive: false });
-    document.body.addEventListener('scroll', preventScroll, { passive: false });
+    // 60fps로 스크롤 위치 감시
+    const positionInterval = setInterval(maintainPosition, 16);
     
     return () => {
       cleanup?.();
-      window.removeEventListener('resize', blockResize);
-      window.removeEventListener('orientationchange', blockResize);
-      window.removeEventListener('scroll', preventScroll);
-      window.removeEventListener('touchmove', preventTouch);
-      document.removeEventListener('scroll', preventScroll);
-      document.body.removeEventListener('scroll', preventScroll);
+      clearInterval(positionInterval);
+      
+      // 모든 이벤트 리스너 제거
+      allTargets.forEach(target => {
+        allEvents.forEach(eventType => {
+          target.removeEventListener(eventType, preventAllMovement);
+        });
+      });
     };
   }, []);
 

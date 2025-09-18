@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover, interactive-widget=overlays-content">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -188,7 +190,57 @@
           return originalAddEventListener.call(this, type, listener, options);
         };
         
-        console.log('Viewport 가로채기 완료');
+        // 모든 스크롤 관련 동작 완전 차단
+        const preventAllScrolling = function(e) {
+          const target = e.target;
+          const isInsideIonContent = target && target.closest && target.closest('ion-content');
+          
+          if (!isInsideIonContent) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // 강제로 스크롤 위치 복원
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+            
+            return false;
+          }
+        };
+        
+        // 모든 스크롤 관련 이벤트 차단
+        const scrollEvents = ['scroll', 'touchmove', 'wheel', 'touchstart', 'touchend', 'gesturestart', 'gesturechange', 'gestureend'];
+        const targets = [window, document, document.documentElement, document.body];
+        
+        targets.forEach(target => {
+          scrollEvents.forEach(eventType => {
+            target.addEventListener(eventType, preventAllScrolling, { 
+              passive: false, 
+              capture: true 
+            });
+          });
+        });
+        
+        // 스크롤 위치를 강제로 (0,0)으로 유지하는 감시자
+        const maintainScrollPosition = function() {
+          if (window.scrollY !== 0 || window.scrollX !== 0) {
+            window.scrollTo(0, 0);
+          }
+          if (document.body.scrollTop !== 0 || document.body.scrollLeft !== 0) {
+            document.body.scrollTop = 0;
+            document.body.scrollLeft = 0;
+          }
+          if (document.documentElement.scrollTop !== 0 || document.documentElement.scrollLeft !== 0) {
+            document.documentElement.scrollTop = 0;
+            document.documentElement.scrollLeft = 0;
+          }
+        };
+        
+        // 지속적으로 스크롤 위치 감시
+        setInterval(maintainScrollPosition, 16); // 60fps
+        
+        console.log('Viewport 가로채기 및 스크롤 완전 차단 완료');
       })();
     </script>
     <style>
