@@ -18,6 +18,10 @@ import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 
+export const viewport = {
+  maximumScale: 1, // Disable auto-zoom on mobile Safari
+  interactiveWidget: 'resizes-content' as const,
+}
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
@@ -48,6 +52,31 @@ const App: React.FC = () => {
     //   // const vh = window.visualViewport?.height;
     //   // document.documentElement.style.setProperty('--vh', `${vh}px`);
     // });
+    const scrollableSelector = '.scrollable';
+    let isKeyboardOpen = false;
+    
+    // 키보드 상태 업데이트
+    function updateKeyboardStatus() {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const windowHeight = window.innerHeight;
+    
+      isKeyboardOpen = viewportHeight < windowHeight - 100; // 약간의 여유
+    }
+    
+    window.visualViewport?.addEventListener('resize', updateKeyboardStatus);
+    window.visualViewport?.addEventListener('scroll', updateKeyboardStatus);
+    window.addEventListener('load', updateKeyboardStatus);
+    
+    // 터치 스크롤 제한
+    document.addEventListener('touchmove', function (e) {
+      if (!isKeyboardOpen) return;
+    
+      const target = e.target as HTMLElement;
+      if (!target.closest('.scrollable, button, input, textarea, select, a')) {
+        console.log("prevent");
+        e.preventDefault();
+      }
+    }, { passive: false, capture: true });
   }, []);
 
   useEffect(() => {
