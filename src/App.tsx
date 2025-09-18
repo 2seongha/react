@@ -41,166 +41,164 @@ const App: React.FC = () => {
 
     initializeWebview();
     
-    // Viewport 크기 변화 완전 차단 - 무조건 고정 크기 유지
-    const setupViewportFixed = () => {
-      // 초기 viewport 크기를 완전히 고정
+    // 키보드 감지 완전 차단 - Layout/Visual Viewport 영향 없음
+    const setupKeyboardBlocking = () => {
+      // 초기 viewport 크기 고정
       const initialWidth = window.innerWidth;
       const initialHeight = window.innerHeight;
       const initialVH = initialHeight * 0.01;
       
-      // CSS 변수 고정
+      // CSS 변수 설정
       document.documentElement.style.setProperty('--vh', `${initialVH}px`);
       document.documentElement.style.setProperty('--initial-width', `${initialWidth}px`);
       document.documentElement.style.setProperty('--initial-height', `${initialHeight}px`);
       
-      // 완전 고정 스타일 적용
-      const applyFixedDimensions = () => {
-        // HTML과 body를 초기 크기로 완전 고정
-        document.documentElement.style.width = `${initialWidth}px`;
-        document.documentElement.style.height = `${initialHeight}px`;
-        document.documentElement.style.minWidth = `${initialWidth}px`;
-        document.documentElement.style.minHeight = `${initialHeight}px`;
-        document.documentElement.style.maxWidth = `${initialWidth}px`;
-        document.documentElement.style.maxHeight = `${initialHeight}px`;
-        document.documentElement.style.position = 'fixed';
-        document.documentElement.style.top = '0';
-        document.documentElement.style.left = '0';
-        document.documentElement.style.overflow = 'hidden';
-        
-        document.body.style.width = `${initialWidth}px`;
-        document.body.style.height = `${initialHeight}px`;
-        document.body.style.minWidth = `${initialWidth}px`;
-        document.body.style.minHeight = `${initialHeight}px`;
-        document.body.style.maxWidth = `${initialWidth}px`;
-        document.body.style.maxHeight = `${initialHeight}px`;
-        document.body.style.position = 'fixed';
-        document.body.style.top = '0';
-        document.body.style.left = '0';
-        document.body.style.right = '0';
-        document.body.style.bottom = '0';
-        document.body.style.overflow = 'hidden';
-        
-        // 스크롤 위치도 고정
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-      };
+      // 고정 크기 강제 적용
+      document.documentElement.style.height = `${initialHeight}px`;
+      document.body.style.height = `${initialHeight}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
       
-      // 초기 적용
-      applyFixedDimensions();
-      
-      // Visual Viewport 크기 변화 강제 차단
+      // Visual Viewport API 완전 무력화
       if (window.visualViewport) {
-        let isBlocking = false;
+        // 모든 Visual Viewport 이벤트를 빈 함수로 오버라이드
+        const originalAddEventListener = window.visualViewport.addEventListener;
+        const originalRemoveEventListener = window.visualViewport.removeEventListener;
         
-        const blockViewportChanges = () => {
-          if (isBlocking) return;
-          isBlocking = true;
-          
-          // 즉시 고정 크기 복원
-          applyFixedDimensions();
-          
-          // Visual Viewport를 초기 크기로 강제 복원 시도
-          try {
-            // 일부 브라우저에서 viewport 크기를 강제로 설정
-            Object.defineProperty(window.visualViewport, 'width', {
-              value: initialWidth,
-              writable: false,
-              configurable: false
-            });
-            Object.defineProperty(window.visualViewport, 'height', {
-              value: initialHeight,
-              writable: false,
-              configurable: false
-            });
-          } catch (e) {
-            // 읽기 전용 속성이므로 에러 무시
+        // addEventListener를 무력화하여 키보드 관련 이벤트 감지 차단
+        window.visualViewport.addEventListener = function(type: string, listener: any, options?: any) {
+          // 키보드 관련 이벤트는 등록하지 않음
+          if (type === 'resize' || type === 'scroll') {
+            return;
           }
-          
-          // 연속 호출로 강제 유지
-          setTimeout(() => {
-            applyFixedDimensions();
-            setTimeout(() => {
-              applyFixedDimensions();
-              isBlocking = false;
-            }, 10);
-          }, 10);
+          return originalAddEventListener.call(this, type, listener, options);
         };
         
-        // 모든 viewport 관련 이벤트 차단
-        window.visualViewport.addEventListener('scroll', blockViewportChanges);
-        window.visualViewport.addEventListener('resize', blockViewportChanges);
-        
-        // 추가 보안 - 주기적으로 크기 확인하고 복원
-        const intervalId = setInterval(() => {
-          if (window.visualViewport && 
-              (window.visualViewport.width !== initialWidth || 
-               window.visualViewport.height !== initialHeight)) {
-            blockViewportChanges();
+        // removeEventListener도 무력화
+        window.visualViewport.removeEventListener = function(type: string, listener: any, options?: any) {
+          if (type === 'resize' || type === 'scroll') {
+            return;
           }
-          applyFixedDimensions();
-        }, 100);
-        
-        return () => {
-          window.visualViewport?.removeEventListener('scroll', blockViewportChanges);
-          window.visualViewport?.removeEventListener('resize', blockViewportChanges);
-          clearInterval(intervalId);
+          return originalRemoveEventListener.call(this, type, listener, options);
         };
+        
+        // Visual Viewport 속성들을 고정값으로 오버라이드
+        try {
+          Object.defineProperty(window.visualViewport, 'width', {
+            get: () => initialWidth,
+            configurable: false
+          });
+          Object.defineProperty(window.visualViewport, 'height', {
+            get: () => initialHeight,
+            configurable: false
+          });
+          Object.defineProperty(window.visualViewport, 'offsetLeft', {
+            get: () => 0,
+            configurable: false
+          });
+          Object.defineProperty(window.visualViewport, 'offsetTop', {
+            get: () => 0,
+            configurable: false
+          });
+          Object.defineProperty(window.visualViewport, 'scale', {
+            get: () => 1,
+            configurable: false
+          });
+        } catch (e) {
+          // 일부 브라우저에서 제한될 수 있음
+        }
       }
       
-      // 일반 window resize도 차단
-      const blockWindowResize = () => {
-        applyFixedDimensions();
-      };
+      // window.innerHeight/innerWidth도 고정값 반환하도록 오버라이드
+      const originalInnerHeight = window.innerHeight;
+      const originalInnerWidth = window.innerWidth;
       
-      window.addEventListener('resize', blockWindowResize);
-      window.addEventListener('orientationchange', blockWindowResize);
+      Object.defineProperty(window, 'innerHeight', {
+        get: () => originalInnerHeight,
+        configurable: false
+      });
+      
+      Object.defineProperty(window, 'innerWidth', {
+        get: () => originalInnerWidth,
+        configurable: false
+      });
+      
+      // CSS의 100vh, 100vw도 고정값으로 강제
+      const style = document.createElement('style');
+      style.textContent = `
+        :root {
+          --real-vh: ${initialVH}px !important;
+        }
+        html, body {
+          height: ${initialHeight}px !important;
+          min-height: ${initialHeight}px !important;
+          max-height: ${initialHeight}px !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // 스크롤 위치 고정
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
       
       return () => {
-        window.removeEventListener('resize', blockWindowResize);
-        window.removeEventListener('orientationchange', blockWindowResize);
+        // 복원은 하지 않음 (키보드 감지 차단 유지)
       };
     };
     
-    const cleanup = setupViewportFixed();
+    const cleanup = setupKeyboardBlocking();
     
-    // 스크롤과 터치 이벤트 완전 차단 (Viewport 고정 보조)
-    const preventAllMovement = (e: Event) => {
+    // resize 이벤트도 완전 차단
+    const blockResize = (e: Event) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return false;
+    };
+    
+    // 스크롤 이벤트 차단 (ion-content 제외)
+    const preventScroll = (e: Event) => {
       const target = e.target as Element;
       const isInsideIonContent = target?.closest?.('ion-content');
       
       if (!isInsideIonContent) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        
-        // 즉시 위치 고정
         window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-        
         return false;
       }
     };
     
-    // 모든 움직임 관련 이벤트 차단
-    const events = ['scroll', 'touchmove', 'wheel', 'touchstart', 'touchend'];
-    const targets = [window, document, document.body, document.documentElement];
+    // 터치 이벤트 차단 (ion-content 제외)
+    const preventTouch = (e: TouchEvent) => {
+      const target = e.target as Element;
+      const isInsideIonContent = target?.closest?.('ion-content');
+      
+      if (!isInsideIonContent) {
+        e.preventDefault();
+        return false;
+      }
+    };
     
-    targets.forEach(target => {
-      events.forEach(eventType => {
-        target.addEventListener(eventType, preventAllMovement, { passive: false });
-      });
-    });
+    // 모든 viewport 변화 관련 이벤트 차단
+    window.addEventListener('resize', blockResize, { passive: false });
+    window.addEventListener('orientationchange', blockResize, { passive: false });
+    window.addEventListener('scroll', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventTouch, { passive: false });
+    document.addEventListener('scroll', preventScroll, { passive: false });
+    document.body.addEventListener('scroll', preventScroll, { passive: false });
     
     return () => {
       cleanup?.();
-      
-      // 모든 이벤트 리스너 제거
-      targets.forEach(target => {
-        events.forEach(eventType => {
-          target.removeEventListener(eventType, preventAllMovement);
-        });
-      });
+      window.removeEventListener('resize', blockResize);
+      window.removeEventListener('orientationchange', blockResize);
+      window.removeEventListener('scroll', preventScroll);
+      window.removeEventListener('touchmove', preventTouch);
+      document.removeEventListener('scroll', preventScroll);
+      document.body.removeEventListener('scroll', preventScroll);
     };
   }, []);
 
