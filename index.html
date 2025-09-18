@@ -86,9 +86,9 @@
       }
     </style>
   </head>
-  <body style="height: 100vh; position: fixed; top: 0; left: 0; right: 0; overflow: hidden;">
+  <body style="height: 100vh; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; touch-action: none;">
     <style>
-      /* #root 컨테이너만 고정, 내부 요소들은 자유롭게 */
+      /* #root 컨테이너도 완전 고정 */
       #root {
         height: 100vh;
         height: calc(var(--vh, 1vh) * 100);
@@ -96,13 +96,18 @@
         top: 0;
         left: 0;
         right: 0;
+        bottom: 0;
         overflow: hidden;
+        touch-action: none;
       }
       
-      /* IonContent 내부에서는 정상적인 스크롤 허용 */
+      /* IonContent 내부에서만 터치 허용 */
+      ion-content {
+        touch-action: pan-y;
+      }
+      
       ion-content * {
-        touch-action: auto;
-        overscroll-behavior: auto;
+        touch-action: manipulation;
       }
     </style>
     <div id="root"></div>

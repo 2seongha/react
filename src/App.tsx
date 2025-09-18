@@ -42,7 +42,7 @@ const App: React.FC = () => {
     initializeWebview();
     
     // Visual Viewport를 고정해서 키보드가 올라와도 스크롤 방지
-    const preventViewportScroll = () => {
+    const setupViewportFixed = () => {
       // 초기 viewport 높이를 고정
       const initialHeight = window.innerHeight;
       document.documentElement.style.setProperty('--vh', `${initialHeight * 0.01}px`);
@@ -73,22 +73,47 @@ const App: React.FC = () => {
       }
     };
     
-    const cleanup = preventViewportScroll();
+    const cleanup = setupViewportFixed();
     
-    // body/html 레벨 스크롤만 방지 (IonContent 스크롤은 허용)
-    const preventBodyScroll = (e: Event) => {
-      // IonContent 내부 스크롤은 허용, body/html 스크롤만 차단
-      if (e.target === document || e.target === document.body || e.target === document.documentElement) {
+    // viewport 스크롤 완전 차단
+    const preventViewportScroll = (e: Event) => {
+      // IonContent 내부가 아닌 경우 스크롤 차단
+      const target = e.target as Element;
+      const isInsideIonContent = target?.closest?.('ion-content');
+      
+      if (!isInsideIonContent) {
         e.preventDefault();
+        e.stopPropagation();
         window.scrollTo(0, 0);
+        return false;
       }
     };
     
-    window.addEventListener('scroll', preventBodyScroll, { passive: false });
+    const preventTouchMove = (e: TouchEvent) => {
+      const target = e.target as Element;
+      const isInsideIonContent = target?.closest?.('ion-content');
+      
+      // IonContent 외부에서의 터치 이동 차단
+      if (!isInsideIonContent) {
+        e.preventDefault();
+        return false;
+      }
+    };
+    
+    // 모든 스크롤 관련 이벤트 차단
+    window.addEventListener('scroll', preventViewportScroll, { passive: false });
+    window.addEventListener('touchmove', preventTouchMove, { passive: false });
+    window.addEventListener('wheel', preventViewportScroll, { passive: false });
+    document.addEventListener('scroll', preventViewportScroll, { passive: false });
+    document.body.addEventListener('scroll', preventViewportScroll, { passive: false });
     
     return () => {
       cleanup?.();
-      window.removeEventListener('scroll', preventBodyScroll);
+      window.removeEventListener('scroll', preventViewportScroll);
+      window.removeEventListener('touchmove', preventTouchMove);
+      window.removeEventListener('wheel', preventViewportScroll);
+      document.removeEventListener('scroll', preventViewportScroll);
+      document.body.removeEventListener('scroll', preventViewportScroll);
     };
   }, []);
 
