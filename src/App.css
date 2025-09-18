@@ -1,3 +1,19 @@
+/* 키보드 높이 보상을 위한 동적 높이 설정 */
+html, body {
+  height: calc(var(--current-vh, 1vh) * 100) !important;
+  overflow: hidden !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+ion-app, #root {
+  height: calc(var(--current-vh, 1vh) * 100) !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;

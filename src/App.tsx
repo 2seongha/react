@@ -40,6 +40,87 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
+
+    // 키보드 높이에 따른 viewport 크기 조정
+    const setupKeyboardCompensation = () => {
+      const initialHeight = window.innerHeight;
+      console.log('초기 viewport 높이:', initialHeight);
+      
+      // CSS 변수로 초기 높이 저장
+      document.documentElement.style.setProperty('--initial-vh', `${initialHeight * 0.01}px`);
+      document.documentElement.style.setProperty('--current-vh', `${initialHeight * 0.01}px`);
+      
+      // Visual Viewport API 사용하여 키보드 높이 감지
+      if (window.visualViewport) {
+        const handleViewportChange = () => {
+          const currentHeight = window.visualViewport?.height || window.innerHeight;
+          const keyboardHeight = initialHeight - currentHeight;
+          
+          console.log('Viewport 변화:', {
+            초기높이: initialHeight,
+            현재높이: currentHeight,
+            키보드높이: keyboardHeight
+          });
+          
+          if (keyboardHeight > 0) {
+            // 키보드가 올라온 경우: viewport 높이를 키보드 높이만큼 줄임
+            const adjustedHeight = currentHeight;
+            const adjustedVH = adjustedHeight * 0.01;
+            
+            document.documentElement.style.setProperty('--current-vh', `${adjustedVH}px`);
+            document.body.style.height = `${adjustedHeight}px`;
+            document.documentElement.style.height = `${adjustedHeight}px`;
+            
+            console.log('키보드 올라옴 - 높이 조정:', adjustedHeight);
+          } else {
+            // 키보드가 내려간 경우: 원래 높이로 복원
+            const originalVH = initialHeight * 0.01;
+            
+            document.documentElement.style.setProperty('--current-vh', `${originalVH}px`);
+            document.body.style.height = `${initialHeight}px`;
+            document.documentElement.style.height = `${initialHeight}px`;
+            
+            console.log('키보드 내려감 - 원래 높이 복원:', initialHeight);
+          }
+        };
+        
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        
+        return () => {
+          window.visualViewport?.removeEventListener('resize', handleViewportChange);
+        };
+      }
+      
+      // Visual Viewport가 지원되지 않는 경우 window resize 이벤트 사용
+      const handleWindowResize = () => {
+        const currentHeight = window.innerHeight;
+        const keyboardHeight = initialHeight - currentHeight;
+        
+        if (keyboardHeight > 50) { // 50px 이상 차이나면 키보드로 판단
+          const adjustedVH = currentHeight * 0.01;
+          document.documentElement.style.setProperty('--current-vh', `${adjustedVH}px`);
+          document.body.style.height = `${currentHeight}px`;
+          document.documentElement.style.height = `${currentHeight}px`;
+        } else {
+          const originalVH = initialHeight * 0.01;
+          document.documentElement.style.setProperty('--current-vh', `${originalVH}px`);
+          document.body.style.height = `${initialHeight}px`;
+          document.documentElement.style.height = `${initialHeight}px`;
+        }
+      };
+      
+      window.addEventListener('resize', handleWindowResize);
+      
+      return () => {
+        window.removeEventListener('resize', handleWindowResize);
+      };
+    };
+    
+    const cleanup = setupKeyboardCompensation();
+    
+    return () => {
+      cleanup?.();
+    };
   }, []);
 
   useEffect(() => {
