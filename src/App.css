@@ -5,10 +5,7 @@ ion-content {
 }
 
 html, body {
-  /* height: var(--vh);
-  max-height: var(--vh);
-  min-height: var(--vh);
-  overflow: hidden; */
+  height: 100dvh;
 }
 
 ion-content::part(scroll) {

@@ -43,10 +43,29 @@ const App: React.FC = () => {
     initializeWebview();
     const vh = window.innerHeight * 0.01;
     // document.documentElement.style.setProperty('--vh', `${vh}px`);
-    window.visualViewport?.addEventListener('resize', () => {
-      const vh = window.visualViewport?.height;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    });
+    // window.visualViewport?.addEventListener('scroll', () => {
+    //   console.log('viewport scroll');
+    //   // const vh = window.visualViewport?.height;
+    //   // document.documentElement.style.setProperty('--vh', `${vh}px`);
+    // });
+    function updateTransform() {
+      const offsetY = window.visualViewport?.offsetTop || window.scrollY || 0;
+      const offsetX = window.visualViewport?.offsetLeft || window.scrollX || 0;
+      console.log(offsetY);
+
+      // document.documentElement.offsetTop = 
+    }
+
+    // 초기 적용
+    updateTransform();
+
+    // 이벤트 연결
+    window.visualViewport?.addEventListener('scroll', updateTransform);
+    window.visualViewport?.addEventListener('resize', updateTransform);
+
+    // fallback (desktop 등)
+    window.addEventListener('scroll', updateTransform);
+    window.addEventListener('resize', updateTransform);
   }, []);
 
   useEffect(() => {
