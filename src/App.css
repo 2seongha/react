@@ -1,5 +1,5 @@
 /* 키보드 높이 보상을 위한 동적 높이 설정 */
-html {
+html, body {
   height: 300px !important;
   overflow: hidden !important;
 }
