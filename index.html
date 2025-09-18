@@ -91,62 +91,104 @@
   </head>
   <body style="height: 100vh; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; touch-action: none;">
     <script>
-      // 페이지 로드 즉시 Visual Viewport 무력화
+      // 페이지 로드 즉시 Visual Viewport 프록시로 가로채기
       (function() {
         const initialWidth = window.innerWidth;
         const initialHeight = window.innerHeight;
         
         console.log('즉시 Viewport 고정:', initialWidth, 'x', initialHeight);
         
-        // Visual Viewport API 완전 대체
+        // Visual Viewport API 프록시로 가로채기
         if (window.visualViewport) {
-          const mockViewport = {
-            width: initialWidth,
-            height: initialHeight,
-            offsetLeft: 0,
-            offsetTop: 0,
-            pageLeft: 0,
-            pageTop: 0,
-            scale: 1,
-            addEventListener: function() {},
-            removeEventListener: function() {},
-            dispatchEvent: function() { return true; },
-            onresize: null,
-            onscroll: null
-          };
+          const originalViewport = window.visualViewport;
           
-          // window.visualViewport 완전 교체
+          // 모든 속성 접근을 가로채는 프록시 생성
+          const viewportProxy = new Proxy(originalViewport, {
+            get: function(target, property) {
+              // 크기 관련 속성들은 고정값 반환
+              if (property === 'width') return initialWidth;
+              if (property === 'height') return initialHeight;
+              if (property === 'offsetLeft') return 0;
+              if (property === 'offsetTop') return 0;
+              if (property === 'pageLeft') return 0;
+              if (property === 'pageTop') return 0;
+              if (property === 'scale') return 1;
+              
+              // 이벤트 관련 메서드들은 빈 함수 반환
+              if (property === 'addEventListener') {
+                return function(type, listener, options) {
+                  // resize, scroll 이벤트는 무시
+                  if (type === 'resize' || type === 'scroll') {
+                    return;
+                  }
+                  return originalViewport.addEventListener.call(originalViewport, type, listener, options);
+                };
+              }
+              
+              if (property === 'removeEventListener') {
+                return function(type, listener, options) {
+                  if (type === 'resize' || type === 'scroll') {
+                    return;
+                  }
+                  return originalViewport.removeEventListener.call(originalViewport, type, listener, options);
+                };
+              }
+              
+              // 기타 속성들은 원본값 반환
+              return target[property];
+            },
+            
+            set: function(target, property, value) {
+              // onresize, onscroll 이벤트 핸들러 설정 무시
+              if (property === 'onresize' || property === 'onscroll') {
+                return true;
+              }
+              // 기타 속성 설정은 허용하지 않음
+              return true;
+            }
+          });
+          
+          // 프록시로 원본 대체 시도
           try {
             Object.defineProperty(window, 'visualViewport', {
-              value: mockViewport,
-              writable: false,
-              configurable: false
+              get: function() { return viewportProxy; },
+              configurable: true
             });
+            console.log('Visual Viewport 프록시 설정 완료');
           } catch (e) {
-            window.visualViewport = mockViewport;
+            console.log('Visual Viewport 프록시 설정 실패:', e);
           }
         }
         
-        // window 크기도 고정
+        // window 크기 관련 속성들도 프록시로 가로채기
+        const originalWindow = window;
+        
+        // innerHeight/innerWidth 프록시
         try {
           Object.defineProperty(window, 'innerHeight', {
-            value: initialHeight,
-            writable: false
+            get: function() { return initialHeight; },
+            configurable: true
           });
           Object.defineProperty(window, 'innerWidth', {
-            value: initialWidth,
-            writable: false
+            get: function() { return initialWidth; },
+            configurable: true
           });
-        } catch (e) {}
+          console.log('Window 크기 속성 고정 완료');
+        } catch (e) {
+          console.log('Window 크기 속성 고정 실패:', e);
+        }
         
         // resize 이벤트 완전 차단
         const originalAddEventListener = window.addEventListener;
         window.addEventListener = function(type, listener, options) {
           if (type === 'resize' || type === 'orientationchange') {
+            console.log('차단된 이벤트:', type);
             return;
           }
           return originalAddEventListener.call(this, type, listener, options);
         };
+        
+        console.log('Viewport 가로채기 완료');
       })();
     </script>
     <style>

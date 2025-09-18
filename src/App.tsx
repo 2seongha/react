@@ -55,101 +55,96 @@ const App: React.FC = () => {
       document.documentElement.style.setProperty('--initial-width', `${initialWidth}px`);
       document.documentElement.style.setProperty('--initial-height', `${initialHeight}px`);
       
-      // Visual Viewport API 자체를 완전히 대체
+      // Visual Viewport API 프록시로 가로채기 (추가 보안)
       if (window.visualViewport) {
+        console.log('React에서 Visual Viewport 추가 보안 설정');
         
-        // 완전히 새로운 Mock 객체로 대체
-        const mockViewport = {
-          width: initialWidth,
-          height: initialHeight,
-          offsetLeft: 0,
-          offsetTop: 0,
-          pageLeft: 0,
-          pageTop: 0,
-          scale: 1,
+        // 이미 프록시가 설정되어 있는지 확인
+        if (window.visualViewport.width !== initialWidth || window.visualViewport.height !== initialHeight) {
+          console.log('Visual Viewport가 아직 변경됨 - 추가 처리 필요');
           
-          // 이벤트 리스너 메서드들을 빈 함수로
-          addEventListener: () => {},
-          removeEventListener: () => {},
-          dispatchEvent: () => true,
+          // 프록시가 작동하지 않는 경우 강제로 속성 오버라이드
+          const originalViewport = window.visualViewport;
+          const fixedProperties: Record<string, { value: number }> = {
+            width: { value: initialWidth },
+            height: { value: initialHeight },
+            offsetLeft: { value: 0 },
+            offsetTop: { value: 0 },
+            pageLeft: { value: 0 },
+            pageTop: { value: 0 },
+            scale: { value: 1 }
+          };
           
-          // 이벤트 핸들러 속성들도 무력화
-          onresize: null,
-          onscroll: null
-        };
-        
-        // window.visualViewport를 완전히 교체
-        try {
-          Object.defineProperty(window, 'visualViewport', {
-            value: mockViewport,
-            writable: false,
-            configurable: false
+          // 각 속성을 개별적으로 오버라이드
+          Object.keys(fixedProperties).forEach(prop => {
+            try {
+              Object.defineProperty(originalViewport, prop, {
+                get: () => fixedProperties[prop].value,
+                configurable: true
+              });
+            } catch (e) {
+              console.log(`${prop} 속성 오버라이드 실패:`, e);
+            }
           });
-        } catch (e) {
-          // defineProperty 실패 시 직접 할당
-          (window as any).visualViewport = mockViewport;
         }
         
-        console.log('Visual Viewport API 완전 대체 완료');
+        console.log('Visual Viewport 추가 보안 완료');
       }
       
-      // window 크기 관련 속성들도 고정
-      try {
-        Object.defineProperty(window, 'innerHeight', {
-          value: initialHeight,
-          writable: false,
-          configurable: false
-        });
+      // window 크기 및 screen 속성들 추가 보안
+      console.log('현재 window 크기:', window.innerWidth, 'x', window.innerHeight);
+      
+      // window 크기가 아직 변경되었다면 추가 처리
+      if (window.innerWidth !== initialWidth || window.innerHeight !== initialHeight) {
+        console.log('Window 크기 변경 감지 - 강제 복원');
         
-        Object.defineProperty(window, 'innerWidth', {
-          value: initialWidth,
-          writable: false,
-          configurable: false
-        });
-        
-        Object.defineProperty(window, 'outerHeight', {
-          value: initialHeight,
-          writable: false,
-          configurable: false
-        });
-        
-        Object.defineProperty(window, 'outerWidth', {
-          value: initialWidth,
-          writable: false,
-          configurable: false
-        });
-      } catch (e) {
-        console.log('Window 속성 고정 실패:', e);
+        try {
+          Object.defineProperty(window, 'innerHeight', {
+            get: () => initialHeight,
+            configurable: true
+          });
+          
+          Object.defineProperty(window, 'innerWidth', {
+            get: () => initialWidth,
+            configurable: true
+          });
+          
+          console.log('Window 크기 강제 복원 완료');
+        } catch (e) {
+          console.log('Window 속성 복원 실패:', e);
+        }
       }
       
-      // screen 객체도 고정
-      try {
-        Object.defineProperty(screen, 'width', {
-          value: initialWidth,
-          writable: false,
-          configurable: false
-        });
-        
-        Object.defineProperty(screen, 'height', {
-          value: initialHeight,
-          writable: false,
-          configurable: false
-        });
-        
-        Object.defineProperty(screen, 'availWidth', {
-          value: initialWidth,
-          writable: false,
-          configurable: false
-        });
-        
-        Object.defineProperty(screen, 'availHeight', {
-          value: initialHeight,
-          writable: false,
-          configurable: false
-        });
-      } catch (e) {
-        console.log('Screen 속성 고정 실패:', e);
-      }
+      // 주기적으로 Visual Viewport 크기 모니터링 및 강제 복원
+      const monitorViewport = () => {
+        if (window.visualViewport) {
+          const currentWidth = window.visualViewport.width;
+          const currentHeight = window.visualViewport.height;
+          
+          if (currentWidth !== initialWidth || currentHeight !== initialHeight) {
+            console.log(`Viewport 크기 변경 감지: ${currentWidth}x${currentHeight} -> ${initialWidth}x${initialHeight}로 복원`);
+            
+            // 강제로 속성 재설정
+            try {
+              Object.defineProperty(window.visualViewport, 'width', {
+                get: () => initialWidth,
+                configurable: true
+              });
+              Object.defineProperty(window.visualViewport, 'height', {
+                get: () => initialHeight,
+                configurable: true
+              });
+            } catch (e) {}
+          }
+        }
+      };
+      
+      // 100ms마다 모니터링
+      const monitorInterval = setInterval(monitorViewport, 100);
+      
+      return () => {
+        clearInterval(monitorInterval);
+      };
       
       // 고정 크기 강제 적용
       document.documentElement.style.width = `${initialWidth}px`;
