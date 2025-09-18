@@ -1,14 +1,6 @@
 /* 키보드 높이 보상을 위한 동적 높이 설정 */
-html, body {
-  height: calc(var(--current-vh, 1vh) * 100) !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-ion-app, #root {
-  height: calc(var(--current-vh, 1vh) * 100) !important;
-  width: 100% !important;
+html {
+  height: 300px !important;
   overflow: hidden !important;
 }
 
