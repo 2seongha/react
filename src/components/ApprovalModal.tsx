@@ -40,6 +40,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   page = undefined,
 }) => {
   const modal = useRef<HTMLIonModalElement>(null);
+  const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const [canDismiss, setCanDismiss] = useState(true);
   const [textValue, setTextValue] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,6 +54,20 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const handleTextChange = (e: any) => {
     const value = (e.target as HTMLTextAreaElement).value;
     setTextValue(value);
+  };
+
+  const handleTextareaFocus = () => {
+    if (textareaRef.current) {
+      // opacity를 0으로 설정
+      textareaRef.current.style.opacity = '0';
+      
+      // setTimeout으로 즉시 1로 변경
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.style.opacity = '1';
+        }
+      }, 1000);
+    }
   };
 
   const handelModalWillPresent = () => {
@@ -120,7 +135,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       canDismiss={canDismiss}
       initialBreakpoint={1} breakpoints={[0, 1]}
       style={{
-        '--max-height': 'calc(100% - 48px)',
+        '--max-height': 'calc(100% - 48px - var(--ion-safe-area-top))',
+        position:'fixed',
+        top: 0,
       }}
     >
       <AppBar
@@ -135,6 +152,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
         <div className='approval-modal-content-wrapper'>
           <span style={{ fontWeight: '600' }}>결재 의견</span>
           <IonTextarea
+            ref={textareaRef}
             mode='md'
             style={{
               marginTop: '8px',
@@ -143,6 +161,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             rows={5}
             value={textValue}
             onInput={handleTextChange}
+            onIonFocus={handleTextareaFocus}
             labelPlacement='start'
             fill="outline"
             placeholder="결재 의견을 입력해 주세요."
