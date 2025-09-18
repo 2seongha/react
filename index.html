@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-viewport">
     <title>iFLOW5</title>
     
     <!-- Pretendard 폰트 preload (중요 웨이트만) -->
@@ -86,28 +86,14 @@
       }
     </style>
   </head>
-  <body style="height: 100vh; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; touch-action: none;">
+  <body style="margin: 0; padding: 0; height: 100vh; height: 100dvh; overflow: hidden;">
     <style>
-      /* #root 컨테이너도 완전 고정 */
+      /* Flutter web처럼 단순하게 */
       #root {
         height: 100vh;
-        height: calc(var(--vh, 1vh) * 100);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        height: 100dvh;
+        width: 100%;
         overflow: hidden;
-        touch-action: none;
-      }
-      
-      /* IonContent 내부에서만 터치 허용 */
-      ion-content {
-        touch-action: pan-y;
-      }
-      
-      ion-content * {
-        touch-action: manipulation;
       }
     </style>
     <div id="root"></div>

@@ -41,80 +41,29 @@ const App: React.FC = () => {
 
     initializeWebview();
     
-    // Visual Viewport를 고정해서 키보드가 올라와도 스크롤 방지
-    const setupViewportFixed = () => {
-      // 초기 viewport 높이를 고정
-      const initialHeight = window.innerHeight;
-      document.documentElement.style.setProperty('--vh', `${initialHeight * 0.01}px`);
-      document.documentElement.style.height = `${initialHeight}px`;
-      document.body.style.height = `${initialHeight}px`;
-      document.body.style.position = 'fixed';
-      document.body.style.top = '0';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.overflow = 'hidden';
+    // Flutter web 스타일의 간단한 viewport 처리
+    const setupFlutterWebStyle = () => {
+      // 동적 viewport height 설정
+      const setViewportHeight = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      };
       
-      // Visual Viewport 이벤트로 스크롤 완전 차단
-      if (window.visualViewport) {
-        const handleViewportChange = () => {
-          // 키보드가 올라와도 viewport 위치를 0,0으로 고정
-          window.scrollTo(0, 0);
-          document.body.scrollTop = 0;
-          document.documentElement.scrollTop = 0;
-        };
-        
-        window.visualViewport.addEventListener('scroll', handleViewportChange);
-        window.visualViewport.addEventListener('resize', handleViewportChange);
-        
-        return () => {
-          window.visualViewport?.removeEventListener('scroll', handleViewportChange);
-          window.visualViewport?.removeEventListener('resize', handleViewportChange);
-        };
-      }
-    };
-    
-    const cleanup = setupViewportFixed();
-    
-    // viewport 스크롤 완전 차단
-    const preventViewportScroll = (e: Event) => {
-      // IonContent 내부가 아닌 경우 스크롤 차단
-      const target = e.target as Element;
-      const isInsideIonContent = target?.closest?.('ion-content');
+      setViewportHeight();
       
-      if (!isInsideIonContent) {
-        e.preventDefault();
-        e.stopPropagation();
-        window.scrollTo(0, 0);
-        return false;
-      }
-    };
-    
-    const preventTouchMove = (e: TouchEvent) => {
-      const target = e.target as Element;
-      const isInsideIonContent = target?.closest?.('ion-content');
+      // resize 이벤트만 처리 (과도한 이벤트 차단 없이)
+      window.addEventListener('resize', setViewportHeight);
+      window.addEventListener('orientationchange', setViewportHeight);
       
-      // IonContent 외부에서의 터치 이동 차단
-      if (!isInsideIonContent) {
-        e.preventDefault();
-        return false;
-      }
+      return () => {
+        window.removeEventListener('resize', setViewportHeight);
+        window.removeEventListener('orientationchange', setViewportHeight);
+      };
     };
     
-    // 모든 스크롤 관련 이벤트 차단
-    window.addEventListener('scroll', preventViewportScroll, { passive: false });
-    window.addEventListener('touchmove', preventTouchMove, { passive: false });
-    window.addEventListener('wheel', preventViewportScroll, { passive: false });
-    document.addEventListener('scroll', preventViewportScroll, { passive: false });
-    document.body.addEventListener('scroll', preventViewportScroll, { passive: false });
+    const cleanup = setupFlutterWebStyle();
     
-    return () => {
-      cleanup?.();
-      window.removeEventListener('scroll', preventViewportScroll);
-      window.removeEventListener('touchmove', preventTouchMove);
-      window.removeEventListener('wheel', preventViewportScroll);
-      document.removeEventListener('scroll', preventViewportScroll);
-      document.body.removeEventListener('scroll', preventViewportScroll);
-    };
+    return cleanup;
   }, []);
 
   useEffect(() => {
