@@ -4,8 +4,28 @@ ion-content {
   --offset-top: 0px;
 }
 
+/* Viewport 완전 고정 - 키보드와 관계없이 고정 */
 html, body {
-  height: 100dvh !important;
+  height: 100vh !important;
+  height: calc(var(--vh, 1vh) * 100) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+
+/* IonApp도 동일하게 고정 */
+ion-app {
+  height: 100vh !important;
+  height: calc(var(--vh, 1vh) * 100) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  overflow: hidden !important;
 }
 
 ion-content::part(scroll) {

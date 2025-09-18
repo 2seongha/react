@@ -40,13 +40,55 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-    const vh = window.innerHeight * 0.01;
-    // document.documentElement.style.setProperty('--vh', `${vh}px`);
-    // window.visualViewport?.addEventListener('scroll', () => {
-    //   console.log('viewport scroll');
-    //   // const vh = window.visualViewport?.height;
-    //   // document.documentElement.style.setProperty('--vh', `${vh}px`);
-    // });
+    
+    // Visual Viewport를 고정해서 키보드가 올라와도 스크롤 방지
+    const preventViewportScroll = () => {
+      // 초기 viewport 높이를 고정
+      const initialHeight = window.innerHeight;
+      document.documentElement.style.setProperty('--vh', `${initialHeight * 0.01}px`);
+      document.documentElement.style.height = `${initialHeight}px`;
+      document.body.style.height = `${initialHeight}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+      
+      // Visual Viewport 이벤트로 스크롤 완전 차단
+      if (window.visualViewport) {
+        const handleViewportChange = () => {
+          // 키보드가 올라와도 viewport 위치를 0,0으로 고정
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
+        };
+        
+        window.visualViewport.addEventListener('scroll', handleViewportChange);
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        
+        return () => {
+          window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+          window.visualViewport?.removeEventListener('resize', handleViewportChange);
+        };
+      }
+    };
+    
+    const cleanup = preventViewportScroll();
+    
+    // 추가 스크롤 방지
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
+    };
+    
+    window.addEventListener('scroll', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+    
+    return () => {
+      cleanup?.();
+      window.removeEventListener('scroll', preventScroll);
+      window.removeEventListener('touchmove', preventScroll);
+    };
   }, []);
 
   useEffect(() => {
