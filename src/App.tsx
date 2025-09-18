@@ -41,20 +41,125 @@ const App: React.FC = () => {
 
     initializeWebview();
     
-    // 키보드 감지 완전 차단 - Layout/Visual Viewport 영향 없음
-    const setupKeyboardBlocking = () => {
-      // 초기 viewport 크기 고정
+    // Visual Viewport API 완전 대체 및 무력화
+    const setupViewportReplacement = () => {
+      // 초기 viewport 크기를 절대값으로 고정
       const initialWidth = window.innerWidth;
       const initialHeight = window.innerHeight;
       const initialVH = initialHeight * 0.01;
+      
+      console.log(`고정 크기: ${initialWidth}x${initialHeight}`);
       
       // CSS 변수 설정
       document.documentElement.style.setProperty('--vh', `${initialVH}px`);
       document.documentElement.style.setProperty('--initial-width', `${initialWidth}px`);
       document.documentElement.style.setProperty('--initial-height', `${initialHeight}px`);
       
+      // Visual Viewport API 자체를 완전히 대체
+      if (window.visualViewport) {
+        
+        // 완전히 새로운 Mock 객체로 대체
+        const mockViewport = {
+          width: initialWidth,
+          height: initialHeight,
+          offsetLeft: 0,
+          offsetTop: 0,
+          pageLeft: 0,
+          pageTop: 0,
+          scale: 1,
+          
+          // 이벤트 리스너 메서드들을 빈 함수로
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => true,
+          
+          // 이벤트 핸들러 속성들도 무력화
+          onresize: null,
+          onscroll: null
+        };
+        
+        // window.visualViewport를 완전히 교체
+        try {
+          Object.defineProperty(window, 'visualViewport', {
+            value: mockViewport,
+            writable: false,
+            configurable: false
+          });
+        } catch (e) {
+          // defineProperty 실패 시 직접 할당
+          (window as any).visualViewport = mockViewport;
+        }
+        
+        console.log('Visual Viewport API 완전 대체 완료');
+      }
+      
+      // window 크기 관련 속성들도 고정
+      try {
+        Object.defineProperty(window, 'innerHeight', {
+          value: initialHeight,
+          writable: false,
+          configurable: false
+        });
+        
+        Object.defineProperty(window, 'innerWidth', {
+          value: initialWidth,
+          writable: false,
+          configurable: false
+        });
+        
+        Object.defineProperty(window, 'outerHeight', {
+          value: initialHeight,
+          writable: false,
+          configurable: false
+        });
+        
+        Object.defineProperty(window, 'outerWidth', {
+          value: initialWidth,
+          writable: false,
+          configurable: false
+        });
+      } catch (e) {
+        console.log('Window 속성 고정 실패:', e);
+      }
+      
+      // screen 객체도 고정
+      try {
+        Object.defineProperty(screen, 'width', {
+          value: initialWidth,
+          writable: false,
+          configurable: false
+        });
+        
+        Object.defineProperty(screen, 'height', {
+          value: initialHeight,
+          writable: false,
+          configurable: false
+        });
+        
+        Object.defineProperty(screen, 'availWidth', {
+          value: initialWidth,
+          writable: false,
+          configurable: false
+        });
+        
+        Object.defineProperty(screen, 'availHeight', {
+          value: initialHeight,
+          writable: false,
+          configurable: false
+        });
+      } catch (e) {
+        console.log('Screen 속성 고정 실패:', e);
+      }
+      
       // 고정 크기 강제 적용
+      document.documentElement.style.width = `${initialWidth}px`;
       document.documentElement.style.height = `${initialHeight}px`;
+      document.documentElement.style.position = 'fixed';
+      document.documentElement.style.top = '0';
+      document.documentElement.style.left = '0';
+      document.documentElement.style.overflow = 'hidden';
+      
+      document.body.style.width = `${initialWidth}px`;
       document.body.style.height = `${initialHeight}px`;
       document.body.style.position = 'fixed';
       document.body.style.top = '0';
@@ -62,79 +167,19 @@ const App: React.FC = () => {
       document.body.style.right = '0';
       document.body.style.overflow = 'hidden';
       
-      // Visual Viewport API 완전 무력화
-      if (window.visualViewport) {
-        // 모든 Visual Viewport 이벤트를 빈 함수로 오버라이드
-        const originalAddEventListener = window.visualViewport.addEventListener;
-        const originalRemoveEventListener = window.visualViewport.removeEventListener;
-        
-        // addEventListener를 무력화하여 키보드 관련 이벤트 감지 차단
-        window.visualViewport.addEventListener = function(type: string, listener: any, options?: any) {
-          // 키보드 관련 이벤트는 등록하지 않음
-          if (type === 'resize' || type === 'scroll') {
-            return;
-          }
-          return originalAddEventListener.call(this, type, listener, options);
-        };
-        
-        // removeEventListener도 무력화
-        window.visualViewport.removeEventListener = function(type: string, listener: any, options?: any) {
-          if (type === 'resize' || type === 'scroll') {
-            return;
-          }
-          return originalRemoveEventListener.call(this, type, listener, options);
-        };
-        
-        // Visual Viewport 속성들을 고정값으로 오버라이드
-        try {
-          Object.defineProperty(window.visualViewport, 'width', {
-            get: () => initialWidth,
-            configurable: false
-          });
-          Object.defineProperty(window.visualViewport, 'height', {
-            get: () => initialHeight,
-            configurable: false
-          });
-          Object.defineProperty(window.visualViewport, 'offsetLeft', {
-            get: () => 0,
-            configurable: false
-          });
-          Object.defineProperty(window.visualViewport, 'offsetTop', {
-            get: () => 0,
-            configurable: false
-          });
-          Object.defineProperty(window.visualViewport, 'scale', {
-            get: () => 1,
-            configurable: false
-          });
-        } catch (e) {
-          // 일부 브라우저에서 제한될 수 있음
-        }
-      }
-      
-      // window.innerHeight/innerWidth도 고정값 반환하도록 오버라이드
-      const originalInnerHeight = window.innerHeight;
-      const originalInnerWidth = window.innerWidth;
-      
-      Object.defineProperty(window, 'innerHeight', {
-        get: () => originalInnerHeight,
-        configurable: false
-      });
-      
-      Object.defineProperty(window, 'innerWidth', {
-        get: () => originalInnerWidth,
-        configurable: false
-      });
-      
-      // CSS의 100vh, 100vw도 고정값으로 강제
+      // CSS로 추가 강제
       const style = document.createElement('style');
       style.textContent = `
-        :root {
+        * {
+          --real-vw: ${initialWidth / 100}px !important;
           --real-vh: ${initialVH}px !important;
         }
-        html, body {
+        html, body, ion-app {
+          width: ${initialWidth}px !important;
           height: ${initialHeight}px !important;
+          min-width: ${initialWidth}px !important;
           min-height: ${initialHeight}px !important;
+          max-width: ${initialWidth}px !important;
           max-height: ${initialHeight}px !important;
         }
       `;
@@ -145,12 +190,14 @@ const App: React.FC = () => {
       document.body.scrollTop = 0;
       document.documentElement.scrollTop = 0;
       
+      console.log('Viewport 완전 고정 완료');
+      
       return () => {
-        // 복원은 하지 않음 (키보드 감지 차단 유지)
+        // 복원하지 않음
       };
     };
     
-    const cleanup = setupKeyboardBlocking();
+    const cleanup = setupViewportReplacement();
     
     // resize 이벤트도 완전 차단
     const blockResize = (e: Event) => {

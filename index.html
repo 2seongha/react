@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover, interactive-widget=resizes-visual">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover, interactive-widget=overlays-content">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>iFLOW5</title>
     
     <!-- Pretendard 폰트 preload (중요 웨이트만) -->
@@ -87,6 +90,65 @@
     </style>
   </head>
   <body style="height: 100vh; position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; touch-action: none;">
+    <script>
+      // 페이지 로드 즉시 Visual Viewport 무력화
+      (function() {
+        const initialWidth = window.innerWidth;
+        const initialHeight = window.innerHeight;
+        
+        console.log('즉시 Viewport 고정:', initialWidth, 'x', initialHeight);
+        
+        // Visual Viewport API 완전 대체
+        if (window.visualViewport) {
+          const mockViewport = {
+            width: initialWidth,
+            height: initialHeight,
+            offsetLeft: 0,
+            offsetTop: 0,
+            pageLeft: 0,
+            pageTop: 0,
+            scale: 1,
+            addEventListener: function() {},
+            removeEventListener: function() {},
+            dispatchEvent: function() { return true; },
+            onresize: null,
+            onscroll: null
+          };
+          
+          // window.visualViewport 완전 교체
+          try {
+            Object.defineProperty(window, 'visualViewport', {
+              value: mockViewport,
+              writable: false,
+              configurable: false
+            });
+          } catch (e) {
+            window.visualViewport = mockViewport;
+          }
+        }
+        
+        // window 크기도 고정
+        try {
+          Object.defineProperty(window, 'innerHeight', {
+            value: initialHeight,
+            writable: false
+          });
+          Object.defineProperty(window, 'innerWidth', {
+            value: initialWidth,
+            writable: false
+          });
+        } catch (e) {}
+        
+        // resize 이벤트 완전 차단
+        const originalAddEventListener = window.addEventListener;
+        window.addEventListener = function(type, listener, options) {
+          if (type === 'resize' || type === 'orientationchange') {
+            return;
+          }
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+      })();
+    </script>
     <style>
       /* #root 컨테이너도 완전 고정 */
       #root {
