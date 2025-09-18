@@ -41,141 +41,166 @@ const App: React.FC = () => {
 
     initializeWebview();
     
-    // Visual Viewport를 고정해서 키보드가 올라와도 스크롤 방지 (iOS 최적화)
+    // Viewport 크기 변화 완전 차단 - 무조건 고정 크기 유지
     const setupViewportFixed = () => {
-      // 초기 viewport 높이를 고정
+      // 초기 viewport 크기를 완전히 고정
+      const initialWidth = window.innerWidth;
       const initialHeight = window.innerHeight;
-      document.documentElement.style.setProperty('--vh', `${initialHeight * 0.01}px`);
-      document.documentElement.style.height = `${initialHeight}px`;
-      document.body.style.height = `${initialHeight}px`;
-      document.body.style.position = 'fixed';
-      document.body.style.top = '0';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.overflow = 'hidden';
+      const initialVH = initialHeight * 0.01;
       
-      // iOS에서 즉시 스크롤 차단을 위한 동기 처리
-      const immediateScrollReset = () => {
+      // CSS 변수 고정
+      document.documentElement.style.setProperty('--vh', `${initialVH}px`);
+      document.documentElement.style.setProperty('--initial-width', `${initialWidth}px`);
+      document.documentElement.style.setProperty('--initial-height', `${initialHeight}px`);
+      
+      // 완전 고정 스타일 적용
+      const applyFixedDimensions = () => {
+        // HTML과 body를 초기 크기로 완전 고정
+        document.documentElement.style.width = `${initialWidth}px`;
+        document.documentElement.style.height = `${initialHeight}px`;
+        document.documentElement.style.minWidth = `${initialWidth}px`;
+        document.documentElement.style.minHeight = `${initialHeight}px`;
+        document.documentElement.style.maxWidth = `${initialWidth}px`;
+        document.documentElement.style.maxHeight = `${initialHeight}px`;
+        document.documentElement.style.position = 'fixed';
+        document.documentElement.style.top = '0';
+        document.documentElement.style.left = '0';
+        document.documentElement.style.overflow = 'hidden';
+        
+        document.body.style.width = `${initialWidth}px`;
+        document.body.style.height = `${initialHeight}px`;
+        document.body.style.minWidth = `${initialWidth}px`;
+        document.body.style.minHeight = `${initialHeight}px`;
+        document.body.style.maxWidth = `${initialWidth}px`;
+        document.body.style.maxHeight = `${initialHeight}px`;
+        document.body.style.position = 'fixed';
+        document.body.style.top = '0';
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.bottom = '0';
+        document.body.style.overflow = 'hidden';
+        
+        // 스크롤 위치도 고정
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       };
       
-      // Visual Viewport 이벤트로 스크롤 완전 차단 (iOS 최적화)
+      // 초기 적용
+      applyFixedDimensions();
+      
+      // Visual Viewport 크기 변화 강제 차단
       if (window.visualViewport) {
-        let rafId: number;
+        let isBlocking = false;
         
-        const handleViewportChange = () => {
-          // 즉시 동기 스크롤 리셋 (깜빡임 방지)
-          immediateScrollReset();
+        const blockViewportChanges = () => {
+          if (isBlocking) return;
+          isBlocking = true;
           
-          // 추가적인 비동기 보정
-          if (rafId) {
-            cancelAnimationFrame(rafId);
+          // 즉시 고정 크기 복원
+          applyFixedDimensions();
+          
+          // Visual Viewport를 초기 크기로 강제 복원 시도
+          try {
+            // 일부 브라우저에서 viewport 크기를 강제로 설정
+            Object.defineProperty(window.visualViewport, 'width', {
+              value: initialWidth,
+              writable: false,
+              configurable: false
+            });
+            Object.defineProperty(window.visualViewport, 'height', {
+              value: initialHeight,
+              writable: false,
+              configurable: false
+            });
+          } catch (e) {
+            // 읽기 전용 속성이므로 에러 무시
           }
           
-          rafId = requestAnimationFrame(() => {
-            immediateScrollReset();
-            
-            // iOS에서 Visual Viewport offset 보정
-            if (window.visualViewport) {
-              const offsetX = window.visualViewport.offsetLeft;
-              const offsetY = window.visualViewport.offsetTop;
-              if (offsetX !== 0 || offsetY !== 0) {
-                window.scrollTo(-offsetX, -offsetY);
-              }
-            }
-          });
-        };
-        
-        const handleViewportResize = () => {
-          immediateScrollReset();
-          
-          // 리사이즈 완료 후 추가 보정
+          // 연속 호출로 강제 유지
           setTimeout(() => {
-            immediateScrollReset();
+            applyFixedDimensions();
+            setTimeout(() => {
+              applyFixedDimensions();
+              isBlocking = false;
+            }, 10);
           }, 10);
-          
-          handleViewportChange();
         };
         
-        // Visual Viewport 이벤트 리스닝
-        window.visualViewport.addEventListener('scroll', handleViewportChange);
-        window.visualViewport.addEventListener('resize', handleViewportResize);
+        // 모든 viewport 관련 이벤트 차단
+        window.visualViewport.addEventListener('scroll', blockViewportChanges);
+        window.visualViewport.addEventListener('resize', blockViewportChanges);
+        
+        // 추가 보안 - 주기적으로 크기 확인하고 복원
+        const intervalId = setInterval(() => {
+          if (window.visualViewport && 
+              (window.visualViewport.width !== initialWidth || 
+               window.visualViewport.height !== initialHeight)) {
+            blockViewportChanges();
+          }
+          applyFixedDimensions();
+        }, 100);
         
         return () => {
-          if (rafId) {
-            cancelAnimationFrame(rafId);
-          }
-          window.visualViewport?.removeEventListener('scroll', handleViewportChange);
-          window.visualViewport?.removeEventListener('resize', handleViewportResize);
+          window.visualViewport?.removeEventListener('scroll', blockViewportChanges);
+          window.visualViewport?.removeEventListener('resize', blockViewportChanges);
+          clearInterval(intervalId);
         };
       }
+      
+      // 일반 window resize도 차단
+      const blockWindowResize = () => {
+        applyFixedDimensions();
+      };
+      
+      window.addEventListener('resize', blockWindowResize);
+      window.addEventListener('orientationchange', blockWindowResize);
+      
+      return () => {
+        window.removeEventListener('resize', blockWindowResize);
+        window.removeEventListener('orientationchange', blockWindowResize);
+      };
     };
     
     const cleanup = setupViewportFixed();
     
-    // viewport 스크롤 완전 차단 (iOS 최적화)
-    let isScrollPreventing = false;
-    
-    const preventViewportScroll = (e: Event) => {
-      const target = e.target as Element;
-      const isInsideIonContent = target?.closest?.('ion-content');
-      
-      if (!isInsideIonContent && !isScrollPreventing) {
-        isScrollPreventing = true;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        
-        // 즉시 스크롤 위치 고정 (동기)
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-        
-        // 추가 보정 (비동기)
-        requestAnimationFrame(() => {
-          window.scrollTo(0, 0);
-          document.body.scrollTop = 0;
-          document.documentElement.scrollTop = 0;
-          isScrollPreventing = false;
-        });
-        
-        return false;
-      }
-    };
-    
-    const preventTouchMove = (e: TouchEvent) => {
+    // 스크롤과 터치 이벤트 완전 차단 (Viewport 고정 보조)
+    const preventAllMovement = (e: Event) => {
       const target = e.target as Element;
       const isInsideIonContent = target?.closest?.('ion-content');
       
       if (!isInsideIonContent) {
-        // 즉시 스크롤 위치 고정
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        // 즉시 위치 고정
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
         
-        e.preventDefault();
-        e.stopImmediatePropagation();
         return false;
       }
     };
     
-    // 모든 스크롤 관련 이벤트 차단 (더 적극적)
-    window.addEventListener('scroll', preventViewportScroll, { passive: false });
-    window.addEventListener('touchmove', preventTouchMove, { passive: false });
-    window.addEventListener('wheel', preventViewportScroll, { passive: false });
-    document.addEventListener('scroll', preventViewportScroll, { passive: false });
-    document.body.addEventListener('scroll', preventViewportScroll, { passive: false });
-    document.documentElement.addEventListener('scroll', preventViewportScroll, { passive: false });
+    // 모든 움직임 관련 이벤트 차단
+    const events = ['scroll', 'touchmove', 'wheel', 'touchstart', 'touchend'];
+    const targets = [window, document, document.body, document.documentElement];
+    
+    targets.forEach(target => {
+      events.forEach(eventType => {
+        target.addEventListener(eventType, preventAllMovement, { passive: false });
+      });
+    });
     
     return () => {
       cleanup?.();
-      window.removeEventListener('scroll', preventViewportScroll);
-      window.removeEventListener('touchmove', preventTouchMove);
-      window.removeEventListener('wheel', preventViewportScroll);
-      document.removeEventListener('scroll', preventViewportScroll);
-      document.body.removeEventListener('scroll', preventViewportScroll);
-      document.documentElement.removeEventListener('scroll', preventViewportScroll);
+      
+      // 모든 이벤트 리스너 제거
+      targets.forEach(target => {
+        events.forEach(eventType => {
+          target.removeEventListener(eventType, preventAllMovement);
+        });
+      });
     };
   }, []);
 

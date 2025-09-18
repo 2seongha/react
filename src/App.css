@@ -4,52 +4,88 @@ ion-content {
   --offset-top: 0px;
 }
 
-/* Viewport 완전 고정 - 키보드와 관계없이 고정 (iOS 최적화) */
+/* Viewport 크기 변화 완전 차단 - 무조건 고정 크기 유지 */
 html, body {
-  height: 100vh !important;
-  height: calc(var(--vh, 1vh) * 100) !important;
+  /* 초기 크기로 완전 고정 */
+  width: var(--initial-width, 100vw) !important;
+  height: var(--initial-height, 100vh) !important;
+  min-width: var(--initial-width, 100vw) !important;
+  min-height: var(--initial-height, 100vh) !important;
+  max-width: var(--initial-width, 100vw) !important;
+  max-height: var(--initial-height, 100vh) !important;
+  
+  /* 위치 고정 */
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
+  
+  /* 스크롤 및 오버플로우 완전 차단 */
   overflow: hidden !important;
   overscroll-behavior: none !important;
-  -webkit-overflow-scrolling: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: auto !important;
+  -webkit-scroll-behavior: auto !important;
+  
+  /* 터치 및 인터랙션 차단 */
   touch-action: none !important;
-  /* iOS에서 깜빡임 방지를 위한 하드웨어 가속 및 부드러운 전환 */
-  will-change: transform !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  
+  /* 하드웨어 가속 및 렌더링 최적화 */
+  will-change: auto !important;
   transform: translate3d(0, 0, 0) !important;
   -webkit-transform: translate3d(0, 0, 0) !important;
   -webkit-backface-visibility: hidden !important;
   backface-visibility: hidden !important;
   perspective: 1000px !important;
   -webkit-perspective: 1000px !important;
-  /* 스크롤 관련 완전 차단 */
-  scroll-behavior: auto !important;
-  -webkit-scroll-behavior: auto !important;
+  
+  /* 크기 조정 방지 */
+  resize: none !important;
+  zoom: 1 !important;
+  -webkit-text-size-adjust: none !important;
+  text-size-adjust: none !important;
 }
 
-/* IonApp도 동일하게 고정하되 내부 스크롤은 허용 */
+/* IonApp 크기 완전 고정 */
 ion-app {
-  height: 100vh !important;
-  height: calc(var(--vh, 1vh) * 100) !important;
+  /* 초기 크기로 완전 고정 */
+  width: var(--initial-width, 100vw) !important;
+  height: var(--initial-height, 100vh) !important;
+  min-width: var(--initial-width, 100vw) !important;
+  min-height: var(--initial-height, 100vh) !important;
+  max-width: var(--initial-width, 100vw) !important;
+  max-height: var(--initial-height, 100vh) !important;
+  
+  /* 위치 고정 */
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
+  
+  /* 스크롤 차단 */
   overflow: hidden !important;
+  overscroll-behavior: none !important;
+  scroll-behavior: auto !important;
+  -webkit-scroll-behavior: auto !important;
+  
+  /* 터치 차단 (내부 ion-content는 예외) */
   touch-action: none !important;
-  /* iOS 최적화 - 하드웨어 가속으로 깜빡임 방지 */
-  will-change: transform !important;
+  
+  /* 하드웨어 가속 */
+  will-change: auto !important;
   transform: translate3d(0, 0, 0) !important;
   -webkit-transform: translate3d(0, 0, 0) !important;
   -webkit-backface-visibility: hidden !important;
   backface-visibility: hidden !important;
-  /* 스크롤 관련 완전 차단 */
-  scroll-behavior: auto !important;
-  -webkit-scroll-behavior: auto !important;
+  
+  /* 크기 조정 방지 */
+  resize: none !important;
+  zoom: 1 !important;
 }
 
 /* IonContent는 정상적으로 스크롤 가능하도록 */
