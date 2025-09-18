@@ -190,15 +190,31 @@
           return originalAddEventListener.call(this, type, listener, options);
         };
         
-        // 모든 스크롤 관련 동작 완전 차단
-        const preventAllScrolling = function(e) {
+        // 선택적 스크롤 차단 (ion-content와 입력 요소는 허용)
+        const preventViewportScrolling = function(e) {
           const target = e.target;
           const isInsideIonContent = target && target.closest && target.closest('ion-content');
+          const isInputElement = target && (
+            target.tagName === 'INPUT' || 
+            target.tagName === 'TEXTAREA' || 
+            target.closest('ion-input') || 
+            target.closest('ion-textarea') ||
+            target.closest('ion-button') ||
+            target.closest('ion-item') ||
+            target.closest('ion-checkbox') ||
+            target.closest('ion-modal') ||
+            target.closest('ion-popover')
+          );
           
-          if (!isInsideIonContent) {
+          // ion-content 내부이거나 입력/버튼 요소면 허용
+          if (isInsideIonContent || isInputElement) {
+            return true;
+          }
+          
+          // 그 외는 차단하되 스크롤 이벤트만 차단 (터치는 부분적으로 허용)
+          if (e.type === 'scroll') {
             e.preventDefault();
             e.stopPropagation();
-            e.stopImmediatePropagation();
             
             // 강제로 스크롤 위치 복원
             window.scrollTo(0, 0);
@@ -207,17 +223,37 @@
             
             return false;
           }
+          
+          // 터치 이벤트는 덜 강력하게 차단
+          if (e.type === 'touchmove' || e.type === 'touchstart' || e.type === 'touchend') {
+            // 수직 터치만 차단 (수평 터치는 허용)
+            if (e.touches && e.touches.length > 0) {
+              // 멀티터치나 빠른 터치는 허용
+              return true;
+            }
+          }
+          
+          return true;
         };
         
         // 모든 스크롤 관련 이벤트 차단
         const scrollEvents = ['scroll', 'touchmove', 'wheel', 'touchstart', 'touchend', 'gesturestart', 'gesturechange', 'gestureend'];
         const targets = [window, document, document.documentElement, document.body];
         
+        // 스크롤 이벤트만 강력하게 차단, 터치는 선택적 차단
         targets.forEach(target => {
-          scrollEvents.forEach(eventType => {
-            target.addEventListener(eventType, preventAllScrolling, { 
+          ['scroll', 'wheel'].forEach(eventType => {
+            target.addEventListener(eventType, preventViewportScrolling, { 
               passive: false, 
               capture: true 
+            });
+          });
+          
+          // 터치 이벤트는 덜 강력하게 차단
+          ['touchmove', 'touchstart', 'touchend'].forEach(eventType => {
+            target.addEventListener(eventType, preventViewportScrolling, { 
+              passive: false, 
+              capture: false  // capture 모드 비활성화
             });
           });
         });
@@ -330,7 +366,7 @@
           const forceStyle = document.createElement('style');
           forceStyle.id = 'force-no-scroll';
           forceStyle.textContent = `
-            html, body, #root, ion-app {
+            html, body {
               position: fixed !important;
               top: 0 !important;
               left: 0 !important;
@@ -346,29 +382,51 @@
               overflow-x: hidden !important;
               overflow-y: hidden !important;
               overscroll-behavior: none !important;
-              overscroll-behavior-x: none !important;
-              overscroll-behavior-y: none !important;
-              touch-action: none !important;
               margin: 0 !important;
               padding: 0 !important;
               border: none !important;
-              scroll-behavior: auto !important;
-              -webkit-overflow-scrolling: auto !important;
             }
             
-            * {
-              scroll-behavior: auto !important;
-              -webkit-overflow-scrolling: auto !important;
+            #root {
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+              right: 0 !important;
+              bottom: 0 !important;
+              width: ${initialWidth}px !important;
+              height: ${initialHeight}px !important;
+              overflow: hidden !important;
             }
             
+            ion-app {
+              position: relative !important;
+              width: 100% !important;
+              height: 100% !important;
+              overflow: hidden !important;
+            }
+            
+            /* ion-content는 정상적인 높이와 스크롤 허용 */
             ion-content {
+              height: 100% !important;
               touch-action: pan-y !important;
               overflow-y: auto !important;
               -webkit-overflow-scrolling: touch !important;
+              position: relative !important;
             }
             
-            ion-content *, ion-input, ion-textarea, input, textarea {
+            /* 모든 상호작용 요소들은 터치 허용 */
+            ion-content *, 
+            ion-input, ion-textarea, input, textarea,
+            ion-button, ion-item, ion-checkbox, ion-radio,
+            ion-select, ion-datetime, ion-toggle,
+            ion-modal, ion-popover, ion-action-sheet {
               touch-action: manipulation !important;
+              pointer-events: auto !important;
+            }
+            
+            /* 전체 페이지 요소들은 터치 차단하되 UI 요소는 허용 */
+            html, body {
+              touch-action: none !important;
             }
           `;
           

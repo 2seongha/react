@@ -194,42 +194,64 @@ const App: React.FC = () => {
     
     const cleanup = setupViewportReplacement();
     
-    // 완전한 스크롤 및 이벤트 차단 (추가 보안)
-    const preventAllMovement = (e: Event) => {
+    // 선택적 스크롤 차단 (터치 상호작용 보장)
+    const preventViewportScroll = (e: Event) => {
       const target = e.target as Element;
       const isInsideIonContent = target?.closest?.('ion-content');
-      const isInputElement = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.closest?.('ion-input') || target?.closest?.('ion-textarea');
+      const isInteractiveElement = target && (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.closest('ion-input') || 
+        target.closest('ion-textarea') ||
+        target.closest('ion-button') ||
+        target.closest('ion-item') ||
+        target.closest('ion-checkbox') ||
+        target.closest('ion-radio') ||
+        target.closest('ion-select') ||
+        target.closest('ion-modal') ||
+        target.closest('ion-popover') ||
+        target.closest('ion-action-sheet')
+      );
       
-      // ion-content 내부이거나 입력 요소가 아닌 경우 모두 차단
-      if (!isInsideIonContent && !isInputElement) {
+      // 상호작용 요소나 ion-content 내부는 허용
+      if (isInsideIonContent || isInteractiveElement) {
+        return true;
+      }
+      
+      // 스크롤 이벤트만 차단 (터치는 허용)
+      if (e.type === 'scroll' || e.type === 'wheel') {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
         
-        // 즉시 스크롤 위치 고정
+        // 스크롤 위치 고정
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
         
         return false;
       }
+      
+      return true;
     };
     
-    // 모든 동작 관련 이벤트 차단
-    const allEvents = [
-      'scroll', 'touchmove', 'wheel', 'touchstart', 'touchend',
-      'resize', 'orientationchange', 'gesturestart', 'gesturechange', 'gestureend',
-      'drag', 'dragstart', 'dragend', 'drop'
-    ];
+    // 스크롤 관련 이벤트만 선택적 차단
+    const scrollTargets = [window, document, document.body, document.documentElement];
     
-    const allTargets = [window, document, document.body, document.documentElement];
-    
-    allTargets.forEach(target => {
-      allEvents.forEach(eventType => {
-        target.addEventListener(eventType, preventAllMovement, { 
+    scrollTargets.forEach(target => {
+      // 스크롤과 wheel 이벤트만 강력하게 차단
+      ['scroll', 'wheel'].forEach(eventType => {
+        target.addEventListener(eventType, preventViewportScroll, { 
           passive: false, 
           capture: true 
         });
+      });
+      
+      // resize는 계속 차단
+      ['resize', 'orientationchange'].forEach(eventType => {
+        target.addEventListener(eventType, (e) => {
+          e.preventDefault();
+          return false;
+        }, { passive: false });
       });
     });
     
@@ -255,10 +277,10 @@ const App: React.FC = () => {
       cleanup?.();
       clearInterval(positionInterval);
       
-      // 모든 이벤트 리스너 제거
-      allTargets.forEach(target => {
-        allEvents.forEach(eventType => {
-          target.removeEventListener(eventType, preventAllMovement);
+      // 이벤트 리스너 제거
+      scrollTargets.forEach(target => {
+        ['scroll', 'wheel', 'resize', 'orientationchange'].forEach(eventType => {
+          target.removeEventListener(eventType, preventViewportScroll);
         });
       });
     };
