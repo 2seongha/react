@@ -41,16 +41,54 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    const initialViewportHeight = window.innerHeight;
-    const initialVh = initialViewportHeight * 0.01;
-    document.documentElement.style.boxShadow = 'inset 0 0 0 5px rgba(255, 0, 0)';
-    document.body.style.scale = '0.98';
-    document.documentElement.style.setProperty('--vh', `${initialVh}px`);
+    // viewport 강제 스크롤 설정
+    const forceScrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    };
 
-    // 이벤트에서 변화 무시 (또는 무조건 원래값으로 되돌림)
-    window.addEventListener('resize', () => {
-      document.documentElement.style.setProperty('--vh', `${initialVh}px`);
-    });
+    // viewport resize 시 강제 top 스크롤
+    const handleViewportChange = () => {
+      forceScrollToTop();
+    };
+
+    // scroll 이벤트 시 강제 top 스크롤
+    const handleScroll = () => {
+      forceScrollToTop();
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('orientationchange', handleViewportChange);
+    window.addEventListener('scroll', handleScroll, { passive: false });
+    document.addEventListener('scroll', handleScroll, { passive: false });
+    document.body.addEventListener('scroll', handleScroll, { passive: false });
+
+    // Visual Viewport API가 있는 경우
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      window.visualViewport.addEventListener('scroll', handleScroll);
+    }
+
+    // 초기 스크롤 위치 설정
+    forceScrollToTop();
+
+    // cleanup 함수 반환
+    const cleanup = () => {
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('orientationchange', handleViewportChange);
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+      document.body.removeEventListener('scroll', handleScroll);
+      
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+        window.visualViewport.removeEventListener('scroll', handleScroll);
+      }
+    };
+
+    return cleanup;
   }, []);
 
   useEffect(() => {
