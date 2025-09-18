@@ -51,10 +51,12 @@ const App: React.FC = () => {
     // viewport resize 시 강제 top 스크롤
     const handleViewportChange = () => {
       forceScrollToTop();
+      console.log('viewport change event');
     };
 
     // scroll 이벤트 시 강제 top 스크롤
     const handleScroll = () => {
+      console.log('scroll eevent');
       forceScrollToTop();
     };
 

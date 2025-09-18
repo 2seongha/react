@@ -274,7 +274,6 @@ const Settings: React.FC = () => {
               placeholder: '이름을 입력하세요',
               attributes: {
                 maxlength: 20,
-                readonly: true,
               },
             },
             {
@@ -284,7 +283,6 @@ const Settings: React.FC = () => {
               min: 1,
               max: 100,
               attributes: {
-                readonly: true,
               },
             },
             {
@@ -292,7 +290,6 @@ const Settings: React.FC = () => {
               type: 'email',
               placeholder: '이메일을 입력하세요',
               attributes: {
-                inputmode: 'none',
               },
             }
           ]}
