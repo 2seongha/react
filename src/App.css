@@ -9,6 +9,15 @@ html, body {
   height: 100dvh !important;
   width: 100dvh !important;
 }
+
+html {
+  border: 5px red;
+}
+
+body {
+  scale: .99;
+}
+
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;
