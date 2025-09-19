@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   IonContent,
   IonPage,
@@ -32,6 +32,10 @@ const Settings: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Input refs
+  const badgeInputRef = useRef<HTMLIonInputElement | null>(null);
+  const toastInputRef = useRef<HTMLIonInputElement | null>(null);
 
   const handleThemeChange = (value: string) => {
     const newTheme = value as 'light' | 'dark' | 'system';
@@ -56,6 +60,42 @@ const Settings: React.FC = () => {
   const handleHapticTest = (hapticType: string) => {
     console.log('Haptic 테스트:', hapticType);
     webviewHaptic(hapticType);
+  };
+
+  // Focus handlers for inputs
+  const handleInputFocus = (inputRef: React.RefObject<HTMLIonInputElement| null>) => {
+    if (inputRef.current) {
+      const inputElement = inputRef.current;
+      const parentElement = inputElement.parentElement;
+      
+      if (parentElement) {
+        // 클론 생성
+        const cloneInput = inputElement.cloneNode(true) as HTMLIonInputElement;
+        cloneInput.removeAttribute("id");
+        cloneInput.style.position = "absolute";
+        cloneInput.style.top = "0";
+        cloneInput.style.left = "0";
+        cloneInput.style.opacity = "0";
+        parentElement.appendChild(cloneInput);
+        
+        // 클론에 포커스
+        cloneInput.focus();
+        setTimeout(() => {
+          cloneInput.style.opacity = "1";
+          inputElement.style.opacity = "0";
+          (inputElement as any).disabled = true;
+        });
+
+        // 블러 이벤트 처리
+        cloneInput.addEventListener("blur", () => {
+          (inputElement as any).value = (cloneInput as any).value;
+          (inputElement as any).disabled = false;
+          inputElement.style.opacity = "1";
+          cloneInput.style.opacity = "0";
+          setTimeout(() => cloneInput.remove());
+        });
+      }
+    }
   };
 
 
@@ -115,10 +155,12 @@ const Settings: React.FC = () => {
           <IonItem>
             <IonLabel position="stacked">배지 숫자 테스트</IonLabel>
             <IonInput
+              ref={badgeInputRef}
               type="number"
               value={badgeNumber}
               placeholder="숫자를 입력하세요"
               onIonInput={(e) => setBadgeNumber(e.detail.value!)}
+              onFocus={() => handleInputFocus(badgeInputRef)}
               style={{ marginTop: '8px' }}
             />
           </IonItem>
@@ -138,10 +180,12 @@ const Settings: React.FC = () => {
           <IonItem>
             <IonLabel position="stacked">토스트 메시지 테스트</IonLabel>
             <IonInput
+              ref={toastInputRef}
               type="text"
               value={toastMessage}
               placeholder="토스트 메시지를 입력하세요"
               onIonInput={(e) => setToastMessage(e.detail.value!)}
+              onFocus={() => handleInputFocus(toastInputRef)}
               style={{ marginTop: '8px' }}
             />
           </IonItem>
