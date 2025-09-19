@@ -41,13 +41,13 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    function setAppHeight() {
-      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-    }
+    window.visualViewport!.addEventListener('scroll', () => {
 
-    window.addEventListener('resize', setAppHeight);
-    window.addEventListener('load', setAppHeight);
-    
+      window.scrollTo({
+        top: 0,
+        behavior: 'instant'
+      });
+    });
   }, []);
 
   useEffect(() => {
