@@ -41,38 +41,51 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    // viewport resize 시 앱을 visualViewport 최상단에 fix
-    const fixAppToTop = () => {
-      if (window.visualViewport) {
-        // visualViewport의 위치 정보 가져오기
-        const { offsetTop } = window.visualViewport;
+    // let scrollY = 0;
 
-        // body와 html도 함께 조정
-        document.body.style.position = 'absolute';
-        // document.body.style.top = `${offsetTop}px`;
-        document.body.style.bottom = `0px`;
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.documentElement.style.position = 'absolute';
-        // document.documentElement.style.top = `${offsetTop}px`;
-        document.documentElement.style.bottom = `0px`;
-      }
-    };
+    // function lockScroll() {
+    //   scrollY = window.scrollY;
 
-    // visualViewport resize 이벤트 리스너
-    if (window.visualViewport) {
-      const handleViewportResize = () => {
-        fixAppToTop();
-      };
+    //   document.body.style.position = 'fixed';
+    //   document.body.style.top = `-${scrollY}px`;
+    //   document.body.style.left = '0';
+    //   document.body.style.right = '0';
+    //   document.body.style.width = '100%';
+    //   document.body.style.overflow = 'hidden';
 
-      window.visualViewport.addEventListener('scroll', handleViewportResize);
-      window.visualViewport.addEventListener('resize', handleViewportResize);
+    //   document.documentElement.style.overflow = 'hidden';
+    // }
 
-      return () => {
-        window.visualViewport?.removeEventListener('scroll', handleViewportResize);
-        window.visualViewport?.removeEventListener('resize', handleViewportResize);
-      };
-    }
+    // function unlockScroll() {
+    //   document.body.style.position = '';
+    //   document.body.style.top = '';
+    //   document.body.style.left = '';
+    //   document.body.style.right = '';
+    //   document.body.style.width = '';
+    //   document.body.style.overflow = '';
+
+    //   document.documentElement.style.overflow = '';
+
+    //   window.scrollTo(0, scrollY);
+    // }
+
+    // if (window.visualViewport) {
+    //   const handleViewportChange = () => {
+    //     const { height } = window.visualViewport!;
+    
+    //     // 키보드가 올라왔는지 판단
+    //     const keyboardVisible = height < window.innerHeight;
+    
+    //     if (keyboardVisible) {
+    //       lockScroll();
+    //     } else {
+    //       unlockScroll();
+    //     }
+    //   };
+    
+    //   window.visualViewport.addEventListener('resize', handleViewportChange);
+    //   window.visualViewport.addEventListener('scroll', handleViewportChange);
+    // }
   }, []);
 
   useEffect(() => {
