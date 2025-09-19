@@ -41,13 +41,59 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    window.visualViewport!.addEventListener('scroll', () => {
-
-      window.scrollTo({
-        top: 0,
-        behavior: 'instant'
-      });
-    });
+    const isActuallyScrollable = (el: HTMLElement | null): boolean => {
+      if (!el) return false;
+    
+      const style = getComputedStyle(el);
+      const canScrollY =
+        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        el.scrollHeight > el.clientHeight;
+    
+      const canScrollX =
+        (style.overflowX === 'auto' || style.overflowX === 'scroll') &&
+        el.scrollWidth > el.clientWidth;
+    
+      return canScrollY || canScrollX;
+    };
+    
+    const findActuallyScrollableParent = async (el: HTMLElement | null): Promise<HTMLElement | null> => {
+      let current: HTMLElement | null = el;
+    
+      while (current && current !== document.body) {
+        // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
+        if (current.tagName === 'ION-CONTENT') {
+          const ionContent = current as any; // TS용 any, 또는 Capacitor/Ionic 타입 쓰면 더 좋음
+          if (ionContent.getScrollElement) {
+            const scrollEl: HTMLElement = await ionContent.getScrollElement();
+            if (isActuallyScrollable(scrollEl)) {
+              return scrollEl;
+            }
+          }
+          return null;
+        }
+    
+        // ✅ 일반 DOM: overflow + scrollHeight 판별
+        if (isActuallyScrollable(current)) return current;
+    
+        current = current.parentElement;
+      }
+    
+      return null;
+    };
+    
+    const handleTouchMove = async (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollableParent = await findActuallyScrollableParent(target);
+    
+      if (!scrollableParent) {
+        e.preventDefault(); // ✅ 스크롤 불가능하면 차단
+      }
+    };
+    
+    window.addEventListener('touchmove', (e) => {
+      // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
+      handleTouchMove(e);
+    }, { passive: false });
   }, []);
 
   useEffect(() => {
