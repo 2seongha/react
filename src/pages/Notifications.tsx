@@ -26,7 +26,8 @@ const Notifications: React.FC = () => {
   return (
     <IonPage className="notifications">
       <AppBar title={<span>알림</span>} />
-      <IonContent fullscreen>
+      <IonContent fullscreen scrollEvents={false} scrollX={false} scrollY={false}>
+        <div style={{ height: '100%', overflow: 'auto' }}>
       <Swiper onSwiper={(swiper) => swiperRef.current = swiper}
         onSlideChange={(swiper) => setValue(swiper.activeIndex)}
         style={{ height: "100%" }}>
@@ -40,6 +41,7 @@ const Notifications: React.FC = () => {
         </SwiperSlide>
         {/* 추가 슬라이드들 */}
       </Swiper>
+        </div>
       </IonContent>
       <BottomTabBar />
     </IonPage>

@@ -16,7 +16,8 @@ const MyPage: React.FC = () => {
         title={<span></span>}
         showBackButton
       />
-      <IonContent>
+      <IonContent scrollEvents={false} scrollX={false} scrollY={false}>
+        <div style={{ height: '100%', overflow: 'auto' }}>
         <div style={{ padding: '22px' }}>
           <span style={{ fontSize: '18px', fontWeight: '600' }}>내 정보</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
@@ -79,6 +80,7 @@ const MyPage: React.FC = () => {
             <span style={{ color: 'var(--ion-color-secondary)' }}>그룹명</span>
             <span>{corp?.corpNm}</span>
           </div>
+        </div>
         </div>
       </IonContent>
     </IonPage>

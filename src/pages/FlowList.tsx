@@ -78,7 +78,8 @@ const FlowList: React.FC = () => {
         showCount={true}
         count={totalCount}
       />
-      <IonContent scrollEvents={false} scrollX={false}>
+      <IonContent scrollEvents={false} scrollX={false} scrollY={false}>
+        <div style={{ height: '100%', overflow: 'auto' }}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -95,6 +96,7 @@ const FlowList: React.FC = () => {
             </div>
         }
 
+        </div>
       </IonContent>
     </IonPage>
   );

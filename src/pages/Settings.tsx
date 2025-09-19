@@ -78,7 +78,8 @@ const Settings: React.FC = () => {
   return (
     <IonPage>
       <AppBar title={<span>설정</span>} showBackButton={true} />
-      <IonContent>
+      <IonContent scrollEvents={false} scrollX={false} scrollY={false}>
+        <div style={{ height: '100%', overflow: 'auto' }}>
         <IonItem>
           <IonImg
             src={themeIcon}
@@ -456,6 +457,7 @@ const Settings: React.FC = () => {
             </div>
           </IonContent>
         </IonModal>
+        </div>
       </IonContent>
     </IonPage>
   );

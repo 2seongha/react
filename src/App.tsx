@@ -41,13 +41,43 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    window.visualViewport!.addEventListener('scroll', () => {
+    const isActuallyScrollable = (el: HTMLElement | null): boolean => {
+      if (!el) return false;
+      const style = getComputedStyle(el);
+      const canScrollY =
+        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        el.scrollHeight > el.clientHeight;
+      const canScrollX =
+        (style.overflowX === 'auto' || style.overflowX === 'scroll') &&
+        el.scrollWidth > el.clientWidth;
+    
+      return canScrollY || canScrollX;
+    };
+    
+    const findActuallyScrollableParent = (el: HTMLElement | null): HTMLElement | null => {
+      let current = el;
+      while (current && current !== document.body) {
+        if (isActuallyScrollable(current)) return current;
+        current = current.parentElement;
+      }
+      return null;
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollableParent = findActuallyScrollableParent(target);
+    
+      if (!scrollableParent) {
+        e.preventDefault(); // 실제로 스크롤할 곳이 없을 때만 막기
+      }
+    };
 
-      window.scrollTo({
-        top: 0,
-        behavior: 'instant'
-      });
-    });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    // 언마운트 시 이벤트 제거
+    return () => {
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
   }, []);
 
   useEffect(() => {
