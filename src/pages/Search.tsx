@@ -112,7 +112,7 @@ const Search: React.FC = () => {
   return (
     <IonPage className='search'>
       <IonContent>
-        <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent: 'center', paddingTop: 'var(--ion-safe-area-top)' }}>
+        <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent: 'center', marginTop: 'var(--ion-safe-area-top)' }}>
           <IonSearchbar
             ref={searchbarRef}
             mode='ios'

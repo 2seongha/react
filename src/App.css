@@ -1,7 +1,14 @@
 /* 키보드 높이 보상을 위한 동적 높이 설정 */
 html, body {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  height: 100dvh !important;
+  width: 100dvh !important;
 }
-
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;

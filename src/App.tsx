@@ -40,6 +40,14 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
+
+    function setAppHeight() {
+      document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+    }
+
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('load', setAppHeight);
+    
   }, []);
 
   useEffect(() => {

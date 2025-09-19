@@ -9,18 +9,15 @@
 .approval-modal-title-wrapper {
   padding: 36px;
   display: flex;
+  align-items: center;
   flex-direction: column;
 }
 
 .approval-modal-title-wrapper>span {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 25px;
+  font-weight: 700;
 }
 
 .approval-modal-content-wrapper {
   padding: 22px;
-}
-
-.approval-modal-ion-content {
-  --offset-bottom: -50px;
 }

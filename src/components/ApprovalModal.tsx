@@ -60,7 +60,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     if (textareaRef.current) {
       // opacity를 0으로 설정
       textareaRef.current.style.opacity = '0';
-      
+
       // setTimeout으로 즉시 1로 변경
       setTimeout(() => {
         if (textareaRef.current) {
@@ -136,15 +136,14 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       initialBreakpoint={1} breakpoints={[0, 1]}
       style={{
         '--max-height': 'calc(100% - 48px - var(--ion-safe-area-top))',
-        position:'fixed',
-        top: 0,
       }}
     >
       <AppBar
         title={<></>}
         customEndButtons={closeButton}
       />
-      <IonContent className='approval-modal-ion-content'>
+      <IonContent className='approval-modal-ion-content' style={{
+      }}>
         <div className='approval-modal-title-wrapper'>
           <span>임직원 개인경비 <span style={{ color: 'var(--ion-color-primary)' }}>1건</span>을</span>
           <span><span style={{ color: 'var(--ion-color-primary)' }}>{title}</span> 하시겠습니까?</span>
@@ -175,7 +174,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             // onClick={handleConfirm}
             disabled={required && !textValue?.trim()}
             style={{
-              height: '48px',
+              height: '58px',
               width: '100%',
               flex: 1,
               borderRadius: '12px',
