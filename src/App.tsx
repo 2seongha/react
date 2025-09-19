@@ -40,52 +40,6 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-
-    let scrollY = 0;
-
-    function lockScroll() {
-      scrollY = window.scrollY;
-
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-
-      document.documentElement.style.overflow = 'hidden';
-    }
-
-    function unlockScroll() {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-
-      document.documentElement.style.overflow = '';
-
-      window.scrollTo(0, scrollY);
-    }
-
-    if (window.visualViewport) {
-      const handleViewportChange = () => {
-        const { height } = window.visualViewport!;
-
-        // 키보드가 올라왔는지 판단
-        const keyboardVisible = height < window.innerHeight;
-
-        if (keyboardVisible) {
-          lockScroll();
-        } else {
-          unlockScroll();
-        }
-      };
-
-      window.visualViewport.addEventListener('resize', handleViewportChange);
-      window.visualViewport.addEventListener('scroll', handleViewportChange);
-    }
   }, []);
 
   useEffect(() => {
