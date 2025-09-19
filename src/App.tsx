@@ -50,7 +50,8 @@ const App: React.FC = () => {
         // body와 html도 함께 조정
         document.body.style.position = 'absolute';
         document.body.style.top = `${offsetTop}px`;
-
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
         document.documentElement.style.position = 'absolute';
         document.documentElement.style.top = `${offsetTop}px`;
       }
