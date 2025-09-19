@@ -32,7 +32,7 @@ const Settings: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Input refs
   const badgeInputRef = useRef<HTMLIonInputElement | null>(null);
   const toastInputRef = useRef<HTMLIonInputElement | null>(null);
@@ -63,38 +63,15 @@ const Settings: React.FC = () => {
   };
 
   // Focus handlers for inputs
-  const handleInputFocus = (inputRef: React.RefObject<HTMLIonInputElement| null>) => {
+  const handleInputFocus = (inputRef: React.RefObject<HTMLIonInputElement | null>) => {
     if (inputRef.current) {
       const inputElement = inputRef.current;
-      const parentElement = inputElement.parentElement;
-      
-      if (parentElement) {
-        // 클론 생성
-        const cloneInput = inputElement.cloneNode(true) as HTMLIonInputElement;
-        cloneInput.removeAttribute("id");
-        cloneInput.style.position = "absolute";
-        cloneInput.style.top = "0";
-        cloneInput.style.left = "0";
-        cloneInput.style.opacity = "0";
-        parentElement.appendChild(cloneInput);
-        
-        // 클론에 포커스
-        cloneInput.focus();
-        setTimeout(() => {
-          cloneInput.style.opacity = "1";
-          inputElement.style.opacity = "0";
-          (inputElement as any).disabled = true;
-        });
+      inputElement.style.opacity = "0";
 
-        // 블러 이벤트 처리
-        cloneInput.addEventListener("blur", () => {
-          (inputElement as any).value = (cloneInput as any).value;
-          (inputElement as any).disabled = false;
-          inputElement.style.opacity = "1";
-          cloneInput.style.opacity = "0";
-          setTimeout(() => cloneInput.remove());
-        });
-      }
+      // 클론에 포커스
+      setTimeout(() => {
+        inputElement.style.opacity = "1";
+      });
     }
   };
 
@@ -154,20 +131,22 @@ const Settings: React.FC = () => {
           {/* 배지 테스트 섹션 */}
           <IonItem>
             <IonLabel position="stacked">배지 숫자 테스트</IonLabel>
-            <IonInput
-              ref={badgeInputRef}
-              type="number"
-              value={badgeNumber}
-              placeholder="숫자를 입력하세요"
-              onIonInput={(e) => setBadgeNumber(e.detail.value!)}
-              onFocus={() => handleInputFocus(badgeInputRef)}
-              style={{ marginTop: '8px' }}
-            />
+            <div style={{ position: 'relative' }}>
+              <IonInput
+                ref={badgeInputRef}
+                type="number"
+                value={badgeNumber}
+                placeholder="숫자를 입력하세요"
+                onIonInput={(e) => setBadgeNumber(e.detail.value!)}
+                onFocus={() => handleInputFocus(badgeInputRef)}
+                style={{ marginTop: '8px' }}
+              />
+            </div>
           </IonItem>
-          
+
           <IonItem>
-            <IonButton 
-              expand="block" 
+            <IonButton
+              expand="block"
               onClick={handleBadgeTest}
               disabled={!badgeNumber.trim()}
               style={{ width: '100%', height: '48px' }}
@@ -179,20 +158,22 @@ const Settings: React.FC = () => {
           {/* 토스트 테스트 섹션 */}
           <IonItem>
             <IonLabel position="stacked">토스트 메시지 테스트</IonLabel>
-            <IonInput
-              ref={toastInputRef}
-              type="text"
-              value={toastMessage}
-              placeholder="토스트 메시지를 입력하세요"
-              onIonInput={(e) => setToastMessage(e.detail.value!)}
-              onFocus={() => handleInputFocus(toastInputRef)}
-              style={{ marginTop: '8px' }}
-            />
+            <div style={{ position: 'relative' }}>
+              <IonInput
+                ref={toastInputRef}
+                type="text"
+                value={toastMessage}
+                placeholder="토스트 메시지를 입력하세요"
+                onIonInput={(e) => setToastMessage(e.detail.value!)}
+                onFocus={() => handleInputFocus(toastInputRef)}
+                style={{ marginTop: '8px' }}
+              />
+            </div>
           </IonItem>
-          
+
           <IonItem>
-            <IonButton 
-              expand="block" 
+            <IonButton
+              expand="block"
               onClick={handleToastTest}
               disabled={!toastMessage.trim()}
               style={{ width: '100%', height: '48px' }}
@@ -211,9 +192,9 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <IonItem>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom:'100px' }}>
-              <IonButton 
-                expand="block" 
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom: '100px' }}>
+              <IonButton
+                expand="block"
                 fill="outline"
                 onClick={() => handleHapticTest('lightImpact')}
                 color="success"
@@ -221,9 +202,9 @@ const Settings: React.FC = () => {
               >
                 Light Impact
               </IonButton>
-              
-              <IonButton 
-                expand="block" 
+
+              <IonButton
+                expand="block"
                 fill="outline"
                 onClick={() => handleHapticTest('mediumImpact')}
                 color="warning"
@@ -231,9 +212,9 @@ const Settings: React.FC = () => {
               >
                 Medium Impact
               </IonButton>
-              
-              <IonButton 
-                expand="block" 
+
+              <IonButton
+                expand="block"
                 fill="outline"
                 onClick={() => handleHapticTest('heavyImpact')}
                 color="danger"
@@ -241,9 +222,9 @@ const Settings: React.FC = () => {
               >
                 Heavy Impact
               </IonButton>
-              
-              <IonButton 
-                expand="block" 
+
+              <IonButton
+                expand="block"
                 fill="outline"
                 onClick={() => handleHapticTest('selectionClick')}
                 color="medium"
@@ -251,9 +232,9 @@ const Settings: React.FC = () => {
               >
                 Selection Click
               </IonButton>
-              
-              <IonButton 
-                expand="block" 
+
+              <IonButton
+                expand="block"
                 fill="outline"
                 onClick={() => handleHapticTest('vibrate')}
                 color="dark"
@@ -274,26 +255,26 @@ const Settings: React.FC = () => {
 
           <IonItem>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom: '100px' }}>
-              <IonButton 
-                expand="block" 
+              <IonButton
+                expand="block"
                 onClick={() => setIsAlertOpen(true)}
                 color="primary"
                 style={{ height: '48px' }}
               >
                 Alert Dialog 테스트
               </IonButton>
-              
-              <IonButton 
-                expand="block" 
+
+              <IonButton
+                expand="block"
                 onClick={() => setIsActionSheetOpen(true)}
                 color="secondary"
                 style={{ height: '48px' }}
               >
                 Action Sheet (Bottom Sheet) 테스트
               </IonButton>
-              
-              <IonButton 
-                expand="block" 
+
+              <IonButton
+                expand="block"
                 onClick={() => setIsModalOpen(true)}
                 color="tertiary"
                 style={{ height: '48px' }}
@@ -444,7 +425,7 @@ const Settings: React.FC = () => {
               <h2>Modal Dialog 테스트</h2>
               <p>이것은 전체 화면 Modal입니다.</p>
               <p>렌더링 성능과 애니메이션을 확인해보세요.</p>
-              
+
               <IonList>
                 <IonItem>
                   <IonLabel>Modal 내부 리스트 아이템 1</IonLabel>
@@ -458,8 +439,8 @@ const Settings: React.FC = () => {
               </IonList>
 
               <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                <IonButton 
-                  expand="block" 
+                <IonButton
+                  expand="block"
                   onClick={() => {
                     webviewHaptic('mediumImpact');
                     webviewToast('Modal에서 액션을 실행했습니다!');
@@ -467,8 +448,8 @@ const Settings: React.FC = () => {
                 >
                   액션 실행
                 </IonButton>
-                <IonButton 
-                  expand="block" 
+                <IonButton
+                  expand="block"
                   fill="outline"
                   onClick={() => setIsModalOpen(false)}
                 >
