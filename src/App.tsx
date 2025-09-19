@@ -45,32 +45,14 @@ const App: React.FC = () => {
     const fixAppToTop = () => {
       if (window.visualViewport) {
         // visualViewport의 위치 정보 가져오기
-        const { offsetTop, offsetLeft } = window.visualViewport;
-        
-        // 앱 컨테이너를 visualViewport 최상단에 고정
-        const appElement = document.querySelector('ion-app') as HTMLElement;
-        if (appElement) {
-          appElement.style.position = 'fixed';
-          appElement.style.top = `${offsetTop}px`;
-          appElement.style.left = `${offsetLeft}px`;
-          appElement.style.width = `${window.visualViewport.width}px`;
-          appElement.style.height = `${window.visualViewport.height}px`;
-        }
-        
+        const { offsetTop } = window.visualViewport;
+
         // body와 html도 함께 조정
-        document.body.style.position = 'fixed';
+        document.body.style.position = 'absolute';
         document.body.style.top = `${offsetTop}px`;
-        document.body.style.left = `${offsetLeft}px`;
-        document.body.style.width = `${window.visualViewport.width}px`;
-        document.body.style.height = `${window.visualViewport.height}px`;
-        document.body.style.overflow = 'hidden';
-        
-        document.documentElement.style.position = 'fixed';
+
+        document.documentElement.style.position = 'absolute';
         document.documentElement.style.top = `${offsetTop}px`;
-        document.documentElement.style.left = `${offsetLeft}px`;
-        document.documentElement.style.width = `${window.visualViewport.width}px`;
-        document.documentElement.style.height = `${window.visualViewport.height}px`;
-        document.documentElement.style.overflow = 'hidden';
       }
     };
 
@@ -80,12 +62,11 @@ const App: React.FC = () => {
         fixAppToTop();
       };
 
+      window.visualViewport.addEventListener('scroll', handleViewportResize);
       window.visualViewport.addEventListener('resize', handleViewportResize);
-      
-      // 초기 설정
-      fixAppToTop();
 
       return () => {
+        window.visualViewport?.removeEventListener('scroll', handleViewportResize);
         window.visualViewport?.removeEventListener('resize', handleViewportResize);
       };
     }
