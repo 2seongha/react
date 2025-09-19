@@ -38,7 +38,8 @@ const More: React.FC = () => {
   return (
     <IonPage className="more">
       <AppBar title={<span>더보기</span>} showSettingButton={true} showMenuButton={true} />
-      <IonContent fullscreen>
+      <IonContent fullscreen scrollEvents={false} scrollX={false} scrollY={false}>
+        <div style={{ height: '100%', overflow: 'auto' }}>
       <IonList>
         <IonItem button onClick={() => handleMenuClick('공지사항')}>
           <IonIcon icon={notificationsOutline} slot="start" />
@@ -70,6 +71,7 @@ const More: React.FC = () => {
           <IonLabel>로그아웃</IonLabel>
         </IonItem>
       </IonList>
+        </div>
       </IonContent>
       <BottomTabBar />
     </IonPage>

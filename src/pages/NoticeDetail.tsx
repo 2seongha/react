@@ -23,9 +23,11 @@ const NoticeDetail: React.FC = () => {
           <IonTitle>공지사항 상세</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">
+      <IonContent className="ion-padding" scrollEvents={false} scrollX={false} scrollY={false}>
+        <div style={{ height: '100%', overflow: 'auto' }}>
         <p>공지사항 상세 페이지</p>
         <p>ID: {id}</p>
+        </div>
       </IonContent>
     </IonPage>
   );

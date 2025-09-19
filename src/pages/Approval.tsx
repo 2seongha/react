@@ -399,7 +399,10 @@ const Approval: React.FC = () => {
       <IonContent
         ref={contentRef}
         scrollEvents={false}
+        scrollX={false}
+        scrollY={false}
       >
+        <div style={{ height: '100%', overflow: 'auto' }}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!isTop}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -449,6 +452,7 @@ const Approval: React.FC = () => {
           onScrollToTop={scrollToTop}
           scrollCallbackRef={scrollCallbackRef}
         />
+        </div>
       </IonContent>
     </IonPage >
   );
