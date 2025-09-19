@@ -34,8 +34,7 @@ const Notice: React.FC = () => {
         </Tabs>
       </IonHeader>
 
-      <IonContent fullscreen className="ion-padding" scrollEvents={false} scrollX={false} scrollY={false}>
-        <div style={{ height: '100%', overflow: 'auto' }}>
+      <IonContent fullscreen className="ion-padding">
 
         <Swiper onSwiper={(swiper) => swiperRef.current = swiper}
           onSlideChange={(swiper) => setValue(swiper.activeIndex)}
@@ -50,7 +49,6 @@ const Notice: React.FC = () => {
           </SwiperSlide>
           {/* 추가 슬라이드들 */}
         </Swiper>
-        </div>
       </IonContent>
     </IonPage >
   );

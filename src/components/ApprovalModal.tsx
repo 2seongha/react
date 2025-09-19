@@ -142,8 +142,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
         title={<></>}
         customEndButtons={closeButton}
       />
-      <IonContent className='approval-modal-ion-content' scrollEvents={false} scrollX={false} scrollY={false}>
-        <div style={{ height: '100%', overflow: 'auto' }}>
+      <IonContent className='approval-modal-ion-content' style={{
+      }}>
         <div className='approval-modal-title-wrapper'>
           <span>임직원 개인경비 <span style={{ color: 'var(--ion-color-primary)' }}>1건</span>을</span>
           <span><span style={{ color: 'var(--ion-color-primary)' }}>{title}</span> 하시겠습니까?</span>
@@ -184,7 +184,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           >
             <span>{confirmText}</span>
           </IonButton>
-        </div>
         </div>
       </IonContent>
       <IonFooter style={{ height: 'var(--ion-safe-area-bottom)' }}></IonFooter>

@@ -111,8 +111,7 @@ const Search: React.FC = () => {
 
   return (
     <IonPage className='search'>
-      <IonContent scrollEvents={false} scrollX={false} scrollY={false}>
-        <div style={{ height: '100%', overflow: 'auto' }}>
+      <IonContent>
         <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent: 'center', marginTop: 'var(--ion-safe-area-top)' }}>
           <IonSearchbar
             ref={searchbarRef}
@@ -216,7 +215,6 @@ const Search: React.FC = () => {
             </div>
           </div>
         )}
-        </div>
       </IonContent>
     </IonPage>
   );

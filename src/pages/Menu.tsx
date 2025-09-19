@@ -66,8 +66,7 @@ const Menu: React.FC = () => {
         customEndButtons={closeButton}
       />
 
-      <IonContent className="menu-content" scrollEvents={false} scrollX={false} scrollY={false}>
-        <div style={{ height: '100%', overflow: 'auto' }}>
+      <IonContent className="menu-content" scrollY={true} scrollX={false}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -76,7 +75,6 @@ const Menu: React.FC = () => {
             <MenuItem key={`${area.AREA_CODE}-${index}`} area={area} />
           ))}
         </IonList>
-        </div>
       </IonContent>
     </IonMenu>
   );

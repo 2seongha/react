@@ -49,8 +49,7 @@ const Home: React.FC = () => {
     <IonPage className="home">
       <AppBar showLogo={true} showSearchButton={true} showMenuButton={true} />
 
-      <IonContent scrollEvents={false} scrollX={false} scrollY={false}>
-        <div style={{ height: '100%', overflow: 'auto' }}>
+      <IonContent scrollEvents={false} scrollX={false} scrollY={true}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
@@ -65,7 +64,6 @@ const Home: React.FC = () => {
         </div>
         <div style={{ marginTop: '12px' }}>
           <TodoSummaryCard />
-        </div>
         </div>
       </IonContent>
       <BottomTabBar />

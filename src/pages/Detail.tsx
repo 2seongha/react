@@ -151,7 +151,6 @@ const Detail: React.FC = () => {
         scrollX={false}
         ref={ionContentRef}
       >
-        <div style={{ height: '100%', overflow: 'auto' }}>
         <div
           ref={pageContentRef}
           style={{
@@ -590,7 +589,6 @@ const Detail: React.FC = () => {
           singleButtonText="닫기"
           singleButtonColor="light"
         />
-        </div>
       </IonContent>
     </IonPage>
   );
