@@ -15,6 +15,7 @@ html {
 ion-content {
   --offset-bottom: 1px;
   --offset-top: 0px;
+  touch-action: none;
 }
 
 ion-content::part(scroll) {
