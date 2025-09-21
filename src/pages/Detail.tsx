@@ -188,6 +188,7 @@ const Detail: React.FC = () => {
               willChange: 'transform',
               minHeight: '200px',
               backgroundColor: 'var(--ion-background-color2)',
+              pointerEvents: 'none',
             }}
           >
             {
@@ -557,26 +558,21 @@ const Detail: React.FC = () => {
           }}
           title="참석자"
           body={
-            <div style={{ padding: '0 16px' }}>
+            <div style={{ padding: '0 8px' }}>
               <span style={{ color: 'var(--ion-color-secondary)', fontSize: '13px' }}>참석자 수: {selectedAttendeeData?.length}</span>
               <div style={{ padding: '0px 0 0px 0', maxHeight: '300px', overflow: 'auto', margin: ' 16px 0 8px 0' }}>
                 {selectedAttendeeData && selectedAttendeeData.map((attend: any, index: number) => (
                   <div style={{ display: 'flex', alignItems: 'center', marginTop: index === 0 ? '0px' : '16px' }} key={`attendee-list-${index}`}>
-                    <div style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ion-color-step-50)', borderRadius: '21px', marginRight: '8px' }}>
-                      <IonIcon icon={person} style={{ color: 'var(--ion-color-step-150)', fontSize: '18ㅅpx' }}></IonIcon>
-                    </div>
                     <div style={{ marginTop: '4px' }}>
                       <div style={{ display: 'flex', gap: '4px', marginBottom: '4px', alignItems: 'center' }}>
                         <span style={{
-                          height: '17px',
-                          padding: '2px 4px 0 4px',
+                          padding: '2px 4px',
                           borderRadius: '6px',
                           backgroundColor: attend.GUBUN === 'A' ? 'var(--ion-color-success)' : 'var(--ion-color-warning)',
                           color: 'var(--ion-color-warning-contrast)',
-                          fontSize: '11px',
-                          marginTop: '1px',
+                          fontSize: '10px',
                         }}>{attend.GUBUN === 'A' ? '내부' : '외부'}</span>
-                        <span style={{ fontSize: '14px', fontWeight: '500' }}>{attend.ATTENDEE} ({attend.ORGTX})</span>
+                        <span style={{ fontSize: '13px', fontWeight: '500' }}>{attend.ATTENDEE} ({attend.ORGTX})</span>
                       </div>
                       <span style={{ color: 'var(--ion-color-secondary)' }}>{attend.PURPOSE || '-'}</span>
                     </div>
@@ -642,10 +638,12 @@ const SubItem: React.FC<SubProps> = React.memo(({ sub, selectable, isSelected, o
               onProfitDialogOpen?.(sub)
             }}
             style={{
-              height: '24px',
-              fontSize: '12px',
+              height: '20px',
+              fontSize: '11px',
               '--padding-top': 0,
               '--padding-bottom': 0,
+              '--padding-start': '6px',
+              '--padding-end': '6px',
               '--border-radius': '6px'
             }}>
             <span>수익성</span>
@@ -661,10 +659,12 @@ const SubItem: React.FC<SubProps> = React.memo(({ sub, selectable, isSelected, o
               onAttendeeDialogOpen?.(sub.CardListAttendeeList)
             }}
             style={{
-              height: '24px',
-              fontSize: '12px',
+              height: '20px',
+              fontSize: '11px',
               '--padding-top': 0,
               '--padding-bottom': 0,
+              '--padding-start': '6px',
+              '--padding-end': '6px',
               '--border-radius': '6px'
             }}>
             <span>참석자</span>

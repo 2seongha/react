@@ -1,21 +1,8 @@
-/* 키보드 높이 보상을 위한 동적 높이 설정 */
-
-html {
-  /* position: fixed; */
-  /* transform: translateY( calc(345px - var(--ion-safe-area-top) - var(--ion-safe-area-bottom))); */
-  /* bottom: calc(-345px + var(--ion-safe-area-top) + var(--ion-safe-area-bottom)); */
-  /* box-shadow: 0 0 0 20px red; */
-  /* scale: .8; */
-  /* overflow: hidden; */
-  touch-action: none;
-  /* bottom: 0; */
-}
-
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;
   --offset-top: 0px;
-  touch-action: none;
+  --keyboard-offset: 0 !important;
 }
 
 ion-content::part(scroll) {

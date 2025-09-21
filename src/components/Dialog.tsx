@@ -2,6 +2,7 @@ import { IonButton, IonContent, IonHeader, IonIcon, IonInput, IonModal, IonTitle
 import { close } from 'ionicons/icons';
 import AppBar from './AppBar';
 import React, { ReactNode, useEffect, useRef, useMemo, useState } from 'react';
+import CustomInput from './CustomInput';
 
 
 interface CustomDialogProps {
@@ -236,34 +237,37 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
       canDismiss={canDismiss}
       style={{
         alignItems: 'center',
-        '--height': 'auto',
-        '--background': 'transparent'
+        '--width': 'fit-content',
+        '--height': 'fit-content',
+        '--background': 'transparent',
+        justifyContent: 'center',
+        paddingBottom: 'var(--keyboard-height)'
       }}
     >
-      <div style={{ width: '100%', padding: '0 40px' }}>
-        <div style={{ padding: '16px', ...contentStyle, backgroundColor: 'var(--ion-background-color)', borderRadius: '18px' }}>
-          {title && (
-            <div style={{
-              textAlign: titleAlign,
-              width: '100%',
-              marginBottom: '16px',
-              fontSize: '18px',
-              fontWeight: '600'
-            }}>
-              {title}
-            </div>
-          )}
-          {renderContent()}
-          <IonInput></IonInput>
-          <IonInput></IonInput>
-          <IonInput></IonInput>
-          {(showFirstButton || showSecondButton || singleButton) && (
-            <div style={{ marginTop: '16px' }}>
-              {renderButtons()}
-            </div>
-          )}
-        </div>
+      {/* <div style={{ width: '100%', padding: '0 40px' }}> */}
+      <div style={{ padding: '16px', ...contentStyle, backgroundColor: 'var(--ion-background-color)', borderRadius: '18px', width: '300px' }}>
+        {title && (
+          <div style={{
+            textAlign: titleAlign,
+            width: '100%',
+            marginBottom: '16px',
+            fontSize: '16px',
+            fontWeight: '600'
+          }}>
+            {title}
+          </div>
+        )}
+        {renderContent()}
+        <CustomInput></CustomInput>
+        <CustomInput></CustomInput>
+        <CustomInput></CustomInput>
+        {(showFirstButton || showSecondButton || singleButton) && (
+          <div style={{ marginTop: '16px' }}>
+            {renderButtons()}
+          </div>
+        )}
       </div>
+      {/* </div> */}
     </IonModal>
   );
 }

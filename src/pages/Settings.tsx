@@ -12,7 +12,6 @@ import {
   IonBackButton,
   IonSegment,
   IonSegmentButton,
-  IonInput,
   IonImg,
   IonButton,
   IonAlert,
@@ -21,6 +20,7 @@ import {
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
+import CustomInput from '../components/CustomInput';
 import { webviewTheme, webviewBadge, webviewToast, webviewHaptic } from '../webview';
 import { themeIcon, bellIcon, lockIcon } from '../assets/images';
 
@@ -33,9 +33,6 @@ const Settings: React.FC = () => {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Input refs
-  const badgeInputRef = useRef<HTMLIonInputElement | null>(null);
-  const toastInputRef = useRef<HTMLIonInputElement | null>(null);
 
   const handleThemeChange = (value: string) => {
     const newTheme = value as 'light' | 'dark' | 'system';
@@ -62,17 +59,6 @@ const Settings: React.FC = () => {
     webviewHaptic(hapticType);
   };
 
-  // Focus handlers for inputs
-  const handleInputFocus = (inputRef: React.RefObject<HTMLIonInputElement | null>) => {
-    if (inputRef.current) {
-      const inputElement = inputRef.current;
-      inputElement.style.opacity = "0";
-
-      setTimeout(() => {
-        inputElement.style.opacity = "1";
-      });
-    }
-  };
 
 
   return (
@@ -130,13 +116,11 @@ const Settings: React.FC = () => {
         <IonItem>
           <IonLabel position="stacked">배지 숫자 테스트</IonLabel>
           <div style={{ position: 'relative' }}>
-            <IonInput
-              ref={badgeInputRef}
+            <CustomInput
               type="number"
               value={badgeNumber}
               placeholder="숫자를 입력하세요"
               onIonInput={(e) => setBadgeNumber(e.detail.value!)}
-              onFocus={() => handleInputFocus(badgeInputRef)}
               style={{ marginTop: '8px' }}
             />
           </div>
@@ -157,13 +141,11 @@ const Settings: React.FC = () => {
         <IonItem>
           <IonLabel position="stacked">토스트 메시지 테스트</IonLabel>
           <div style={{ position: 'relative' }}>
-            <IonInput
-              ref={toastInputRef}
+            <CustomInput
               type="text"
               value={toastMessage}
               placeholder="토스트 메시지를 입력하세요"
               onIonInput={(e) => setToastMessage(e.detail.value!)}
-              onFocus={() => handleInputFocus(toastInputRef)}
               style={{ marginTop: '8px' }}
             />
           </div>
@@ -340,13 +322,10 @@ const Settings: React.FC = () => {
           onDidDismiss={() => setIsActionSheetOpen(false)}
           header="액션 선택"
           subHeader="아래로 드래그하거나 옵션을 선택하세요"
-          canDismiss={true}
           showBackdrop={true}
           backdropDismiss={true}
           keyboardClose={true}
           animated={true}
-          enterAnimation={undefined}
-          leaveAnimation={undefined}
           buttons={[
             {
               text: '📄 문서 보기',

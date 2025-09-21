@@ -60,7 +60,7 @@ const GroupButton: React.FC = () => {
       className='group-button-wrapper'
     >
       {todoSummary ? (
-        todoSummary.map((item, index) => (
+        [...todoSummary,...todoSummary,...todoSummary,...todoSummary,...todoSummary].map((item, index) => (
           <button
             key={`group-button${index}`}
             ref={(el) => { (buttonRefs.current[index] = el) }}

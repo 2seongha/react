@@ -56,13 +56,16 @@ const App: React.FC = () => {
       return canScrollY || canScrollX;
     };
 
-    const findActuallyScrollableParent = async (touch: any,  el: HTMLElement | null): Promise<Element | null> => {
+    const findActuallyScrollableParent = async (touch: any, el: HTMLElement | null): Promise<Element | null> => {
       let current = document.elementFromPoint(touch.clientX, touch.clientY);
       // let current: HTMLElement | null = el;
       console.log(current);
-      
+
       while (current && current !== document.body) {
         // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
+        if (current.tagName === 'ION-DATETIME') {
+          return current;
+        }
         if (current.tagName === 'ION-CONTENT') {
           const ionContent = current as any; // TS용 any, 또는 Capacitor/Ionic 타입 쓰면 더 좋음
           if (ionContent.getScrollElement) {
@@ -76,7 +79,6 @@ const App: React.FC = () => {
 
         // ✅ 일반 DOM: overflow + scrollHeight 판별
         if (isActuallyScrollable(current)) return current;
-
         current = current.parentElement;
       }
 
