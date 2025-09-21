@@ -27,6 +27,8 @@ setupIonicReact({
   mode: 'md',
   animated: true,
   rippleEffect: true,
+  scrollAssist: false,
+  scrollPadding: false,
 });
 
 createRoot(document.getElementById('root')!).render(
