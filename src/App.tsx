@@ -41,24 +41,26 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    const isActuallyScrollable = (el: HTMLElement | null): boolean => {
+    const isActuallyScrollable = (el: Element | null): boolean => {
       if (!el) return false;
-    
+
       const style = getComputedStyle(el);
       const canScrollY =
         (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
         el.scrollHeight > el.clientHeight;
-    
+
       const canScrollX =
         (style.overflowX === 'auto' || style.overflowX === 'scroll') &&
         el.scrollWidth > el.clientWidth;
-    
+
       return canScrollY || canScrollX;
     };
-    
-    const findActuallyScrollableParent = async (el: HTMLElement | null): Promise<HTMLElement | null> => {
-      let current: HTMLElement | null = el;
-    
+
+    const findActuallyScrollableParent = async (touch: any,  el: HTMLElement | null): Promise<Element | null> => {
+      let current = document.elementFromPoint(touch.clientX, touch.clientY);
+      // let current: HTMLElement | null = el;
+      console.log(current);
+      
       while (current && current !== document.body) {
         // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
         if (current.tagName === 'ION-CONTENT') {
@@ -71,25 +73,25 @@ const App: React.FC = () => {
           }
           return null;
         }
-    
+
         // ✅ 일반 DOM: overflow + scrollHeight 판별
         if (isActuallyScrollable(current)) return current;
-    
+
         current = current.parentElement;
       }
-    
+
       return null;
     };
-    
+
     const handleTouchMove = async (e: TouchEvent) => {
       const target = e.target as HTMLElement;
-      const scrollableParent = await findActuallyScrollableParent(target);
-    
+      const touch = e.touches[0]; // 첫 번째 터치 포인트
+      const scrollableParent = await findActuallyScrollableParent(touch, target);
       if (!scrollableParent) {
         e.preventDefault(); // ✅ 스크롤 불가능하면 차단
       }
     };
-    
+
     window.addEventListener('touchmove', (e) => {
       // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
       handleTouchMove(e);
