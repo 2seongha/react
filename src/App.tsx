@@ -41,9 +41,9 @@ const App: React.FC = () => {
 
     initializeWebview();
 
-    if("virtualKeyboard" in navigator){
-      // navigator.virtualKeyboard!.overlaysContent = true;
-    }
+    window.addEventListener('scroll', function () {
+      window.scrollTo(0, 0); // 항상 top으로 되돌리기
+    });
 
     const isActuallyScrollable = (el: Element | null): boolean => {
       if (!el) return false;

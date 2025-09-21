@@ -1,6 +1,11 @@
-html{
-  virtual-keyboard: overlays-content;
+html {
+  overflow: auto;
 }
+
+body {
+  height: calc(100% + 1px);
+}
+
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;
