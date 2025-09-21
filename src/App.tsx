@@ -41,6 +41,10 @@ const App: React.FC = () => {
 
     initializeWebview();
 
+    if("virtualKeyboard" in navigator){
+      // navigator.virtualKeyboard!.overlaysContent = true;
+    }
+
     const isActuallyScrollable = (el: Element | null): boolean => {
       if (!el) return false;
 
