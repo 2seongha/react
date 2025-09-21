@@ -1,4 +1,4 @@
-import { IonButton, IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonContent, IonHeader, IonIcon, IonInput, IonModal, IonTitle, IonToolbar } from '@ionic/react';
 import { close } from 'ionicons/icons';
 import AppBar from './AppBar';
 import React, { ReactNode, useEffect, useRef, useMemo, useState } from 'react';
@@ -254,6 +254,9 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             </div>
           )}
           {renderContent()}
+          <IonInput></IonInput>
+          <IonInput></IonInput>
+          <IonInput></IonInput>
           {(showFirstButton || showSecondButton || singleButton) && (
             <div style={{ marginTop: '16px' }}>
               {renderButtons()}
