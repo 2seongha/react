@@ -25,8 +25,13 @@ const App: React.FC = () => {
   const [completeInit, setCompleteInit] = useState<boolean>(false);
   const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
+  const [fixedHeight, setFixedHeight] = useState<number>(0);
 
   useEffect(() => {
+    // 초기 높이 설정 (한 번만 실행)
+    const initialHeight = window.innerHeight;
+    setFixedHeight(initialHeight);
+    
     // 웹뷰 초기화
     const initializeWebview = async () => {
       try {
@@ -42,77 +47,6 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-    
-    disableBodyScroll(document.documentElement, {
-      // allowTouchMove: (el) => {
-      //   while (el && el !== document.body) {
-      //     if (el.getAttribute('body-scroll-lock-ignore') !== null) {
-      //       return true;
-      //     }
-    
-      //     el = el.parentElement;
-      //   }
-      // },
-    });
-    
-    const isActuallyScrollable = (el: Element | null): boolean => {
-      if (!el) return false;
-
-      const style = getComputedStyle(el);
-      const canScrollY =
-        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
-        el.scrollHeight > el.clientHeight;
-
-      const canScrollX =
-        (style.overflowX === 'auto' || style.overflowX === 'scroll') &&
-        el.scrollWidth > el.clientWidth;
-
-      return canScrollY || canScrollX;
-    };
-
-    const findActuallyScrollableParent = async (touch: any, el: HTMLElement | null): Promise<Element | null> => {
-      let current = document.elementFromPoint(touch.clientX, touch.clientY);
-      // let current: HTMLElement | null = el;
-      // console.log(current);
-
-      while (current && current !== document.body) {
-        // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
-        if (current.tagName === 'ION-DATETIME') {
-          return current;
-        }
-        if (current.tagName === 'ION-CONTENT') {
-          const ionContent = current as any; // TS용 any, 또는 Capacitor/Ionic 타입 쓰면 더 좋음
-          if (ionContent.getScrollElement) {
-            const scrollEl: HTMLElement = await ionContent.getScrollElement();
-            if (isActuallyScrollable(scrollEl)) {
-              return scrollEl;
-            }
-          }
-          return null;
-        }
-
-        // ✅ 일반 DOM: overflow + scrollHeight 판별
-        if (isActuallyScrollable(current)) return current;
-        current = current.parentElement;
-      }
-
-      return null;
-    };
-
-    const handleTouchMove = async (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      const touch = e.touches[0]; // 첫 번째 터치 포인트
-      const scrollableParent = await findActuallyScrollableParent(touch, target);
-      console.log(target);
-      if (!scrollableParent) {
-        e.preventDefault(); // ✅ 스크롤 불가능하면 차단
-      }
-    };
-
-    window.addEventListener('touchmove', (e) => {
-      // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
-      // handleTouchMove(e);
-    }, { passive: false });
   }, []);
 
   useEffect(() => {
@@ -148,26 +82,28 @@ const App: React.FC = () => {
     }
   }, [webviewInitialized, themeInitialized]);
 
-  if (!completeInit) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
+  if (!completeInit) return <div style={{ width: '100%', height: fixedHeight || '100vh', background: 'transparent' }} />
   return (
-    <IonApp>
-      <IonReactRouter >
-        <Menu />
-        <IonRouterOutlet mode={getPlatformMode()} id="main-content">
-          <Route path="/app/home" component={Home} exact />
-          <Route path="/app/notifications" component={Notifications} exact />
-          <Route path="/app/more" component={More} exact />
-          <Route path="/flowList/:AREA_CODE" component={FlowList} exact />
-          <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
-          <Route path="/detail/:FLOWNO" component={Detail} exact />
-          <Route path="/notice" component={Notice} exact />
-          <Route path="/settings" component={Settings} exact />
-          <Route path="/myPage" component={MyPage} exact />
-          <Route path="/search" component={Search} exact />
-          <Redirect exact from="/" to="/app/home" />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
+    <div style={{ height: fixedHeight || '100vh', overflow: 'hidden' }}>
+      <IonApp>
+        <IonReactRouter >
+          <Menu />
+          <IonRouterOutlet mode={getPlatformMode()} id="main-content">
+            <Route path="/app/home" component={Home} exact />
+            <Route path="/app/notifications" component={Notifications} exact />
+            <Route path="/app/more" component={More} exact />
+            <Route path="/flowList/:AREA_CODE" component={FlowList} exact />
+            <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
+            <Route path="/detail/:FLOWNO" component={Detail} exact />
+            <Route path="/notice" component={Notice} exact />
+            <Route path="/settings" component={Settings} exact />
+            <Route path="/myPage" component={MyPage} exact />
+            <Route path="/search" component={Search} exact />
+            <Redirect exact from="/" to="/app/home" />
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </IonApp>
+    </div>
   );
 };
 
