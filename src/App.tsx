@@ -27,10 +27,10 @@ const App: React.FC = () => {
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
   const [fixedHeight, setFixedHeight] = useState<number>();
 
-  const initialHeight = document.documentElement.offsetHeight;
-  setFixedHeight(initialHeight);
-
   useEffect(() => {
+    const initialHeight = document.documentElement.offsetHeight;
+    setFixedHeight(initialHeight);
+
     // 웹뷰 초기화
     const initializeWebview = async () => {
       try {
