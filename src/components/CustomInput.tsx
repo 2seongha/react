@@ -36,7 +36,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
       setIsHidden(true);
       debugger;
     }
-    
+
     onIonFocus?.(e);
   }, [shouldUseCustomLogic, isHidden, onIonFocus]);
 
@@ -50,7 +50,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
     if (isHidden) {
       setIsHidden(false);
     }
-    
+
     onIonBlur?.(e);
   }, [shouldUseCustomLogic, isHidden, onIonBlur]);
 
@@ -90,13 +90,14 @@ const CustomInput: React.FC<CustomInputProps> = ({
       {/* 보이는 input (포커스 전까지) */}
       {!isHidden && (
         <IonInput
+          inputMode='none'
           ref={visibleInputRef}
           onIonFocus={handleFocus}
           className={className}
           {...inputProps}
         />
       )}
-      
+
       {/* 숨겨진 input (포커스 시 활성화) */}
       <IonInput
         ref={hiddenInputRef}
