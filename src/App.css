@@ -1,14 +1,21 @@
-html {
-  height: 100dvh;
-  overflow: auto;
+body {
+  overflow: hidden;
 }
 
-body {
-  height: calc(100% + 1px);
+#root-wrapper {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
+/* } */ */
+
+#root {
+  max-height: calc(100% + 1000px);
+  height: calc(100% + 1000px);
+  background: linear-gradient(to bottom, #ff7e5f, #b700ff);
 }
 
 /* 스크롤 관련 */
-ion-content {
+/* ion-content {
   --offset-bottom: 1px;
   --offset-top: 0px;
   --keyboard-offset: 0 !important;
@@ -21,19 +28,16 @@ ion-content::part(scroll) {
 
 ion-content::part(scroll)::-webkit-scrollbar {
   display: none;
-}
+} */
 
 /* 모든 스크롤바 완전 제거 */
-* {
+/* * {
   scrollbar-width: none !important;
-  /* Firefox */
   -ms-overflow-style: none !important;
-  /* IE/Edge */
 }
 
 *::-webkit-scrollbar {
   display: none !important;
-  /* Chrome/Safari */
   width: 0 !important;
   height: 0 !important;
 }
@@ -48,7 +52,7 @@ ion-content::part(scroll)::-webkit-scrollbar {
 
 *::-webkit-scrollbar-corner {
   background: transparent !important;
-}
+} */
 
 /* TabBar 관련 */
 ion-tab-bar {

@@ -18,6 +18,8 @@ import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 
+import bodyScrollLock, { disableBodyScroll } from 'body-scroll-lock-upgrade';
+
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [completeInit, setCompleteInit] = useState<boolean>(false);
@@ -40,11 +42,19 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-
-    window.addEventListener('scroll', function () {
-      window.scrollTo(0, 0); // 항상 top으로 되돌리기
+    
+    disableBodyScroll(document.documentElement, {
+      // allowTouchMove: (el) => {
+      //   while (el && el !== document.body) {
+      //     if (el.getAttribute('body-scroll-lock-ignore') !== null) {
+      //       return true;
+      //     }
+    
+      //     el = el.parentElement;
+      //   }
+      // },
     });
-
+    
     const isActuallyScrollable = (el: Element | null): boolean => {
       if (!el) return false;
 
@@ -63,7 +73,7 @@ const App: React.FC = () => {
     const findActuallyScrollableParent = async (touch: any, el: HTMLElement | null): Promise<Element | null> => {
       let current = document.elementFromPoint(touch.clientX, touch.clientY);
       // let current: HTMLElement | null = el;
-      console.log(current);
+      // console.log(current);
 
       while (current && current !== document.body) {
         // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
@@ -93,6 +103,7 @@ const App: React.FC = () => {
       const target = e.target as HTMLElement;
       const touch = e.touches[0]; // 첫 번째 터치 포인트
       const scrollableParent = await findActuallyScrollableParent(touch, target);
+      console.log(target);
       if (!scrollableParent) {
         e.preventDefault(); // ✅ 스크롤 불가능하면 차단
       }
@@ -100,7 +111,7 @@ const App: React.FC = () => {
 
     window.addEventListener('touchmove', (e) => {
       // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
-      handleTouchMove(e);
+      // handleTouchMove(e);
     }, { passive: false });
   }, []);
 

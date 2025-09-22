@@ -34,7 +34,6 @@ const CustomInput: React.FC<CustomInputProps> = ({
     if (hiddenInputRef.current && !isHidden) {
       hiddenInputRef.current?.setFocus();
       setIsHidden(true);
-      debugger;
     }
 
     onIonFocus?.(e);
