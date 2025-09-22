@@ -18,8 +18,6 @@ import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 
-import bodyScrollLock, { disableBodyScroll } from 'body-scroll-lock-upgrade';
-
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [completeInit, setCompleteInit] = useState<boolean>(false);
@@ -29,9 +27,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // 초기 높이 설정 (한 번만 실행)
-    const initialHeight = window.innerHeight;
+    const initialHeight = document.documentElement.offsetHeight;
     setFixedHeight(initialHeight);
-    
+
     // 웹뷰 초기화
     const initializeWebview = async () => {
       try {
@@ -84,26 +82,24 @@ const App: React.FC = () => {
 
   if (!completeInit) return <div style={{ width: '100%', height: fixedHeight || '100vh', background: 'transparent' }} />
   return (
-    <div style={{ height: fixedHeight || '100vh', overflow: 'hidden' }}>
-      <IonApp>
-        <IonReactRouter >
-          <Menu />
-          <IonRouterOutlet mode={getPlatformMode()} id="main-content">
-            <Route path="/app/home" component={Home} exact />
-            <Route path="/app/notifications" component={Notifications} exact />
-            <Route path="/app/more" component={More} exact />
-            <Route path="/flowList/:AREA_CODE" component={FlowList} exact />
-            <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
-            <Route path="/detail/:FLOWNO" component={Detail} exact />
-            <Route path="/notice" component={Notice} exact />
-            <Route path="/settings" component={Settings} exact />
-            <Route path="/myPage" component={MyPage} exact />
-            <Route path="/search" component={Search} exact />
-            <Redirect exact from="/" to="/app/home" />
-          </IonRouterOutlet>
-        </IonReactRouter>
-      </IonApp>
-    </div>
+    <IonApp style={{ height: fixedHeight }}>
+      <IonReactRouter >
+        <Menu />
+        <IonRouterOutlet mode={getPlatformMode()} id="main-content">
+          <Route path="/app/home" component={Home} exact />
+          <Route path="/app/notifications" component={Notifications} exact />
+          <Route path="/app/more" component={More} exact />
+          <Route path="/flowList/:AREA_CODE" component={FlowList} exact />
+          <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
+          <Route path="/detail/:FLOWNO" component={Detail} exact />
+          <Route path="/notice" component={Notice} exact />
+          <Route path="/settings" component={Settings} exact />
+          <Route path="/myPage" component={MyPage} exact />
+          <Route path="/search" component={Search} exact />
+          <Redirect exact from="/" to="/app/home" />
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
   );
 };
 
