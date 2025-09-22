@@ -18,18 +18,19 @@ import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 
+import bodyScrollLock, { disableBodyScroll } from 'body-scroll-lock-upgrade';
+
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [completeInit, setCompleteInit] = useState<boolean>(false);
   const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
-  const [fixedHeight, setFixedHeight] = useState<number>(0);
+  const [fixedHeight, setFixedHeight] = useState<number>();
+
+  const initialHeight = document.documentElement.offsetHeight;
+  setFixedHeight(initialHeight);
 
   useEffect(() => {
-    // 초기 높이 설정 (한 번만 실행)
-    const initialHeight = document.documentElement.offsetHeight;
-    setFixedHeight(initialHeight);
-
     // 웹뷰 초기화
     const initializeWebview = async () => {
       try {
@@ -45,6 +46,65 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
+
+    const isActuallyScrollable = (el: Element | null): boolean => {
+      if (!el) return false;
+
+      const style = getComputedStyle(el);
+      const canScrollY =
+        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+        el.scrollHeight > el.clientHeight;
+
+      const canScrollX =
+        (style.overflowX === 'auto' || style.overflowX === 'scroll') &&
+        el.scrollWidth > el.clientWidth;
+
+      return canScrollY || canScrollX;
+    };
+
+    const findActuallyScrollableParent = async (touch: any, el: HTMLElement | null): Promise<Element | null> => {
+      let current = document.elementFromPoint(touch.clientX, touch.clientY);
+      // let current: HTMLElement | null = el;
+      // console.log(current);
+
+      while (current && current !== document.body) {
+        // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
+        if (current.tagName === 'ION-DATETIME') {
+          return current;
+        }
+        if (current.tagName === 'ION-CONTENT') {
+          const ionContent = current as any; // TS용 any, 또는 Capacitor/Ionic 타입 쓰면 더 좋음
+          if (ionContent.getScrollElement) {
+            const scrollEl: HTMLElement = await ionContent.getScrollElement();
+            if (isActuallyScrollable(scrollEl)) {
+              return scrollEl;
+            }
+          }
+          return null;
+        }
+
+        // ✅ 일반 DOM: overflow + scrollHeight 판별
+        if (isActuallyScrollable(current)) return current;
+        current = current.parentElement;
+      }
+
+      return null;
+    };
+
+    const handleTouchMove = async (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const touch = e.touches[0]; // 첫 번째 터치 포인트
+      const scrollableParent = await findActuallyScrollableParent(touch, target);
+      console.log(target);
+      if (!scrollableParent) {
+        e.preventDefault(); // ✅ 스크롤 불가능하면 차단
+      }
+    };
+
+    window.addEventListener('touchmove', (e) => {
+      // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
+      handleTouchMove(e);
+    }, { passive: false });
   }, []);
 
   useEffect(() => {
@@ -80,9 +140,9 @@ const App: React.FC = () => {
     }
   }, [webviewInitialized, themeInitialized]);
 
-  if (!completeInit) return <div style={{ width: '100%', height: fixedHeight || '100vh', background: 'transparent' }} />
+  if (!completeInit) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
   return (
-    <IonApp style={{ height: fixedHeight }}>
+    <IonApp style={{height: fixedHeight}}>
       <IonReactRouter >
         <Menu />
         <IonRouterOutlet mode={getPlatformMode()} id="main-content">
