@@ -134,7 +134,7 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = 'Y'; // 환경변수 가져오기
+  const isWebView = 'N'; // 환경변수 가져오기
   console.log('----- webview Init Start -----', isWebView);
 
   if (isWebView == 'N') {
@@ -244,7 +244,7 @@ const _initWebview = async (): Promise<void> => {
           apiKey: ''
         }
       });
-      await fetchUser('w_usl_@irisbr.com');
+      await fetchUser('minzi@irisbr.com');
 
       if (userInfoResolver) {
         userInfoResolver(true);

@@ -18,8 +18,6 @@ import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 
-import bodyScrollLock, { disableBodyScroll } from 'body-scroll-lock-upgrade';
-
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
   const [completeInit, setCompleteInit] = useState<boolean>(false);
@@ -103,7 +101,7 @@ const App: React.FC = () => {
 
     window.addEventListener('touchmove', (e) => {
       // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
-      handleTouchMove(e);
+      // handleTouchMove(e);
     }, { passive: false });
   }, []);
 

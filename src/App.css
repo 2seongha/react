@@ -1,6 +1,6 @@
 html, body {
-  height: 100vh;
   overflow: hidden;
+  height: 100dvh;
 }
 
 /* 스크롤 관련 */
