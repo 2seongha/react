@@ -244,7 +244,7 @@ const _initWebview = async (): Promise<void> => {
           apiKey: ''
         }
       });
-      await fetchUser('minzi@irisbr.com');
+      await fetchUser('w_usl_@irisbr.com');
 
       if (userInfoResolver) {
         userInfoResolver(true);
