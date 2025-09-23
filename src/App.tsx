@@ -1,4 +1,4 @@
-import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
+import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
@@ -44,65 +44,6 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-
-    const isActuallyScrollable = (el: Element | null): boolean => {
-      if (!el) return false;
-
-      const style = getComputedStyle(el);
-      const canScrollY =
-        (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
-        el.scrollHeight > el.clientHeight;
-
-      const canScrollX =
-        (style.overflowX === 'auto' || style.overflowX === 'scroll') &&
-        el.scrollWidth > el.clientWidth;
-
-      return canScrollY || canScrollX;
-    };
-
-    const findActuallyScrollableParent = async (touch: any, el: HTMLElement | null): Promise<Element | null> => {
-      let current = document.elementFromPoint(touch.clientX, touch.clientY);
-      // let current: HTMLElement | null = el;
-      // console.log(current);
-
-      while (current && current !== document.body) {
-        // ✅ Ionic: ion-content가 나타나면 getScrollElement 사용
-        if (current.tagName === 'ION-DATETIME') {
-          return current;
-        }
-        if (current.tagName === 'ION-CONTENT') {
-          const ionContent = current as any; // TS용 any, 또는 Capacitor/Ionic 타입 쓰면 더 좋음
-          if (ionContent.getScrollElement) {
-            const scrollEl: HTMLElement = await ionContent.getScrollElement();
-            if (isActuallyScrollable(scrollEl)) {
-              return scrollEl;
-            }
-          }
-          return null;
-        }
-
-        // ✅ 일반 DOM: overflow + scrollHeight 판별
-        if (isActuallyScrollable(current)) return current;
-        current = current.parentElement;
-      }
-
-      return null;
-    };
-
-    const handleTouchMove = async (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      const touch = e.touches[0]; // 첫 번째 터치 포인트
-      const scrollableParent = await findActuallyScrollableParent(touch, target);
-      console.log(target);
-      if (!scrollableParent) {
-        e.preventDefault(); // ✅ 스크롤 불가능하면 차단
-      }
-    };
-
-    window.addEventListener('touchmove', (e) => {
-      // async 핸들러는 바로 쓸 수 없어서 이렇게 래핑
-      // handleTouchMove(e);
-    }, { passive: false });
   }, []);
 
   useEffect(() => {
