@@ -258,9 +258,6 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
           </div>
         )}
         {renderContent()}
-        <CustomInput inputMode='none'></CustomInput>
-        <CustomInput inputMode='none'></CustomInput>
-        <CustomInput inputMode='none'></CustomInput>
         {(showFirstButton || showSecondButton || singleButton) && (
           <div style={{ marginTop: '16px' }}>
             {renderButtons()}

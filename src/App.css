@@ -1,8 +1,3 @@
-html, body {
-  overflow: hidden;
-  height: 100dvh;
-}
-
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;
@@ -215,4 +210,8 @@ ion-refresher.refresher-native .refresher-pulling-icon,
 ion-refresher.refresher-native .refresher-refreshing-icon {
   background-color: var(--grab-indicator-color) !important;
   border-color: var(--custom-border-color-50) !important;
+}
+
+ion-menu-button.ion-color-medium {
+  --ion-color-base : rgba(100, 109, 123, .48) !important;
 }

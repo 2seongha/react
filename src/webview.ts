@@ -1,5 +1,11 @@
+import { isPlatform, useIonRouter } from "@ionic/react";
 import useAppStore from "./stores/appStore";
-import { CorpModel, DeviceInfo, KeyboardVisibility, ShellPadding } from "./stores/types";
+import {
+  CorpModel,
+  DeviceInfo,
+  KeyboardVisibility,
+  ShellPadding,
+} from "./stores/types";
 
 // 글로벌 웹뷰 함수들 선언
 declare global {
@@ -23,25 +29,25 @@ declare global {
 
 // 웹뷰 함수들 래퍼
 export const webviewTheme = (theme: string): void => {
-  if (typeof window !== 'undefined' && window.webviewTheme) {
+  if (typeof window !== "undefined" && window.webviewTheme) {
     window.webviewTheme(theme);
   }
 };
 
 export const webviewLogout = (): void => {
-  if (typeof window !== 'undefined' && window.webviewLogout) {
+  if (typeof window !== "undefined" && window.webviewLogout) {
     window.webviewLogout();
   }
 };
 
 export const webviewPushSetting = (): void => {
-  if (typeof window !== 'undefined' && window.webviewPushSetting) {
+  if (typeof window !== "undefined" && window.webviewPushSetting) {
     window.webviewPushSetting();
   }
 };
 
 export const webviewHistoryPop = (): void => {
-  if (typeof window !== 'undefined' && window.webviewHistoryPop) {
+  if (typeof window !== "undefined" && window.webviewHistoryPop) {
     window.webviewHistoryPop();
   } else {
     // 브라우저 히스토리 백
@@ -50,55 +56,55 @@ export const webviewHistoryPop = (): void => {
 };
 
 export const webviewToast = (msg: string): void => {
-  if (typeof window !== 'undefined' && window.webviewToast) {
+  if (typeof window !== "undefined" && window.webviewToast) {
     window.webviewToast(msg);
   }
 };
 
 export const webviewHaptic = (type: string): void => {
-  if (typeof window !== 'undefined' && window.webviewHaptic) {
+  if (typeof window !== "undefined" && window.webviewHaptic) {
     window.webviewHaptic(type);
   }
 };
 
 export const webviewNoticeOnOff = (val: string, org: string): void => {
-  if (typeof window !== 'undefined' && window.webviewNoticeOnOff) {
+  if (typeof window !== "undefined" && window.webviewNoticeOnOff) {
     window.webviewNoticeOnOff(val, org);
   }
 };
 
 export const webviewAppEnd = (): void => {
-  if (typeof window !== 'undefined' && window.webviewAppEnd) {
+  if (typeof window !== "undefined" && window.webviewAppEnd) {
     window.webviewAppEnd();
   }
 };
 
 export const webviewAttach = (title: string, url: string): void => {
-  if (typeof window !== 'undefined' && window.webviewAttach) {
+  if (typeof window !== "undefined" && window.webviewAttach) {
     window.webviewAttach(title, url);
   }
 };
 
 export const webviewBadge = (badge: string): void => {
-  if (typeof window !== 'undefined' && window.webviewBadge) {
+  if (typeof window !== "undefined" && window.webviewBadge) {
     window.webviewBadge(badge);
   }
 };
 
 export const webviewPrivacyPolicy = (): void => {
-  if (typeof window !== 'undefined' && window.webviewPrivacyPolicy) {
+  if (typeof window !== "undefined" && window.webviewPrivacyPolicy) {
     window.webviewPrivacyPolicy();
   }
 };
 
 export const webviewTermsOfUse = (): void => {
-  if (typeof window !== 'undefined' && window.webviewTermsOfUse) {
+  if (typeof window !== "undefined" && window.webviewTermsOfUse) {
     window.webviewTermsOfUse();
   }
 };
 
 export const webviewBiometrics = (): void => {
-  if (typeof window !== 'undefined' && window.webviewBiometrics) {
+  if (typeof window !== "undefined" && window.webviewBiometrics) {
     window.webviewBiometrics();
   }
 };
@@ -124,33 +130,31 @@ const tokenPromise = new Promise<boolean>((resolve) => {
 export const initWebview = async (): Promise<boolean> => {
   await _initWebview();
 
-  await Promise.all([
-    paddingPromise,
-    tokenPromise,
-    userInfoPromise,
-  ]);
+  await Promise.all([paddingPromise, tokenPromise, userInfoPromise]);
 
   return true;
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = 'Y'; // 환경변수 가져오기
-  console.log('----- webview Init Start -----', isWebView);
+  const isWebView = "Y"; // 환경변수 가져오기
+  // const router = useIonRouter();
+  console.log("----- webview Init Start -----", isWebView);
 
-  if (isWebView == 'N') {
+  if (isWebView == "N") {
     // 개발용
     const setCorp = useAppStore.getState().setCorp;
     const fetchUser = useAppStore.getState().fetchUser;
     setCorp({
-      corpId: 'IRISBRIGHT',
-      corpNm: '아이리스브라이트',
+      corpId: "IRISBRIGHT",
+      corpNm: "아이리스브라이트",
       system: {
         // apiEndpoint: 'http://localhost:4001/v1/api',
-        apiEndpoint: 'https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api',
-        apiKey: ''
-      }
+        apiEndpoint:
+          "https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api",
+        apiKey: "",
+      },
     });
-    await fetchUser('w_usl_@irisbr.com');
+    await fetchUser("w_usl_@irisbr.com");
     // 웹뷰가 아닌 경우 바로 완료 처리
     if (paddingResolver) {
       paddingResolver(true);
@@ -164,10 +168,10 @@ const _initWebview = async (): Promise<void> => {
       userInfoResolver(true);
       userInfoResolver = null;
     }
-  } else if (isWebView == 'Y') {
+  } else if (isWebView == "Y") {
     // 패딩 정보 수신
     const receivePadding = (event: Event) => {
-      console.log('----- webview receivePadding Start -----');
+      console.log("----- webview receivePadding Start -----");
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
 
@@ -179,50 +183,56 @@ const _initWebview = async (): Promise<void> => {
       };
 
       // 패딩 정보를 사용하여 UI 조정
-      console.log('Padding received:', result);
-      document.documentElement.style.setProperty('--ion-safe-area-top', `${result.top}px`);
-      document.documentElement.style.setProperty('--ion-safe-area-bottom', `${result.bottom}px`);
+      console.log("Padding received:", result);
+      document.documentElement.style.setProperty(
+        "--ion-safe-area-top",
+        `${result.top}px`
+      );
+      document.documentElement.style.setProperty(
+        "--ion-safe-area-bottom",
+        `${result.bottom}px`
+      );
 
       // 초기화 완료 시에만 resolver 호출
       if (paddingResolver) {
         paddingResolver(true);
         paddingResolver = null;
       }
-      console.log('----- webview receivePadding End -----');
+      console.log("----- webview receivePadding End -----");
     };
 
-    window.removeEventListener('receivePadding', receivePadding);
-    window.addEventListener('receivePadding', receivePadding);
+    window.removeEventListener("receivePadding", receivePadding);
+    window.addEventListener("receivePadding", receivePadding);
 
     // 토큰 정보 수신
     const receiveToken = (event: Event) => {
-      console.log('----- webview receiveToken Start -----');
+      console.log("----- webview receiveToken Start -----");
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
 
       const tokens = {
         deviceToken: detail.deviceToken,
-        deviceInfo: detail.deviceInfo
+        deviceInfo: detail.deviceInfo,
       };
 
       // localStorage에 저장
-      localStorage.setItem('deviceToken', tokens.deviceToken);
-      localStorage.setItem('deviceInfo', JSON.stringify(tokens.deviceInfo));
+      localStorage.setItem("deviceToken", tokens.deviceToken);
+      localStorage.setItem("deviceInfo", JSON.stringify(tokens.deviceInfo));
 
       // 토큰 정보 처리
       if (tokenResolver) {
         tokenResolver(true);
         tokenResolver = null;
       }
-      console.log('----- webview receiveToken End -----');
+      console.log("----- webview receiveToken End -----");
     };
 
-    window.removeEventListener('receiveToken', receiveToken);
-    window.addEventListener('receiveToken', receiveToken);
+    window.removeEventListener("receiveToken", receiveToken);
+    window.addEventListener("receiveToken", receiveToken);
 
     // 사용자 정보 수신
     const receiveUserInfo = async (event: Event) => {
-      console.log('----- webview receiveUserInfo Start -----');
+      console.log("----- webview receiveUserInfo Start -----");
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
       const corp = detail.corp;
@@ -237,101 +247,106 @@ const _initWebview = async (): Promise<void> => {
       const setCorp = useAppStore.getState().setCorp;
       const fetchUser = useAppStore.getState().fetchUser;
       setCorp({
-        corpId: 'IRIS_BRIGHT',
-        corpNm: '아이리스 브라이트',
+        corpId: "IRIS_BRIGHT",
+        corpNm: "아이리스 브라이트",
         system: {
-          apiEndpoint: 'https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api',
-          apiKey: ''
-        }
+          apiEndpoint:
+            "https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api",
+          apiKey: "",
+        },
       });
-      await fetchUser('w_usl_@irisbr.com');
+      await fetchUser("w_usl_@irisbr.com");
 
       if (userInfoResolver) {
         userInfoResolver(true);
         userInfoResolver = null;
       }
-      console.log('----- webview receiveUserInfo End -----');
+      console.log("----- webview receiveUserInfo End -----");
     };
 
-    window.removeEventListener('receiveUserInfo', receiveUserInfo);
-    window.addEventListener('receiveUserInfo', receiveUserInfo);
+    window.removeEventListener("receiveUserInfo", receiveUserInfo);
+    window.addEventListener("receiveUserInfo", receiveUserInfo);
 
     // 뒤로가기 버튼 처리
     const receiveBack = () => {
-      console.log('----- webview receiveBack -----');
+      console.log("----- webview receiveBack -----");
 
       const currentPath = window.location.pathname;
 
       // 경로가 "/app"으로 시작하면 종료 처리
-      if (currentPath.startsWith('/app/')) {
+      if (currentPath.startsWith("/app/")) {
         webviewAppEnd();
       } else {
+        console.log('back buttonnnnnnnnnnn');
+        // router.goBack();
         window.history.back();
       }
     };
 
-    window.removeEventListener('receiveBack', receiveBack);
-    window.addEventListener('receiveBack', receiveBack);
+    window.removeEventListener("receiveBack", receiveBack);
+    window.addEventListener("receiveBack", receiveBack);
 
     // 생체인증 결과 수신
     const receiveBiometrics = (event: Event) => {
-      console.log('----- webview receiveBiometrics -----');
+      console.log("----- webview receiveBiometrics -----");
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
 
       const didAuthenticate = detail.didAuthenticate;
 
-      if (didAuthenticate === 'true') {
-        webviewToast('생체 인증에 성공했습니다');
+      if (didAuthenticate === "true") {
+        webviewToast("생체 인증에 성공했습니다");
         // React Router로 홈으로 이동
-        window.location.href = '/';
+        window.location.href = "/";
       }
     };
 
-    window.removeEventListener('receiveBiometrics', receiveBiometrics);
-    window.addEventListener('receiveBiometrics', receiveBiometrics);
+    window.removeEventListener("receiveBiometrics", receiveBiometrics);
+    window.addEventListener("receiveBiometrics", receiveBiometrics);
 
     // 키보드 상태 수신
     const receiveKeyboard = (event: Event) => {
-      console.log('----- webview receiveKeyboard -----');
+      console.log("----- webview receiveKeyboard -----");
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
 
       const result: KeyboardVisibility = {
-        isOpen: detail.isOpen === 'true',
+        isOpen: detail.isOpen === "true",
         height: Math.round(parseFloat(detail.keyboardHeight) || 0),
       };
 
       // 키보드 상태에 따른 UI 조정
-      console.log('Keyboard visibility:', result.isOpen, result.height);
-      if (result.isOpen) {
-        document.documentElement.style.setProperty('--keyboard-height', `${result.height}px`);
-      } else {
-        document.documentElement.style.setProperty('--keyboard-height', '0px');
-      }
+      console.log("Keyboard visibility:", result.isOpen, result.height);
+      console.log('isPlatform : ' + isPlatform('ios'));
+      document.documentElement.style.setProperty(
+        "--keyboard-height",
+        isPlatform('ios') ? `${result.height}px` : `calc(var(--ion-safe-area-bottom) + ${result.height}px)`
+      );
     };
 
-    window.removeEventListener('receiveKeyboard', receiveKeyboard);
-    window.addEventListener('receiveKeyboard', receiveKeyboard);
+    window.removeEventListener("receiveKeyboard", receiveKeyboard);
+    window.addEventListener("receiveKeyboard", receiveKeyboard);
 
     // 웹뷰 초기화 완료 신호
-    if (typeof window !== 'undefined' && window.initWebview) {
+    if (typeof window !== "undefined" && window.initWebview) {
       window.initWebview();
     }
   }
 };
 
 // localStorage 헬퍼 함수들
-export const getStoredToken = (key: 'accessToken' | 'refreshToken' | 'deviceToken'): string | null => {
-  if (typeof window !== 'undefined') {
+export const getStoredToken = (
+  key: "accessToken" | "refreshToken" | "deviceToken"
+): string | null => {
+  if (typeof window !== "undefined") {
     return localStorage.getItem(key);
   }
   return null;
 };
 
 export const getStoredDeviceInfo = (): DeviceInfo | null => {
-  if (typeof window !== 'undefined') {
-    const deviceInfo = localStorage.getItem('deviceInfo');
+  if (typeof window !== "undefined") {
+    const deviceInfo = localStorage.getItem("deviceInfo");
     return deviceInfo ? JSON.parse(deviceInfo) : null;
   }
   return null;

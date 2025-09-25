@@ -1,9 +1,15 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { IonContent, IonFooter, IonIcon, IonModal, IonTextarea } from '@ionic/react';
-import { IonButton } from '@ionic/react';
-import AppBar from './AppBar';
-import { close } from 'ionicons/icons';
-import './ApprovalModal.css';
+import React, { useState, useRef, useMemo, useEffect } from "react";
+import {
+  IonContent,
+  IonFooter,
+  IonIcon,
+  IonModal,
+  IonTextarea,
+} from "@ionic/react";
+import { IonButton } from "@ionic/react";
+import AppBar from "./AppBar";
+import { close } from "ionicons/icons";
+import "./ApprovalModal.css";
 interface ApprovalModalProps {
   isOpen: boolean;
   trigger: string;
@@ -14,7 +20,14 @@ interface ApprovalModalProps {
   placeholder?: string;
   cancelText?: string;
   confirmText?: string;
-  confirmColor?: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' | 'danger';
+  confirmColor?:
+    | "primary"
+    | "secondary"
+    | "error"
+    | "warning"
+    | "info"
+    | "success"
+    | "danger";
   onCancel?: () => void;
   onConfirm?: (textValue: string) => void;
   maxLength?: number;
@@ -29,10 +42,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   title,
   subtitle,
   message,
-  placeholder = '내용을 입력해주세요',
-  cancelText = '취소',
-  confirmText = '확인',
-  confirmColor = 'primary',
+  placeholder = "내용을 입력해주세요",
+  cancelText = "취소",
+  confirmText = "확인",
+  confirmColor = "primary",
   onCancel,
   onConfirm,
   maxLength = 500,
@@ -42,7 +55,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const modal = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const [canDismiss, setCanDismiss] = useState(true);
-  const [textValue, setTextValue] = useState('');
+  const [textValue, setTextValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
@@ -56,26 +69,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     setTextValue(value);
   };
 
-  const handleTextareaFocus = () => {
-    if (textareaRef.current) {
-      // opacity를 0으로 설정
-      textareaRef.current.style.opacity = '0';
-
-      // setTimeout으로 즉시 1로 변경
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.style.opacity = '1';
-        }
-      }, 1000);
-    }
-  };
-
   const handelModalWillPresent = () => {
-    setTextValue('');
+    setTextValue("");
     setIsModalOpen(true);
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
-    window.history.pushState({ ...currentState, modalOpen: true }, '');
+    window.history.pushState({ ...currentState, modalOpen: true }, "");
     historyPushedRef.current = true;
     closedByBackButtonRef.current = false;
   };
@@ -104,151 +103,100 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, [isModalOpen]);
 
   // 닫기 버튼 컴포넌트 - AppBar 버튼과 동일한 스타일
-  const closeButton = useMemo(() => (
-    <IonButton
-      mode='md'
-      shape='round'
-      color={'medium'}
-      className="app-bar-button"
-      onClick={dismiss}
-    >
-      <IonIcon icon={close} />
-    </IonButton>
-  ), []);
+  const closeButton = useMemo(
+    () => (
+      <IonButton
+        mode="md"
+        shape="round"
+        color={"medium"}
+        className="app-bar-button"
+        onClick={dismiss}
+      >
+        <IonIcon icon={close} />
+      </IonButton>
+    ),
+    []
+  );
 
   return (
     <IonModal
       onIonModalWillPresent={handelModalWillPresent}
       onIonModalDidDismiss={handelModalDidDismiss}
-      className='approval-modal'
-      mode='ios'
+      className="approval-modal"
+      mode="ios"
       ref={modal}
       trigger={trigger}
       canDismiss={canDismiss}
-      initialBreakpoint={1} breakpoints={[0, 1]}
+      initialBreakpoint={1}
+      breakpoints={[0, 1]}
       style={{
-        '--max-height': 'calc(100% - 48px - var(--ion-safe-area-top))',
+        "--max-height": "calc(100% - 48px - var(--ion-safe-area-top))",
       }}
     >
-      <AppBar
-        title={<></>}
-        customEndButtons={closeButton}
-      />
-      <IonContent className='approval-modal-ion-content' style={{
-      }}>
-        <div className='approval-modal-title-wrapper'>
-          <span>임직원 개인경비 <span style={{ color: 'var(--ion-color-primary)' }}>1건</span>을</span>
-          <span><span style={{ color: 'var(--ion-color-primary)' }}>{title}</span> 하시겠습니까?</span>
+      <AppBar title={<></>} customEndButtons={closeButton} />
+      <IonContent className="approval-modal-ion-content">
+        <div className="approval-modal-title-wrapper">
+          <span>
+            임직원 개인경비{" "}
+            <span style={{ color: "var(--ion-color-primary)" }}>1건</span>을
+          </span>
+          <span>
+            <span style={{ color: "var(--ion-color-primary)" }}>{title}</span>{" "}
+            하시겠습니까?
+          </span>
         </div>
-        <div className='approval-modal-content-wrapper'>
-          <span style={{ fontWeight: '600' }}>결재 의견</span>
+        <div
+          style={{
+            padding: "28px 8px 8px 8px",
+            position: "fixed",
+            bottom: 'max(var(--ion-safe-area-bottom), var(--keyboard-height))',
+            // bottom: 'var(--ion-safe-area-bottom)',
+            width: "100%",
+            background: "var(--ion-background-color-gradient)",
+            zIndex: 2,
+          }}
+        >
           <IonTextarea
             ref={textareaRef}
-            mode='md'
+            mode="md"
             style={{
-              marginTop: '8px',
-              '--border-radius': '16px',
+              marginBottom: "8px",
+              "--border-radius": "16px",
             }}
-            rows={5}
+            rows={4}
             value={textValue}
             onInput={handleTextChange}
-            onIonFocus={handleTextareaFocus}
-            labelPlacement='start'
+            labelPlacement="start"
             fill="outline"
             placeholder="결재 의견을 입력해 주세요."
           ></IonTextarea>
-        </div>
-        <div style={{ padding: '8px', position: 'absolute', bottom: 0, width: '100%' }}>
           <IonButton
-            mode='md'
+            mode="md"
             color={confirmColor}
-            // color='danger'
-            // onClick={handleConfirm}
             disabled={required && !textValue?.trim()}
             style={{
-              height: '58px',
-              width: '100%',
+              height: "58px",
+              width: "100%",
               flex: 1,
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: '500'
+              borderRadius: "12px",
+              fontSize: "18px",
+              fontWeight: "600",
             }}
           >
             <span>{confirmText}</span>
           </IonButton>
         </div>
       </IonContent>
-      <IonFooter style={{ height: 'var(--ion-safe-area-bottom)' }}></IonFooter>
+      {/* <IonFooter style={{ '--padding-inset-bottom': 'var(--ion-safe-area-keyboard)' }}></IonFooter> */}
     </IonModal>
-    // <Dialog
-    //   open={isOpen}
-    //   onClose={onDidDismiss}
-    //   maxWidth="sm"
-    //   fullWidth
-    //   slots={{
-    //     transition: Transition,
-    //   }}
-    //   sx={{
-    //     '& .MuiDialog-paper': {
-    //       borderRadius: '18px',
-    //       margin: '16px',
-    //       backgroundColor: 'var(--ion-item-background)',
-    //       color: 'var(--ion-text-color)'
-    //     }
-    //   }}
-    // >
-    //   <div style={{ padding: '16px' }}>
-    //     <span style={{ textAlign: 'center', width: '100%' }}>{title}</span>
-    //     <IonTextarea
-    //       style={{
-    //         margin: '16px 0',
-    //         '--border-radius': '16px',
-    //       }}
-    //       rows={5}
-    //       value={textValue}
-    //       onInput={handleTextChange}
-    //       labelPlacement='start'
-    //       fill="outline"
-    //       placeholder="결재 의견"
-    //     ></IonTextarea>
-    //     <div style={{ height: '48px', display: 'flex', gap: '8px' }}>
-    //       <IonButton
-    //         mode='md'
-    //         onClick={handleCancel}
-    //         color='light'
-    //         style={{
-    //           height: '100%',
-    //           flex: 1,
-    //           borderRadius: '12px'
-    //         }}
-    //       >
-    //         <span>{cancelText}</span>
-    //       </IonButton>
-    //       <IonButton
-    //         mode='md'
-    //         color={confirmColor}
-    //         // color='danger'
-    //         onClick={handleConfirm}
-    //         disabled={required && !textValue.trim()}
-    //         style={{
-    //           height: '100%',
-    //           flex: 1,
-    //           borderRadius: '12px',
-    //         }}
-    //       >
-    //         <span>{confirmText}</span>
-    //       </IonButton>
-    //     </div>
-    //   </div>
-    // </Dialog>
   );
 };
 

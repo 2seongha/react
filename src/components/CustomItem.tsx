@@ -65,7 +65,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
         ref={wrapperRef}
         style={style}
         className={itemClasses}
-        onPointerUp={onClick ? () => {
+        onClick={onClick ? () => {
           onClick();
         } : undefined}
       >

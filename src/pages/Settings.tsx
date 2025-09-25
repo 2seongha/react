@@ -16,7 +16,8 @@ import {
   IonButton,
   IonAlert,
   IonActionSheet,
-  IonModal
+  IonModal,
+  IonInput
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
@@ -116,7 +117,7 @@ const Settings: React.FC = () => {
         <IonItem>
           <IonLabel position="stacked">배지 숫자 테스트</IonLabel>
           <div style={{ position: 'relative' }}>
-            <CustomInput
+            <IonInput
               type="number"
               value={badgeNumber}
               placeholder="숫자를 입력하세요"
@@ -141,7 +142,7 @@ const Settings: React.FC = () => {
         <IonItem>
           <IonLabel position="stacked">토스트 메시지 테스트</IonLabel>
           <div style={{ position: 'relative' }}>
-            <CustomInput
+            <IonInput
               type="text"
               value={toastMessage}
               placeholder="토스트 메시지를 입력하세요"
@@ -261,6 +262,13 @@ const Settings: React.FC = () => {
             >
               Modal Dialog 테스트
             </IonButton>
+            <IonInput
+              type="text"
+              value={toastMessage}
+              placeholder="토스트 메시지를 입력하세요"
+              onIonInput={(e) => setToastMessage(e.detail.value!)}
+              style={{ marginTop: '8px' }}
+            />
           </div>
         </IonItem>
 

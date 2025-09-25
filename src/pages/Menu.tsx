@@ -1,16 +1,12 @@
 import {
   IonContent,
-  IonHeader,
   IonItem,
   IonLabel,
   IonList,
   IonMenu,
-  IonTitle,
-  IonToolbar,
   IonIcon,
   IonImg,
   IonButton,
-  IonButtons,
   IonMenuToggle,
   IonRefresher,
   IonRefresherContent,
@@ -22,7 +18,6 @@ import { menuController } from '@ionic/core/components';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   chevronDown,
-  chevronForward,
   chevronUp,
   close,
   refreshOutline

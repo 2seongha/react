@@ -24,11 +24,10 @@ import './index.css';
 import './App.css';
 
 setupIonicReact({
-  mode: 'md',
   animated: true,
   rippleEffect: true,
-  scrollAssist: false,
   scrollPadding: false,
+  scrollAssist: false
 });
 
 createRoot(document.getElementById('root')!).render(

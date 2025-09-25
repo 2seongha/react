@@ -24,7 +24,7 @@ import "./Detail.css";
 import { getFlowIcon } from "../utils";
 import { useParams } from "react-router-dom";
 import useAppStore from "../stores/appStore";
-import { motion, useMotionValue } from "framer-motion";
+import { color, motion, useMotionValue, useTransform } from "framer-motion";
 import _ from "lodash";
 import Timeline from "@mui/lab/Timeline";
 import TimelineItem from "@mui/lab/TimelineItem";
@@ -43,30 +43,28 @@ import {
   PersonOutline,
 } from "@mui/icons-material";
 import ApprovalModal from "../components/ApprovalModal";
-import { chevronCollapse, chevronExpand, person } from "ionicons/icons";
+import { person } from "ionicons/icons";
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
 const Detail: React.FC = () => {
   const [activeTab, setActiveTab] = useState("tab1");
+  const [expandedHeight, setExpandedHeight] = useState(0);
   const [profitDialogOpen, setProfitDialogOpen] = useState(false); // 수익성 Dialog
   const [selectedProfitData, setSelectedProfitData] = useState<any>(null);
   const [attendeeDialogOpen, setAttendeeDialogOpen] = useState(false); // 참석자 Dialog
   const [selectedAttendeeData, setSelectedAttendeeData] = useState<any>(null);
-  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
 
   // CommonAlert 상태
   const [isApprovalAlertOpen, setIsApprovalAlertOpen] = useState(false);
   const [isRejectAlertOpen, setIsRejectAlertOpen] = useState(false);
 
   // Refs
+  const expandedHeaderRef = useRef<HTMLDivElement | null>(null);
+  const ionContentRef = useRef<HTMLIonContentElement | null>(null);
   const swiperRef = useRef<SwiperClass | null>(null);
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const headerHeightRef = useRef<number>(0);
-
-  useEffect(() => {
-    headerHeightRef.current = headerRef.current?.offsetHeight ?? 0;
-  }, [headerRef.current]);
+  const pageContentRef = useRef<HTMLDivElement | null>(null);
+  const page = useRef(undefined);
 
   // Constants
   const { FLOWNO } = useParams<{ FLOWNO: string }>();
@@ -115,20 +113,80 @@ const Detail: React.FC = () => {
     // 여기에 반려 API 호출 로직 추가
   }, []);
 
+  // 헤더 높이 미리 측정 (화면에 보이기 전)
+  const [isHeaderMeasured, setIsHeaderMeasured] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!expandedHeaderRef.current || isHeaderMeasured) return;
+
+    // 임시로 화면 밖에서 측정
+    const tempElement = expandedHeaderRef.current.cloneNode(
+      true
+    ) as HTMLElement;
+    tempElement.style.position = "absolute";
+    tempElement.style.top = "-9999px";
+    tempElement.style.left = "-9999px";
+    tempElement.style.visibility = "hidden";
+    tempElement.style.width = window.innerWidth + "px";
+
+    document.body.appendChild(tempElement);
+
+    // 높이 측정
+    const measuredHeight = tempElement.offsetHeight;
+    if (measuredHeight > 0) {
+      setExpandedHeight(measuredHeight);
+      setIsHeaderMeasured(true);
+    }
+
+    document.body.removeChild(tempElement);
+
+    // ResizeObserver로 실시간 업데이트
+    const observer = new ResizeObserver(([entry]) => {
+      const newHeight = entry.contentRect.height;
+      if (newHeight > 0 && newHeight !== expandedHeight) {
+        setExpandedHeight(newHeight + 34);
+      }
+    });
+
+    observer.observe(expandedHeaderRef.current);
+    return () => observer.disconnect();
+  }, [isHeaderMeasured, expandedHeight]);
+
+  // 헤더 애니메이션
+  // 스크롤 감지 (전체 문서 기준)
+  const scrollY = useMotionValue(0);
+
+  // 초기 스크롤 위치 설정
+  useEffect(() => {
+    scrollY.set(0);
+    if (pageContentRef.current) {
+      pageContentRef.current.scrollTop = 0;
+    }
+  }, []);
+
+  // 0~50%: 헤더 사라짐, 50%~100%: 위 헤더 나타남
+  const halfHeight = expandedHeight * 0.5;
+  const opacity = useTransform(scrollY, [0, halfHeight], [1, 0]);
+  const scale = useTransform(scrollY, [0, halfHeight], [1, 0.8]);
+  const opacityRev = useTransform(
+    scrollY,
+    [halfHeight, expandedHeight],
+    [0, 1]
+  );
+
   return (
-    <IonPage className="detail">
+    <IonPage className="detail" ref={page}>
       <AppBar
         showBackButton={true}
         titleCenter={false}
         title={
-          <div
+          <motion.div
             style={{
               width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "start",
-              opacity: isHeaderCollapsed ? 1 : 0,
-              transition: "opacity 0.3s",
+              opacity: opacityRev,
             }}
           >
             <span style={{ fontSize: "13px" }}>{approval.APPR_TITLE}</span>
@@ -137,49 +195,53 @@ const Detail: React.FC = () => {
             >
               {P_AREA_CODE_TXT}
             </span>
-          </div>
-        }
-        customEndButtons={
-          <IonButton
-            mode="md"
-            shape="round"
-            color={"medium"}
-            className="app-bar-button"
-            onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
-          >
-            <IonIcon
-              icon={isHeaderCollapsed ? chevronExpand : chevronCollapse}
-            />
-          </IonButton>
+          </motion.div>
         }
       />
-      <IonContent scrollEvents={false} scrollY={false} scrollX={false}>
+      <IonContent
+        scrollEvents={false}
+        scrollY={false}
+        scrollX={false}
+        ref={ionContentRef}
+      >
         <div
-          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+          ref={pageContentRef}
+          style={{
+            height: "100%",
+            overflow: "auto",
+            scrollSnapType: "y mandatory",
+          }}
+          onScroll={(e) => {
+            const scrollTop = (e.target as HTMLElement).scrollTop;
+            scrollY.set(scrollTop);
+          }}
         >
+          {/* 헤더 높이만큼 공간 확보 div */}
+          {isHeaderMeasured && (
+            <div
+              style={{
+                height: expandedHeight + "px",
+                scrollSnapAlign: "end",
+              }}
+            />
+          )}
           <motion.div
-            ref={headerRef}
-            animate={{
-              height: isHeaderCollapsed ? 0 : headerHeightRef.current,
-              opacity: isHeaderCollapsed ? 0 : 1,
-              scale: isHeaderCollapsed ? 0.8 : 1,
-            }}
-            transition={{
-              duration: 0.4,
-              ease: [0.4, 0, 0.2, 1],
-              height: { duration: 0.3 },
-              opacity: { duration: 0.2 },
-            }}
+            ref={expandedHeaderRef}
             style={{
+              position: "absolute",
+              top: "0",
               width: "100%",
               display: "flex",
               alignItems: "start",
               justifyContent: "center",
               flexDirection: "column",
-              padding: isHeaderCollapsed ? "0 22px" : "12px 22px 22px 22px",
+              padding: "12px 22px 22px 22px",
+              opacity,
+              scale,
+              willChange: "transform",
+              minHeight: "200px",
               backgroundColor: "var(--ion-background-color2)",
               pointerEvents: "none",
-              overflow: "hidden",
             }}
           >
             {
@@ -216,11 +278,7 @@ const Detail: React.FC = () => {
                   </span>
                 </div>
                 <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    width: "100%",
-                  }}
+                  style={{ fontSize: "16px", fontWeight: "600", width: "100%" }}
                 >
                   {approval.APPR_TITLE}
                 </span>
@@ -287,240 +345,328 @@ const Detail: React.FC = () => {
               </>
             }
           </motion.div>
-          <IonSegment
-            className="segment"
-            value={activeTab}
-            color="medium"
-            mode="md"
-            onIonChange={(e) => {
-              const selectedTab = e.detail.value as string;
-              const tabIndex = TAB_KEYS.indexOf(selectedTab);
-              if (tabIndex !== -1) {
-                setActiveTab(selectedTab);
-                swiperRef.current?.slideTo(tabIndex);
-              }
-            }}
-          >
-            <IonSegmentButton value="tab1">
-              <div className="detail-segment-label">
-                <span>상세목록</span>
-                <span>({approval.SUB.length})</span>
-              </div>
-            </IonSegmentButton>
-            <IonSegmentButton value="tab2">
-              <div className="detail-segment-label">
-                <span>결재정보</span>
-                <span>({approval.LISTAPPRLINE.length})</span>
-              </div>
-            </IonSegmentButton>
-            <IonSegmentButton value="tab3">
-              <div className="detail-segment-label">
-                <span>첨부파일</span>
-                <span>({approval.LISTATTACH.length})</span>
-              </div>
-            </IonSegmentButton>
-          </IonSegment>
-          {/* Swiper 탭 콘텐츠 */}
-          <Swiper
-            className="swiper"
+          {/* 헤더 밑으로 분리된 grab indicator와 segment */}
+          <div
             style={{
+              position: "relative",
               flex: 1,
-              width: "100%",
+              scrollSnapAlign: "start",
             }}
-            onSwiper={(swiper) => (swiperRef.current = swiper)}
-            onSlideChange={handleSlideChange}
-            resistanceRatio={0}
           >
-            <SwiperSlide
-              style={{
-                overflow: "auto",
-                padding: "12px 21px 0 21px",
-                backgroundColor: "var(--ion-background-color)",
-              }}
-            >
-              {approval.SUB.map((sub: any, index: number) => (
-                <SubItem
-                  key={sub.FLOWNO + sub.FLOWCNT + index}
-                  selectable={P_AREA_CODE === "TODO"}
-                  sub={sub}
-                  isSelected={false}
-                  onSelectionChange={() => {}}
-                  onProfitDialogOpen={(profitData) => {
-                    setSelectedProfitData(profitData);
-                    // 숨김 버튼을 클릭해서 Dialog 열기
-                    document.getElementById("profit-dialog-trigger")?.click();
-                  }}
-                  onAttendeeDialogOpen={(attendeeData) => {
-                    setSelectedAttendeeData(attendeeData);
-                    // 숨김 버튼을 클릭해서 Dialog 열기
-                    document.getElementById("attendee-dialog-trigger")?.click();
-                  }}
-                />
-              ))}
-            </SwiperSlide>
-            <SwiperSlide
-              style={{
-                overflow: "auto",
-              }}
-            >
-              <Timeline
-                position="right"
-                sx={{
-                  backgroundColor: "var(--ion-background-color)",
-                  paddingTop: "12px",
-                  paddingLeft: "22px",
-                  paddingRight: 0,
-                  paddingBottom: 0,
-                  margin: 0,
-                  "& .MuiTimelineItem-root": {
-                    minHeight: "auto",
-                    "&:before": {
-                      display: "none",
-                    },
-                  },
-                }}
-              >
-                {approval.LISTAPPRLINE.map((apprLine: any, index: number) => {
-                  const isStarter = apprLine.WFIT_TYPE === "ST";
-                  const isLast = index === approval.LISTAPPRLINE.length - 1;
-                  const text = approval.TEXT.find(
-                    (text: any) => text.FLOWIT === apprLine.APPR_CNT
-                  )?.LTEXT;
-
-                  let MuiIcon, color, borderColor, connectorColor;
-                  switch (apprLine.WFSTAT) {
-                    case "":
-                      MuiIcon = PersonOutline;
-                      color = "var(--gray-color)";
-                      borderColor = "var(--gray-color)";
-                      connectorColor = "var(--gray-color)";
-                      break;
-                    case "P":
-                      MuiIcon = CheckCircleOutline;
-                      color = "var(--gray-color)";
-                      borderColor = "var(--ion-color-primary)";
-                      connectorColor = "var(--gray-color)";
-                      break;
-                    case "A":
-                      MuiIcon = CheckCircle;
-                      color = "var(--ion-color-primary)";
-                      borderColor = "var(--ion-color-primary)";
-                      connectorColor = "var(--ion-color-primary)";
-                      break;
-                    case "R":
-                      MuiIcon = Cancel;
-                      color = "var(--red)";
-                      borderColor = "var(--red)";
-                      connectorColor = "var(--red)";
-                      break;
-                    case "C":
-                      MuiIcon = Close;
-                      color = "var(--red)";
-                      borderColor = "var(--red)";
-                      connectorColor = "var(--red)";
-                      break;
-                    default:
-                      MuiIcon = PersonOutline;
-                      color = "var(--gray-color)";
-                      borderColor = "var(--gray-color)";
-                      connectorColor = "var(--gray-color)";
-                      break;
-                  }
-
-                  if (isStarter) {
-                    MuiIcon = HowToReg;
-                    color = "var(--ion-color-primary)";
-                    borderColor = "var(--ion-color-primary)";
-                    connectorColor = "var(--ion-color-primary)";
-                  }
-
-                  return (
-                    <TimelineItem key={`time-line-item-${index}`}>
-                      <TimelineSeparator>
-                        <TimelineDot
-                          sx={{
-                            backgroundColor: color,
-                            border: "2px solid",
-                            borderColor: borderColor,
-                            marginTop: "8px",
-                            marginBottom: "4px",
-                            boxShadow: "none",
-                          }}
-                        >
-                          {MuiIcon ? <MuiIcon /> : null}
-                        </TimelineDot>
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            marginBottom: "8px",
-                            color: color,
-                          }}
-                        >
-                          {apprLine.APPR_CNT}
-                        </span>
-                        {!isLast && (
-                          <TimelineConnector
-                            sx={{
-                              backgroundColor: connectorColor,
-                              minHeight: 8,
-                            }}
-                          />
-                        )}
-                      </TimelineSeparator>
-                      <TimelineContent sx={{ padding: "0 22px" }}>
-                        <ApprLineItem apprLine={apprLine} text={text} />
-                      </TimelineContent>
-                    </TimelineItem>
-                  );
-                })}
-              </Timeline>
-            </SwiperSlide>
-          </Swiper>
-          {P_AREA_CODE === "TODO" && (
             <div
               style={{
-                height: "75px",
-                width: "100%",
-                backgroundColor: "var(--ion-background-color)",
-                borderTop: "1px solid var(--custom-border-color-100)",
-                borderRadius: "16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "8px",
-                gap: "8px",
+                position: "sticky",
+                left: 0,
+                right: 0,
+                top: 0,
+                height: "76px",
+                zIndex: 3,
+                backgroundColor: "var(--ion-background-color2)",
               }}
             >
-              <IonButton
+              <div className="grap-indicator-wrapper">
+                <span
+                  style={{
+                    display: "block",
+                    width: "60px",
+                    height: "4px",
+                    background: "var(--grab-indicator-color)",
+                  }}
+                />
+              </div>
+              <IonSegment
+                className="segment"
+                value={activeTab}
+                color="medium"
                 mode="md"
-                color="light"
-                style={{
-                  flex: 1,
-                  height: "100%",
-                  fontSize: "18px",
-                  fontWeight: "600",
+                onIonChange={(e) => {
+                  const selectedTab = e.detail.value as string;
+                  const tabIndex = TAB_KEYS.indexOf(selectedTab);
+                  if (tabIndex !== -1) {
+                    setActiveTab(selectedTab);
+                    swiperRef.current?.slideTo(tabIndex);
+                  }
                 }}
-                id="reject-modal"
-                // onClick={() => setIsRejectAlertOpen(true)}
               >
-                <span>반려하기</span>
-              </IonButton>
-              <IonButton
-                mode="md"
-                color="primary"
-                style={{
-                  flex: 1,
-                  height: "100%",
-                  fontSize: "18px",
-                  fontWeight: "600",
-                }}
-                id="approve-modal"
-                // onClick={() => setIsApprovalAlertOpen(true)}
-              >
-                <span>승인하기</span>
-              </IonButton>
+                <IonSegmentButton value="tab1">
+                  <div className="detail-segment-label">
+                    <span>상세목록</span>
+                    <span>({approval.SUB.length})</span>
+                  </div>
+                </IonSegmentButton>
+                <IonSegmentButton value="tab2">
+                  <div className="detail-segment-label">
+                    <span>결재정보</span>
+                    <span>({approval.LISTAPPRLINE.length})</span>
+                  </div>
+                </IonSegmentButton>
+                <IonSegmentButton value="tab3">
+                  <div className="detail-segment-label">
+                    <span>첨부파일</span>
+                    <span>({approval.LISTATTACH.length})</span>
+                  </div>
+                </IonSegmentButton>
+              </IonSegment>
             </div>
-          )}
+
+            {/* Swiper 탭 콘텐츠 */}
+            <Swiper
+              className="swiper"
+              effect="flip"
+              // autoHeight
+              style={{
+                // height: "100%",
+                backgroundColor: "var(--ion-background-color)",
+                // willChange: "transform",
+                // paddingTop: "76px",
+              }}
+              // onSliderFirstMove={(swiper)=>{
+              //   swiper.updateAutoHeight(0);
+              //   console.log('onSlideNextTransitionStart')
+              // }}
+              // onSliderFirstMove={() => {
+              //   console.log('start')
+              //   const swiper = swiperRef.current;
+              //   if(swiper){
+              //     const activeSlide = swiper.slides[swiper.activeIndex];
+              //     activeSlide.style.opacity = '0';
+              //   }
+              // }}
+              onTransitionCancel={()=>{
+                console.log("onTransitionCancel");
+              }}
+              onSliderMove={()=>{
+                console.log("onSliderMove");
+              }}
+              onTransitionStart={()=> {
+                console.log("onTransitionStart");
+                const swiper = swiperRef.current;
+                if(!swiper) return;
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const swiperWrapper = swiper.wrapperEl;
+                if (activeSlide && swiperWrapper) {
+                  const activeSlideHeight = activeSlide.firstChild!.offsetHeight;
+                  swiperWrapper.style.height = `${activeSlideHeight}px`;
+                  pageContentRef.current!.scrollTop = pageContentRef.current!.scrollTop >expandedHeight ? expandedHeight : pageContentRef.current!.scrollTop;
+                }
+              }}
+              onTransitionEnd={(swiper) => {
+                console.log("onTransitionEnd");
+                // const activeSlide = swiper.slides[swiper.activeIndex];
+                // const swiperWrapper = swiper.wrapperEl;
+                // if (activeSlide && swiperWrapper) {
+                //   const activeSlideHeight = activeSlide.firstChild!.offsetHeight;
+                //   swiperWrapper.style.height = `${activeSlideHeight}px`;
+                //   pageContentRef.current!.scrollTop = pageContentRef.current!.scrollTop >expandedHeight ? expandedHeight : pageContentRef.current!.scrollTop;
+                // }
+              }}
+              onSwiper={(swiper) => (swiperRef.current = swiper)}
+              onSlideChange={handleSlideChange}
+              resistanceRatio={0}
+              // autoHeight
+              // setWrapperSize
+            >
+              <SwiperSlide>
+                <div
+                  style={{
+                    height: "auto",
+                    padding: "12px 22px var(--ion-safe-area-bottom) 22px",
+                  }}
+                >
+                  {[...approval.SUB,...approval.SUB].map((sub: any, index: number) => (
+                    <SubItem
+                      key={sub.FLOWNO + sub.FLOWCNT + index}
+                      selectable={P_AREA_CODE === "TODO"}
+                      sub={sub}
+                      isSelected={false}
+                      onSelectionChange={() => {}}
+                      onProfitDialogOpen={(profitData) => {
+                        setSelectedProfitData(profitData);
+                        // 숨김 버튼을 클릭해서 Dialog 열기
+                        document
+                          .getElementById("profit-dialog-trigger")
+                          ?.click();
+                      }}
+                      onAttendeeDialogOpen={(attendeeData) => {
+                        setSelectedAttendeeData(attendeeData);
+                        // 숨김 버튼을 클릭해서 Dialog 열기
+                        document
+                          .getElementById("attendee-dialog-trigger")
+                          ?.click();
+                      }}
+                    />
+                  ))}
+                </div>
+              </SwiperSlide>
+              <SwiperSlide>
+                <div
+                  style={{
+                    height: "auto",
+                    paddingTop: "12px",
+                    // overscrollBehavior: "none",
+                  }}
+                >
+                  <Timeline
+                    position="right"
+                    sx={{
+                      padding: 0,
+                      margin: 0,
+                      paddingLeft: "22px",
+                      "& .MuiTimelineItem-root": {
+                        minHeight: "auto",
+                        "&:before": {
+                          display: "none",
+                        },
+                      },
+                    }}
+                  >
+                    {[...approval.LISTAPPRLINE, ...approval.LISTAPPRLINE].map(
+                      (apprLine: any, index: number) => {
+                        const isStarter = apprLine.WFIT_TYPE === "ST";
+                        const isLast =
+                          index === approval.LISTAPPRLINE.length - 1;
+                        const text = approval.TEXT.find(
+                          (text: any) => text.FLOWIT === apprLine.APPR_CNT
+                        )?.LTEXT;
+
+                        let MuiIcon, color, borderColor, connectorColor;
+                        switch (apprLine.WFSTAT) {
+                          case "":
+                            MuiIcon = PersonOutline;
+                            color = "var(--gray-color)";
+                            borderColor = "var(--gray-color)";
+                            connectorColor = "var(--gray-color)";
+                            break;
+                          case "P":
+                            MuiIcon = CheckCircleOutline;
+                            color = "var(--gray-color)";
+                            borderColor = "var(--ion-color-primary)";
+                            connectorColor = "var(--gray-color)";
+                            break;
+                          case "A":
+                            MuiIcon = CheckCircle;
+                            color = "var(--ion-color-primary)";
+                            borderColor = "var(--ion-color-primary)";
+                            connectorColor = "var(--ion-color-primary)";
+                            break;
+                          case "R":
+                            MuiIcon = Cancel;
+                            color = "var(--red)";
+                            borderColor = "var(--red)";
+                            connectorColor = "var(--red)";
+                            break;
+                          case "C":
+                            MuiIcon = Close;
+                            color = "var(--red)";
+                            borderColor = "var(--red)";
+                            connectorColor = "var(--red)";
+                            break;
+                          default:
+                            MuiIcon = PersonOutline;
+                            color = "var(--gray-color)";
+                            borderColor = "var(--gray-color)";
+                            connectorColor = "var(--gray-color)";
+                            break;
+                        }
+
+                        if (isStarter) {
+                          MuiIcon = HowToReg;
+                          color = "var(--ion-color-primary)";
+                          borderColor = "var(--ion-color-primary)";
+                          connectorColor = "var(--ion-color-primary)";
+                        }
+
+                        return (
+                          <TimelineItem key={`time-line-item-${index}`}>
+                            <TimelineSeparator>
+                              <TimelineDot
+                                sx={{
+                                  backgroundColor: color,
+                                  border: "2px solid",
+                                  borderColor: borderColor,
+                                  marginTop: "8px",
+                                  marginBottom: "4px",
+                                  boxShadow: "none",
+                                }}
+                              >
+                                {MuiIcon ? <MuiIcon /> : null}
+                              </TimelineDot>
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  marginBottom: "8px",
+                                  color: color,
+                                }}
+                              >
+                                {apprLine.APPR_CNT}
+                              </span>
+                              {!isLast && (
+                                <TimelineConnector
+                                  sx={{
+                                    backgroundColor: connectorColor,
+                                    minHeight: 8,
+                                  }}
+                                />
+                              )}
+                            </TimelineSeparator>
+                            <TimelineContent sx={{ padding: "0 22px" }}>
+                              <ApprLineItem apprLine={apprLine} text={text} />
+                            </TimelineContent>
+                          </TimelineItem>
+                        );
+                      }
+                    )}
+                  </Timeline>
+                </div>
+              </SwiperSlide>
+            </Swiper>
+          </div>
+          {/* <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              height: "calc(75px + var(--ion-safe-area-bottom))",
+              width: "100%",
+              backgroundColor: "var(--ion-background-color)",
+              zIndex: "1",
+              borderTop: "1px solid var(--custom-border-color-100)",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px 8px calc(8px + var(--ion-safe-area-bottom)) 8px",
+              gap: "8px",
+            }}
+          >
+            <IonButton
+              mode="md"
+              color="light"
+              style={{
+                flex: 1,
+                height: "100%",
+                fontSize: "18px",
+                fontWeight: "600",
+              }}
+              id="reject-modal"
+              // onClick={() => setIsRejectAlertOpen(true)}
+            >
+              <span>반려하기</span>
+            </IonButton>
+            <IonButton
+              mode="md"
+              color="primary"
+              style={{
+                flex: 1,
+                height: "100%",
+                fontSize: "18px",
+                fontWeight: "600",
+              }}
+              id="approve-modal"
+              // onClick={() => setIsApprovalAlertOpen(true)}
+            >
+              <span>승인하기</span>
+            </IonButton>
+          </div> */}
         </div>
         {/* 승인 Modal */}
         <ApprovalModal
@@ -536,6 +682,7 @@ const Detail: React.FC = () => {
           onConfirm={handleApproval}
           maxLength={300}
           required={false}
+          page={page}
           trigger="approve-modal"
         />
 
@@ -553,6 +700,7 @@ const Detail: React.FC = () => {
           onConfirm={handleReject}
           maxLength={300}
           required={true}
+          page={page}
           trigger="reject-modal"
         />
         {/* 수익성 Dialog Trigger Button (숨김) */}
