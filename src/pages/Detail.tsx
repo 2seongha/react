@@ -64,9 +64,41 @@ const Detail: React.FC = () => {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const headerHeightRef = useRef<number>(0);
 
-  useEffect(() => {
-    headerHeightRef.current = headerRef.current?.offsetHeight ?? 0;
-  }, [headerRef.current]);
+  useLayoutEffect(() => {
+    if (!headerRef.current) return;
+
+    // 임시로 화면 밖에서 측정
+    const tempElement = headerRef.current.cloneNode(
+      true
+    ) as HTMLElement;
+    tempElement.style.position = "absolute";
+    tempElement.style.top = "-9999px";
+    tempElement.style.left = "-9999px";
+    tempElement.style.visibility = "hidden";
+    tempElement.style.width = window.innerWidth + "px";
+
+    document.body.appendChild(tempElement);
+
+    // 높이 측정
+    const measuredHeight = tempElement.offsetHeight;
+    if (measuredHeight > 0) {
+      debugger;
+      headerHeightRef.current = measuredHeight;
+    }
+
+    document.body.removeChild(tempElement);
+
+    // ResizeObserver로 실시간 업데이트
+    // const observer = new ResizeObserver(([entry]) => {
+    //   const newHeight = entry.contentRect.height;
+    //   if (newHeight > 0 && newHeight !== expandedHeight) {
+    //     setExpandedHeight(newHeight + 34);
+    //   }
+    // });
+
+    // observer.observe(expandedHeaderRef.current);
+    // return () => observer.disconnect();
+  }, []);
 
   // Constants
   const { FLOWNO } = useParams<{ FLOWNO: string }>();
@@ -155,7 +187,7 @@ const Detail: React.FC = () => {
       />
       <IonContent scrollEvents={false} scrollY={false} scrollX={false}>
         <div
-          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+          style={{ display: "flex", flexDirection: "column", height: "100%", paddingBottom: 'var(--ion-safe-area-bottom)' }}
         >
           <motion.div
             ref={headerRef}
@@ -361,12 +393,12 @@ const Detail: React.FC = () => {
             <SwiperSlide
               style={{
                 overflow: "auto",
+                backgroundColor: "var(--ion-background-color)",
               }}
             >
               <Timeline
                 position="right"
                 sx={{
-                  backgroundColor: "var(--ion-background-color)",
                   paddingTop: "12px",
                   paddingLeft: "22px",
                   paddingRight: 0,

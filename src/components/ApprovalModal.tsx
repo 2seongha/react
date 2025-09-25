@@ -160,7 +160,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             bottom: 'max(var(--ion-safe-area-bottom), var(--keyboard-height))',
             // bottom: 'var(--ion-safe-area-bottom)',
             width: "100%",
-            background: "var(--ion-background-color-gradient)",
+            background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
             zIndex: 2,
           }}
         >

@@ -103,7 +103,7 @@ const AppBar: React.FC<AppBarProps> = ({
             <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
             : <div></div>
           }
-          <IonButtons slot="end">
+          <IonButtons slot="end" style={{marginRight:'8px'}}>
             {showSearchButton &&
               <IonButton mode='md' shape='round' color={'medium'}
                 className="app-bar-button"
