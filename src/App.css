@@ -130,6 +130,11 @@ ion-item {
   --background-hover-opacity: 0;
 }
 
+ion-segment-button {
+  --background-hover: transparent;
+  --background-hover-opacity: 0;
+}
+
 ion-button {
   margin-inline-start: 0px;
   margin-inline-end: 0px;

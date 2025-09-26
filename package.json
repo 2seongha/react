@@ -23,8 +23,10 @@
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.11.0",
     "framer-motion": "^12.23.12",
+    "install": "^0.13.0",
     "ionicons": "^8.0.13",
     "lodash": "^4.17.21",
+    "npm": "^11.6.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-loading-indicators": "^1.0.1",
@@ -33,6 +35,7 @@
     "react-scroll": "^1.9.3",
     "react-slot-counter": "^3.3.1",
     "react-virtuoso": "^4.14.0",
+    "seamless-scroll-polyfill": "^2.3.4",
     "swiper": "^11.2.10",
     "zustand": "^5.0.7"
   },

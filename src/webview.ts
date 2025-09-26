@@ -137,7 +137,6 @@ export const initWebview = async (): Promise<boolean> => {
 
 const _initWebview = async (): Promise<void> => {
   const isWebView = "Y"; // 환경변수 가져오기
-  // const router = useIonRouter();
   console.log("----- webview Init Start -----", isWebView);
 
   if (isWebView == "N") {

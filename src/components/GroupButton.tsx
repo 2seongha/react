@@ -3,6 +3,7 @@ import './GroupButton.css';
 import useAppStore from '../stores/appStore';
 import CustomSkeleton from './CustomSkeleton';
 import { useShallow } from 'zustand/shallow';
+import { elementScrollIntoView } from 'seamless-scroll-polyfill';
 
 const GroupButton: React.FC = () => {
   const [selected, setSelected] = useState<{ value: number } | null>(null);
@@ -24,7 +25,11 @@ const GroupButton: React.FC = () => {
         // 새로 선택된 버튼으로 스크롤
         setTimeout(() => {
           const button = buttonRefs.current[newIndex.value];
-          button?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          if(button) elementScrollIntoView(button, {
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center',
+          });
         }, 0);
       }
       setSelected(newIndex);

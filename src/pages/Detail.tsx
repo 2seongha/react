@@ -14,6 +14,8 @@ import {
   IonImg,
   IonIcon,
   IonButton,
+  IonItem,
+  IonCheckbox,
 } from "@ionic/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useShallow } from "zustand/shallow";
@@ -24,7 +26,7 @@ import "./Detail.css";
 import { getFlowIcon } from "../utils";
 import { useParams } from "react-router-dom";
 import useAppStore from "../stores/appStore";
-import { motion, useMotionValue } from "framer-motion";
+import { motion } from "framer-motion";
 import _ from "lodash";
 import Timeline from "@mui/lab/Timeline";
 import TimelineItem from "@mui/lab/TimelineItem";
@@ -48,6 +50,7 @@ import { chevronCollapse, chevronExpand, person } from "ionicons/icons";
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
 const Detail: React.FC = () => {
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState("tab1");
   const [profitDialogOpen, setProfitDialogOpen] = useState(false); // 수익성 Dialog
   const [selectedProfitData, setSelectedProfitData] = useState<any>(null);
@@ -68,13 +71,11 @@ const Detail: React.FC = () => {
     if (!headerRef.current) return;
 
     // 임시로 화면 밖에서 측정
-    const tempElement = headerRef.current.cloneNode(
-      true
-    ) as HTMLElement;
+    const tempElement = headerRef.current.cloneNode(true) as HTMLElement;
     tempElement.style.position = "absolute";
-    tempElement.style.top = "-9999px";
-    tempElement.style.left = "-9999px";
-    tempElement.style.visibility = "hidden";
+    tempElement.style.top = "-0";
+    tempElement.style.left = "-0";
+    // tempElement.style.visibility = "hidden";
     tempElement.style.width = window.innerWidth + "px";
 
     document.body.appendChild(tempElement);
@@ -82,22 +83,10 @@ const Detail: React.FC = () => {
     // 높이 측정
     const measuredHeight = tempElement.offsetHeight;
     if (measuredHeight > 0) {
-      debugger;
       headerHeightRef.current = measuredHeight;
     }
 
     document.body.removeChild(tempElement);
-
-    // ResizeObserver로 실시간 업데이트
-    // const observer = new ResizeObserver(([entry]) => {
-    //   const newHeight = entry.contentRect.height;
-    //   if (newHeight > 0 && newHeight !== expandedHeight) {
-    //     setExpandedHeight(newHeight + 34);
-    //   }
-    // });
-
-    // observer.observe(expandedHeaderRef.current);
-    // return () => observer.disconnect();
   }, []);
 
   // Constants
@@ -147,6 +136,29 @@ const Detail: React.FC = () => {
     // 여기에 반려 API 호출 로직 추가
   }, []);
 
+  // 전체 선택 상태 계산
+  const isAllSelected = useMemo(() => {
+    if (approval.SUB.length === 0) return false;
+    return approval.SUB.every((sub: any) => selectedItems.has(sub.FLOWCNT));
+  }, [selectedItems]);
+
+  // 전체 선택/해제 핸들러
+  const handleSelectAll = useCallback(() => {
+    if (!approval.SUB) return;
+
+    if (isAllSelected) {
+      // 전체 해제
+      setSelectedItems(new Set());
+    } else {
+      // 전체 선택 (필터된 결과만)
+      const newSet = new Set<string>();
+      approval.SUB.forEach((sub: any) => {
+        newSet.add(sub.FLOWCNT);
+      });
+      setSelectedItems(newSet);
+    }
+  }, [isAllSelected]);
+
   return (
     <IonPage className="detail">
       <AppBar
@@ -161,9 +173,20 @@ const Detail: React.FC = () => {
               alignItems: "start",
               opacity: isHeaderCollapsed ? 1 : 0,
               transition: "opacity 0.3s",
+              paddingRight: "52px",
             }}
           >
-            <span style={{ fontSize: "13px" }}>{approval.APPR_TITLE}</span>
+            <span
+              style={{
+                fontSize: "13px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                width: "100%",
+              }}
+            >
+              {approval.APPR_TITLE}
+            </span>
             <span
               style={{ fontSize: "13px", color: "var(--ion-color-secondary)" }}
             >
@@ -187,29 +210,33 @@ const Detail: React.FC = () => {
       />
       <IonContent scrollEvents={false} scrollY={false} scrollX={false}>
         <div
-          style={{ display: "flex", flexDirection: "column", height: "100%", paddingBottom: 'var(--ion-safe-area-bottom)' }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            paddingBottom: "var(--ion-safe-area-bottom)",
+            backgroundColor: "var(--ion-background-color)",
+          }}
         >
           <motion.div
             ref={headerRef}
             animate={{
-              height: isHeaderCollapsed ? 0 : headerHeightRef.current,
               opacity: isHeaderCollapsed ? 0 : 1,
-              scale: isHeaderCollapsed ? 0.8 : 1,
+              scale: isHeaderCollapsed ? 0.6 : 1,
             }}
             transition={{
               duration: 0.4,
               ease: [0.4, 0, 0.2, 1],
-              height: { duration: 0.3 },
               opacity: { duration: 0.2 },
             }}
             style={{
+              position: "absolute",
               width: "100%",
               display: "flex",
               alignItems: "start",
               justifyContent: "center",
               flexDirection: "column",
-              padding: isHeaderCollapsed ? "0 22px" : "12px 22px 22px 22px",
-              backgroundColor: "var(--ion-background-color2)",
+              padding: "12px 21px 21px 21px",
               pointerEvents: "none",
               overflow: "hidden",
             }}
@@ -222,6 +249,7 @@ const Detail: React.FC = () => {
                     alignItems: "center",
                     gap: "4px",
                     marginBottom: "8px",
+                    height: "20px",
                   }}
                 >
                   <IonImg src={icon.image} style={{ width: "20px" }} />
@@ -259,10 +287,10 @@ const Detail: React.FC = () => {
                 <div
                   style={{
                     marginTop: "22px",
-                    backgroundColor: "var(--ion-background-color)",
                     width: "100%",
                     borderRadius: "12px",
                     overflow: "hidden",
+                    backgroundColor: 'var(--ion-background-color)'
                   }}
                 >
                   <div
@@ -319,6 +347,20 @@ const Detail: React.FC = () => {
               </>
             }
           </motion.div>
+          <motion.div
+            animate={{
+              height: isHeaderCollapsed ? 0 : headerHeightRef.current,
+            }}
+            style={{
+              backgroundColor: "var(--ion-background-color2)",
+              height: headerHeightRef.current,
+            }}
+            transition={{
+              duration: 0.4,
+              ease: [0.4, 0, 0.2, 1],
+              height: { duration: 0.3 },
+            }}
+          ></motion.div>
           <IonSegment
             className="segment"
             value={activeTab}
@@ -342,13 +384,13 @@ const Detail: React.FC = () => {
             <IonSegmentButton value="tab2">
               <div className="detail-segment-label">
                 <span>결재정보</span>
-                <span>({approval.LISTAPPRLINE.length})</span>
+                <span></span>
               </div>
             </IonSegmentButton>
             <IonSegmentButton value="tab3">
               <div className="detail-segment-label">
                 <span>첨부파일</span>
-                <span>({approval.LISTATTACH.length})</span>
+                <span></span>
               </div>
             </IonSegmentButton>
           </IonSegment>
@@ -367,16 +409,25 @@ const Detail: React.FC = () => {
               style={{
                 overflow: "auto",
                 padding: "12px 21px 0 21px",
-                backgroundColor: "var(--ion-background-color)",
               }}
             >
+              {<div className='buttons-wrapper'>
+                <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
+                  <IonCheckbox
+                    mode='md'
+                    checked={isAllSelected}
+                    style={{ pointerEvents: 'none' }}
+                  />
+                  <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
+                </IonItem>
+              </div>}
               {approval.SUB.map((sub: any, index: number) => (
                 <SubItem
                   key={sub.FLOWNO + sub.FLOWCNT + index}
                   selectable={P_AREA_CODE === "TODO"}
                   sub={sub}
                   isSelected={false}
-                  onSelectionChange={() => {}}
+                  onSelectionChange={() => { }}
                   onProfitDialogOpen={(profitData) => {
                     setSelectedProfitData(profitData);
                     // 숨김 버튼을 클릭해서 Dialog 열기
@@ -393,7 +444,6 @@ const Detail: React.FC = () => {
             <SwiperSlide
               style={{
                 overflow: "auto",
-                backgroundColor: "var(--ion-background-color)",
               }}
             >
               <Timeline
@@ -507,15 +557,40 @@ const Detail: React.FC = () => {
                 })}
               </Timeline>
             </SwiperSlide>
+            <SwiperSlide
+              style={{
+                overflow: "auto",
+                padding: "12px 21px 0 21px",
+              }}
+            >
+              {approval.SUB.map((sub: any, index: number) => (
+                <SubItem
+                  key={sub.FLOWNO + sub.FLOWCNT + index}
+                  selectable={P_AREA_CODE === "TODO"}
+                  sub={sub}
+                  isSelected={false}
+                  onSelectionChange={() => { }}
+                  onProfitDialogOpen={(profitData) => {
+                    setSelectedProfitData(profitData);
+                    // 숨김 버튼을 클릭해서 Dialog 열기
+                    document.getElementById("profit-dialog-trigger")?.click();
+                  }}
+                  onAttendeeDialogOpen={(attendeeData) => {
+                    setSelectedAttendeeData(attendeeData);
+                    // 숨김 버튼을 클릭해서 Dialog 열기
+                    document.getElementById("attendee-dialog-trigger")?.click();
+                  }}
+                />
+              ))}
+            </SwiperSlide>
           </Swiper>
           {P_AREA_CODE === "TODO" && (
             <div
               style={{
                 height: "75px",
                 width: "100%",
-                backgroundColor: "var(--ion-background-color)",
                 borderTop: "1px solid var(--custom-border-color-100)",
-                borderRadius: "16px",
+                borderRadius: "16px 16px 0 0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -533,7 +608,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="reject-modal"
-                // onClick={() => setIsRejectAlertOpen(true)}
+              // onClick={() => setIsRejectAlertOpen(true)}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -547,7 +622,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="approve-modal"
-                // onClick={() => setIsApprovalAlertOpen(true)}
+              // onClick={() => setIsApprovalAlertOpen(true)}
               >
                 <span>승인하기</span>
               </IonButton>
@@ -608,8 +683,8 @@ const Detail: React.FC = () => {
                   <span>
                     {selectedProfitData.RKE_PRCTR
                       ? selectedProfitData.RKE_PRCTR +
-                        " | " +
-                        selectedProfitData.RKE_PRCTR_TX
+                      " | " +
+                      selectedProfitData.RKE_PRCTR_TX
                       : "-"}
                   </span>
                 </div>
@@ -618,8 +693,8 @@ const Detail: React.FC = () => {
                   <span>
                     {selectedProfitData.RKE_VKORG
                       ? selectedProfitData.RKE_VKORG +
-                        " | " +
-                        selectedProfitData.RKE_VKORG_TX
+                      " | " +
+                      selectedProfitData.RKE_VKORG_TX
                       : "-"}
                   </span>
                 </div>
@@ -628,8 +703,8 @@ const Detail: React.FC = () => {
                   <span>
                     {selectedProfitData.RKE_MATKL
                       ? selectedProfitData.RKE_MATKL +
-                        " | " +
-                        selectedProfitData.RKE_MATKL_TX
+                      " | " +
+                      selectedProfitData.RKE_MATKL_TX
                       : "-"}
                   </span>
                 </div>
@@ -638,8 +713,8 @@ const Detail: React.FC = () => {
                   <span>
                     {selectedProfitData.RKE_WERKS
                       ? selectedProfitData.RKE_WERKS +
-                        " | " +
-                        selectedProfitData.RKE_WERKS_TX
+                      " | " +
+                      selectedProfitData.RKE_WERKS_TX
                       : "-"}
                   </span>
                 </div>
@@ -648,8 +723,8 @@ const Detail: React.FC = () => {
                   <span>
                     {selectedProfitData.RKE_ARTNR
                       ? selectedProfitData.RKE_ARTNR +
-                        " | " +
-                        selectedProfitData.RKE_ARTNR_TX
+                      " | " +
+                      selectedProfitData.RKE_ARTNR_TX
                       : "-"}
                   </span>
                 </div>
