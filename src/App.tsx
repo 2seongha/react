@@ -17,6 +17,7 @@ import Notifications from './pages/Notifications';
 import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
@@ -79,9 +80,14 @@ const App: React.FC = () => {
     }
   }, [webviewInitialized, themeInitialized]);
 
-  if (!completeInit) return <div style={{ width: '100%', height: '100%', background: 'transparent' }} />
+  if (!completeInit) return (
+    <div style={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ion-background-color)' }} >
+      <OrbitProgress color="var(--ion-text-color)" size="small" text="" textColor="" />
+    </div>
+  );
+
   return (
-    <IonApp style={{height: fixedHeight}}>
+    <IonApp style={{ height: fixedHeight }}>
       <IonReactRouter >
         <Menu />
         <IonRouterOutlet mode={getPlatformMode()} id="main-content">

@@ -2,7 +2,7 @@ import { IonContent, IonImg, IonItem, IonPage, IonRefresher, IonRefresherContent
 import { useParams } from 'react-router-dom';
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Commet } from 'react-loading-indicators';
+import { Commet, OrbitProgress } from 'react-loading-indicators';
 import { refreshOutline } from 'ionicons/icons';
 import { useShallow } from 'zustand/shallow';
 import useAppStore from '../stores/appStore';
@@ -85,7 +85,7 @@ const FlowList: React.FC = () => {
 
         {!flowList ?
           <div className='loading-indicator-wrapper'>
-            <Commet color="var(--ion-color-primary)" size="medium" text="" textColor="" />
+            <OrbitProgress color="var(--ion-color-primary)" size="small" text="" textColor="" />
           </div>
           : (!flowList.CHILDREN || flowList.CHILDREN.length === 0) ?
             <NoData message="해당 항목에 대한 데이터가 없습니다." />
@@ -123,37 +123,7 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
     backgroundColor: icon.backgroundColor
   }), [icon.backgroundColor]);
 
-  const containerStyle = useMemo(() => ({
-    marginTop: '10px',
-    overflow: 'hidden' as const,
-  }), []);
-
-  // 애니메이션 props 메모이제이션 (GPU 가속 최적화)
-  const motionProps = useMemo(() => ({
-    layout: true,
-    initial: {
-      y: 20,
-      scale: 0.95,
-    },
-    animate: {
-      y: 0,
-      scale: 1,
-    },
-    transition: {
-      duration: 0.3,
-      delay: Math.min(index * 0.05, 0.3), // 최대 지연 시간 제한
-      ease: [0.25, 0.46, 0.45, 0.94] as const, // easeOutQuart
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 30,
-    },
-  }), [index]);
-
   return (
-    // <motion.div
-    //   {...motionProps}
-    //   style={containerStyle}
-    // >
     <IonItem
       button
       className='flow-list-item'
@@ -171,7 +141,6 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
         <span>{Number(area.CNT)}</span>
       </div>
     </IonItem>
-    // </motion.div>
   );
 }, (prevProps, nextProps) => {
   // 커스텀 비교 함수로 불필요한 리렌더링 방지

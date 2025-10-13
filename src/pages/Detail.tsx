@@ -16,6 +16,7 @@ import {
   IonButton,
   IonItem,
   IonCheckbox,
+  useIonRouter,
 } from "@ionic/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useShallow } from "zustand/shallow";
@@ -46,6 +47,7 @@ import {
 } from "@mui/icons-material";
 import ApprovalModal from "../components/ApprovalModal";
 import { chevronCollapse, chevronExpand, person } from "ionicons/icons";
+import { webviewToast } from "../webview";
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -66,6 +68,7 @@ const Detail: React.FC = () => {
   const swiperRef = useRef<SwiperClass | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const headerHeightRef = useRef<number>(0);
+  const router = useIonRouter();
 
   useLayoutEffect(() => {
     if (!headerRef.current) return;
@@ -108,6 +111,15 @@ const Detail: React.FC = () => {
         ) || null
     )
   );
+
+  if (!approval) {
+    setTimeout(() => {
+      router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
+    }, 0);
+    webviewToast('존재하지 않는 결재 건입니다.');
+    return null;
+  }
+
   const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_H);
   const flds = _(approval)
     .pickBy((_, key) => /^FLD\d+$/.test(key))
@@ -225,9 +237,7 @@ const Detail: React.FC = () => {
               scale: isHeaderCollapsed ? 0.6 : 1,
             }}
             transition={{
-              duration: 0.4,
-              ease: [0.4, 0, 0.2, 1],
-              opacity: { duration: 0.2 },
+              duration: 0.3,
             }}
             style={{
               position: "absolute",
@@ -239,6 +249,8 @@ const Detail: React.FC = () => {
               padding: "12px 21px 21px 21px",
               pointerEvents: "none",
               overflow: "hidden",
+              zIndex: 0,
+              willChange: 'opacity scale'
             }}
           >
             {
@@ -354,11 +366,10 @@ const Detail: React.FC = () => {
             style={{
               backgroundColor: "var(--ion-background-color2)",
               height: headerHeightRef.current,
+              willChange: 'height'
             }}
             transition={{
-              duration: 0.4,
-              ease: [0.4, 0, 0.2, 1],
-              height: { duration: 0.3 },
+              duration: 0.3,
             }}
           ></motion.div>
           <IonSegment
@@ -430,12 +441,10 @@ const Detail: React.FC = () => {
                   onSelectionChange={() => { }}
                   onProfitDialogOpen={(profitData) => {
                     setSelectedProfitData(profitData);
-                    // 숨김 버튼을 클릭해서 Dialog 열기
                     document.getElementById("profit-dialog-trigger")?.click();
                   }}
                   onAttendeeDialogOpen={(attendeeData) => {
                     setSelectedAttendeeData(attendeeData);
-                    // 숨김 버튼을 클릭해서 Dialog 열기
                     document.getElementById("attendee-dialog-trigger")?.click();
                   }}
                 />
@@ -587,15 +596,15 @@ const Detail: React.FC = () => {
           {P_AREA_CODE === "TODO" && (
             <div
               style={{
-                height: "75px",
+                height: "83px",
                 width: "100%",
                 borderTop: "1px solid var(--custom-border-color-100)",
                 borderRadius: "16px 16px 0 0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "8px",
-                gap: "8px",
+                padding: "12px 21px",
+                gap: "12px",
               }}
             >
               <IonButton
@@ -608,7 +617,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="reject-modal"
-              // onClick={() => setIsRejectAlertOpen(true)}
+                // onClick={() => setIsRejectAlertOpen(true)}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -622,7 +631,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="approve-modal"
-              // onClick={() => setIsApprovalAlertOpen(true)}
+                // onClick={() => setIsApprovalAlertOpen(true)}
               >
                 <span>승인하기</span>
               </IonButton>

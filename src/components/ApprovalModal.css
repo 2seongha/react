@@ -21,3 +21,28 @@
 .approval-modal-content-wrapper {
   padding: 22px;
 }
+
+.flip-animation {
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.flip-animation.flipped {
+  transform: rotateY(180deg);
+}
+
+@keyframes cardFlip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(-90deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+.card-flip-enter {
+  animation: cardFlip 0.6s ease-in-out;
+}

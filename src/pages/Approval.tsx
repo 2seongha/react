@@ -130,7 +130,7 @@ const Approval: React.FC = () => {
 
   // 네비게이션 핸들러 - useCallback으로 최적화
   const handleBackNavigation = useCallback(() => {
-    router.push(`/flowList/${P_AREA_CODE}`, 'back', 'pop');
+    router.goBack();
   }, [router]);
 
   // 아이템 선택 상태 관리

@@ -25,7 +25,7 @@ const GroupButton: React.FC = () => {
         // 새로 선택된 버튼으로 스크롤
         setTimeout(() => {
           const button = buttonRefs.current[newIndex.value];
-          if(button) elementScrollIntoView(button, {
+          if (button) elementScrollIntoView(button, {
             behavior: 'smooth',
             block: 'nearest',
             inline: 'center',
@@ -52,7 +52,11 @@ const GroupButton: React.FC = () => {
     setApprovals(null);
     setSelected({ value: index });
     const button = buttonRefs.current[index];
-    button?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    button && elementScrollIntoView(button, {
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
   };
 
   if (todoSummary && todoSummary.length === 0) {
@@ -65,7 +69,7 @@ const GroupButton: React.FC = () => {
       className='group-button-wrapper'
     >
       {todoSummary ? (
-        [...todoSummary,...todoSummary,...todoSummary,...todoSummary,...todoSummary].map((item, index) => (
+        todoSummary.map((item, index) => (
           <button
             key={`group-button${index}`}
             ref={(el) => { (buttonRefs.current[index] = el) }}

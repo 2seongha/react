@@ -35,7 +35,6 @@ const Home: React.FC = () => {
 
   useIonViewWillEnter(() => {
     fetchAreas('');
-    console.log('home will enter');
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {

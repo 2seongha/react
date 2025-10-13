@@ -5,11 +5,13 @@ import {
   IonIcon,
   IonModal,
   IonTextarea,
+  useIonRouter,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
 import { close } from "ionicons/icons";
 import "./ApprovalModal.css";
+import AnimatedIcon from "./AnimatedIcon";
 interface ApprovalModalProps {
   isOpen: boolean;
   trigger: string;
@@ -21,13 +23,13 @@ interface ApprovalModalProps {
   cancelText?: string;
   confirmText?: string;
   confirmColor?:
-    | "primary"
-    | "secondary"
-    | "error"
-    | "warning"
-    | "info"
-    | "success"
-    | "danger";
+  | "primary"
+  | "secondary"
+  | "error"
+  | "warning"
+  | "info"
+  | "success"
+  | "danger";
   onCancel?: () => void;
   onConfirm?: (textValue: string) => void;
   maxLength?: number;
@@ -52,13 +54,16 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   required = false,
   page = undefined,
 }) => {
+  const router = useIonRouter();
   const modal = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
-  const [canDismiss, setCanDismiss] = useState(true);
-  const [textValue, setTextValue] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
+
+  const [textValue, setTextValue] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [step, setStep] = useState(0); // 0: 결재 전, 1: 결재 중, 2: 결재 후
+  const [status, setStatus] = useState<string | null>(null);
 
   function dismiss() {
     modal.current?.dismiss();
@@ -69,9 +74,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     setTextValue(value);
   };
 
-  const handelModalWillPresent = () => {
+  const handleModalWillPresent = () => {
     setTextValue("");
     setIsModalOpen(true);
+    setStep(0);
+    setStatus(null);
+
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
     window.history.pushState({ ...currentState, modalOpen: true }, "");
@@ -79,7 +87,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     closedByBackButtonRef.current = false;
   };
 
-  const handelModalDidDismiss = () => {
+  const handleModalDidDismiss = () => {
     setIsModalOpen(false);
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
     if (historyPushedRef.current && !closedByBackButtonRef.current) {
@@ -126,15 +134,27 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     []
   );
 
+  const handleApprove = () => {
+    if (step === 0) {
+      setStep(1);
+      setTimeout(() => {
+        setStatus("success");
+        setStep(2);
+      }, 2400);
+    } else if (step === 2) {
+      router.goBack();
+    }
+  };
+
   return (
     <IonModal
-      onIonModalWillPresent={handelModalWillPresent}
-      onIonModalDidDismiss={handelModalDidDismiss}
+      onIonModalWillPresent={handleModalWillPresent}
+      onIonModalDidDismiss={handleModalDidDismiss}
       className="approval-modal"
       mode="ios"
       ref={modal}
       trigger={trigger}
-      canDismiss={canDismiss}
+      canDismiss={step !== 1}
       initialBreakpoint={1}
       breakpoints={[0, 1]}
       style={{
@@ -144,31 +164,32 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent className="approval-modal-ion-content">
         <div className="approval-modal-title-wrapper">
+          <AnimatedIcon status={status} style={{ "marginBottom": "12px", "display": step !== 0 ? 'block' : 'none' }} />
           <span>
             임직원 개인경비{" "}
             <span style={{ color: "var(--ion-color-primary)" }}>1건</span>을
           </span>
-          <span>
+          <span key={step} className="card-flip-enter">
             <span style={{ color: "var(--ion-color-primary)" }}>{title}</span>{" "}
-            하시겠습니까?
+            {step === 0 ? "하시겠습니까?" : step === 1 ? "중입니다." : "했습니다."}
           </span>
         </div>
         <div
           style={{
-            padding: "28px 8px 8px 8px",
+            padding: "28px 21px 12px 21px",
             position: "fixed",
             bottom: 'max(var(--ion-safe-area-bottom), var(--keyboard-height))',
-            // bottom: 'var(--ion-safe-area-bottom)',
             width: "100%",
             background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
             zIndex: 2,
+            pointerEvents: step === 1 ? 'none' : 'auto'
           }}
         >
           <IonTextarea
             ref={textareaRef}
             mode="md"
             style={{
-              marginBottom: "8px",
+              marginBottom: "12px",
               "--border-radius": "16px",
             }}
             rows={4}
@@ -176,6 +197,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             onInput={handleTextChange}
             labelPlacement="start"
             fill="outline"
+            disabled={step !== 0}
             placeholder="결재 의견을 입력해 주세요."
           ></IonTextarea>
           <IonButton
@@ -190,12 +212,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               fontSize: "18px",
               fontWeight: "600",
             }}
+            onClick={handleApprove}
           >
-            <span>{confirmText}</span>
+            <span>{step === 0 ? confirmText : '닫기'}</span>
           </IonButton>
         </div>
       </IonContent>
-      {/* <IonFooter style={{ '--padding-inset-bottom': 'var(--ion-safe-area-keyboard)' }}></IonFooter> */}
     </IonModal>
   );
 };
