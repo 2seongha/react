@@ -13,7 +13,7 @@
   flex-direction: column;
 }
 
-.approval-modal-title-wrapper>span {
+.approval-modal-title-wrapper span {
   font-size: 25px;
   font-weight: 700;
 }
@@ -33,13 +33,13 @@
 
 @keyframes cardFlip {
   0% {
-    transform: rotateY(0deg);
+    transform: rotateX(0deg);
   }
   50% {
-    transform: rotateY(-90deg);
+    transform: rotateX(-90deg);
   }
   100% {
-    transform: rotateY(0deg);
+    transform: rotateX(0deg);
   }
 }
 
