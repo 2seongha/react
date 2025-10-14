@@ -411,6 +411,7 @@ const Detail: React.FC = () => {
             style={{
               flex: 1,
               width: "100%",
+              backgroundColor: "var(--ion-background-color)"
             }}
             onSwiper={(swiper) => (swiperRef.current = swiper)}
             onSlideChange={handleSlideChange}
@@ -419,36 +420,56 @@ const Detail: React.FC = () => {
             <SwiperSlide
               style={{
                 overflow: "auto",
-                padding: "12px 21px 0 21px",
+                padding: "60px 21px 0 21px",
               }}
             >
-              {<div className='buttons-wrapper'>
-                <IonItem button onTouchStart={handleSelectAll} mode='md' className='select-all-button'>
-                  <IonCheckbox
-                    mode='md'
-                    checked={isAllSelected}
-                    style={{ pointerEvents: 'none' }}
+              <div>
+                {<div style={{
+                  backgroundColor: "var(--ion-background-color)",
+                  position: "fixed",
+                  width: "100%",
+                  height: "48px",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0px 9px",
+                  borderBottom: "1px solid var(--custom-border-color-100)",
+                  borderRadius: "16px",
+                  left: 0,
+                  top: 0
+                }}>
+                  <IonItem button onClick={handleSelectAll} mode='md' className='select-all-button' style={{
+                    "--padding-start": "12px",
+                    "--padding-end": "12px",
+                    "--padding-top": "8px",
+                    "--padding-bottom": "8px",
+                    "--border-radius": "8px"
+                  }}>
+                    <IonCheckbox
+                      mode='md'
+                      checked={isAllSelected}
+                      style={{ pointerEvents: 'none', marginRight: '8px' }}
+                    />
+                    <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
+                  </IonItem>
+                </div>}
+                {[...approval.SUB, ...approval.SUB, ...approval.SUB].map((sub: any, index: number) => (
+                  <SubItem
+                    key={sub.FLOWNO + sub.FLOWCNT + index}
+                    selectable={P_AREA_CODE === "TODO"}
+                    sub={sub}
+                    isSelected={false}
+                    onSelectionChange={() => { }}
+                    onProfitDialogOpen={(profitData) => {
+                      setSelectedProfitData(profitData);
+                      document.getElementById("profit-dialog-trigger")?.click();
+                    }}
+                    onAttendeeDialogOpen={(attendeeData) => {
+                      setSelectedAttendeeData(attendeeData);
+                      document.getElementById("attendee-dialog-trigger")?.click();
+                    }}
                   />
-                  <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
-                </IonItem>
-              </div>}
-              {approval.SUB.map((sub: any, index: number) => (
-                <SubItem
-                  key={sub.FLOWNO + sub.FLOWCNT + index}
-                  selectable={P_AREA_CODE === "TODO"}
-                  sub={sub}
-                  isSelected={false}
-                  onSelectionChange={() => { }}
-                  onProfitDialogOpen={(profitData) => {
-                    setSelectedProfitData(profitData);
-                    document.getElementById("profit-dialog-trigger")?.click();
-                  }}
-                  onAttendeeDialogOpen={(attendeeData) => {
-                    setSelectedAttendeeData(attendeeData);
-                    document.getElementById("attendee-dialog-trigger")?.click();
-                  }}
-                />
-              ))}
+                ))}
+              </div>
             </SwiperSlide>
             <SwiperSlide
               style={{
@@ -617,7 +638,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="reject-modal"
-                // onClick={() => setIsRejectAlertOpen(true)}
+              // onClick={() => setIsRejectAlertOpen(true)}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -631,7 +652,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="approve-modal"
-                // onClick={() => setIsApprovalAlertOpen(true)}
+              // onClick={() => setIsApprovalAlertOpen(true)}
               >
                 <span>승인하기</span>
               </IonButton>
@@ -640,34 +661,23 @@ const Detail: React.FC = () => {
         </div>
         {/* 승인 Modal */}
         <ApprovalModal
-          isOpen={isApprovalAlertOpen}
-          onDidDismiss={() => setIsApprovalAlertOpen(false)}
+          // isOpen={isApprovalAlertOpen}
+          // onDidDismiss={() => setIsApprovalAlertOpen(false)}
+          apprTitle={AREA_CODE_TXT ?? ""}
+          count="1"
           title="승인"
-          subtitle="승인 의견을 입력해주세요."
-          message="승인 처리하시겠습니까?"
-          placeholder="승인 의견 (선택사항)"
-          cancelText="취소"
-          confirmText="승인하기"
-          confirmColor="primary"
-          onConfirm={handleApproval}
-          maxLength={300}
+          buttonText="승인하기"
+          buttonColor="primary"
           required={false}
           trigger="approve-modal"
         />
-
         {/* 반려 Modal */}
         <ApprovalModal
-          isOpen={isRejectAlertOpen}
-          onDidDismiss={() => setIsRejectAlertOpen(false)}
+          apprTitle={AREA_CODE_TXT ?? ""}
+          count="1"
           title="반려"
-          subtitle="반려 사유를 입력해주세요."
-          message="반려 처리하시겠습니까?"
-          placeholder="반려 사유를 입력해주세요"
-          cancelText="취소"
-          confirmText="반려하기"
-          confirmColor="danger"
-          onConfirm={handleReject}
-          maxLength={300}
+          buttonText="반려하기"
+          buttonColor="danger"
           required={true}
           trigger="reject-modal"
         />

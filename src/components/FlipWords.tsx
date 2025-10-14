@@ -6,6 +6,7 @@ type FlipWordsProps = Omit<React.ComponentProps<'span'>, 'children'> & {
   duration?: number
   letterDelay?: number
   wordDelay?: number
+  animation?: boolean
 }
 
 function FlipWords({
@@ -15,6 +16,7 @@ function FlipWords({
   letterDelay = 0.1,
   wordDelay = 0.5,
   className,
+  animation,
   ...props
 }: FlipWordsProps) {
   const localRef = React.useRef<HTMLSpanElement>(null)
@@ -27,6 +29,10 @@ function FlipWords({
       setCurrentWord(words[0])
     }
   }, [words[0]])
+
+  if (!animation) return (
+    <span ref={localRef} data-slot="flip-words" {...props}>{currentWord}</span>
+  );
 
   return (
     <span ref={localRef} data-slot="flip-words" {...props}>

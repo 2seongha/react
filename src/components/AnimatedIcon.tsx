@@ -8,9 +8,10 @@ import lottieErrorData from '../assets/lottie_error.json'
 interface AnimatedIconProps {
   status?: string | null;
   style?: React.CSSProperties;
+  onAnimationComplete?: () => void;
 }
 
-const AnimatedIcon: React.FC<AnimatedIconProps> = ({ status, style }) => {
+const AnimatedIcon: React.FC<AnimatedIconProps> = ({ status, style, onAnimationComplete }) => {
   const [isLoading, setIsLoading] = useState(true);
   const lottieRef = useRef<LottieRefCurrentProps | null>(null);
 
@@ -25,6 +26,9 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ status, style }) => {
   const handleLoadingComplete = () => {
     if (!lottieRef.current!.animationItem!.loop) {
       setIsLoading(false);
+      if (onAnimationComplete) {
+        onAnimationComplete();
+      }
     }
   };
 
