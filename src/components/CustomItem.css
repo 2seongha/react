@@ -7,7 +7,7 @@
 }
 
 .custom-item.selected {
-  background: rgba(var(--ion-color-primary-rgb), 0.05);
+  background: rgba(var(--ion-color-primary-rgb), 0.05) !important;
   outline: 1px solid rgba(var(--ion-color-primary-rgb), 0.2);
 }
 

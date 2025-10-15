@@ -54,15 +54,9 @@ const TAB_KEYS = ["tab1", "tab2", "tab3"];
 const Detail: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState("tab1");
-  const [profitDialogOpen, setProfitDialogOpen] = useState(false); // 수익성 Dialog
   const [selectedProfitData, setSelectedProfitData] = useState<any>(null);
-  const [attendeeDialogOpen, setAttendeeDialogOpen] = useState(false); // 참석자 Dialog
   const [selectedAttendeeData, setSelectedAttendeeData] = useState<any>(null);
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-
-  // CommonAlert 상태
-  const [isApprovalAlertOpen, setIsApprovalAlertOpen] = useState(false);
-  const [isRejectAlertOpen, setIsRejectAlertOpen] = useState(false);
 
   // Refs
   const swiperRef = useRef<SwiperClass | null>(null);
@@ -78,7 +72,6 @@ const Detail: React.FC = () => {
     tempElement.style.position = "absolute";
     tempElement.style.top = "-0";
     tempElement.style.left = "-0";
-    // tempElement.style.visibility = "hidden";
     tempElement.style.width = window.innerWidth + "px";
 
     document.body.appendChild(tempElement);
@@ -146,6 +139,19 @@ const Detail: React.FC = () => {
   const handleReject = useCallback((comment: string) => {
     console.log("반려 처리:", comment);
     // 여기에 반려 API 호출 로직 추가
+  }, []);
+
+  // 아이템 선택 상태 관리
+  const handleItemSelection = useCallback((flowCnt: string, isSelected: boolean) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(flowCnt);
+      } else {
+        newSet.delete(flowCnt);
+      }
+      return newSet;
+    });
   }, []);
 
   // 전체 선택 상태 계산
@@ -420,56 +426,56 @@ const Detail: React.FC = () => {
             <SwiperSlide
               style={{
                 overflow: "auto",
-                padding: "60px 21px 0 21px",
+                padding: "0px 21px 0 21px",
               }}
             >
-              <div>
-                {<div style={{
-                  backgroundColor: "var(--ion-background-color)",
-                  position: "fixed",
-                  width: "100%",
-                  height: "48px",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "0px 9px",
-                  borderBottom: "1px solid var(--custom-border-color-100)",
-                  borderRadius: "16px",
-                  left: 0,
-                  top: 0
+              {<div style={{
+                backgroundColor: "var(--ion-background-color)",
+                position: "sticky",
+                width: "100%",
+                height: "48px",
+                display: "flex",
+                alignItems: "center",
+                padding: "0px 9px",
+                marginBottom: '12px',
+                borderBottom: "1px solid var(--custom-border-color-100)",
+                // borderRadius: "16px",
+                left: 0,
+                top: 0,
+                zIndex: 1,
+              }}>
+                <IonItem button onClick={handleSelectAll} mode='md' className='select-all-button' style={{
+                  "--padding-start": "12px",
+                  "--padding-end": "12px",
+                  "--padding-top": "8px",
+                  "--padding-bottom": "8px",
+                  "--border-radius": "8px"
                 }}>
-                  <IonItem button onClick={handleSelectAll} mode='md' className='select-all-button' style={{
-                    "--padding-start": "12px",
-                    "--padding-end": "12px",
-                    "--padding-top": "8px",
-                    "--padding-bottom": "8px",
-                    "--border-radius": "8px"
-                  }}>
-                    <IonCheckbox
-                      mode='md'
-                      checked={isAllSelected}
-                      style={{ pointerEvents: 'none', marginRight: '8px' }}
-                    />
-                    <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
-                  </IonItem>
-                </div>}
-                {[...approval.SUB, ...approval.SUB, ...approval.SUB].map((sub: any, index: number) => (
-                  <SubItem
-                    key={sub.FLOWNO + sub.FLOWCNT + index}
-                    selectable={P_AREA_CODE === "TODO"}
-                    sub={sub}
-                    isSelected={false}
-                    onSelectionChange={() => { }}
-                    onProfitDialogOpen={(profitData) => {
-                      setSelectedProfitData(profitData);
-                      document.getElementById("profit-dialog-trigger")?.click();
-                    }}
-                    onAttendeeDialogOpen={(attendeeData) => {
-                      setSelectedAttendeeData(attendeeData);
-                      document.getElementById("attendee-dialog-trigger")?.click();
-                    }}
+                  <IonCheckbox
+                    mode='md'
+                    checked={isAllSelected}
+                    style={{ pointerEvents: 'none', marginRight: '8px' }}
                   />
-                ))}
-              </div>
+                  <span style={{ fontSize: '12px' }}>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
+                </IonItem>
+              </div>}
+              {approval.SUB.map((sub: any, index: number) => (
+                <SubItem
+                  key={sub.FLOWNO + sub.FLOWCNT + index}
+                  selectable={P_AREA_CODE === "TODO"}
+                  sub={sub}
+                  isSelected={selectedItems.has(sub.FLOWCNT)}
+                  onSelectionChange={handleItemSelection}
+                  onProfitDialogOpen={(profitData) => {
+                    setSelectedProfitData(profitData);
+                    document.getElementById("profit-dialog-trigger")?.click();
+                  }}
+                  onAttendeeDialogOpen={(attendeeData) => {
+                    setSelectedAttendeeData(attendeeData);
+                    document.getElementById("attendee-dialog-trigger")?.click();
+                  }}
+                />
+              ))}
             </SwiperSlide>
             <SwiperSlide
               style={{
@@ -661,25 +667,23 @@ const Detail: React.FC = () => {
         </div>
         {/* 승인 Modal */}
         <ApprovalModal
-          // isOpen={isApprovalAlertOpen}
-          // onDidDismiss={() => setIsApprovalAlertOpen(false)}
-          apprTitle={AREA_CODE_TXT ?? ""}
-          count="1"
-          title="승인"
+          apprTitle={AREA_CODE_TXT}
+          title="분리 승인"
           buttonText="승인하기"
           buttonColor="primary"
           required={false}
           trigger="approve-modal"
+          selectedItems={approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT))}
         />
         {/* 반려 Modal */}
         <ApprovalModal
-          apprTitle={AREA_CODE_TXT ?? ""}
-          count="1"
-          title="반려"
+          apprTitle={AREA_CODE_TXT}
+          title="분리 반려"
           buttonText="반려하기"
           buttonColor="danger"
           required={true}
           trigger="reject-modal"
+          selectedItems={approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT))}
         />
         {/* 수익성 Dialog Trigger Button (숨김) */}
         <IonButton
@@ -690,7 +694,6 @@ const Detail: React.FC = () => {
         <CustomDialog
           trigger="profit-dialog-trigger"
           onDidDismiss={() => {
-            setProfitDialogOpen(false);
             setSelectedProfitData(null);
           }}
           title="수익성 세그먼트"
@@ -763,7 +766,6 @@ const Detail: React.FC = () => {
         <CustomDialog
           trigger="attendee-dialog-trigger"
           onDidDismiss={() => {
-            setAttendeeDialogOpen(false);
             setSelectedAttendeeData(null);
           }}
           title="참석자"
@@ -871,9 +873,9 @@ const SubItem: React.FC<SubProps> = React.memo(
 
     const handleCheckboxChange = useCallback(
       (checked: boolean) => {
-        onSelectionChange(sub.FLOWNO, checked);
+        onSelectionChange(sub.FLOWCNT, checked);
       },
-      [sub.FLOWNO, onSelectionChange]
+      [sub.FLOWCNT, onSelectionChange]
     );
 
     const handleItemClick = useCallback(() => {

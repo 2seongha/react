@@ -14,12 +14,12 @@ import "./ApprovalModal.css";
 import AnimatedIcon from "./AnimatedIcon";
 import { FlipWords } from "./FlipWords";
 import { motion, AnimatePresence } from "framer-motion";
+import { webviewHaptic } from "../webview";
 
 interface ApprovalModalProps {
-  trigger: string;
-  apprTitle: string;
-  title: string;
-  count?: string;
+  trigger?: string;
+  apprTitle?: string;
+  title?: string;
   buttonText?: string;
   buttonColor?:
   | "primary"
@@ -30,16 +30,17 @@ interface ApprovalModalProps {
   | "success"
   | "danger";
   required?: boolean;
+  selectedItems?: Array<object>;
 }
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({
   trigger,
   apprTitle,
   title,
-  count,
   buttonText = "확인",
   buttonColor = "primary",
   required = false,
+  selectedItems,
 }) => {
   const router = useIonRouter();
   const modal = useRef<HTMLIonModalElement>(null);
@@ -125,12 +126,14 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
   const handleApprove = () => {
     if (step === 0) {
+      webviewHaptic("mediumImpact");
       setStep(1);
       setStepText("중입니다.");
       setTimeout(() => {
         const statuses = ["success", "error", "warning"];
         const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
         setStatus(randomStatus);
+        webviewHaptic("mediumImpact");
       }, 2400);
     } else if (step === 2) {
       router.goBack();
@@ -167,7 +170,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               y: 0,
               scale: 1,
             }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          transition={{ duration: step === 2 ? 0.4 : 0.5, ease: "easeInOut" }}
         >
           {step !== 0 && <AnimatedIcon
             status={status}
@@ -183,18 +186,29 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             }}
           />}
           <span>
-            {apprTitle + " "}
-            <span style={{ color: "var(--ion-color-primary)" }}>{count}건</span>을
+            {apprTitle}
+            <span style={{ color: "var(--ion-color-primary)" }}> {selectedItems?.length}건</span>을
           </span>
           <span >
             <span style={{ color: "var(--ion-color-primary)" }}>{title}</span>{" "}
             <FlipWords animation={step !== 0} words={[stepText]} />
           </span>
         </motion.div>
+        <motion.div style={{
+          flex: 1,
+          overflow: 'auto'
+        }}>
+          {selectedItems?.map((item: any, index: number) => (
+            <div key={`detail-item-${index}`}>
+              <span>{item.FLOWCNT ?? item.FLOWCNT}</span>
+              <span>{item.APPR_TITLE ?? item.BKTXT}</span>
+            </div>
+          ))}
+        </motion.div>
         <AnimatePresence>
           {step !== 1 && (
             <motion.div
-              initial={{ opacity: 1, y: 0 }}
+              initial={step === 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
