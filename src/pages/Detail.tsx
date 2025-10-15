@@ -644,7 +644,6 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="reject-modal"
-              // onClick={() => setIsRejectAlertOpen(true)}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -658,7 +657,6 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="approve-modal"
-              // onClick={() => setIsApprovalAlertOpen(true)}
               >
                 <span>승인하기</span>
               </IonButton>
@@ -666,7 +664,7 @@ const Detail: React.FC = () => {
           )}
         </div>
         {/* 승인 Modal */}
-        <ApprovalModal
+        {P_AREA_CODE === 'TODO' && <ApprovalModal
           apprTitle={AREA_CODE_TXT}
           title="분리 승인"
           buttonText="승인하기"
@@ -674,9 +672,9 @@ const Detail: React.FC = () => {
           required={false}
           trigger="approve-modal"
           selectedItems={approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT))}
-        />
+        />}
         {/* 반려 Modal */}
-        <ApprovalModal
+        {P_AREA_CODE === 'TODO' && <ApprovalModal
           apprTitle={AREA_CODE_TXT}
           title="분리 반려"
           buttonText="반려하기"
@@ -684,7 +682,7 @@ const Detail: React.FC = () => {
           required={true}
           trigger="reject-modal"
           selectedItems={approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT))}
-        />
+        />}
         {/* 수익성 Dialog Trigger Button (숨김) */}
         <IonButton
           id="profit-dialog-trigger"

@@ -11,6 +11,7 @@ import { getFlowIcon } from '../utils';
 import NoData from '../components/NoData';
 import AppBar from '../components/AppBar';
 import './FlowList.css';
+import { webviewHaptic } from '../webview';
 
 const FlowList: React.FC = () => {
   const { AREA_CODE } = useParams<{ AREA_CODE: string }>();
@@ -28,6 +29,7 @@ const FlowList: React.FC = () => {
   // 새로고침 핸들러 최적화
   const handleRefresh = useCallback(async (event: RefresherCustomEvent) => {
     setAreas(null);
+    webviewHaptic("mediumImpact");
     if (AREA_CODE) {
       await Promise.allSettled([fetchAreas('')]);
     }

@@ -28,6 +28,7 @@ import { AreaModel } from '../stores/types';
 import { getFlowIcon } from '../utils';
 import './Menu.css';
 import AppBar from '../components/AppBar';
+import { webviewHaptic } from '../webview';
 
 const Menu: React.FC = () => {
   const areas = useAppStore(state => state.areas);
@@ -36,6 +37,7 @@ const Menu: React.FC = () => {
 
   const handleRefresh = useCallback(async (event: RefresherCustomEvent) => {
     setAreas(null);
+    webviewHaptic("mediumImpact");
     await fetchAreas('');
     event.detail.complete();
   }, [setAreas, fetchAreas]);

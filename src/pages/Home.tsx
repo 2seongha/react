@@ -26,6 +26,7 @@ import GroupButton from '../components/GroupButton';
 import BottomTabBar from '../components/BottomNavigation';
 import { personIcon, searchIcon } from '../assets/images';
 import { useShallow } from 'zustand/shallow';
+import { webviewHaptic } from '../webview';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
@@ -40,6 +41,7 @@ const Home: React.FC = () => {
   async function handleRefresh(event: RefresherCustomEvent) {
     setMenuAreas(null);
     setApprovals(null);
+    webviewHaptic("mediumImpact");
     await Promise.allSettled(([fetchAreas('')]));
     event.detail.complete();
   }

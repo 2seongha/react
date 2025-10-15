@@ -9,6 +9,8 @@ import './Approval.css';
 import { useParams } from 'react-router-dom';
 import NoData from '../components/NoData';
 import _ from 'lodash';
+import { webviewHaptic } from '../webview';
+import ApprovalModal from '../components/ApprovalModal';
 
 const Approval: React.FC = () => {
   const { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
@@ -47,6 +49,7 @@ const Approval: React.FC = () => {
     setApprovals(null);
     setSelectedItems(new Set());
     setSearchText('');
+    webviewHaptic("mediumImpact");
     await Promise.allSettled(([fetchApprovals(P_AREA_CODE, AREA_CODE)]));
     event.detail.complete();
   }
@@ -320,12 +323,10 @@ const Approval: React.FC = () => {
               <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
             </IonItem>
             <div className='approve-buttons'>
-              <IonButton mode='md' color='light' disabled={selectedItems.size === 0} style={{ '--border-radius': '8px' }}>
-                {/* <IonIcon src={closeOutline} /> */}
+              <IonButton id="approval-reject-modal" mode='md' color='light' disabled={selectedItems.size === 0} style={{ '--border-radius': '8px' }}>
                 <span style={{ padding: '0 4px' }}>반려하기</span>
               </IonButton>
-              <IonButton mode='md' color='primary' disabled={selectedItems.size === 0} style={{ '--border-radius': '8px' }}>
-                {/* <IonIcon src={checkmarkOutline} /> */}
+              <IonButton id="approval-approve-modal" mode='md' color='primary' disabled={selectedItems.size === 0} style={{ '--border-radius': '8px' }}>
                 <span style={{ padding: '0 4px' }}>승인하기</span>
               </IonButton>
             </div>
@@ -449,6 +450,26 @@ const Approval: React.FC = () => {
           onScrollToTop={scrollToTop}
           scrollCallbackRef={scrollCallbackRef}
         />
+        {/* 승인 Modal */}
+        {P_AREA_CODE === 'TODO' && <ApprovalModal
+          apprTitle={AREA_CODE_TXT}
+          title="승인"
+          buttonText="승인하기"
+          buttonColor="primary"
+          required={false}
+          trigger="approval-approve-modal"
+          selectedItems={filteredApprovals?.filter((sub: any) => selectedItems.has(sub.FLOWNO))}
+        />}
+        {/* 반려 Modal */}
+        {P_AREA_CODE === 'TODO' && <ApprovalModal
+          apprTitle={AREA_CODE_TXT}
+          title="반려"
+          buttonText="반려하기"
+          buttonColor="danger"
+          required={true}
+          trigger="approval-reject-modal"
+          selectedItems={filteredApprovals?.filter((sub: any) => selectedItems.has(sub.FLOWNO))}
+        />}
       </IonContent>
     </IonPage >
   );

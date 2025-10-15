@@ -11,6 +11,8 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+  z-index: 2;
+  background-color: var(--ion-background-color);
 }
 
 .approval-modal-title-wrapper span {
