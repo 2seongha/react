@@ -158,9 +158,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent className="approval-modal-ion-content">
         <div style={{
-          background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 160px, transparent 180px)',
+          background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 140px, transparent 160px)',
           width: '100%',
-          height: '180px',
+          height: '160px',
           position: 'fixed',
           zIndex: 2
         }} />
@@ -212,8 +212,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               style={{
                 width: '100%',
                 padding: '16px 21px 16px 21px',
-                marginTop: '160px',
-                marginBottom: '176px',
+                marginTop: '140px',
+                marginBottom: 'calc(176px + var(--ion-safe-area-bottom))',
               }}>
               {selectedItems?.map((item: any, index: number) => (
                 <div key={`approval-modal-item-${index}`}
@@ -244,15 +244,13 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     }}>
                       {item.APPR_TITLE ?? item.BKTXT}
                     </span>
-                    <span
+                    {status && status !== 'success' && <span
                       style={{
                         marginTop: '4px',
                         fontSize: '13px',
                         color: `var(--ion-color-${status === 'error' ? 'danger' : `${status}`})`
                       }}
-                    >
-                      오류 메시지 자리
-                    </span>
+                    >오류 메시지 자리</span>}
                   </div>
                 </div>
               ))}
