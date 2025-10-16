@@ -97,7 +97,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     const handlePopState = (event: PopStateEvent) => {
       if (isModalOpen) {
         // step이 2일 때는 뒤로가기 막기
-        if (step === 2) {
+        if (step === 1) {
           event.preventDefault();
           // 히스토리를 다시 앞으로 이동
           window.history.pushState({ modalOpen: true }, "");
