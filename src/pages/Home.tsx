@@ -289,7 +289,7 @@ const TodoSummaryCard: React.FC = () => {
         onClick={() => {
           router.push(`/approval/${approvals?.P_AREA_CODE}/${approvals?.AREA_CODE}/${approvals?.P_AREA_CODE_TXT}/${approvals?.AREA_CODE_TXT}`);
         }}
-        disabled={!todoSummary || !todoSummary.length}
+        disabled={!approvals || !todoSummary || !todoSummary.length}
       >
         <span>자세히 보기</span>
         <IonIcon src={chevronForwardOutline} style={{ width: 14, marginLeft: 2 }} />

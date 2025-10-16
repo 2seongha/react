@@ -438,7 +438,7 @@ const Detail: React.FC = () => {
                 alignItems: "center",
                 padding: "0px 9px",
                 marginBottom: '12px',
-                borderBottom: "1px solid var(--custom-border-color-100)",
+                borderBottom: "0.56px solid var(--custom-border-color-50)",
                 // borderRadius: "16px",
                 left: 0,
                 top: 0,

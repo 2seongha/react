@@ -3,10 +3,10 @@ import React, { ReactNode, useState, useMemo, useCallback, useRef } from 'react'
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
 interface CustomItemProps {
+  selectable?: boolean;
   title?: ReactNode;
   body?: ReactNode;
   sub?: ReactNode;
-  selectable?: boolean;
   onClick?: () => void;
   onLongPress?: () => void;
   onCheckboxChange?: (checked: boolean) => void;

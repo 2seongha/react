@@ -9,7 +9,7 @@ import {
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
-import { close } from "ionicons/icons";
+import { checkmarkCircle, checkmarkCircleOutline, close } from "ionicons/icons";
 import "./ApprovalModal.css";
 import AnimatedIcon from "./AnimatedIcon";
 import { FlipWords } from "./FlipWords";
@@ -136,7 +136,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
         setStatus(randomStatus);
       }, 2400);
     } else if (step === 2) {
-      router.goBack();
+      dismiss();
     }
   };
 
@@ -158,7 +158,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent className="approval-modal-ion-content">
         <div style={{
-          backgroundColor: 'var(--ion-background-color)',
+          background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 160px, transparent 180px)',
           width: '100%',
           height: '180px',
           position: 'fixed',
@@ -212,21 +212,48 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               style={{
                 width: '100%',
                 padding: '16px 21px 16px 21px',
-                marginTop: '180px',
+                marginTop: '160px',
                 marginBottom: '176px',
               }}>
               {selectedItems?.map((item: any, index: number) => (
-                <div key={`detail-item-${index}`}
+                <div key={`approval-modal-item-${index}`}
+                  className={`approval-modal-item ${status}`}
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
                     backgroundColor: 'var(--ion-background-color2)',
                     padding: '16px 21px',
-                    borderRadius: '12px',
-                    marginBottom: '8px'
+                    borderRadius: step === 2? '4px 12px 12px 4px' : '12px',
+                    marginBottom: '8px',
+                    gap: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    position: 'relative'
                   }}>
-                  <span style={{ color: 'var(--ion-color-secondary)', fontSize: '12px', marginBottom: '4px' }}>{item.APPR_TITLE ? item.FLOWNO : item.FLOWCNT}</span>
-                  <span style={{ fontWeight: '500' }}>{item.APPR_TITLE ?? item.BKTXT}</span>
+                  {step === 2 && <IonIcon icon={checkmarkCircle} style={{ fontSize: '24px' }} color={status === 'error' ? 'danger' : `${status}`} />}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: step === 2 ? 'calc(100% - 36px)' : '100%'
+                  }}>
+                    <span style={{ color: 'var(--ion-color-secondary)', fontSize: '12px', marginBottom: '4px' }}>{item.APPR_TITLE ? item.FLOWNO : item.FLOWCNT}</span>
+                    <span style={{
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '100%', // 말줄임표가 보일 수 있도록 너비 제한 필요
+                    }}>
+                      {item.APPR_TITLE ?? item.BKTXT}
+                    </span>
+                    <span
+                      style={{
+                        marginTop: '4px',
+                        fontSize: '13px',
+                        color: `var(--ion-color-${status === 'error' ? 'danger' : `${status}`})`
+                      }}
+                    >
+                      오류 메시지 자리
+                    </span>
+                  </div>
                 </div>
               ))}
             </motion.div>
@@ -242,7 +269,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               style={{
                 padding: "28px 21px calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px",
                 position: "fixed",
-                // bottom: 'max(var(--ion-safe-area-bottom), var(--keyboard-height))',
+                bottom: 0,
                 width: "100%",
                 background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
               }}
