@@ -221,7 +221,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                   style={{
                     backgroundColor: 'var(--ion-background-color2)',
                     padding: '16px 21px',
-                    borderRadius: step === 2? '4px 12px 12px 4px' : '12px',
+                    borderRadius: step === 2 ? '4px 12px 12px 4px' : '12px',
                     marginBottom: '8px',
                     gap: '12px',
                     display: 'flex',
