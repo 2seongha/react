@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "lcl": "cross-env VITE_WEBVIEW=N vite --host",
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "cross-env VITE_WEBVIEW=Y vite build",
     "build:prod": "NODE_ENV=production vite build --mode production",
     "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist",
     "lint": "eslint .",
@@ -22,6 +23,7 @@
     "@types/lodash": "^4.17.20",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.11.0",
+    "cross-env": "^10.1.0",
     "framer-motion": "^12.23.12",
     "install": "^0.13.0",
     "ionicons": "^8.0.13",
