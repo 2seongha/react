@@ -105,6 +105,8 @@ const Detail: React.FC = () => {
     )
   );
 
+  approval.IS_SEPERATE = true;
+
   if (!approval) {
     setTimeout(() => {
       router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
@@ -429,7 +431,7 @@ const Detail: React.FC = () => {
                 padding: "0px 21px 0 21px",
               }}
             >
-              {<div style={{
+              {(P_AREA_CODE === 'TODO' && approval.IS_SEPERATE) && <div style={{
                 backgroundColor: "var(--ion-background-color)",
                 position: "sticky",
                 width: "100%",
@@ -437,9 +439,7 @@ const Detail: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 padding: "0px 9px",
-                marginBottom: '12px',
                 borderBottom: "0.56px solid var(--custom-border-color-50)",
-                // borderRadius: "16px",
                 left: 0,
                 top: 0,
                 zIndex: 1,
@@ -461,8 +461,9 @@ const Detail: React.FC = () => {
               </div>}
               {approval.SUB.map((sub: any, index: number) => (
                 <SubItem
+                  style={{ marginTop: index === 0 ? '12px' : 0 }}
                   key={sub.FLOWNO + sub.FLOWCNT + index}
-                  selectable={P_AREA_CODE === "TODO"}
+                  selectable={P_AREA_CODE === "TODO" && approval.IS_SEPERATE}
                   sub={sub}
                   isSelected={selectedItems.has(sub.FLOWCNT)}
                   onSelectionChange={handleItemSelection}
@@ -644,6 +645,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="reject-modal"
+                disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -657,6 +659,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="approve-modal"
+                disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
               >
                 <span>승인하기</span>
               </IonButton>
@@ -849,6 +852,7 @@ interface SubProps {
   onSelectionChange: (id: string, isSelected: boolean) => void | undefined;
   onProfitDialogOpen?: (profitData: any) => void;
   onAttendeeDialogOpen?: (attendeeData: any) => void;
+  style?: React.CSSProperties;
 }
 
 // ApprovalItem 컴포넌트 - wrapper div 포함
@@ -860,6 +864,7 @@ const SubItem: React.FC<SubProps> = React.memo(
     onSelectionChange,
     onProfitDialogOpen,
     onAttendeeDialogOpen,
+    style,
   }) => {
     const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_I);
     const flds = _(sub)
@@ -993,6 +998,7 @@ const SubItem: React.FC<SubProps> = React.memo(
           backgroundColor: "var(--ion-card-background2)",
           border: "1px solid var(--custom-border-color-0)",
           marginBottom: "12px",
+          ...style
         }}
       />
     );

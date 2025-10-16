@@ -51,7 +51,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const [textValue, setTextValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState(0); // 0: 결재 전, 1: 결재 중, 2: 결재 후
-  const [stepText, setStepText] = useState("하시겠습니까?");
+  const [stepText, setStepText] = useState("할까요?");
   const [status, setStatus] = useState<string | null>(null);
 
   function dismiss() {
@@ -77,7 +77,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     setIsModalOpen(false);
     setTextValue("");
     setStep(0);
-    setStepText("하시겠습니까?");
+    setStepText("할까요?");
     setStatus(null);
 
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
@@ -129,7 +129,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     if (step === 0) {
       webviewHaptic("mediumImpact");
       setStep(1);
-      setStepText("중입니다.");
+      setStepText("할게요.");
       setTimeout(() => {
         const statuses = ["success", "error", "warning"];
         const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -186,7 +186,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <AnimatedIcon
               status={status}
               onAnimationComplete={() => {
-                setStepText("했습니다.");
+                setStepText("했어요.");
                 webviewHaptic("mediumImpact");
                 setTimeout(() => setStep(2), 1000);
               }}
@@ -199,10 +199,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             />}
           <span>
             {apprTitle}
-            <span style={{ color: "var(--ion-color-primary)" }}> {selectedItems?.length}건</span>을
+            <span style={{ color: `var(--ion-color-${buttonColor})` }}> {selectedItems?.length}건</span>을
           </span>
           <span >
-            <span style={{ color: "var(--ion-color-primary)" }}>{title}</span>{" "}
+            <span style={{ color: `var(--ion-color-${buttonColor})` }}>{title}</span>{" "}
             <FlipWords animation={step !== 0} words={[stepText]} />
           </span>
         </motion.div>
@@ -225,7 +225,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                   style={{
                     backgroundColor: 'var(--ion-background-color2)',
                     padding: '16px 21px',
-                    borderRadius: step === 2 ? '4px 12px 12px 4px' : '12px',
+                    borderRadius: '4px 12px 12px 4px',
                     marginBottom: '8px',
                     gap: '12px',
                     display: 'flex',
@@ -293,7 +293,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               ></IonTextarea>
               <IonButton
                 mode="md"
-                color={buttonColor}
+                color={step === 2 ? 'primary' : buttonColor}
                 disabled={required && !textValue?.trim()}
                 style={{
                   height: "58px",

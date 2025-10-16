@@ -67,7 +67,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
         className={itemClasses}
         onClick={onClick ? () => {
           onClick();
-        } : undefined}
+        } : selectable ? handleCheckboxToggle : undefined}
       >
         <div className='custom-item-header' style={{ alignItems: checkboxCenter ? 'center' : 'start' }}>
           {selectable && (
@@ -90,7 +90,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
             </div>
           </div>
         )}
-        {onClick && <IonRippleEffect />}
+        {(onClick || (!onClick && selectable)) && <IonRippleEffect />}
       </div>
       {selectable &&
         <div
