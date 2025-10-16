@@ -156,125 +156,132 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       }}
     >
       <AppBar title={<></>} customEndButtons={closeButton} />
-      <IonContent scrollY={false} className="approval-modal-ion-content">
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingTop: '20px' }}>
-          <motion.div
-            className="approval-modal-title-wrapper"
-            animate={
-              step === 1 ? {
-                y: "calc(50vh - 48px - 100%)",
-                scale: 0.9,
-              } : step === 2 ? {
-                y: "40px",
-                scale: 0.8,
-              } : {
-                y: '0px',
-                scale: 1,
-              }}
-            transition={{ duration: step === 2 ? 0.4 : 0.5, ease: "easeInOut" }}
-          >
-            {step !== 0 && <AnimatedIcon
-              status={status}
-              onAnimationComplete={() => {
-                setStepText("했습니다.");
-                webviewHaptic("mediumImpact");
-                setTimeout(() => setStep(2), 1000);
-              }}
-              style={{
-                position: 'absolute',
-                top: '-90px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-              }}
-            />}
-            <span>
-              {apprTitle}
-              <span style={{ color: "var(--ion-color-primary)" }}> {selectedItems?.length}건</span>을
-            </span>
-            <span >
-              <span style={{ color: "var(--ion-color-primary)" }}>{title}</span>{" "}
-              <FlipWords animation={step !== 0} words={[stepText]} />
-            </span>
-          </motion.div>
-          <AnimatePresence>
-            {step !== 1 && <motion.div
-              initial={step === 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 200 }}
+      <IonContent className="approval-modal-ion-content">
+        <div style={{
+          backgroundColor: 'var(--ion-background-color)',
+          width: '100%',
+          height: '180px',
+          position: 'fixed',
+          zIndex: 2
+        }} />
+        <motion.div
+          className="approval-modal-title-wrapper"
+          animate={
+            step === 1 ? {
+              y: "calc(50vh - 100%)",
+              scale: 0.9,
+            } : step === 2 ? {
+              y: "40px",
+              scale: 0.8,
+            } : {
+              y: '0px',
+              scale: 1,
+            }}
+          transition={{ duration: step === 2 ? 0.4 : 0.5, ease: "easeInOut" }}
+        >
+          {step !== 0 && <AnimatedIcon
+            status={status}
+            onAnimationComplete={() => {
+              setStepText("했습니다.");
+              webviewHaptic("mediumImpact");
+              setTimeout(() => setStep(2), 1000);
+            }}
+            style={{
+              position: 'absolute',
+              top: '-70px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
+          />}
+          <span>
+            {apprTitle}
+            <span style={{ color: "var(--ion-color-primary)" }}> {selectedItems?.length}건</span>을
+          </span>
+          <span >
+            <span style={{ color: "var(--ion-color-primary)" }}>{title}</span>{" "}
+            <FlipWords animation={step !== 0} words={[stepText]} />
+          </span>
+        </motion.div>
+        <AnimatePresence>
+          {step !== 1 &&
+            <motion.div
+              initial={step === 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 200 }}
+              exit={{ opacity: 0, y: 50 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               style={{
-                position: 'absolute',
                 width: '100%',
-                height: '100%',
-                overflow: 'auto',
-                padding: '140px 21px 16px 21px',
+                padding: '16px 21px 16px 21px',
+                marginTop: '180px',
                 marginBottom: '176px',
               }}>
               {selectedItems?.map((item: any, index: number) => (
-                <div key={`detail-item-${index}`} style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  backgroundColor: 'var(--ion-background-color2)',
-                  padding: '16px 21px',
-                  borderRadius: '12px',
-                  marginBottom: '8px'
-                }}>
+                <div key={`detail-item-${index}`}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    backgroundColor: 'var(--ion-background-color2)',
+                    padding: '16px 21px',
+                    borderRadius: '12px',
+                    marginBottom: '8px'
+                  }}>
                   <span style={{ color: 'var(--ion-color-secondary)', fontSize: '12px', marginBottom: '4px' }}>{item.APPR_TITLE ? item.FLOWNO : item.FLOWCNT}</span>
                   <span style={{ fontWeight: '500' }}>{item.APPR_TITLE ?? item.BKTXT}</span>
                 </div>
               ))}
-            </motion.div>}
-          </AnimatePresence>
-          <AnimatePresence>
-            {step !== 1 && (
-              <motion.div
-                initial={step === 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
+            </motion.div>
+          }
+        </AnimatePresence>
+        <AnimatePresence>
+          {step !== 1 && (
+            <motion.div
+              initial={step === 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              style={{
+                padding: "28px 21px 12px 21px",
+                position: "fixed",
+                bottom: 'max(var(--ion-safe-area-bottom), var(--keyboard-height))',
+                width: "100%",
+                background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
+              }}
+            >
+              <IonTextarea
+                ref={textareaRef}
+                mode="md"
                 style={{
-                  padding: "28px 21px 12px 21px",
-                  position: "fixed",
-                  bottom: 'max(var(--ion-safe-area-bottom), var(--keyboard-height))',
-                  width: "100%",
-                  background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
+                  marginBottom: "12px",
+                  "--border-radius": "16px",
                 }}
+                rows={4}
+                value={textValue}
+                onInput={handleTextChange}
+                labelPlacement="start"
+                fill="outline"
+                disabled={step !== 0}
+                placeholder="결재 의견을 입력해 주세요."
+              ></IonTextarea>
+              <IonButton
+                mode="md"
+                color={buttonColor}
+                disabled={required && !textValue?.trim()}
+                style={{
+                  height: "58px",
+                  width: "100%",
+                  flex: 1,
+                  borderRadius: "12px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                }}
+                onClick={handleApprove}
               >
-                <IonTextarea
-                  ref={textareaRef}
-                  mode="md"
-                  style={{
-                    marginBottom: "12px",
-                    "--border-radius": "16px",
-                  }}
-                  rows={4}
-                  value={textValue}
-                  onInput={handleTextChange}
-                  labelPlacement="start"
-                  fill="outline"
-                  disabled={step !== 0}
-                  placeholder="결재 의견을 입력해 주세요."
-                ></IonTextarea>
-                <IonButton
-                  mode="md"
-                  color={buttonColor}
-                  disabled={required && !textValue?.trim()}
-                  style={{
-                    height: "58px",
-                    width: "100%",
-                    flex: 1,
-                    borderRadius: "12px",
-                    fontSize: "18px",
-                    fontWeight: "600",
-                  }}
-                  onClick={handleApprove}
-                >
-                  <span>{step === 0 ? buttonText : '닫기'}</span>
-                </IonButton>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                <span>{step === 0 ? buttonText : '닫기'}</span>
+              </IonButton>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* </div> */}
       </IonContent>
     </IonModal>
   );
