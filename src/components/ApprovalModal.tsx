@@ -171,7 +171,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           }}
           animate={
             step === 1 ? {
-              y: "calc(50vh - 100%)",
+              y: "calc(50vh - 100% - 48px)",
               scale: 0.9,
             } : step === 2 ? {
               y: "48px",
