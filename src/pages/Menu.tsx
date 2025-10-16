@@ -111,6 +111,7 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ area, level = 0 }) => {
   return (
     <>
       <IonItem
+        mode='md'
         button
         className={`menu-item level-${level} ${hasChildren ? 'has-children' : ''} ${isExpanded ? 'expanded' : ''}`}
         onClick={handleItemClick}

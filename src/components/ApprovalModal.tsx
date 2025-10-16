@@ -96,6 +96,13 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
     const handlePopState = (event: PopStateEvent) => {
       if (isModalOpen) {
+        // step이 2일 때는 뒤로가기 막기
+        if (step === 2) {
+          event.preventDefault();
+          // 히스토리를 다시 앞으로 이동
+          window.history.pushState({ modalOpen: true }, "");
+          return;
+        }
         // 뒤로가기로 인한 모달 닫기
         closedByBackButtonRef.current = true;
         dismiss();
@@ -107,7 +114,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, step]);
 
   // 닫기 버튼 컴포넌트 - AppBar 버튼과 동일한 스타일
   const closeButton = useMemo(
