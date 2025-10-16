@@ -105,7 +105,7 @@ const Detail: React.FC = () => {
     )
   );
 
-  approval.IS_SEPERATE = true;
+  if(approval) approval.IS_SEPERATE = true;
 
   if (!approval) {
     setTimeout(() => {
