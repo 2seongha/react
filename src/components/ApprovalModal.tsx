@@ -129,7 +129,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     if (step === 0) {
       webviewHaptic("mediumImpact");
       setStep(1);
-      setStepText("할게요.");
+      setStepText("할게요");
       setTimeout(() => {
         const statuses = ["success", "error", "warning"];
         const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -186,7 +186,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <AnimatedIcon
               status={status}
               onAnimationComplete={() => {
-                setStepText("했어요.");
+                setStepText("했어요");
                 webviewHaptic("mediumImpact");
                 setTimeout(() => setStep(2), 1000);
               }}
@@ -215,8 +215,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               transition={{ duration: 0.5, ease: "easeInOut" }}
               style={{
                 width: '100%',
-                padding: '16px 21px 16px 21px',
-                marginTop: '140px',
+                padding: '16px 21px 24px 21px',
+                marginTop: '144px',
                 marginBottom: 'calc(176px + var(--ion-safe-area-bottom))',
               }}>
               {selectedItems?.map((item: any, index: number) => (
@@ -241,6 +241,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     <span style={{ color: 'var(--ion-color-secondary)', fontSize: '12px', marginBottom: '4px' }}>{item.APPR_TITLE ? item.FLOWNO : item.FLOWCNT}</span>
                     <span style={{
                       fontWeight: 500,
+                      fontSize: '14px',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
