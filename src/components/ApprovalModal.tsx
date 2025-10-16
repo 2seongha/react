@@ -166,12 +166,15 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
         }} />
         <motion.div
           className="approval-modal-title-wrapper"
+          style={{
+            transformOrigin: "top center"
+          }}
           animate={
             step === 1 ? {
               y: "calc(50vh - 100%)",
               scale: 0.9,
             } : step === 2 ? {
-              y: "40px",
+              y: "48px",
               scale: 0.8,
             } : {
               y: '0px',
@@ -179,20 +182,21 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             }}
           transition={{ duration: step === 2 ? 0.4 : 0.5, ease: "easeInOut" }}
         >
-          {step !== 0 && <AnimatedIcon
-            status={status}
-            onAnimationComplete={() => {
-              setStepText("했습니다.");
-              webviewHaptic("mediumImpact");
-              setTimeout(() => setStep(2), 1000);
-            }}
-            style={{
-              position: 'absolute',
-              top: '-70px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          />}
+          {step !== 0 &&
+            <AnimatedIcon
+              status={status}
+              onAnimationComplete={() => {
+                setStepText("했습니다.");
+                webviewHaptic("mediumImpact");
+                setTimeout(() => setStep(2), 1000);
+              }}
+              style={{
+                position: 'absolute',
+                top: '-70px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+              }}
+            />}
           <span>
             {apprTitle}
             <span style={{ color: "var(--ion-color-primary)" }}> {selectedItems?.length}건</span>을

@@ -51,7 +51,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ status, style, onAnimationC
       lottieRef={lottieRef}
       animationData={isLoading ? lottieLoadingData : getStatusIcon()}
       loop={isLoading}
-      style={{ width: 120, height: 120, ...style }}
+      style={{ width: 110, height: 110, ...style }}
       onComplete={isLoading ? handleLoadingComplete : undefined}
     />
   );
