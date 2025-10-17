@@ -14,8 +14,10 @@ const Notifications: React.FC = () => {
   const [filterValue, setFilterValue] = useState("A");
 
   const fetchNotifications = useAppStore(state => state.fetchNotifications);
+  const setNotifications = useAppStore(state => state.setNotifications);
 
   useIonViewWillEnter(() => {
+    setNotifications(null);
     fetchNotifications();
   });
 
@@ -52,7 +54,7 @@ const Notifications: React.FC = () => {
         count={totalCount} />
       <IonHeader mode='ios'>
         <div style={{
-          padding: '6px 21px',
+          padding: '6px 0 6px 21px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
@@ -107,8 +109,8 @@ const Notifications: React.FC = () => {
                     <div
                       style={{
                         width: '100%',
-                        padding: '32px 24px',
-                        borderBottom: '1px solid var(--custom-border-color-50)',
+                        padding: '28px 24px',
+                        borderBottom: '1px solid var(--custom-border-color-100)',
                         display: 'flex',
                         flexDirection: 'column',
                         backgroundColor: notifiaction.READ_YN === 'N' ? 'rgba(var(--ion-color-primary-rgb), .08)' : 'transparent',
@@ -127,7 +129,7 @@ const Notifications: React.FC = () => {
                         }
                         {notifiaction.TITLE}
                       </span>
-                      <span style={{ fontWeight: '500', fontSize: '13px', color: 'var(--ion-color-secondary)' }}>{notifiaction.CONTENT}</span>
+                      <span style={{ fontWeight: '400', fontSize: '13px'}}>{notifiaction.CONTENT}</span>
                     </div>
                   </IonItem>
                   <IonItemOptions side="end">
