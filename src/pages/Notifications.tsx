@@ -107,6 +107,7 @@ const Notifications: React.FC = () => {
                 <IonItemSliding key={`notification-${index}`}>
                   <IonItem>
                     <div
+                      className={notifiaction.READ_YN === 'N' ? 'not-read' : ''}
                       style={{
                         width: '100%',
                         padding: '28px 24px',
@@ -116,17 +117,17 @@ const Notifications: React.FC = () => {
                         backgroundColor: notifiaction.READ_YN === 'N' ? 'rgba(var(--ion-color-primary-rgb), .08)' : 'transparent',
                         position: 'relative'
                       }}>
+                      {/* {notifiaction.READ_YN === 'N' &&
+                        <div style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '3px',
+                          marginRight: '8px',
+                          backgroundColor: 'var(--ion-color-primary)'
+                        }} />
+                      } */}
                       <span style={{ fontWeight: '400', fontSize: '13px', color: 'var(--ion-color-secondary)', position: 'absolute', right: '16px', top: '16px' }}>{notifiaction.ERDAT}</span>
-                      <span style={{ fontWeight: '500', fontSize: '15px', marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
-                        {notifiaction.READ_YN === 'N' &&
-                          <div style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '3px',
-                            marginRight: '8px',
-                            backgroundColor: 'var(--ion-color-primary)'
-                          }} />
-                        }
+                      <span style={{ fontWeight: '500', fontSize: '15px', marginBottom: '6px', display: 'flex', alignItems: 'center', color: notifiaction.READ_YN === 'N' ? 'var(--ion-color-primary)' : 'var(--ion-text-secondary)' }}>
                         {notifiaction.TITLE}
                       </span>
                       <span style={{ fontWeight: '400', fontSize: '13px' }}>{notifiaction.CONTENT}</span>
