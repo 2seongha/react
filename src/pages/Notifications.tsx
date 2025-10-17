@@ -129,7 +129,7 @@ const Notifications: React.FC = () => {
                       <span style={{ fontWeight: '600', fontSize: '15px', marginBottom: '6px', display: 'flex', alignItems: 'center', color: notifiaction.READ_YN === 'N' ? 'var(--ion-color-primary)' : 'var(--ion-text-secondary)' }}>
                         {notifiaction.TITLE}
                       </span>
-                      <span style={{ fontWeight: '500', fontSize: '14px' }}>{notifiaction.CONTENT}</span>
+                      <span style={{ fontWeight: '400', fontSize: '14px' }}>{notifiaction.CONTENT}</span>
                     </div>
                   </IonItem>
                   <IonItemOptions side="end" >
