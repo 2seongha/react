@@ -17,12 +17,12 @@ const Notifications: React.FC = () => {
   const setNotifications = useAppStore(state => state.setNotifications);
 
   useIonViewWillEnter(() => {
-    setNotifications(null);
     fetchNotifications();
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     webviewHaptic("mediumImpact");
+    setNotifications(null);
     await Promise.allSettled(([fetchNotifications()]));
     event.detail.complete();
   }
@@ -110,7 +110,7 @@ const Notifications: React.FC = () => {
                       style={{
                         width: '100%',
                         padding: '28px 24px',
-                        borderBottom: '1px solid var(--custom-border-color-100)',
+                        borderBottom: '1px solid var(--custom-border-color-50)',
                         display: 'flex',
                         flexDirection: 'column',
                         backgroundColor: notifiaction.READ_YN === 'N' ? 'rgba(var(--ion-color-primary-rgb), .08)' : 'transparent',
@@ -134,7 +134,7 @@ const Notifications: React.FC = () => {
                   </IonItem>
                   <IonItemOptions side="end" >
                     <IonItemOption color="danger" >
-                      <IonIcon icon={trashOutline} style={{width:'60px'}}/>
+                      <IonIcon icon={trashOutline} style={{ width: '60px' }} />
                     </IonItemOption>
                   </IonItemOptions>
                 </IonItemSliding>

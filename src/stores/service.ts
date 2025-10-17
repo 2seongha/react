@@ -63,7 +63,7 @@ export async function fetchApprovals(P_AREA_CODE: string, AREA_CODE: string): Pr
 export async function fetchNotifications(): Promise<NotificationModel[]> {
   try {
     // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Mock API call with realistic notice data
     const mockNotifications: NotificationModel[] = [
