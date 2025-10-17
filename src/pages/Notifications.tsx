@@ -1,4 +1,4 @@
-import { IonButton, IonContent, IonHeader, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonList, IonPage, IonRefresher, IonRefresherContent, IonSelect, IonSelectOption, IonToolbar, isPlatform, RefresherCustomEvent, useIonViewWillEnter } from '@ionic/react';
+import { IonButton, IonContent, IonHeader, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonList, IonPage, IonRefresher, IonRefresherContent, IonSelect, IonSelectOption, IonToolbar, isPlatform, RefresherCustomEvent, useIonViewWillEnter } from '@ionic/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import AppBar from '../components/AppBar';
@@ -6,7 +6,7 @@ import BottomTabBar from '../components/BottomNavigation';
 import './Notifications.css';
 import useAppStore from '../stores/appStore';
 import { webviewHaptic } from '../webview';
-import { refreshOutline } from 'ionicons/icons';
+import { refreshOutline, trashOutline } from 'ionicons/icons';
 import NoData from '../components/NoData';
 
 const Notifications: React.FC = () => {
@@ -129,11 +129,13 @@ const Notifications: React.FC = () => {
                         }
                         {notifiaction.TITLE}
                       </span>
-                      <span style={{ fontWeight: '400', fontSize: '13px'}}>{notifiaction.CONTENT}</span>
+                      <span style={{ fontWeight: '400', fontSize: '13px' }}>{notifiaction.CONTENT}</span>
                     </div>
                   </IonItem>
-                  <IonItemOptions side="end">
-                    <IonItemOption color="danger">삭제</IonItemOption>
+                  <IonItemOptions side="end" >
+                    <IonItemOption color="danger" expandable >
+                      <IonIcon icon={trashOutline} style={{width:'60px'}}/>
+                    </IonItemOption>
                   </IonItemOptions>
                 </IonItemSliding>
               )))}
