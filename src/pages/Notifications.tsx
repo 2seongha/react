@@ -22,7 +22,6 @@ const Notifications: React.FC = () => {
 
   async function handleRefresh(event: RefresherCustomEvent) {
     webviewHaptic("mediumImpact");
-    setNotifications(null);
     await Promise.allSettled(([fetchNotifications()]));
     event.detail.complete();
   }
