@@ -37,13 +37,13 @@ const FlowList: React.FC = () => {
   }, [setAreas, fetchAreas, AREA_CODE]);
 
   // 애니메이션을 위한 count 상태
-  const [totalCount, seTotalCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   // totalCount 변경 시 애니메이션으로 업데이트
   useEffect(() => {
-    seTotalCount(0);
+    setTotalCount(0);
     setTimeout(() => {
-      seTotalCount(flowList?.CNT ? Number(flowList.CNT) : 0);
+      setTotalCount(flowList?.CNT ? Number(flowList.CNT) : 0);
     }, 200)
   }, [flowList?.CNT]);
 

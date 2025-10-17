@@ -1,0 +1,22 @@
+ion-popover.select-popover {
+  --width: 180px;
+  --box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+ion-popover.select-popover ion-item {
+  --inner-padding-start: 12px;
+  --inner-padding-top: 12px;
+  --inner-padding-bottom: 12px;
+  --inner-padding-end: 12px;
+}
+
+.notifications.select ion-item {
+  --inner-padding-start: 12px;
+  --inner-padding-end: 12px;
+}
+
+.select::part(icon) {
+  color: var(--ion-color-secondary);
+  width: 16px;
+  height: 16px;
+}

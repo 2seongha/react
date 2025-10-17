@@ -51,12 +51,13 @@ export interface UserModel {
 }
 
 export interface NotificationModel {
-  notifyNo: string;
-  title?: string;
-  content?: string;
-  readYn: 'Y' | 'N';
-  popupYn: 'Y' | 'N';
-  link?: string;
+  NOTIFY_NO: string;
+  TITLE?: string;
+  CONTENT?: string;
+  READ_YN: 'Y' | 'N';
+  POPUP_YN: 'Y' | 'N';
+  LINK?: string;
+  ERDAT?: string;
 }
 
 export interface NoticeModel {
