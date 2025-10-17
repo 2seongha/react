@@ -62,7 +62,6 @@ function FlipWords({
           style={{
             position: "relative",
             textAlign: "left",
-            padding: "0 2px",
             willChange: "transform opacity filter"
           }}
           key={currentWord}
@@ -96,7 +95,7 @@ function FlipWords({
                   {letter}
                 </motion.span>
               ))}
-              <span className="inline-block">&nbsp;</span>
+              {/* <span className="inline-block">&nbsp;</span> */}
             </motion.span>
           ))}
         </motion.span>

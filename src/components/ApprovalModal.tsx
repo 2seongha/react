@@ -210,7 +210,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           </span>
           <span >
             <span style={{ color: `var(--ion-color-${buttonColor})` }}>{title}</span>{" "}
-            <FlipWords animation={step !== 0} words={[stepText]} />
+            <FlipWords animation={stepText === '했어요'} words={[stepText]} />
           </span>
         </motion.div>
         <AnimatePresence>
