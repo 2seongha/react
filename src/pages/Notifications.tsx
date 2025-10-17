@@ -134,7 +134,7 @@ const Notifications: React.FC = () => {
                   </IonItem>
                   <IonItemOptions side="end" >
                     <IonItemOption color="danger" >
-                      <IonIcon icon={trashOutline} style={{ width: '60px' }} />
+                      <IonIcon icon={trashOutline} style={{ width: '60px' }} size='large' />
                     </IonItemOption>
                   </IonItemOptions>
                 </IonItemSliding>
