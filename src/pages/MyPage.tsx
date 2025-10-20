@@ -5,13 +5,14 @@ import {
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
+import './MyPage.css'
 
 const MyPage: React.FC = () => {
   const user = useAppStore((state) => state.user);
   const corp = useAppStore((state) => state.corp);
 
   return (
-    <IonPage>
+    <IonPage className='mypage'>
       <AppBar
         title={<span></span>}
         showBackButton
@@ -68,7 +69,7 @@ const MyPage: React.FC = () => {
             <span>{user?.KOSTL_NAME || '-'}</span>
           </div>
         </div>
-        <div style={{height:'22px', backgroundColor:'var(--ion-background-color2)'}}></div>
+        <div style={{ height: '22px', backgroundColor: 'var(--ion-background-color2)' }}></div>
         <div style={{ padding: '22px' }}>
           <span style={{ fontSize: '18px', fontWeight: '600' }}>그룹 정보</span>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>

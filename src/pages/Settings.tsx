@@ -12,7 +12,6 @@ import {
   IonBackButton,
   IonSegment,
   IonSegmentButton,
-  IonImg,
   IonButton,
   IonAlert,
   IonActionSheet,
@@ -24,6 +23,7 @@ import AppBar from '../components/AppBar';
 import CustomInput from '../components/CustomInput';
 import { webviewTheme, webviewBadge, webviewToast, webviewHaptic } from '../webview';
 import { themeIcon, bellIcon, lockIcon } from '../assets/images';
+import CachedImage from '../components/CachedImage';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -67,11 +67,10 @@ const Settings: React.FC = () => {
       <AppBar title={<span>설정</span>} showBackButton={true} />
       <IonContent>
         <IonItem>
-          <IonImg
+          <CachedImage
             src={themeIcon}
             style={{ width: '24px', height: '24px', marginRight: '16px' }}
             alt="theme icon"
-
           />
           <IonLabel>
             <h3>테마 설정</h3>
@@ -94,21 +93,19 @@ const Settings: React.FC = () => {
         </IonItem>
 
         <IonItem button>
-          <IonImg
+          <CachedImage
             src={bellIcon}
             style={{ width: '24px', height: '24px', marginRight: '16px' }}
             alt="notification icon"
-
           />
           <IonLabel>알림 설정</IonLabel>
         </IonItem>
 
         <IonItem button>
-          <IonImg
+          <CachedImage
             src={lockIcon}
             style={{ width: '24px', height: '24px', marginRight: '16px' }}
             alt="security icon"
-
           />
           <IonLabel>보안 설정</IonLabel>
         </IonItem>

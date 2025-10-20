@@ -7,7 +7,6 @@ import {
   IonTitle,
   IonButton,
   IonIcon,
-  IonImg,
   useIonRouter,
   IonMenuButton,
 } from '@ionic/react';
@@ -16,6 +15,7 @@ import './AppBar.css';
 import AnimatedBadge from './AnimatedBadge';
 import useAppStore from '../stores/appStore';
 import { appLogoDark, appLogoLight } from '../assets/images';
+import CachedImage from './CachedImage';
 
 type AppBarProps = {
   title?: ReactNode;
@@ -70,7 +70,7 @@ const AppBar: React.FC<AppBarProps> = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', height: '48px' }}>
           {showLogo &&
             <div style={{ position: 'relative', width: '80px', height: '48px', marginLeft: '20px' }}>
-              <IonImg
+              <CachedImage
                 src={appLogoDark}
                 alt="app logo"
                 style={{
@@ -80,7 +80,7 @@ const AppBar: React.FC<AppBarProps> = ({
                   display: actualTheme === 'light' ? 'block' : 'none'
                 }}
               />
-              <IonImg
+              <CachedImage
                 src={appLogoLight}
                 alt="app logo"
                 style={{

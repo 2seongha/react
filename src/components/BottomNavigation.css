@@ -18,14 +18,18 @@
 }
 
 .MuiBottomNavigationAction-root>* {
-  color: var( --ion-color-step-600);
+  color: var( --ion-color-step-500);
 }
 
 .MuiBottomNavigationAction-root.Mui-selected >*{
-  color: var(--ion-color-primary) !important;
+  color: var(--ion-text-color) !important;
 }
 
 .MuiBottomNavigationAction-label {
   padding-top: 2px;
   font-size: 11px !important;
+}
+
+.css-1enwswh-MuiBadge-badge {
+  background-color: #ff2f2f !important;
 }

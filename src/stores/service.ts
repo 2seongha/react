@@ -122,7 +122,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '001',
+        NOTIFY_NO: '007',
         TITLE: '경비정산 결재 요청',
         CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
         READ_YN: 'N',
@@ -131,7 +131,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '002',
+        NOTIFY_NO: '008',
         TITLE: '휴가신청 승인 완료',
         CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
         READ_YN: 'N',
@@ -140,7 +140,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '003',
+        NOTIFY_NO: '009',
         TITLE: '구매요청 반려',
         CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
         READ_YN: 'Y',
@@ -149,7 +149,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '004',
+        NOTIFY_NO: '010',
         TITLE: '교육신청 마감 임박',
         CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
         READ_YN: 'Y',
@@ -158,7 +158,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '005',
+        NOTIFY_NO: '011',
         TITLE: '초과근무 신청 승인',
         CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
         READ_YN: 'N',
@@ -167,7 +167,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '006',
+        NOTIFY_NO: '012',
         TITLE: '시스템 점검 안내',
         CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
         READ_YN: 'Y',
@@ -176,7 +176,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '001',
+        NOTIFY_NO: '013',
         TITLE: '경비정산 결재 요청',
         CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
         READ_YN: 'N',
@@ -185,7 +185,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '002',
+        NOTIFY_NO: '014',
         TITLE: '휴가신청 승인 완료',
         CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
         READ_YN: 'N',
@@ -194,7 +194,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '003',
+        NOTIFY_NO: '015',
         TITLE: '구매요청 반려',
         CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
         READ_YN: 'Y',
@@ -203,7 +203,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '004',
+        NOTIFY_NO: '016',
         TITLE: '교육신청 마감 임박',
         CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
         READ_YN: 'Y',
@@ -212,7 +212,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '005',
+        NOTIFY_NO: '017',
         TITLE: '초과근무 신청 승인',
         CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
         READ_YN: 'N',
@@ -221,7 +221,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '006',
+        NOTIFY_NO: '018',
         TITLE: '시스템 점검 안내',
         CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
         READ_YN: 'Y',
@@ -230,7 +230,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '001',
+        NOTIFY_NO: '019',
         TITLE: '경비정산 결재 요청',
         CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
         READ_YN: 'N',
@@ -239,7 +239,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '002',
+        NOTIFY_NO: '020',
         TITLE: '휴가신청 승인 완료',
         CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
         READ_YN: 'N',
@@ -248,7 +248,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '003',
+        NOTIFY_NO: '021',
         TITLE: '구매요청 반려',
         CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
         READ_YN: 'Y',
@@ -257,7 +257,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '004',
+        NOTIFY_NO: '022',
         TITLE: '교육신청 마감 임박',
         CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
         READ_YN: 'Y',
@@ -266,7 +266,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '005',
+        NOTIFY_NO: '023',
         TITLE: '초과근무 신청 승인',
         CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
         READ_YN: 'N',
@@ -275,7 +275,7 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
         ERDAT: '2025-10-17',
       },
       {
-        NOTIFY_NO: '006',
+        NOTIFY_NO: '024',
         TITLE: '시스템 점검 안내',
         CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
         READ_YN: 'Y',

@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
-import { IonImg } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import { noDataDark, noDataLight } from '../assets/images';
 import './NoData.css';
+import CachedImage from './CachedImage';
 
 interface NoDataProps {
   message?: string;
@@ -49,7 +49,7 @@ const NoData: React.FC<NoDataProps> = React.memo(({
 
   return (
     <div className={`no-data ${className}`}>
-      <IonImg
+      <CachedImage
         src={noDataImage}
         style={imageStyle}
         alt="no data"

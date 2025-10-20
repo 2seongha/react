@@ -111,7 +111,7 @@ const Detail: React.FC = () => {
     setTimeout(() => {
       router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
     }, 0);
-    webviewToast('존재하지 않는 결재 건입니다.');
+    webviewToast('존재하지 않는 결재 건입니다');
     return null;
   }
 
@@ -908,7 +908,8 @@ const SubItem: React.FC<SubProps> = React.memo(
                 <IonButton
                   id="profitability-dialog"
                   color="tertiary"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onProfitDialogOpen?.(sub);
                   }}
                   style={{
@@ -931,7 +932,8 @@ const SubItem: React.FC<SubProps> = React.memo(
                 <IonButton
                   id="attendee-dialog"
                   color="warning"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onAttendeeDialogOpen?.(sub.CardListAttendeeList);
                   }}
                   style={{

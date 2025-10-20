@@ -224,7 +224,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 width: '100%',
                 padding: '16px 21px 24px 21px',
                 marginTop: '144px',
-                marginBottom: 'calc(176px + var(--ion-safe-area-bottom))',
+                marginBottom: 'calc(154px + var(--ion-safe-area-bottom))',
               }}>
               {selectedItems?.map((item: any, index: number) => (
                 <div key={`approval-modal-item-${index}`}
@@ -291,7 +291,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                   marginBottom: "12px",
                   "--border-radius": "16px",
                 }}
-                rows={4}
+                rows={3}
                 value={textValue}
                 onInput={handleTextChange}
                 labelPlacement="start"

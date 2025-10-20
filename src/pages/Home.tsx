@@ -5,7 +5,6 @@ import {
   IonCard,
   IonButton,
   IonIcon,
-  IonImg,
   useIonViewWillEnter,
   IonRefresher,
   IonRefresherContent,
@@ -27,6 +26,7 @@ import BottomTabBar from '../components/BottomNavigation';
 import { personIcon, searchIcon } from '../assets/images';
 import { useShallow } from 'zustand/shallow';
 import { webviewHaptic } from '../webview';
+import CachedImage from '../components/CachedImage';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
@@ -98,7 +98,7 @@ const WelcomeCard: React.FC = () => {
   return (
     <IonCard className='home-card'>
       <div className='welcome-card-content'>
-        <IonImg
+        <CachedImage
           src={personIcon}
           style={{ width: '48px', height: '48px' }}
           alt="person"
@@ -229,7 +229,8 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
       <div className='menu-item'>
         <div className='menu-item-content'>
           <div className='menu-item-icon' style={{ backgroundColor: icon.backgroundColor }}>
-            <IonImg
+            <CachedImage
+              width='27px'
               src={icon.image}
               alt="menu icon"
             />
@@ -250,7 +251,7 @@ const TodoSummaryCard: React.FC = () => {
   return (
     <IonCard className='home-card todo-summary-card'>
       <div className='todo-summary-title'>
-        <IonImg
+        <CachedImage
           src={getFlowIcon('TODO').image}
           style={{ width: '24px', height: '24px' }}
           alt="todo icon"
@@ -261,7 +262,7 @@ const TodoSummaryCard: React.FC = () => {
       {
         approvals instanceof Error ?
           <div className='todo-summary-no-data'>
-            <IonImg
+            <CachedImage
               src={searchIcon}
               style={{ width: '48px', height: '48px' }}
               alt="search icon"
@@ -271,7 +272,7 @@ const TodoSummaryCard: React.FC = () => {
           :
           todoSummary?.length == 0 ?
             <div className='todo-summary-no-data'>
-              <IonImg
+              <CachedImage
                 src={searchIcon}
                 style={{ width: '48px', height: '48px' }}
                 alt="search icon"

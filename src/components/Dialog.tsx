@@ -13,14 +13,14 @@ interface CustomDialogProps {
 
   // 첫 번째 버튼 (일반적으로 취소)
   firstButtonText?: string;
-  firstButtonColor?: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
+  firstButtonColor?: 'primary' | 'secondary' | 'danger' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
   firstButtonStyle?: React.CSSProperties;
   onFirstButtonClick?: () => void;
   showFirstButton?: boolean;
 
   // 두 번째 버튼 (일반적으로 확인)
   secondButtonText?: string;
-  secondButtonColor?: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
+  secondButtonColor?: 'primary' | 'secondary' | 'danger' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
   secondButtonStyle?: React.CSSProperties;
   onSecondButtonClick?: () => void;
   showSecondButton?: boolean;
@@ -28,7 +28,7 @@ interface CustomDialogProps {
   // 단일 버튼 모드
   singleButton?: boolean;
   singleButtonText?: string;
-  singleButtonColor?: 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
+  singleButtonColor?: 'primary' | 'secondary' | 'danger' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
   singleButtonStyle?: React.CSSProperties;
   onSingleButtonClick?: () => void;
 
@@ -126,6 +126,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   const handleFirstButton = () => {
     if (onFirstButtonClick) {
       onFirstButtonClick();
+      dismiss();
     } else {
       dismiss();
     }
@@ -134,6 +135,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   const handleSecondButton = () => {
     if (onSecondButtonClick) {
       onSecondButtonClick();
+      dismiss();
     } else {
       dismiss();
     }
@@ -142,27 +144,15 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   const handleSingleButton = () => {
     if (onSingleButtonClick) {
       onSingleButtonClick();
+      dismiss();
     } else {
       dismiss();
     }
   };
 
-  // 닫기 버튼 컴포넌트
-  const closeButton = useMemo(() => (
-    <IonButton
-      mode='md'
-      shape='round'
-      color={'medium'}
-      className="app-bar-button"
-      onClick={dismiss}
-    >
-      <IonIcon icon={close} />
-    </IonButton>
-  ), []);
-
   const renderContent = () => {
     if (body) return body;
-    if (message) return <div style={{ margin: '16px 0' }}>{message}</div>;
+    if (message) return <div style={{ margin: '32px 12px', textAlign: 'center', fontSize: '15px' }}>{message}</div>;
     return null;
   };
 

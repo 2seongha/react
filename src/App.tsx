@@ -18,6 +18,7 @@ import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 import { OrbitProgress } from 'react-loading-indicators';
+import { useImagePreload } from './hooks/useImagePreload';
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
@@ -25,6 +26,7 @@ const App: React.FC = () => {
   const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
   const [fixedHeight, setFixedHeight] = useState<number>();
+  const { isLoading: imageLoading, loadedCount } = useImagePreload();
 
   useEffect(() => {
     const initialHeight = document.documentElement.offsetHeight;
@@ -70,15 +72,15 @@ const App: React.FC = () => {
     setThemeInitialized(true);
   }, [themeMode]);
 
-  // 웹뷰와 테마 모두 초기화 완료되었을 때 앱 초기화 완료
+  // 웹뷰, 테마, 이미지 모두 초기화 완료되었을 때 앱 초기화 완료
   useEffect(() => {
-    if (webviewInitialized && themeInitialized) {
+    if (webviewInitialized && themeInitialized && !imageLoading) {
       console.log('앱 초기화 완료!');
-      console.log(completeInit);
+      console.log(`이미지 ${loadedCount}개 캐싱 완료`);
 
       setCompleteInit(true);
     }
-  }, [webviewInitialized, themeInitialized]);
+  }, [webviewInitialized, themeInitialized, imageLoading, loadedCount]);
 
   if (!completeInit) return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ion-background-color)' }} >
