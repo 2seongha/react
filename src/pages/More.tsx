@@ -40,11 +40,6 @@ const More: React.FC = () => {
       <AppBar title={<span>더보기</span>} showSettingButton={true} showMenuButton={true} />
       <IonContent fullscreen>
       <IonList>
-        <IonItem button onClick={() => handleMenuClick('공지사항')}>
-          <IonIcon icon={notificationsOutline} slot="start" />
-          <IonLabel>공지사항</IonLabel>
-        </IonItem>
-
         <IonItem button routerLink="/settings">
           <IonIcon icon={settingsOutline} slot="start" />
           <IonLabel>설정</IonLabel>

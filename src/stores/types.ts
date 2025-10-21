@@ -54,6 +54,7 @@ export interface NotificationModel {
   NOTIFY_NO: string;
   TITLE?: string;
   CONTENT?: string;
+  TYPE?: 'START' | 'APPROVE' | 'REJECT';
   READ_YN: 'Y' | 'N';
   POPUP_YN: 'Y' | 'N';
   LINK?: string;

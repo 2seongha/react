@@ -106,9 +106,8 @@ const CachedImage: React.FC<CachedImageProps> = ({
     <img
       src={imageSrc}
       style={{
+        objectFit: 'contain',
         ...style,
-        display: 'block',
-        objectFit: 'contain'
       }}
       onError={() => {
         if (fallback && imageSrc !== fallback) {

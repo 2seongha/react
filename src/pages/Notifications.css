@@ -17,13 +17,102 @@ ion-popover.select-popover ion-item {
   height: 16px;
 }
 
+/* Filter header styles */
+.filter-header {
+  padding: 6px 0 6px 21px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-select-item {
+  font-size: 16px;
+  width: 130px;
+  font-weight: 500;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-button {
+  font-size: 15px;
+  height: 42px;
+}
+
+/* Notification item styles */
+.notification-item {
+  width: 100%;
+  padding: 30px 24px;
+  border-bottom: 1px solid var(--custom-border-color-50);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.notification-item.not-read {
+  background-color: rgba(var(--ion-color-primary-rgb), .08);
+}
+
+.notification-date {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--ion-color-secondary);
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+
+.notification-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.notification-title.unread {
+  color: var(--ion-text-color);
+}
+
+.notification-title.read {
+  color: var(--ion-color-step-450);
+}
+
+.notification-content {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.notification-content.unread {
+  color: var(--ion-color-step-800);
+}
+
+.notification-content.read {
+  color: var(--ion-color-step-450);
+}
+
+.delete-icon {
+  width: 60px;
+  font-size: 22px;
+}
+
 .not-read::before {
   content: '';
   position: absolute;
-  width: 5px;
-  height: 100%;
+  width: 2px;
+  height: 95%;
   background-color: var(--ion-color-primary);
   left: 0;
-  top: 0;
+  top: 2.5%;
   border-radius: 0 4px 4px 0;
+}
+
+.not-read.APPROVE::before {
+  background-color: var(--ion-color-success);
+}
+
+.not-read.REJECT::before {
+  background-color: var(--ion-color-danger);
 }

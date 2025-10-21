@@ -1,9 +1,10 @@
-import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, RefresherCustomEvent, useIonRouter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, IonFab, isPlatform, IonHeader, useIonViewWillLeave } from '@ionic/react';
+import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, RefresherCustomEvent, useIonRouter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, isPlatform, IonHeader, useIonViewWillLeave } from '@ionic/react';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
 import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, checkmarkOutline } from 'ionicons/icons';
 import CustomItem from '../components/CustomItem';
+import ScrollToTopFab, { useScrollToTop } from '../components/ScrollToTopFab';
 import CustomSkeleton from '../components/CustomSkeleton';
 import './Approval.css';
 import { useParams } from 'react-router-dom';
@@ -20,10 +21,9 @@ const Approval: React.FC = () => {
   const router = useIonRouter();
 
   // 캐싱된 타이틀들
-  const [isTop, setIsTop] = useState(true);
+  const { isTop, scrollToTop, scrollCallbackRef, contentRef } = useScrollToTop();
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState<string>('');
-  const scrollCallbackRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     setApprovals(null);
@@ -92,44 +92,6 @@ const Approval: React.FC = () => {
     setEndDate(defaultEndDate);
   }, [defaultStartDate, defaultEndDate]);
 
-  //* 스크롤 관련
-  const contentRef = useRef<HTMLIonContentElement>(null);
-
-  const scrollToTop = () => {
-    contentRef.current?.scrollToTop(500);
-  };
-
-  useEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
-
-    const handleScroll = () => {
-      content.getScrollElement().then((scrollElement) => {
-        if (scrollElement) {
-          const scrollTop = scrollElement.scrollTop;
-          setIsTop(scrollTop < 100);
-
-          if (scrollCallbackRef.current) {
-            scrollCallbackRef.current();
-          }
-        }
-      });
-    };
-
-    content.getScrollElement().then((scrollElement) => {
-      if (scrollElement) {
-        scrollElement.addEventListener('scroll', handleScroll, { passive: true });
-      }
-    });
-
-    return () => {
-      content.getScrollElement().then((scrollElement) => {
-        if (scrollElement) {
-          scrollElement.removeEventListener('scroll', handleScroll);
-        }
-      });
-    };
-  }, []);
 
   // 네비게이션 핸들러 - useCallback으로 최적화
   const handleBackNavigation = useCallback(() => {
@@ -477,65 +439,6 @@ const Approval: React.FC = () => {
 
 export default Approval;
 
-// 독립적인 ScrollToTop FAB 컴포넌트
-interface ScrollToTopFabProps {
-  isTop: boolean;
-  onScrollToTop: () => void;
-  scrollCallbackRef: React.RefObject<(() => void) | null>;
-}
-
-const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScrollToTop, scrollCallbackRef }) => {
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    // Virtuoso의 rangeChanged 이벤트를 통해 스크롤 감지
-    const handleScroll = () => {
-      if (!isTop) {
-        if (!isScrolling) {  // 이미 스크롤 중이면 중복 처리 방지
-          setIsScrolling(true);
-        }
-
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-
-        scrollTimeoutRef.current = setTimeout(() => {
-          setIsScrolling(false);
-        }, 2000);
-      }
-    };
-
-    // callback 등록
-    scrollCallbackRef.current = handleScroll;
-
-    return () => {
-      scrollCallbackRef.current = null;
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [isTop, isScrolling, scrollCallbackRef]);
-
-  return (
-    <IonFab
-      vertical="bottom"
-      horizontal="end"
-      slot="fixed"
-      style={{
-        marginBottom: 'calc(var(--ion-safe-area-bottom) + 12px)',
-        opacity: (isScrolling && !isTop) ? 1 : 0,
-        transform: (isScrolling && !isTop) ? 'scale(1)' : 'scale(0.8)',
-        transition: 'all 0.3s ease-in-out',
-        pointerEvents: (isScrolling && !isTop) ? 'auto' : 'none'
-      }}
-    >
-      <IonButton onTouchStart={onScrollToTop} className='scroll-top-button'>
-        <span>상단으로 이동</span>
-      </IonButton>
-    </IonFab>
-  );
-});
 
 interface ApprovalProps {
   index: number;

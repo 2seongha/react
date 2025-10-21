@@ -67,7 +67,7 @@ const Menu: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        <IonList className="hierarchical-menu">
+        <IonList style={{ paddingBottom: 'var(--ion-safe-area-bottom)' }}>
           {areas?.map((area, index) => (
             <MenuItem key={`${area.AREA_CODE}-${index}`} area={area} />
           ))}

@@ -65,224 +65,334 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
     // Simulate API loading delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 
+    // Function to get random TYPE and corresponding TITLE
+    const getRandomTypeAndTitle = () => {
+      const types = ['START', 'APPROVE', 'REJECT'] as const;
+      const type = types[Math.floor(Math.random() * types.length)];
+      
+      const titleMap = {
+        START: '결재 요청이 도착했습니다.',
+        APPROVE: '결재 요청이 승인되었습니다.',
+        REJECT: '결재 요청이 반려되었습니다.'
+      };
+      
+      return { type, title: titleMap[type] };
+    };
+
     // Mock API call with realistic notice data
     const mockNotifications: NotificationModel[] = [
-      {
-        NOTIFY_NO: '001',
-        TITLE: '경비정산 결재 요청',
-        CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-        READ_YN: 'N',
-        POPUP_YN: 'Y',
-        LINK: 'EXP001/20240115001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '002',
-        TITLE: '휴가신청 승인 완료',
-        CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'VAC001/20240115002',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '003',
-        TITLE: '구매요청 반려',
-        CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'PUR001/20240114001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '004',
-        TITLE: '교육신청 마감 임박',
-        CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'TRN001/20240113001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '005',
-        TITLE: '초과근무 신청 승인',
-        CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'OT001/20240112001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '006',
-        TITLE: '시스템 점검 안내',
-        CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: '',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '007',
-        TITLE: '경비정산 결재 요청',
-        CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-        READ_YN: 'N',
-        POPUP_YN: 'Y',
-        LINK: 'EXP001/20240115001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '008',
-        TITLE: '휴가신청 승인 완료',
-        CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'VAC001/20240115002',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '009',
-        TITLE: '구매요청 반려',
-        CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'PUR001/20240114001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '010',
-        TITLE: '교육신청 마감 임박',
-        CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'TRN001/20240113001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '011',
-        TITLE: '초과근무 신청 승인',
-        CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'OT001/20240112001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '012',
-        TITLE: '시스템 점검 안내',
-        CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: '',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '013',
-        TITLE: '경비정산 결재 요청',
-        CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-        READ_YN: 'N',
-        POPUP_YN: 'Y',
-        LINK: 'EXP001/20240115001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '014',
-        TITLE: '휴가신청 승인 완료',
-        CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'VAC001/20240115002',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '015',
-        TITLE: '구매요청 반려',
-        CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'PUR001/20240114001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '016',
-        TITLE: '교육신청 마감 임박',
-        CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'TRN001/20240113001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '017',
-        TITLE: '초과근무 신청 승인',
-        CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'OT001/20240112001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '018',
-        TITLE: '시스템 점검 안내',
-        CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: '',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '019',
-        TITLE: '경비정산 결재 요청',
-        CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-        READ_YN: 'N',
-        POPUP_YN: 'Y',
-        LINK: 'EXP001/20240115001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '020',
-        TITLE: '휴가신청 승인 완료',
-        CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'VAC001/20240115002',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '021',
-        TITLE: '구매요청 반려',
-        CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'PUR001/20240114001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '022',
-        TITLE: '교육신청 마감 임박',
-        CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: 'TRN001/20240113001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '023',
-        TITLE: '초과근무 신청 승인',
-        CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-        READ_YN: 'N',
-        POPUP_YN: 'N',
-        LINK: 'OT001/20240112001',
-        ERDAT: '2025-10-17',
-      },
-      {
-        NOTIFY_NO: '024',
-        TITLE: '시스템 점검 안내',
-        CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-        READ_YN: 'Y',
-        POPUP_YN: 'N',
-        LINK: '',
-        ERDAT: '2025-10-17',
-      }
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '001',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
+          READ_YN: 'N',
+          POPUP_YN: 'Y',
+          LINK: 'EXP001/20240115001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '002',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'VAC001/20240115002',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '003',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'PUR001/20240114001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '004',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'TRN001/20240113001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '005',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'OT001/20240112001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '006',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: '',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '007',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
+          READ_YN: 'N',
+          POPUP_YN: 'Y',
+          LINK: 'EXP001/20240115001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '008',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'VAC001/20240115002',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '009',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'PUR001/20240114001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '010',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'TRN001/20240113001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '011',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'OT001/20240112001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '012',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: '',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '013',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
+          READ_YN: 'N',
+          POPUP_YN: 'Y',
+          LINK: 'EXP001/20240115001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '014',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'VAC001/20240115002',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '015',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'PUR001/20240114001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '016',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'TRN001/20240113001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '017',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'OT001/20240112001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '018',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: '',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '019',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
+          READ_YN: 'N',
+          POPUP_YN: 'Y',
+          LINK: 'EXP001/20240115001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '020',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'VAC001/20240115002',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '021',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'PUR001/20240114001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '022',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: 'TRN001/20240113001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '023',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
+          READ_YN: 'N',
+          POPUP_YN: 'N',
+          LINK: 'OT001/20240112001',
+          ERDAT: '2025-10-17',
+        };
+      })(),
+      (() => {
+        const typeAndTitle = getRandomTypeAndTitle();
+        return {
+          NOTIFY_NO: '024',
+          TYPE: typeAndTitle.type,
+          TITLE: typeAndTitle.title,
+          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
+          READ_YN: 'Y',
+          POPUP_YN: 'N',
+          LINK: '',
+          ERDAT: '2025-10-17',
+        };
+      })()
     ];
 
     return mockNotifications;
