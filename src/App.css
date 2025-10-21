@@ -12,12 +12,12 @@ ion-content::part(scroll) {
 
 ion-content::part(scroll)::-webkit-scrollbar {
   display: none;
-} */
+}
 
-/* 모든 스크롤바 완전 제거 */
-{
+* {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+  touch-action: manipulation;
 }
 
 *::-webkit-scrollbar {
@@ -218,5 +218,5 @@ ion-refresher.refresher-native .refresher-refreshing-icon {
 }
 
 ion-menu-button.ion-color-medium {
-  --ion-color-base : rgba(100, 109, 123, .48) !important;
+  --ion-color-base: rgba(100, 109, 123, .48) !important;
 }
