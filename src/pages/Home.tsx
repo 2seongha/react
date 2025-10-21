@@ -23,7 +23,7 @@ import { getFlowIcon } from '../utils';
 import { AreaModel } from '../stores/types';
 import GroupButton from '../components/GroupButton';
 import BottomTabBar from '../components/BottomNavigation';
-import { personIcon, searchIcon } from '../assets/images';
+import { banknotesGlassIcon, creditcardGlassIcon, personIcon, searchIcon } from '../assets/images';
 import { useShallow } from 'zustand/shallow';
 import { webviewHaptic } from '../webview';
 import CachedImage from '../components/CachedImage';
@@ -62,6 +62,9 @@ const Home: React.FC = () => {
         </div>
         <div style={{ marginTop: '12px' }}>
           <MenuCard />
+        </div>
+        <div style={{ marginTop: '12px' }}>
+          <StartButtons />
         </div>
         <div style={{ marginTop: '12px', marginBottom: '12px' }}>
           <TodoSummaryCard />
@@ -333,5 +336,58 @@ const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = f
         </div>
       </div>
     </IonItem>
+  );
+};
+
+const StartButtons: React.FC = () => {
+
+  return (
+    <div style={{ marginTop: '28px' }}>
+      <span style={{ fontSize: '17px', fontWeight: '600', marginLeft: '8px' }}>업무 시작</span>
+      <div style={{
+        marginTop: '8px',
+        display: 'flex',
+        gap: '12px'
+      }}>
+        <IonItem style={{ flex: 1, '--border-radius': '12px' }}>
+          <div style={{
+            padding: '12px',
+            height: '88px',
+            width: '100%',
+            background: 'linear-gradient(to bottom, transparent 0%, transparent calc(100% - 10px), rgba(var(--ion-color-primary-rgb), .08) 100%)'
+          }}>
+            <span style={{ fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: 4 }}>법인카드</span>
+            <span style={{ fontSize: '15px', fontWeight: '600', color: 'var(--ion-color-secondary)' }}> 5건</span>
+            <CachedImage src={creditcardGlassIcon}
+              style={{
+                width: '48px',
+                position: 'absolute',
+                right: 12,
+                bottom: 2
+              }} />
+          </div>
+        </IonItem>
+        <IonItem style={{ flex: 1, '--border-radius': '12px' }}>
+          <div style={{
+            padding: '12px',
+            height: '88px',
+            width: '100%',
+            background: 'linear-gradient(to bottom, transparent 0%, transparent calc(100% - 10px), rgba(var(--ion-color-primary-rgb), .08) 100%)'
+          }}>
+            <span style={{ fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: 4 }}>임직원개인경비</span>
+            <span style={{ fontSize: '15px', fontWeight: '600', color: 'var(--ion-color-secondary)' }}> 38건</span>
+            <CachedImage src={banknotesGlassIcon}
+              style={{
+                width: '48px',
+                position: 'absolute',
+                right: 12,
+                bottom: 2
+              }} />
+          </div>
+        </IonItem>
+      </div>
+      {/* <IonCard className='home-card menu-card'>
+      </IonCard> */}
+    </div>
   );
 };

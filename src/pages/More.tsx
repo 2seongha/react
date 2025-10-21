@@ -5,7 +5,8 @@ import {
   IonItem,
   IonIcon,
   IonLabel,
-  useIonViewWillEnter
+  useIonViewWillEnter,
+  useIonRouter
 } from '@ionic/react';
 import {
   notificationsOutline,
@@ -15,59 +16,116 @@ import {
   shieldOutline,
   documentTextOutline
 } from 'ionicons/icons';
-import React from 'react';
+import React, { useCallback } from 'react';
 import AppBar from '../components/AppBar';
 import BottomTabBar from '../components/BottomNavigation';
 import { webviewLogout } from '../webview';
+import CustomDialog from '../components/Dialog';
+import CachedImage from '../components/CachedImage';
+import { clipboardIcon, copyMoreIcon, gearIcon, informationIcon, logoutIcon } from '../assets/images';
 
 const More: React.FC = () => {
-  useIonViewWillEnter(() => {
-    console.log('more will enter');
-  });
-
   const handleLogout = () => {
-    // 로그아웃 로직 구현
     webviewLogout();
-    console.log('로그아웃 클릭');
-  };
-
-  const handleMenuClick = (menuName: string) => {
-    console.log(`${menuName} 클릭`);
   };
 
   return (
     <IonPage className="more">
-      <AppBar title={<span>더보기</span>} showSettingButton={true} showMenuButton={true} />
-      <IonContent fullscreen>
-      <IonList>
-        <IonItem button routerLink="/settings">
-          <IonIcon icon={settingsOutline} slot="start" />
-          <IonLabel>설정</IonLabel>
-        </IonItem>
-
-        <IonItem button onClick={() => handleMenuClick('버전 정보')}>
-          <IonIcon icon={informationCircleOutline} slot="start" />
-          <IonLabel>버전 정보</IonLabel>
-        </IonItem>
-
-        <IonItem button onClick={() => handleMenuClick('개인정보처리방침')}>
-          <IonIcon icon={shieldOutline} slot="start" />
-          <IonLabel>개인정보처리방침</IonLabel>
-        </IonItem>
-
-        <IonItem button onClick={() => handleMenuClick('서비스 이용약관')}>
-          <IonIcon icon={documentTextOutline} slot="start" />
-          <IonLabel>서비스 이용약관</IonLabel>
-        </IonItem>
-
-        <IonItem button onClick={handleLogout}>
-          <IonIcon icon={logOutOutline} slot="start" />
-          <IonLabel>로그아웃</IonLabel>
-        </IonItem>
-      </IonList>
+      <AppBar title={<span>더보기</span>} showMenuButton={true} />
+      <IonContent>
+        <IonList style={{ padding: '0 9px' }}>
+          <MenuItem
+            iconSrc={gearIcon}
+            title="설정"
+            routerLink="/settings"
+          />
+          <MenuItem
+            iconSrc={informationIcon}
+            title="버전"
+            routerLink="/termsOfUse"
+          />
+          <MenuItem
+            iconSrc={clipboardIcon}
+            title="개인정보처리방침"
+            routerLink="/privacyPolicy"
+          />
+          <MenuItem
+            iconSrc={copyMoreIcon}
+            title="서비스 이용약관"
+            routerLink="/termsOfUse"
+          />
+          <MenuItem
+            id='logout-trigger'
+            iconSrc={logoutIcon}
+            title="로그아웃"
+          />
+        </IonList>
+        <CustomDialog
+          trigger="logout-trigger"
+          title="알림"
+          message="로그아웃 하시겠습니까?"
+          firstButtonText='아니오'
+          secondButtonText='예'
+          onSecondButtonClick={handleLogout}
+        />
       </IonContent>
       <BottomTabBar />
     </IonPage>
+  );
+};
+
+interface MenuItemProps {
+  id?: string;
+  iconSrc?: string;
+  title: string;
+  onClick?: () => void;
+  routerLink?: string;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ id, iconSrc, title, onClick, routerLink }) => {
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const iconContainerStyle = {
+    backgroundColor: 'var(--ion-background-color2)',
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '12px',
+    marginRight: '12px'
+  };
+
+  const titleStyle = {
+    fontSize: '15px',
+    fontWeight: '500'
+  };
+
+  return (
+    <IonItem
+      id={id}
+      button
+      mode='ios'
+      routerLink={routerLink}
+      onClick={handleClick}
+      style={{
+        '--padding-start': '12px',
+        '--padding-end': '12px',
+        '--padding-top': '12px',
+        '--padding-bottom': '12px',
+        '--border-radius': '12px'
+      }}>
+      {iconSrc && (
+        <div style={iconContainerStyle}>
+          <CachedImage src={iconSrc} width={'22px'} />
+        </div>
+      )}
+      <span style={titleStyle}>{title}</span>
+    </IonItem>
   );
 };
 

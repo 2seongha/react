@@ -152,7 +152,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
 
   const renderContent = () => {
     if (body) return body;
-    if (message) return <div style={{ margin: '32px 12px', textAlign: 'center', fontSize: '15px' }}>{message}</div>;
+    if (message) return <div style={{ margin: '32px 12px', textAlign: 'center', fontSize: '15px', fontWeight: '500' }}>{message}</div>;
     return null;
   };
 

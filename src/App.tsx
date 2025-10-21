@@ -19,6 +19,8 @@ import MyPage from './pages/MyPage';
 import Search from './pages/Search';
 import { OrbitProgress } from 'react-loading-indicators';
 import { useImagePreload } from './hooks/useImagePreload';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfUse from './pages/TermsOfUse';
 
 const App: React.FC = () => {
   const { themeMode } = useAppStore();
@@ -103,6 +105,8 @@ const App: React.FC = () => {
           <Route path="/settings" component={Settings} exact />
           <Route path="/myPage" component={MyPage} exact />
           <Route path="/search" component={Search} exact />
+          <Route path="/privacyPolicy" component={PrivacyPolicy} exact />
+          <Route path="/termsOfUse" component={TermsOfUse} exact />
           <Redirect exact from="/" to="/app/home" />
         </IonRouterOutlet>
       </IonReactRouter>

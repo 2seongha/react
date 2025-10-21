@@ -65,8 +65,8 @@ ion-popover.select-popover ion-item {
 }
 
 .notification-title {
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 14px;
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -82,11 +82,11 @@ ion-popover.select-popover ion-item {
 
 .notification-content {
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .notification-content.unread {
-  color: var(--ion-color-step-800);
+  color: var(--ion-color-step-600);
 }
 
 .notification-content.read {

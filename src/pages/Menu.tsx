@@ -13,6 +13,7 @@ import {
   RefresherCustomEvent,
   isPlatform,
   useIonRouter,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { menuController } from '@ionic/core/components';
 import React, { useState, useCallback, useMemo } from 'react';
@@ -29,6 +30,7 @@ import { getFlowIcon } from '../utils';
 import './Menu.css';
 import AppBar from '../components/AppBar';
 import { webviewHaptic } from '../webview';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const Menu: React.FC = () => {
   const areas = useAppStore(state => state.areas);
@@ -57,7 +59,10 @@ const Menu: React.FC = () => {
   ), []);
 
   return (
-    <IonMenu side="end" menuId="main-menu" contentId="main-content" className="slide-menu" swipeGesture={false}>
+    <IonMenu side="end" menuId="main-menu" contentId="main-content" className="slide-menu" swipeGesture={false}
+      onIonWillOpen={() => {
+        fetchAreas('');
+      }}>
       <AppBar
         title={<span>메뉴</span>}
         customEndButtons={closeButton}
@@ -67,11 +72,17 @@ const Menu: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        <IonList style={{ paddingBottom: 'var(--ion-safe-area-bottom)' }}>
-          {areas?.map((area, index) => (
-            <MenuItem key={`${area.AREA_CODE}-${index}`} area={area} />
-          ))}
-        </IonList>
+        {!areas ?
+          <div className='loading-indicator-wrapper'>
+            <OrbitProgress color="var(--ion-color-primary)" size="small" text="" textColor="" />
+          </div>
+          :
+          <IonList style={{ paddingBottom: 'var(--ion-safe-area-bottom)' }}>
+            {areas?.map((area, index) => (
+              <MenuItem key={`${area.AREA_CODE}-${index}`} area={area} />
+            ))}
+          </IonList>
+        }
       </IonContent>
     </IonMenu>
   );
