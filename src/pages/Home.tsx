@@ -349,7 +349,12 @@ const StartButtons: React.FC = () => {
         display: 'flex',
         gap: '12px'
       }}>
-        <IonItem style={{ flex: 1, '--border-radius': '12px' }}>
+        <IonItem
+          button
+          mode='md'
+          style={{ flex: 1, '--border-radius': '12px' }}
+          onClick={() => { console.log('adsf') }}
+        >
           <div style={{
             padding: '12px',
             height: '88px',
@@ -367,7 +372,12 @@ const StartButtons: React.FC = () => {
               }} />
           </div>
         </IonItem>
-        <IonItem style={{ flex: 1, '--border-radius': '12px' }}>
+        <IonItem
+          button
+          mode='md'
+          style={{ flex: 1, '--border-radius': '12px' }}
+          onClick={() => { console.log('adsf') }}
+        >
           <div style={{
             padding: '12px',
             height: '88px',
