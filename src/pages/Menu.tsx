@@ -13,8 +13,8 @@ import {
   RefresherCustomEvent,
   isPlatform,
   useIonRouter,
-  useIonViewWillEnter,
 } from '@ionic/react';
+import { useLocation } from 'react-router-dom';
 import { menuController } from '@ionic/core/components';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
@@ -33,9 +33,12 @@ import { webviewHaptic } from '../webview';
 import { OrbitProgress } from 'react-loading-indicators';
 
 const Menu: React.FC = () => {
+  const location = useLocation();
   const areas = useAppStore(state => state.areas);
   const setAreas = useAppStore(state => state.setAreas);
   const fetchAreas = useAppStore(state => state.fetchAreas);
+
+  const isHomePage = location.pathname.startsWith('/app/');
 
   const handleRefresh = useCallback(async (event: RefresherCustomEvent) => {
     setAreas(null);
@@ -59,7 +62,7 @@ const Menu: React.FC = () => {
   ), []);
 
   return (
-    <IonMenu side="end" menuId="main-menu" contentId="main-content" className="slide-menu" swipeGesture={false}
+    <IonMenu side="end" menuId="main-menu" contentId="main-content" className="slide-menu" swipeGesture={isHomePage}
       onIonWillOpen={() => {
         fetchAreas('');
       }}>
@@ -151,21 +154,6 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ area, level = 0 }) => {
               icon={isExpanded ? chevronUp : chevronDown}
             />
           </IonButton>
-          // :
-          // <div style={{
-          //   width: '44px',
-          //   height: '44px',
-          //   display: 'flex',
-          //   alignItems: 'center',
-          //   justifyContent: 'center',
-          //   marginRight: '8px'
-          // }}>
-          //   <IonIcon
-          //     style={{ width: 24, height: 24, color: 'rgba(100, 109, 123, .48)' }}
-          //     icon={chevronForward}
-          //     slot="end"
-          //   />
-          // </div>
         }
       </IonItem >
 

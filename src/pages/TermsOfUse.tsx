@@ -9,7 +9,7 @@ const TermsOfUse: React.FC = () => {
     <IonPage className="more">
       <AppBar title={<span>서비스 이용약관</span>} showBackButton={true} />
       <IonContent>
-        <div style={{ padding: '21px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ padding: '0 21px var(--ion-safe-area-bottom) 21px', maxWidth: '800px', margin: '0 auto' }}>
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: 'var(--ion-text-color)' }}>
               제1조(목적)

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, ReactNode } from 'react';
 import {
   IonContent,
   IonPage,
@@ -16,7 +16,9 @@ import {
   IonAlert,
   IonActionSheet,
   IonModal,
-  IonInput
+  IonInput,
+  IonIcon,
+  IonToggle
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
@@ -24,16 +26,12 @@ import CustomInput from '../components/CustomInput';
 import { webviewTheme, webviewBadge, webviewToast, webviewHaptic } from '../webview';
 import { themeIcon, bellIcon, lockIcon } from '../assets/images';
 import CachedImage from '../components/CachedImage';
+import { contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
+import { Widgets } from '@mui/icons-material';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
   const setThemeMode = useAppStore(state => state.setThemeMode);
-  const [badgeNumber, setBadgeNumber] = useState<string>('');
-  const [toastMessage, setToastMessage] = useState<string>('');
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
 
   const handleThemeChange = (value: string) => {
     const newTheme = value as 'light' | 'dark' | 'system';
@@ -45,403 +43,113 @@ const Settings: React.FC = () => {
     webviewTheme(newTheme);
   };
 
-  const handleBadgeTest = () => {
-    console.log('Badge 테스트:', badgeNumber);
-    webviewBadge(badgeNumber);
-  };
-
-  const handleToastTest = () => {
-    console.log('Toast 테스트:', toastMessage);
-    webviewToast(toastMessage);
-  };
-
-  const handleHapticTest = (hapticType: string) => {
-    console.log('Haptic 테스트:', hapticType);
-    webviewHaptic(hapticType);
-  };
-
 
 
   return (
     <IonPage>
       <AppBar title={<span>설정</span>} showBackButton={true} />
-      <IonContent>
-        <IonItem>
-          <CachedImage
-            src={themeIcon}
-            style={{ width: '24px', height: '24px', marginRight: '16px' }}
-            alt="theme icon"
-          />
-          <IonLabel>
-            <h3>테마 설정</h3>
-            <IonSegment
-              value={themeMode}
-              onIonChange={e => handleThemeChange(e.detail.value as string)}
-              style={{ marginTop: '8px' }}
-            >
-              <IonSegmentButton value="light">
-                <IonLabel>라이트</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="system">
-                <IonLabel>시스템</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="dark">
-                <IonLabel>다크</IonLabel>
-              </IonSegmentButton>
-            </IonSegment>
-          </IonLabel>
-        </IonItem>
-
-        <IonItem button>
-          <CachedImage
-            src={bellIcon}
-            style={{ width: '24px', height: '24px', marginRight: '16px' }}
-            alt="notification icon"
-          />
-          <IonLabel>알림 설정</IonLabel>
-        </IonItem>
-
-        <IonItem button>
-          <CachedImage
-            src={lockIcon}
-            style={{ width: '24px', height: '24px', marginRight: '16px' }}
-            alt="security icon"
-          />
-          <IonLabel>보안 설정</IonLabel>
-        </IonItem>
-
-        {/* 배지 테스트 섹션 */}
-        <IonItem>
-          <IonLabel position="stacked">배지 숫자 테스트</IonLabel>
-          <div style={{ position: 'relative' }}>
-            <IonInput
-              type="number"
-              value={badgeNumber}
-              placeholder="숫자를 입력하세요"
-              onIonInput={(e) => setBadgeNumber(e.detail.value!)}
-              style={{ marginTop: '8px' }}
-            />
-          </div>
-        </IonItem>
-
-        <IonItem>
-          <IonButton
-            expand="block"
-            onClick={handleBadgeTest}
-            disabled={!badgeNumber.trim()}
-            style={{ width: '100%', height: '48px' }}
+      <IonContent style={{
+        '--padding-start': '21px',
+        '--padding-end': '21px',
+      }}>
+        <span style={{ fontSize: '17px', fontWeight: '600', marginTop: '28px', marginBottom: '12px', display: 'block' }}>테마</span>
+        <MenuItem title={'모드'} iconSrc={themeIcon} content={
+          <IonSegment
+            mode='ios'
+            value={themeMode}
+            onIonChange={e => handleThemeChange(e.detail.value as string)}
+            style={{
+              width: '210px',
+              '--background': 'transparent',
+              border: '1px solid var(--custom-border-color-100)'
+            }}
           >
-            webviewBadge 테스트 실행
-          </IonButton>
-        </IonItem>
-
-        {/* 토스트 테스트 섹션 */}
-        <IonItem>
-          <IonLabel position="stacked">토스트 메시지 테스트</IonLabel>
-          <div style={{ position: 'relative' }}>
-            <IonInput
-              type="text"
-              value={toastMessage}
-              placeholder="토스트 메시지를 입력하세요"
-              onIonInput={(e) => setToastMessage(e.detail.value!)}
-              style={{ marginTop: '8px' }}
-            />
-          </div>
-        </IonItem>
-
-        <IonItem>
-          <IonButton
-            expand="block"
-            onClick={handleToastTest}
-            disabled={!toastMessage.trim()}
-            style={{ width: '100%', height: '48px' }}
-            color="secondary"
-          >
-            webviewToast 테스트 실행
-          </IonButton>
-        </IonItem>
-
-        {/* 햅틱 테스트 섹션 */}
-        <IonItem>
-          <IonLabel>
-            <h3>햅틱 피드백 테스트</h3>
-            <p>다양한 햅틱 피드백을 테스트해보세요</p>
-          </IonLabel>
-        </IonItem>
-
-        <IonItem>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom: '100px' }}>
-            <IonButton
-              expand="block"
-              fill="outline"
-              onClick={() => handleHapticTest('lightImpact')}
-              color="success"
-              style={{ height: '48px' }}
-            >
-              Light Impact
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              fill="outline"
-              onClick={() => handleHapticTest('mediumImpact')}
-              color="warning"
-              style={{ height: '48px' }}
-            >
-              Medium Impact
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              fill="outline"
-              onClick={() => handleHapticTest('heavyImpact')}
-              color="danger"
-              style={{ height: '48px' }}
-            >
-              Heavy Impact
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              fill="outline"
-              onClick={() => handleHapticTest('selectionClick')}
-              color="medium"
-              style={{ height: '48px' }}
-            >
-              Selection Click
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              fill="outline"
-              onClick={() => handleHapticTest('vibrate')}
-              color="dark"
-              style={{ height: '48px' }}
-            >
-              Vibrate
-            </IonButton>
-          </div>
-        </IonItem>
-
-        {/* Dialog/Modal 테스트 섹션 */}
-        <IonItem>
-          <IonLabel>
-            <h3>Dialog & Modal 테스트</h3>
-            <p>다양한 Dialog와 Modal을 테스트해보세요</p>
-          </IonLabel>
-        </IonItem>
-
-        <IonItem>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', paddingBottom: '100px' }}>
-            <IonButton
-              expand="block"
-              onClick={() => setIsAlertOpen(true)}
-              color="primary"
-              style={{ height: '48px' }}
-            >
-              Alert Dialog 테스트
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              onClick={() => setIsActionSheetOpen(true)}
-              color="secondary"
-              style={{ height: '48px' }}
-            >
-              Action Sheet (Bottom Sheet) 테스트
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              onClick={() => setIsModalOpen(true)}
-              color="tertiary"
-              style={{ height: '48px' }}
-            >
-              Modal Dialog 테스트
-            </IonButton>
-            <IonInput
-              type="text"
-              value={toastMessage}
-              placeholder="토스트 메시지를 입력하세요"
-              onIonInput={(e) => setToastMessage(e.detail.value!)}
-              style={{ marginTop: '8px' }}
-            />
-          </div>
-        </IonItem>
-
-        {/* Alert Dialog with Input */}
-        <IonAlert
-          isOpen={isAlertOpen}
-          onDidDismiss={() => setIsAlertOpen(false)}
-          header="사용자 입력"
-          subHeader="Alert Dialog with Input 테스트"
-          message="이름을 입력해주세요:"
-          inputs={[
-            {
-              name: 'name',
-              type: 'text',
-              placeholder: '이름을 입력하세요',
-              attributes: {
-                maxlength: 20,
-              },
-            },
-            {
-              name: 'age',
-              type: 'number',
-              placeholder: '나이를 입력하세요',
-              min: 1,
-              max: 100,
-              attributes: {
-              },
-            },
-            {
-              name: 'email',
-              type: 'email',
-              placeholder: '이메일을 입력하세요',
-              attributes: {
-              },
-            }
-          ]}
-          buttons={[
-            {
-              text: '취소',
-              role: 'cancel',
-              handler: () => {
-                webviewHaptic('lightImpact');
-              }
-            },
-            {
-              text: '확인',
-              handler: (alertData) => {
-                webviewHaptic('mediumImpact');
-                const { name, age, email } = alertData;
-                webviewToast(`입력된 정보: ${name}, ${age}세, ${email}`);
-              }
-            }
-          ]}
-        />
-
-        {/* Action Sheet (Bottom Sheet) with Swipe to Dismiss */}
-        <IonActionSheet
-          isOpen={isActionSheetOpen}
-          onDidDismiss={() => setIsActionSheetOpen(false)}
-          header="액션 선택"
-          subHeader="아래로 드래그하거나 옵션을 선택하세요"
-          showBackdrop={true}
-          backdropDismiss={true}
-          keyboardClose={true}
-          animated={true}
-          buttons={[
-            {
-              text: '📄 문서 보기',
-              icon: 'document-text-outline',
-              handler: () => {
-                webviewHaptic('selectionClick');
-                webviewToast('문서 보기를 선택했습니다');
-              }
-            },
-            {
-              text: '📷 사진 촬영',
-              icon: 'camera-outline',
-              handler: () => {
-                webviewHaptic('selectionClick');
-                webviewToast('사진 촬영을 선택했습니다');
-              }
-            },
-            {
-              text: '📁 파일 업로드',
-              icon: 'cloud-upload-outline',
-              handler: () => {
-                webviewHaptic('selectionClick');
-                webviewToast('파일 업로드를 선택했습니다');
-              }
-            },
-            {
-              text: '🔗 링크 공유',
-              icon: 'share-outline',
-              handler: () => {
-                webviewHaptic('selectionClick');
-                webviewToast('링크 공유를 선택했습니다');
-              }
-            },
-            {
-              text: '⭐ 즐겨찾기 추가',
-              icon: 'star-outline',
-              handler: () => {
-                webviewHaptic('mediumImpact');
-                webviewToast('즐겨찾기에 추가했습니다');
-              }
-            },
-            {
-              text: '🗑️ 삭제',
-              icon: 'trash-outline',
-              role: 'destructive',
-              handler: () => {
-                webviewHaptic('heavyImpact');
-                webviewToast('삭제 옵션을 선택했습니다');
-              }
-            },
-            {
-              text: '취소',
-              role: 'cancel',
-              handler: () => {
-                webviewHaptic('lightImpact');
-              }
-            }
-          ]}
-        />
-
-        {/* Modal Dialog */}
-        <IonModal isOpen={isModalOpen} onDidDismiss={() => setIsModalOpen(false)}>
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>Modal Dialog</IonTitle>
-              <IonButtons slot="end">
-                <IonButton onClick={() => setIsModalOpen(false)}>닫기</IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent>
-            <div style={{ padding: '20px' }}>
-              <h2>Modal Dialog 테스트</h2>
-              <p>이것은 전체 화면 Modal입니다.</p>
-              <p>렌더링 성능과 애니메이션을 확인해보세요.</p>
-
-              <IonList>
-                <IonItem>
-                  <IonLabel>Modal 내부 리스트 아이템 1</IonLabel>
-                </IonItem>
-                <IonItem>
-                  <IonLabel>Modal 내부 리스트 아이템 2</IonLabel>
-                </IonItem>
-                <IonItem>
-                  <IonLabel>Modal 내부 리스트 아이템 3</IonLabel>
-                </IonItem>
-              </IonList>
-
-              <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                <IonButton
-                  expand="block"
-                  onClick={() => {
-                    webviewHaptic('mediumImpact');
-                    webviewToast('Modal에서 액션을 실행했습니다!');
-                  }}
-                >
-                  액션 실행
-                </IonButton>
-                <IonButton
-                  expand="block"
-                  fill="outline"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  모달 닫기
-                </IonButton>
-              </div>
-            </div>
-          </IonContent>
-        </IonModal>
+            <IonSegmentButton value="light" style={{
+              '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
+              '--border-color': 'var(--custom-border-color-100)'
+            }}>
+              <IonIcon src={sunnyOutline} size='small'></IonIcon>
+            </IonSegmentButton>
+            <IonSegmentButton value="system" style={{
+              '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
+              '--border-color': 'var(--custom-border-color-100)'
+            }}>
+              <IonIcon src={contrastOutline} size='small'></IonIcon>
+            </IonSegmentButton>
+            <IonSegmentButton value="dark" style={{
+              '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
+              '--border-color': 'var(--custom-border-color-100)'
+            }}>
+              <IonIcon src={moonOutline} size='small'></IonIcon>
+            </IonSegmentButton>
+          </IonSegment>
+        } />
+        <span style={{ fontSize: '17px', fontWeight: '600', marginTop: '36px', marginBottom: '12px', display: 'block' }}>푸시알림</span>
+        <MenuItem title={'개인알림'} iconSrc={bellIcon} content={
+          <IonToggle />
+        } />
+        <MenuItem title={'공지알림'} iconSrc={bellIcon} content={
+          <IonToggle />
+        } />
       </IonContent>
-    </IonPage>
+    </IonPage >
+  );
+};
+
+interface MenuItemProps {
+  id?: string;
+  iconSrc?: string;
+  title: string;
+  onClick?: () => void;
+  routerLink?: string;
+  content?: ReactNode;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ id, iconSrc, title, onClick, routerLink, content }) => {
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
+  const iconContainerStyle = {
+    backgroundColor: 'var(--ion-background-color2)',
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '12px',
+    marginRight: '12px'
+  };
+
+  const titleStyle = {
+    fontSize: '15px',
+    fontWeight: '500'
+  };
+
+  return (
+    <div
+      style={{
+        padding: '12px 0',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        {iconSrc && (
+          <div style={iconContainerStyle}>
+            <CachedImage src={iconSrc} width={'22px'} />
+          </div>
+        )}
+        <span style={titleStyle}>{title}</span>
+      </div>
+      {content}
+    </div>
   );
 };
 

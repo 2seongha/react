@@ -3,20 +3,8 @@ import {
   IonPage,
   IonList,
   IonItem,
-  IonIcon,
-  IonLabel,
-  useIonViewWillEnter,
-  useIonRouter
 } from '@ionic/react';
-import {
-  notificationsOutline,
-  logOutOutline,
-  settingsOutline,
-  informationCircleOutline,
-  shieldOutline,
-  documentTextOutline
-} from 'ionicons/icons';
-import React, { useCallback } from 'react';
+import React from 'react';
 import AppBar from '../components/AppBar';
 import BottomTabBar from '../components/BottomNavigation';
 import { webviewLogout } from '../webview';
@@ -42,7 +30,6 @@ const More: React.FC = () => {
           <MenuItem
             iconSrc={informationIcon}
             title="버전"
-            routerLink="/termsOfUse"
           />
           <MenuItem
             iconSrc={clipboardIcon}
@@ -109,7 +96,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ id, iconSrc, title, onClick, router
     <IonItem
       id={id}
       button
-      mode='ios'
+      mode='md'
       routerLink={routerLink}
       onClick={handleClick}
       style={{

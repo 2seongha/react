@@ -89,13 +89,13 @@ const Notifications: React.FC = () => {
               disabled={useMemo(() => (notifications?.filter(notification => notification.READ_YN === 'N').length ?? 0) === 0, [notifications])}
               mode='md'
               fill='clear'
-              className="filter-button">모두 읽음</IonButton>
+              className="filter-button">모두읽음</IonButton>
             <IonButton
               disabled={useMemo(() => (notifications?.length ?? 0) === 0, [notifications])}
               id='all-delete-trigger'
               mode='md'
               fill='clear'
-              className="filter-button">모두 삭제</IonButton>
+              className="filter-button">모두삭제</IonButton>
           </div>
         </div>
       </IonHeader>
@@ -114,22 +114,21 @@ const Notifications: React.FC = () => {
             : (!filteredNotifications || filteredNotifications.length === 0) ?
               <NoData />
               :
-              <IonList>
-                <AnimatePresence>
-                  {filteredNotifications.map((notification: any) => (
-                    <NotificationItem
-                      key={notification.NOTIFY_NO}
-                      notification={notification}
-                      onDelete={handleDeleteNotification}
-                    />
-                  ))}
-                </AnimatePresence>
-              </IonList>
+              <AnimatePresence>
+                {filteredNotifications.map((notification: any) => (
+                  <NotificationItem
+                    key={notification.NOTIFY_NO}
+                    notification={notification}
+                    onDelete={handleDeleteNotification}
+                  />
+                ))}
+              </AnimatePresence>
         }
         <ScrollToTopFab
           isTop={isTop}
           onScrollToTop={scrollToTop}
           scrollCallbackRef={scrollCallbackRef}
+          safeAreaBottom={false}
         />
         <CustomDialog
           trigger="all-delete-trigger"
