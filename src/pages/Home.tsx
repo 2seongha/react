@@ -27,6 +27,7 @@ import { banknotesGlassIcon, creditcardGlassIcon, personIcon, searchIcon } from 
 import { useShallow } from 'zustand/shallow';
 import { webviewHaptic } from '../webview';
 import CachedImage from '../components/CachedImage';
+import _ from 'lodash';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
@@ -54,9 +55,9 @@ const Home: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        {/* <div>
+        <div style={{ marginTop: '12px' }}>
           <NoticeCard />
-        </div> */}
+        </div>
         <div style={{ marginTop: '12px' }}>
           <WelcomeCard />
         </div>
@@ -250,6 +251,7 @@ const TodoSummaryCard: React.FC = () => {
   const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
+  const [selectedArea, setSelectedArea] = useState<AreaModel | null>(null);
 
   return (
     <IonCard className='home-card todo-summary-card'>
@@ -261,37 +263,46 @@ const TodoSummaryCard: React.FC = () => {
         />
         <span>미결함</span>
       </div>
-      <GroupButton />
-      {
-        approvals instanceof Error ?
-          <div className='todo-summary-no-data'>
-            <CachedImage
-              src={searchIcon}
-              style={{ width: '48px', height: '48px' }}
-              alt="search icon"
-            />
-            <span>예상치 못한 오류가 발생했습니다.</span>
-          </div>
-          :
-          todoSummary?.length == 0 ?
+      <GroupButton onSelectionChange={(selectedItem) => {
+        setSelectedArea(selectedItem);
+      }} />
+      <div style={{
+        maxHeight: '150px',
+        overflow: 'auto',
+      }} onTouchMove={(e)=>e.stopPropagation()}>
+        {
+          approvals instanceof Error ?
             <div className='todo-summary-no-data'>
               <CachedImage
                 src={searchIcon}
                 style={{ width: '48px', height: '48px' }}
                 alt="search icon"
               />
-              <span>미결 항목이 없습니다.</span>
-            </div> :
-            Array.from({ length: !approvals?.LIST ? 3 : Math.min(approvals?.LIST.length, 3) }).map((_, index) => (
-              <ApprovalItem key={index} approvalItem={approvals?.LIST?.[index]} isLoading={!approvals?.LIST} index={index} />
-            ))
-      }
+              <span>예상치 못한 오류가 발생했습니다.</span>
+            </div>
+            :
+            approvals?.LIST?.length === 0 ?
+              <div className='todo-summary-no-data'>
+                <CachedImage
+                  src={searchIcon}
+                  style={{ width: '48px', height: '48px' }}
+                  alt="search icon"
+                />
+                <span>미결 항목이 없습니다.</span>
+              </div> :
+              Array.from({ length: approvals?.LIST ? approvals?.LIST.length : 3 }).map((_, index) => (
+                <ApprovalItem key={index} approvalItem={approvals?.LIST?.[index]} isLoading={!approvals?.LIST} index={index} onClick={() => {
+                  router.push(`/detail/${approvals?.LIST?.[index].FLOWNO}/${selectedArea?.P_AREA_CODE}/${selectedArea?.FLOWCODE}/${selectedArea?.P_AREA_CODE_TXT}/${selectedArea?.O_LTEXT}`, 'forward', 'push');
+                }} />
+              ))
+        }
+      </div>
       <IonButton
         color='medium'
         className='menu-expand-button'
         fill="clear"
         onClick={() => {
-          router.push(`/approval/${approvals?.P_AREA_CODE}/${approvals?.AREA_CODE}/${approvals?.P_AREA_CODE_TXT}/${approvals?.AREA_CODE_TXT}`);
+          router.push(`/approval/${selectedArea?.P_AREA_CODE}/${selectedArea?.FLOWCODE}/${selectedArea?.P_AREA_CODE_TXT}/${selectedArea?.O_LTEXT}`);
         }}
         disabled={!approvals || !todoSummary || !todoSummary.length}
       >
@@ -306,11 +317,10 @@ interface ApprovalItemProps {
   approvalItem?: any;
   isLoading?: boolean;
   index: number;
+  onClick: () => void;
 }
 
-const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = false, index }) => {
-  const router = useIonRouter();
-
+const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = false, index, onClick }) => {
   if (isLoading || !approvalItem) {
     return (
       <div className='todo-summary-item-skeleton '>
@@ -320,18 +330,15 @@ const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = f
   }
 
   return (
-    <IonItem button className='todo-summary-ion-item' onClick={() => {
-      router.push(`/detail/${approvalItem.FLOWNO}`, 'forward', 'push');
-
-    }}>
+    <IonItem button className='todo-summary-ion-item' onClick={onClick}>
       <div className='todo-summary-item-wrapper'>
         <span className='todo-summary-index'>{`${index + 1}.`}</span>
         <div className='todo-summary-content'>
-          <span className='todo-summary-item-title'>{approvalItem.TITLE}</span>
+          <span className='todo-summary-item-title'>{approvalItem.APPR_TITLE}</span>
           <div className='todo-summary-item-sub-wrapper'>
             <span>{approvalItem.CREATE_DATE + '・'}</span>
             <IonIcon src={person} ></IonIcon>
-            <span>{approvalItem.NAME}</span>
+            <span>{approvalItem.CREATOR_NAME}</span>
           </div>
         </div>
       </div>
@@ -342,10 +349,10 @@ const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = f
 const StartButtons: React.FC = () => {
 
   return (
-    <div style={{ marginTop: '28px' }}>
+    <div style={{ marginTop: '32px' }}>
       <span style={{ fontSize: '17px', fontWeight: '600', marginLeft: '8px' }}>업무 시작</span>
       <div style={{
-        marginTop: '8px',
+        marginTop: '12px',
         display: 'flex',
         gap: '12px'
       }}>

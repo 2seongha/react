@@ -9,7 +9,7 @@ import {
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
-import { checkmarkCircle, checkmarkCircleOutline, close } from "ionicons/icons";
+import { checkmarkCircle, close } from "ionicons/icons";
 import "./ApprovalModal.css";
 import AnimatedIcon from "./AnimatedIcon";
 import { FlipWords } from "./FlipWords";
@@ -254,7 +254,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                       textOverflow: 'ellipsis',
                       maxWidth: '100%', // 말줄임표가 보일 수 있도록 너비 제한 필요
                     }}>
-                      {item.APPR_TITLE ?? item.BKTXT}
+                      {item.APPR_TITLE ? item.APPR_TITLE : (item.TITLE || item.FLD02)}
                     </span>
                     {status && status !== 'success' && <span
                       style={{

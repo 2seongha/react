@@ -220,3 +220,25 @@ ion-refresher.refresher-native .refresher-refreshing-icon {
 ion-menu-button.ion-color-medium {
   --ion-color-base: rgba(100, 109, 123, .48) !important;
 }
+
+/* Ion Modal auto Height */
+ion-modal.auto-height {
+  --height: auto;
+  align-items: end;
+}
+
+ion-modal.auto-height::part(content) {
+  position: relative;
+  display: block;
+  contain: content;
+}
+
+ion-modal.auto-height .ion-page {
+  overflow: visible;
+}
+
+ion-modal.auto-height .inner-content {
+  max-height: 30vh;
+  overflow: auto;
+  touch-action: none;
+}

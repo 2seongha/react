@@ -29,25 +29,25 @@ export interface UserModel {
   BUKRS?: string;
   LOGIN_ID?: string;
   NAME?: string;
-  PERNR?: string;
+  // PERNR?: string;
   ORGEH?: string;
   ORGTX?: string;
   RANK?: string;
   RANK_NAME?: string;
-  POSITIONN?: string;
-  POSITIONN_NAME?: string;
-  KOSTL?: string;
-  KOSTL_NAME?: string;
-  LAND1?: string;
+  // POSITIONN?: string;
+  // POSITIONN_NAME?: string;
+  // KOSTL?: string;
+  // KOSTL_NAME?: string;
+  // LAND1?: string;
   MAIL?: string;
   PHONE?: string;
-  PASS?: string;
-  PASS01?: string;
-  PASS02?: string;
-  PASS03?: string;
-  PASS04?: string;
-  PASS05?: string;
-  PASS06?: string;
+  // PASS?: string;
+  // PASS01?: string;
+  // PASS02?: string;
+  // PASS03?: string;
+  // PASS04?: string;
+  // PASS05?: string;
+  // PASS06?: string;
 }
 
 export interface NotificationModel {

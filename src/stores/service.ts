@@ -30,7 +30,7 @@ export async function fetchAreas(P_AREA_CODE: string): Promise<AreaModel[]> {
   try {
     const user = useAppStore.getState().user;
     // const LOGIN_ID = user?.LOGIN_ID;
-    const LOGIN_ID = user?.MAIL;
+    const LOGIN_ID = user?.LOGIN_ID;
     const BUKRS = user?.BUKRS;
 
     const api = createApiInstance();

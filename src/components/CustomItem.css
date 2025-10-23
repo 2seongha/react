@@ -20,6 +20,7 @@
   position: relative;
   padding: 16px 20px 12px 20px;
   min-height: 48px;
+  width: 100%;
 }
 
 .custom-item-header-icon {
@@ -32,6 +33,7 @@
   top: 0;
   width: 56px;
   height: 56px;
+  z-index: 2;
 }
 
 .custom-item-header>ion-checkbox {

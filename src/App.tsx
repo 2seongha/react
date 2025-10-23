@@ -100,7 +100,7 @@ const App: React.FC = () => {
           <Route path="/app/more" component={More} exact />
           <Route path="/flowList/:AREA_CODE" component={FlowList} exact />
           <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
-          <Route path="/detail/:FLOWNO" component={Detail} exact />
+          <Route path="/detail/:FLOWNO/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Detail} exact />
           <Route path="/notice" component={Notice} exact />
           <Route path="/settings" component={Settings} exact />
           <Route path="/myPage" component={MyPage} exact />

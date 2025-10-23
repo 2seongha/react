@@ -17,8 +17,9 @@ import {
   IonItem,
   IonCheckbox,
   useIonRouter,
+  IonFooter,
 } from "@ionic/react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
 import { useShallow } from "zustand/shallow";
 import "swiper/css";
 import AppBar from "../components/AppBar";
@@ -27,7 +28,7 @@ import "./Detail.css";
 import { getFlowIcon } from "../utils";
 import { useParams } from "react-router-dom";
 import useAppStore from "../stores/appStore";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import _ from "lodash";
 import Timeline from "@mui/lab/Timeline";
 import TimelineItem from "@mui/lab/TimelineItem";
@@ -46,8 +47,9 @@ import {
   PersonOutline,
 } from "@mui/icons-material";
 import ApprovalModal from "../components/ApprovalModal";
-import { chevronCollapse, chevronExpand, person } from "ionicons/icons";
+import { chevronCollapse, chevronExpand, chevronForward, person } from "ionicons/icons";
 import { webviewToast } from "../webview";
+import SubModal from "../components/SubModal";
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -56,12 +58,16 @@ const Detail: React.FC = () => {
   const [activeTab, setActiveTab] = useState("tab1");
   const [selectedProfitData, setSelectedProfitData] = useState<any>(null);
   const [selectedAttendeeData, setSelectedAttendeeData] = useState<any>(null);
-  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  const [selectedSubData, setSelectedSubData] = useState<any>(null);
+
+  // framer motion values - 스크롤 값 직접 사용
+  const scrollY = useMotionValue(0);
 
   // Refs
   const swiperRef = useRef<SwiperClass | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const headerHeightRef = useRef<number>(0);
+  const outerScrollRef = useRef<HTMLDivElement | null>(null);
   const router = useIonRouter();
 
   useLayoutEffect(() => {
@@ -85,17 +91,50 @@ const Detail: React.FC = () => {
     document.body.removeChild(tempElement);
   }, []);
 
+  // IntersectionObserver를 사용한 Swiper 컨테이너 가시 영역 감지
+  // useEffect(() => {
+  //   if (!swiperContainerRef.current) return;
+
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       entries.forEach((entry) => {
+  //         if (entry.isIntersecting) {
+  //           const rect = entry.boundingClientRect;
+  //           const visibleTop = Math.max(0, rect.top);
+  //           const visibleBottom = Math.min(window.innerHeight, rect.bottom);
+  //           const currentVisibleHeight = Math.max(0, visibleBottom - visibleTop);
+
+  //           setVisibleHeight(currentVisibleHeight);
+  //           console.log('Visible height:', currentVisibleHeight);
+  //         }
+  //       });
+  //     },
+  //     {
+  //       root: null, // viewport를 root로 사용
+  //       rootMargin: '0px',
+  //       threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] // 세밀한 감지를 위해 여러 threshold 설정
+  //     }
+  //   );
+
+  //   observer.observe(swiperContainerRef.current);
+  //   return () => {
+  //     observer.disconnect();
+  //   };
+  // }, []);
+
   // Constants
+  let { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
   const { FLOWNO } = useParams<{ FLOWNO: string }>();
-  const P_AREA_CODE = useAppStore(
+  P_AREA_CODE = useAppStore(
     useShallow((state) => state.approvals?.P_AREA_CODE) || null
-  );
-  const P_AREA_CODE_TXT = useAppStore(
+  ) || P_AREA_CODE;
+  P_AREA_CODE_TXT = useAppStore(
     useShallow((state) => state.approvals?.P_AREA_CODE_TXT) || null
-  );
-  const AREA_CODE_TXT = useAppStore(
-    useShallow((state) => state.approvals?.AREA_CODE_TXT) || null
-  );
+  ) || P_AREA_CODE_TXT;
+  AREA_CODE_TXT = useAppStore(
+    useShallow((state) => state.approvals?.FLOWCODE_TXT) || null
+  ) || AREA_CODE_TXT;
+
   const approval = useAppStore(
     useShallow(
       (state) =>
@@ -104,8 +143,6 @@ const Detail: React.FC = () => {
         ) || null
     )
   );
-
-  if(approval) approval.IS_SEPERATE = true;
 
   if (!approval) {
     setTimeout(() => {
@@ -123,6 +160,7 @@ const Detail: React.FC = () => {
     .map(([_, value]) => value)
     .value();
 
+
   const icon = useMemo(() => getFlowIcon(P_AREA_CODE ?? ""), []);
 
   // 슬라이드 변경 핸들러
@@ -132,15 +170,32 @@ const Detail: React.FC = () => {
     setActiveTab(newTab);
   }, []);
 
-  // 승인/반려 핸들러
-  const handleApproval = useCallback((comment: string) => {
-    console.log("승인 처리:", comment);
-    // 여기에 승인 API 호출 로직 추가
-  }, []);
+  // 스크롤 핸들러 - 스크롤 값 직접 전달
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const scrollTop = event.currentTarget.scrollTop;
+    scrollY.set(scrollTop); // 스크롤 값 직접 설정
+  }, [scrollY]);
 
-  const handleReject = useCallback((comment: string) => {
-    console.log("반려 처리:", comment);
-    // 여기에 반려 API 호출 로직 추가
+  // SwiperSlide 내부 스크롤 핸들러 - 위로 스크롤시 outer scroll을 헤더 높이만큼 스크롤
+
+  const prevScrollTopRef = useRef(0);
+
+  const handleSwiperSlideScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const element = event.currentTarget;
+    const currentScrollTop = element.scrollTop;
+    const prevScrollTop = prevScrollTopRef.current;
+
+    // 스크롤이 위로 올라가고 있고, 현재 스크롤 위치가 0에 가까울 때 (예: 10px 이내)
+    if (currentScrollTop > prevScrollTop) {
+      if (outerScrollRef.current) {
+        outerScrollRef.current.scrollTo({
+          top: headerHeightRef.current,
+          behavior: 'auto'
+        });
+      }
+    }
+
+    prevScrollTopRef.current = currentScrollTop;
   }, []);
 
   // 아이템 선택 상태 관리
@@ -179,20 +234,23 @@ const Detail: React.FC = () => {
     }
   }, [isAllSelected]);
 
+  const opacity = useTransform(scrollY, [0, headerHeightRef.current / 2], [1, 0]);
+  const opacityRev = useTransform(scrollY, [headerHeightRef.current / 2, headerHeightRef.current], [0, 1]);
+  const scale = useTransform(scrollY, [0, headerHeightRef.current], [1, 0.8]);
+
   return (
     <IonPage className="detail">
       <AppBar
         showBackButton={true}
         titleCenter={false}
         title={
-          <div
+          <motion.div
             style={{
               width: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "start",
-              opacity: isHeaderCollapsed ? 1 : 0,
-              transition: "opacity 0.3s",
+              opacity: opacityRev,
               paddingRight: "52px",
             }}
           >
@@ -212,41 +270,38 @@ const Detail: React.FC = () => {
             >
               {P_AREA_CODE_TXT}
             </span>
-          </div>
+          </motion.div>
         }
-        customEndButtons={
-          <IonButton
-            mode="md"
-            shape="round"
-            color={"medium"}
-            className="app-bar-button"
-            onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
-          >
-            <IonIcon
-              icon={isHeaderCollapsed ? chevronExpand : chevronCollapse}
-            />
-          </IonButton>
-        }
+      // customEndButtons={
+      //   <IonButton
+      //     mode="md"
+      //     shape="round"
+      //     color={"medium"}
+      //     className="app-bar-button"
+      //     onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
+      //   >
+      //     <IonIcon
+      //       icon={isHeaderCollapsed ? chevronExpand : chevronCollapse}
+      //     />
+      //   </IonButton>
+      // }
       />
       <IonContent scrollEvents={false} scrollY={false} scrollX={false}>
         <div
+          ref={outerScrollRef}
+          onScroll={handleScroll}
           style={{
-            display: "flex",
-            flexDirection: "column",
+            // display: "flex",
+            // flexDirection: "column",
             height: "100%",
+            scrollSnapType: 'y mandatory',
+            overflow: 'auto',
             paddingBottom: "var(--ion-safe-area-bottom)",
             backgroundColor: "var(--ion-background-color)",
           }}
         >
           <motion.div
             ref={headerRef}
-            animate={{
-              opacity: isHeaderCollapsed ? 0 : 1,
-              scale: isHeaderCollapsed ? 0.6 : 1,
-            }}
-            transition={{
-              duration: 0.3,
-            }}
             style={{
               position: "absolute",
               width: "100%",
@@ -258,7 +313,9 @@ const Detail: React.FC = () => {
               pointerEvents: "none",
               overflow: "hidden",
               zIndex: 0,
-              willChange: 'opacity scale'
+              opacity,
+              scale,
+              // y: headerY, // 스크롤한 만큼 위로 이동
             }}
           >
             {
@@ -337,7 +394,7 @@ const Detail: React.FC = () => {
                           fontWeight: "500",
                         }}
                       >
-                        {approval?.NAME}
+                        {approval.CREATOR_NAME}
                       </span>
                     </div>
                     <span
@@ -367,19 +424,21 @@ const Detail: React.FC = () => {
               </>
             }
           </motion.div>
-          <motion.div
-            animate={{
-              height: isHeaderCollapsed ? 0 : headerHeightRef.current,
-            }}
+          <div
             style={{
               backgroundColor: "var(--ion-background-color2)",
-              height: headerHeightRef.current,
-              willChange: 'height'
+              height: headerHeightRef.current, // 스크롤한 만큼 높이 감소
+              willChange: 'height',
+              scrollSnapAlign: 'start'
             }}
-            transition={{
-              duration: 0.3,
-            }}
-          ></motion.div>
+          ></div>
+          <div
+            className="grab-indicator"
+            style={{
+              scrollSnapAlign: 'start'
+            }}>
+            <span></span>
+          </div>
           <IonSegment
             className="segment"
             value={activeTab}
@@ -417,9 +476,10 @@ const Detail: React.FC = () => {
           <Swiper
             className="swiper"
             style={{
-              flex: 1,
+              // flex: 1,
+              height: `calc(100vh - 96px - 84px - 28px)`,
               width: "100%",
-              backgroundColor: "var(--ion-background-color)"
+              backgroundColor: "var(--ion-background-color)",
             }}
             onSwiper={(swiper) => (swiperRef.current = swiper)}
             onSlideChange={handleSlideChange}
@@ -430,6 +490,7 @@ const Detail: React.FC = () => {
                 overflow: "auto",
                 padding: "0px 21px 0 21px",
               }}
+              onScroll={handleSwiperSlideScroll}
             >
               {(P_AREA_CODE === 'TODO' && approval.IS_SEPERATE) && <div style={{
                 backgroundColor: "var(--ion-background-color)",
@@ -459,13 +520,14 @@ const Detail: React.FC = () => {
                   <span style={{ fontSize: '12px' }}>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
                 </IonItem>
               </div>}
-              {approval.SUB.map((sub: any, index: number) => (
+              {[...approval.SUB,...approval.SUB,...approval.SUB,...approval.SUB].filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
                 <SubItem
                   style={{ marginTop: index === 0 ? '12px' : 0 }}
-                  key={sub.FLOWNO + sub.FLOWCNT + index}
+                  key={item.FLOWNO + item.FLOWCNT + index}
                   selectable={P_AREA_CODE === "TODO" && approval.IS_SEPERATE}
-                  sub={sub}
-                  isSelected={selectedItems.has(sub.FLOWCNT)}
+                  item={item}
+                  sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.FLOWCNT === sub.FLOWCNT)}
+                  isSelected={selectedItems.has(item.FLOWCNT)}
                   onSelectionChange={handleItemSelection}
                   onProfitDialogOpen={(profitData) => {
                     setSelectedProfitData(profitData);
@@ -475,6 +537,10 @@ const Detail: React.FC = () => {
                     setSelectedAttendeeData(attendeeData);
                     document.getElementById("attendee-dialog-trigger")?.click();
                   }}
+                  onSubModalOpen={(subs, index) => {
+                    setSelectedSubData({ modalTitle: item.TITLE || item.FLD02, subs: subs, initialIndex: index });
+                    document.getElementById("sub-modal-trigger")?.click();
+                  }}
                 />
               ))}
             </SwiperSlide>
@@ -482,6 +548,7 @@ const Detail: React.FC = () => {
               style={{
                 overflow: "auto",
               }}
+              onScroll={handleSwiperSlideScroll}
             >
               <Timeline
                 position="right"
@@ -499,14 +566,20 @@ const Detail: React.FC = () => {
                   },
                 }}
               >
-                {approval.LISTAPPRLINE.map((apprLine: any, index: number) => {
+                {approval.APPRLINE.map((apprLine: any, index: number) => {
                   const isStarter = apprLine.WFIT_TYPE === "ST";
-                  const isLast = index === approval.LISTAPPRLINE.length - 1;
+                  const isRef = apprLine.WFIT_TYPE === "D"; //참조
+                  const isLast = index === approval.APPRLINE.length - 1;
                   const text = approval.TEXT.find(
                     (text: any) => text.FLOWIT === apprLine.APPR_CNT
                   )?.LTEXT;
 
                   let MuiIcon, color, borderColor, connectorColor;
+
+                  if (isRef) {
+                    apprLine.WFSTAT = approval.APPRLINE.find((p: any) => (p.APPR_CNT === apprLine.APPR_CNT) && (p.WFIT_TYPE !== 'D'))?.WFSTAT;
+                  }
+
                   switch (apprLine.WFSTAT) {
                     case "":
                       MuiIcon = PersonOutline;
@@ -553,6 +626,10 @@ const Detail: React.FC = () => {
                     connectorColor = "var(--ion-color-primary)";
                   }
 
+                  if (isRef) {
+                    connectorColor = "var(--ion-color-primary)";
+                  }
+
                   return (
                     <TimelineItem key={`time-line-item-${index}`}>
                       <TimelineSeparator>
@@ -572,7 +649,7 @@ const Detail: React.FC = () => {
                           style={{
                             fontSize: "12px",
                             marginBottom: "8px",
-                            color: color,
+                            color: borderColor,
                           }}
                         >
                           {apprLine.APPR_CNT}
@@ -599,93 +676,62 @@ const Detail: React.FC = () => {
                 overflow: "auto",
                 padding: "12px 21px 0 21px",
               }}
+              onScroll={handleSwiperSlideScroll}
             >
               {approval.SUB.map((sub: any, index: number) => (
-                <SubItem
-                  key={sub.FLOWNO + sub.FLOWCNT + index}
-                  selectable={P_AREA_CODE === "TODO"}
-                  sub={sub}
-                  isSelected={false}
-                  onSelectionChange={() => { }}
-                  onProfitDialogOpen={(profitData) => {
-                    setSelectedProfitData(profitData);
-                    // 숨김 버튼을 클릭해서 Dialog 열기
-                    document.getElementById("profit-dialog-trigger")?.click();
-                  }}
-                  onAttendeeDialogOpen={(attendeeData) => {
-                    setSelectedAttendeeData(attendeeData);
-                    // 숨김 버튼을 클릭해서 Dialog 열기
-                    document.getElementById("attendee-dialog-trigger")?.click();
-                  }}
-                />
+                <></>
+                // <SubItem
+                //   key={sub.FLOWNO + sub.FLOWCNT + index}
+                //   selectable={P_AREA_CODE === "TODO"}
+                //   sub={sub}
+                //   isSelected={false}
+                //   onSelectionChange={() => { }}
+                //   onProfitDialogOpen={(profitData) => {
+                //     setSelectedProfitData(profitData);
+                //     // 숨김 버튼을 클릭해서 Dialog 열기
+                //     document.getElementById("profit-dialog-trigger")?.click();
+                //   }}
+                //   onAttendeeDialogOpen={(attendeeData) => {
+                //     setSelectedAttendeeData(attendeeData);
+                //     // 숨김 버튼을 클릭해서 Dialog 열기
+                //     document.getElementById("attendee-dialog-trigger")?.click();
+                //   }}
+                // />
               ))}
             </SwiperSlide>
           </Swiper>
-          {P_AREA_CODE === "TODO" && (
-            <div
-              style={{
-                height: "83px",
-                width: "100%",
-                borderTop: "1px solid var(--custom-border-color-100)",
-                borderRadius: "16px 16px 0 0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "12px 21px",
-                gap: "12px",
-              }}
-            >
-              <IonButton
-                mode="md"
-                color="light"
-                style={{
-                  flex: 1,
-                  height: "100%",
-                  fontSize: "18px",
-                  fontWeight: "600",
-                }}
-                id="reject-modal"
-                disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
-              >
-                <span>반려하기</span>
-              </IonButton>
-              <IonButton
-                mode="md"
-                color="primary"
-                style={{
-                  flex: 1,
-                  height: "100%",
-                  fontSize: "18px",
-                  fontWeight: "600",
-                }}
-                id="approve-modal"
-                disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
-              >
-                <span>승인하기</span>
-              </IonButton>
-            </div>
-          )}
         </div>
+        {<SubModal
+          trigger="sub-modal-trigger"
+          modalTitle={selectedSubData?.modalTitle}
+          subs={selectedSubData?.subs}
+          initialIndex={selectedSubData?.initialIndex}
+        />}
         {/* 승인 Modal */}
         {P_AREA_CODE === 'TODO' && <ApprovalModal
           apprTitle={AREA_CODE_TXT}
-          title="분리 승인"
+          title={approval.IS_SEPERATE ? "분리 승인" : "승인"}
           buttonText="승인하기"
           buttonColor="primary"
           required={false}
           trigger="approve-modal"
-          selectedItems={approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT))}
+          selectedItems={approval.IS_SEPERATE ? approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT) && sub.CHECK === 'I') : [approval]}
         />}
         {/* 반려 Modal */}
         {P_AREA_CODE === 'TODO' && <ApprovalModal
           apprTitle={AREA_CODE_TXT}
-          title="분리 반려"
+          title={approval.IS_SEPERATE ? "분리 반려" : "반려"}
           buttonText="반려하기"
           buttonColor="danger"
           required={true}
           trigger="reject-modal"
-          selectedItems={approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT))}
+          selectedItems={approval.IS_SEPERATE ? approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT) && sub.CHECK === 'I') : [approval]}
         />}
+        {/* Sub Modal Trigger Button (숨김) */}
+        <IonButton
+          id="sub-modal-trigger"
+          style={{ display: "none" }}
+        ></IonButton>
         {/* 수익성 Dialog Trigger Button (숨김) */}
         <IonButton
           id="profit-dialog-trigger"
@@ -839,6 +885,55 @@ const Detail: React.FC = () => {
           singleButtonColor="light"
         />
       </IonContent>
+      <IonFooter style={{
+        boxShadow: 'none',
+        backgroundColor: 'var(--ion-background-color)'
+      }}>
+        {P_AREA_CODE === "TODO" && (
+          <div
+            style={{
+              height: "83px",
+              width: "100%",
+              borderTop: "1px solid var(--custom-border-color-100)",
+              borderRadius: "16px 16px 0 0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "12px 21px",
+              gap: "12px",
+            }}
+          >
+            <IonButton
+              mode="md"
+              color="light"
+              style={{
+                flex: 1,
+                height: "100%",
+                fontSize: "18px",
+                fontWeight: "600",
+              }}
+              id="reject-modal"
+              disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
+            >
+              <span>반려하기</span>
+            </IonButton>
+            <IonButton
+              mode="md"
+              color="primary"
+              style={{
+                flex: 1,
+                height: "100%",
+                fontSize: "18px",
+                fontWeight: "600",
+              }}
+              id="approve-modal"
+              disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
+            >
+              <span>승인하기</span>
+            </IonButton>
+          </div>
+        )}
+      </IonFooter>
     </IonPage>
   );
 };
@@ -846,28 +941,32 @@ const Detail: React.FC = () => {
 export default Detail;
 
 interface SubProps {
-  sub: any;
+  item: any;
+  sub?: any;
   selectable: boolean | undefined;
   isSelected: boolean | undefined;
   onSelectionChange: (id: string, isSelected: boolean) => void | undefined;
   onProfitDialogOpen?: (profitData: any) => void;
   onAttendeeDialogOpen?: (attendeeData: any) => void;
+  onSubModalOpen?: (subs: any, index: number) => void;
   style?: React.CSSProperties;
 }
 
 // ApprovalItem 컴포넌트 - wrapper div 포함
 const SubItem: React.FC<SubProps> = React.memo(
   ({
+    item,
     sub,
     selectable,
     isSelected,
     onSelectionChange,
     onProfitDialogOpen,
     onAttendeeDialogOpen,
+    onSubModalOpen,
     style,
   }) => {
     const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_I);
-    const flds = _(sub)
+    const flds = _(item)
       .pickBy((_, key) => /^FLD\d+$/.test(key))
       .toPairs()
       .sortBy(([key]) => parseInt(key.replace("FLD", ""), 10))
@@ -876,14 +975,10 @@ const SubItem: React.FC<SubProps> = React.memo(
 
     const handleCheckboxChange = useCallback(
       (checked: boolean) => {
-        onSelectionChange(sub.FLOWCNT, checked);
+        onSelectionChange(item.FLOWCNT, checked);
       },
-      [sub.FLOWCNT, onSelectionChange]
+      [item.FLOWCNT, onSelectionChange]
     );
-
-    const handleItemClick = useCallback(() => {
-      console.log("아이템 클릭:", sub.FLOWNO);
-    }, [sub.FLOWNO]);
 
     const titleElement = useMemo(
       () => (
@@ -896,21 +991,21 @@ const SubItem: React.FC<SubProps> = React.memo(
             justifyContent: "space-between",
           }}
         >
-          <span>{sub.BKTXT}</span>
+          <span>{item.TITLE || item.FLD02}</span>
           <div style={{ display: "flex", gap: "4px" }}>
             {
               //? 수익성
-              (sub.RKE_PRCTR ||
-                sub.RKE_ARTNR ||
-                sub.RKE_MATKL ||
-                sub.RKE_VKORG ||
-                sub.RKE_WERKS) && (
+              (item.RKE_PRCTR ||
+                item.RKE_ARTNR ||
+                item.RKE_MATKL ||
+                item.RKE_VKORG ||
+                item.RKE_WERKS) && (
                 <IonButton
                   id="profitability-dialog"
                   color="tertiary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onProfitDialogOpen?.(sub);
+                    onProfitDialogOpen?.(item);
                   }}
                   style={{
                     height: "20px",
@@ -928,13 +1023,13 @@ const SubItem: React.FC<SubProps> = React.memo(
             }
             {
               //? 참석자
-              !_.isEmpty(sub.CardListAttendeeList) && (
+              !_.isEmpty(item.CardListAttendeeList) && (
                 <IonButton
                   id="attendee-dialog"
                   color="warning"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onAttendeeDialogOpen?.(sub.CardListAttendeeList);
+                    onAttendeeDialogOpen?.(item.CardListAttendeeList);
                   }}
                   style={{
                     height: "20px",
@@ -953,7 +1048,7 @@ const SubItem: React.FC<SubProps> = React.memo(
           </div>
         </div>
       ),
-      [sub.BKTXT]
+      [item.TITLE]
     );
 
     const bodyElement = useMemo(
@@ -963,7 +1058,7 @@ const SubItem: React.FC<SubProps> = React.memo(
             return (
               <div
                 className="custom-item-body-line"
-                key={sub.FLOWNO + sub.FLOWCNT + index}
+                key={item.FLOWNO + item.FLOWCNT + index}
               >
                 <span>{title}</span>
                 <span>{flds[index] || "-"}</span>
@@ -975,6 +1070,42 @@ const SubItem: React.FC<SubProps> = React.memo(
       [titles]
     );
 
+    const subElement = !_.isEmpty(sub) ? useMemo(
+      () => (
+        sub.map((item: any, index: number) =>
+          <IonItem
+            button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSubModalOpen?.(sub, index);
+            }}
+            key={`sub-${index}`}
+            mode="md"
+            style={{
+              '--background': isSelected ? 'rgba(var(--ion-color-primary-rgb), .05)' : 'rgba(var(--ion-background-color2-rgb), .5)',
+              '--border-radius': '8px',
+              '--border-color': isSelected ? 'transparent' : 'var(--custom-border-color-100)',
+              marginBottom: sub.length - 1 !== index ? 4 : 0
+            }}>
+            <div style={{
+              width: '100%',
+              padding: '10px 12px 10px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: '13px', fontWeight: '500' }}>{item.TITLE}</span>
+              <IonIcon src={chevronForward}
+                style={{
+                  color: 'var(--ion-color-secondary)'
+                }} />
+            </div>
+          </IonItem>
+        )
+      ),
+      [titles, isSelected]
+    ) : null;
+
     // CustomItem props 메모이제이션 - state 대신 ref 사용으로 최적화
     const customItemProps = useMemo(
       () => ({
@@ -982,13 +1113,17 @@ const SubItem: React.FC<SubProps> = React.memo(
         checked: isSelected,
         title: titleElement,
         body: bodyElement,
+        sub: subElement,
+        // onClick: handleItemClick,
         onCheckboxChange: handleCheckboxChange,
       }),
       [
+        selectable,
         isSelected,
         titleElement,
         bodyElement,
-        handleItemClick,
+        subElement,
+        // handleItemClick,
         handleCheckboxChange,
       ]
     );
@@ -1042,7 +1177,7 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
                 fontWeight: "400",
               }}
             >
-              {apprLine.WFIT_TYPE_TEXT}
+              {apprLine.WFIT_SUB_TEXT}
             </span>
           </div>
           {text && (
@@ -1072,11 +1207,11 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
         <div className="custom-item-body">
           <div className="custom-item-body-line">
             <span>결재완료일</span>
-            <span>{apprLine.END_DATE || "-"}</span>
+            <span>{Number(apprLine.END_DATE) ? `${apprLine.END_DATE.slice(0, 4)}/${apprLine.END_DATE.slice(4, 6)}/${apprLine.END_DATE.slice(6)}` : "-"}</span>
           </div>
           <div className="custom-item-body-line">
             <span>결재완료시간</span>
-            <span>{apprLine.END_TIME || "-"}</span>
+            <span>{Number(apprLine.END_TIME) ? `${apprLine.END_TIME.slice(0, 2)}:${apprLine.END_TIME.slice(2, 4)}:${apprLine.END_TIME.slice(4)}` : "-"}</span>
           </div>
         </div>
       ),

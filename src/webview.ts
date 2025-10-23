@@ -144,16 +144,14 @@ const _initWebview = async (): Promise<void> => {
     const setCorp = useAppStore.getState().setCorp;
     const fetchUser = useAppStore.getState().fetchUser;
     setCorp({
-      corpId: "IRISBRIGHT",
-      corpNm: "아이리스브라이트",
+      corpId: "ISTN",
+      corpNm: "아이에스티엔",
       system: {
-        apiEndpoint: 'http://localhost:4001/v1/api',
-        // apiEndpoint:
-        //   "https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api",
-        apiKey: "",
+        apiEndpoint: 'http://localhost:4201/v1/api',
+        apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
     });
-    await fetchUser("w_usl_@irisbr.com");
+    await fetchUser("ITK00013");
     // 웹뷰가 아닌 경우 바로 완료 처리
     if (paddingResolver) {
       paddingResolver(true);
@@ -237,24 +235,24 @@ const _initWebview = async (): Promise<void> => {
       const corp = detail.corp;
       const loginId = detail.loginId;
 
-      // const setCorp = useAppStore.getState().setCorp;
-      // const fetchUser = useAppStore.getState().fetchUser;
-      // setCorp(corp);
-      // await fetchUser(loginId);
-
-      // 개발용
       const setCorp = useAppStore.getState().setCorp;
       const fetchUser = useAppStore.getState().fetchUser;
-      setCorp({
-        corpId: "IRIS_BRIGHT",
-        corpNm: "아이리스 브라이트",
-        system: {
-          apiEndpoint:
-            "https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api",
-          apiKey: "",
-        },
-      });
-      await fetchUser("w_usl_@irisbr.com");
+      setCorp(corp);
+      await fetchUser(loginId);
+
+      // 개발용
+      // const setCorp = useAppStore.getState().setCorp;
+      // const fetchUser = useAppStore.getState().fetchUser;
+      // setCorp({
+      //   corpId: "IRIS_BRIGHT",
+      //   corpNm: "아이리스 브라이트",
+      //   system: {
+      //     apiEndpoint:
+      //       "https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api",
+      //     apiKey: "",
+      //   },
+      // });
+      // await fetchUser("w_usl_@irisbr.com");
 
       if (userInfoResolver) {
         userInfoResolver(true);

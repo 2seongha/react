@@ -2,16 +2,21 @@ import React, { useRef, useState, useEffect } from 'react';
 import './GroupButton.css';
 import useAppStore from '../stores/appStore';
 import CustomSkeleton from './CustomSkeleton';
-import { useShallow } from 'zustand/shallow';
+import { shallow, useShallow } from 'zustand/shallow';
 import { elementScrollIntoView } from 'seamless-scroll-polyfill';
 
-const GroupButton: React.FC = () => {
+interface GroupButtonProps {
+  onSelectionChange?: (selectedItem: any) => void;
+}
+
+const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
   const [selected, setSelected] = useState<{ value: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
+
   const setApprovals = useAppStore(state => state.setApprovals);
   const fetchApprovals = useAppStore(state => state.fetchApprovals);
 
@@ -42,7 +47,11 @@ const GroupButton: React.FC = () => {
     if (selected == null) return;
     console.log("선택변경");
     if (todoSummary) {
-      fetchApprovals('TODO', todoSummary[selected.value].AREA_CODE!);
+      const selectedItem = todoSummary[selected.value];
+      fetchApprovals('TODO', selectedItem.AREA_CODE!);
+
+      // 부모에게 선택된 값 전달
+      onSelectionChange?.(selectedItem);
     }
   }, [selected]);
 

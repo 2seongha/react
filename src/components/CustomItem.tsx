@@ -1,7 +1,8 @@
-import { IonCheckbox, IonIcon, IonRippleEffect } from '@ionic/react';
+import { IonCheckbox, IonIcon, IonItem, IonRippleEffect } from '@ionic/react';
 import React, { ReactNode, useState, useMemo, useCallback, useRef } from 'react';
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
+import { AnimatePresence, motion } from 'framer-motion';
 interface CustomItemProps {
   selectable?: boolean;
   title?: ReactNode;
@@ -40,8 +41,6 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
   const handleTitleClick = useCallback(() => {
     if (sub) {
       setIsExpanded(!isExpanded);
-    } else if (onClick) {
-      onClick();
     }
   }, [sub, isExpanded, onClick]);
 
@@ -69,27 +68,66 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
           onClick();
         } : selectable ? handleCheckboxToggle : undefined}
       >
-        <div className='custom-item-header' style={{ alignItems: checkboxCenter ? 'center' : 'start' }}>
-          {selectable && (
-            <IonCheckbox
-              checked={checked}
-              mode='md'
-              style={{ pointerEvents: 'none' }}
-            />
-          )}
-          <div className={contentAreaClasses} onClick={sub ? handleTitleClick : undefined} /*style={{ pointerEvents: sub ? 'auto' : 'none' }}*/>
-            {title}
-            {headerButton}
-          </div>
-        </div>
-        {body}
-        {sub && isExpanded && (
-          <div className="custom-item-sub" style={{ overflow: "hidden" }}>
-            <div style={{ padding: "12px 16px" }}>
-              {sub}
+        {sub ?
+          <IonItem
+            mode='md'
+            button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleTitleClick();
+            }}
+            style={{
+              '--background': 'transparent'
+            }}>
+            <div className='custom-item-header' style={{ alignItems: checkboxCenter ? 'center' : 'start' }}>
+              {selectable && (
+                <IonCheckbox
+                  checked={checked}
+                  mode='md'
+                  style={{ pointerEvents: 'none' }}
+                />
+              )}
+              <div className={contentAreaClasses} >
+                {title}
+                {headerButton}
+              </div>
+            </div>
+          </IonItem> :
+          <div className='custom-item-header' style={{ alignItems: checkboxCenter ? 'center' : 'start' }}>
+            {selectable && (
+              <IonCheckbox
+                checked={checked}
+                mode='md'
+                style={{ pointerEvents: 'none' }}
+              />
+            )}
+            <div className={contentAreaClasses} >
+              {title}
+              {headerButton}
             </div>
           </div>
-        )}
+        }
+        {body}
+        <AnimatePresence initial={false}>
+          {sub && isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{
+                height: { duration: 0.2, ease: 'easeInOut' },
+                opacity: { duration: 0.1, ease: 'easeOut' }
+              }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div className="custom-item-sub">
+                <div style={{ padding: " 0 16px 12px 16px" }}>
+                  {sub}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {(onClick || (!onClick && selectable)) && <IonRippleEffect />}
       </div>
       {selectable &&

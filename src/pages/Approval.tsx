@@ -26,9 +26,9 @@ const Approval: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
 
   useEffect(() => {
-    setApprovals(null);
     setSelectedItems(new Set());
     setSearchText('');
+    setApprovals(null);
     fetchApprovals(P_AREA_CODE, AREA_CODE);
 
     return () => setApprovals(null);
@@ -38,9 +38,9 @@ const Approval: React.FC = () => {
   // useIonViewWillEnter(() => {
   // });
 
-  useIonViewWillLeave(() => {
-    // setApprovals(null);
-  })
+  // useIonViewWillLeave(() => {
+  //   setApprovals(null);
+  // })
 
   // useIonViewDidLeave(() => {
   // });
@@ -138,8 +138,8 @@ const Approval: React.FC = () => {
     // 검색어 필터링
     if (searchText.trim()) {
       filtered = filtered.filter((approval: any) =>
-        approval.TITLE.toLowerCase().includes(searchText.toLowerCase()) ||
-        approval.NAME.toLowerCase().includes(searchText.toLowerCase())
+        approval.APPR_TITLE.toLowerCase().includes(searchText.toLowerCase()) ||
+        approval.CREATOR_NAME.toLowerCase().includes(searchText.toLowerCase())
       );
     }
     return filtered;
@@ -199,12 +199,17 @@ const Approval: React.FC = () => {
     }
   }, [filteredApprovals, isAllSelected]);
 
+  const handleItemClick = useCallback((approval: any) => {
+    console.log('아이템 클릭:', approval.FLOWNO);
+    router.push(`/detail/${approval.FLOWNO}/${P_AREA_CODE}/${AREA_CODE}/${P_AREA_CODE_TXT}/${AREA_CODE_TXT}`, 'forward', 'push');
+  }, []); // router 의존성 제거
+
   return (
     <IonPage className='approval'>
       <AppBar
         title={
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span className='app-bar-sub-title' onClick={handleBackNavigation}>{approvals?.P_AREA_CODE_TXT ?? P_AREA_CODE_TXT}</span>
+            <span className='app-bar-sub-title' onClick={handleBackNavigation}>{approvals?.P_AREA_CODE_TXT || P_AREA_CODE_TXT}</span>
             <IonIcon src={chevronForwardOutline} style={{ width: 16, color: 'var(--ion-color-secondary)' }} />
             <span>{approvals?.AREA_CODE_TXT ?? AREA_CODE_TXT}</span>
           </div>
@@ -377,9 +382,9 @@ const Approval: React.FC = () => {
                 ))}
               </div>
             ) : filteredApprovals && filteredApprovals.length > 0 ? (
-              filteredApprovals.map((approval: any, index: number) => (
+              filteredApprovals.map((approval: any, index: number) =>
                 <ApprovalItem
-                  key={approval.FLOWNO}
+                  key={`approval-${approval.FLOWNO}-${index}`}
                   selectable={P_AREA_CODE === 'TODO'}
                   approval={approval}
                   index={index}
@@ -388,8 +393,10 @@ const Approval: React.FC = () => {
                   searchText={searchText}
                   isFirstItem={index === 0}
                   isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
+                  handleItemClick={handleItemClick}
                 />
-              ))
+              )
+
               // <Virtuoso
               //   className='virtuoso'
               //   ref={virtuosoRef}
@@ -449,6 +456,7 @@ interface ApprovalProps {
   searchText: string;
   isFirstItem: boolean;
   isLastItem: boolean;
+  handleItemClick: (approval: any) => void;
 }
 
 // 텍스트 하이라이트 헬퍼 함수 (컴포넌트 외부에서 정의하여 매번 재생성 방지)
@@ -464,7 +472,7 @@ const highlightText = (text: string, searchText: string) => {
 };
 
 // ApprovalItem 컴포넌트 - wrapper div 포함
-const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, selectable, isSelected, onSelectionChange, searchText, isFirstItem, isLastItem }) => {
+const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, selectable, isSelected, onSelectionChange, searchText, isFirstItem, isLastItem, handleItemClick }) => {
   const router = useIonRouter();
   const titles = useAppStore(state => state.approvals?.TITLE.TITLE_H);
   const flds = _(approval)
@@ -480,27 +488,17 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, sel
 
   console.log('approval item rebuild : ' + index);
 
-  const handleItemClick = useCallback(() => {
-    console.log('아이템 클릭:', approval.FLOWNO);
-    router.push(`/detail/${approval.FLOWNO}`, 'forward', 'push');
-  }, [approval.FLOWNO]); // router 의존성 제거
-
-  const handleLongPress = useCallback(() => {
-    console.log('롱프레스:', approval.FLOWNO);
-    // TODO: 롱프레스 로직 구현 (예: 컨텍스트 메뉴, 다중 선택 모드 등)
-  }, [approval.FLOWNO]);
-
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
   const titleElement = useMemo(() => (
     <div className='custom-item-title'>
-      <span>{highlightText(approval.TITLE, searchText)}</span>
+      <span>{highlightText(approval.APPR_TITLE, searchText)}</span>
       <div className='custom-item-sub-title'>
         <IonIcon src={person} />
-        <span>{highlightText(approval.NAME, searchText)}({approval.ORGTX}) ・ </span>
+        <span>{highlightText(approval.CREATOR_NAME, searchText)} ・ </span>
         <span>{approval.CREATE_DATE}</span>
       </div>
     </div>
-  ), [approval.TITLE, approval.NAME, approval.CREATE_DATE, searchText]);
+  ), [approval.APPR_TITLE, approval.CREATOR_NAME, approval.CREATE_DATE, searchText]);
 
   const bodyElement = useMemo(() => (
     <div className='custom-item-body'>
@@ -519,11 +517,10 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, sel
     checked: isSelected,
     title: titleElement,
     body: bodyElement,
-    onClick: handleItemClick,
-    onLongPress: handleLongPress,
+    onClick: () => handleItemClick(approval),
     onCheckboxChange: handleCheckboxChange,
     checkboxCenter: false,
-  }), [isSelected, titleElement, bodyElement, handleItemClick, handleLongPress, handleCheckboxChange]);
+  }), [isSelected, titleElement, bodyElement, handleItemClick, handleCheckboxChange]);
 
 
   return (
