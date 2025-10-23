@@ -136,7 +136,8 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
+  // const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
+  const isWebView = 'Y'; // 환경변수 가져오기
   console.log("----- webview Init Start -----", isWebView);
 
   if (isWebView == "N") {
@@ -232,14 +233,18 @@ const _initWebview = async (): Promise<void> => {
       console.log("----- webview receiveUserInfo Start -----");
       const customEvent = event as CustomEvent;
       const detail = JSON.parse(customEvent.detail);
-      const corp = detail.corp;
+      const corp = JSON.parse(detail.corp);
       const loginId = detail.loginId;
+      console.log(loginId)
+      console.log(loginId)
+      console.log(loginId)
 
       const setCorp = useAppStore.getState().setCorp;
       const fetchUser = useAppStore.getState().fetchUser;
       setCorp(corp);
-      await fetchUser(loginId);
+      console.log('1111111111')
 
+      await fetchUser(loginId);
       // 개발용
       // const setCorp = useAppStore.getState().setCorp;
       // const fetchUser = useAppStore.getState().fetchUser;
@@ -274,8 +279,6 @@ const _initWebview = async (): Promise<void> => {
       if (currentPath.startsWith("/app/")) {
         webviewAppEnd();
       } else {
-        console.log('back buttonnnnnnnnnnn');
-        // router.goBack();
         window.history.back();
       }
     };

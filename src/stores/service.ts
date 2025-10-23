@@ -5,19 +5,33 @@ import { UserModel, ApprovalModel, AreaModel, NoticeModel, NotificationModel } f
 // axios 인스턴스 생성
 const createApiInstance = () => {
   const corp = useAppStore.getState().corp;
+  if (!corp?.SYSTEM?.apiEndpoint || !corp?.SYSTEM?.apiKey) {
+    throw new Error('API endpoint or key is not defined in store.');
+  }
 
   return axios.create({
-    baseURL: corp?.system.apiEndpoint,
+    baseURL: corp?.SYSTEM?.apiEndpoint,
     headers: {
-      'x-api-key': corp?.system.apiKey
+      'x-api-key': corp?.SYSTEM?.apiKey
     }
   });
 };
 
 export async function fetchUser(LOGIN_ID: string): Promise<UserModel> {
   try {
+    console.log(LOGIN_ID)
+    console.log(LOGIN_ID)
+    console.log(LOGIN_ID)
+    console.log(LOGIN_ID)
+    console.log(LOGIN_ID)
     const api = createApiInstance();
-    const res = await api.get(`/user/${encodeURIComponent(LOGIN_ID)}`);
+    console.log('4444444444')
+    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
+    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
+    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
+    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
+    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
+    const res = await api.get(`/v1/api/user/${encodeURIComponent(LOGIN_ID)}`);
 
     return res.data;
   } catch (error: any) {
@@ -29,13 +43,12 @@ export async function fetchUser(LOGIN_ID: string): Promise<UserModel> {
 export async function fetchAreas(P_AREA_CODE: string): Promise<AreaModel[]> {
   try {
     const user = useAppStore.getState().user;
-    // const LOGIN_ID = user?.LOGIN_ID;
     const LOGIN_ID = user?.LOGIN_ID;
     const BUKRS = user?.BUKRS;
 
     const api = createApiInstance();
-    const res = await api.get(`/menus?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}`);
-
+    const res = await api.get(`/v1/api/menus?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}`);
+    console.log(res.data);
     return res.data;
   } catch (error: any) {
     console.error(error);
@@ -51,7 +64,7 @@ export async function fetchApprovals(P_AREA_CODE: string, AREA_CODE: string): Pr
     const BUKRS = user?.BUKRS;
 
     const api = createApiInstance();
-    const res = await api.get(`/approvals?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}&AREA_CODE=${AREA_CODE}`);
+    const res = await api.get(`/v1/api/approvals?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}&AREA_CODE=${AREA_CODE}`);
 
     return res.data;
   } catch (error: any) {
@@ -69,13 +82,13 @@ export async function fetchNotifications(): Promise<NotificationModel[]> {
     const getRandomTypeAndTitle = () => {
       const types = ['START', 'APPROVE', 'REJECT'] as const;
       const type = types[Math.floor(Math.random() * types.length)];
-      
+
       const titleMap = {
         START: '결재 요청이 도착했습니다.',
         APPROVE: '결재 요청이 승인되었습니다.',
         REJECT: '결재 요청이 반려되었습니다.'
       };
-      
+
       return { type, title: titleMap[type] };
     };
 

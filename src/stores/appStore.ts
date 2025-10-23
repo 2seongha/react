@@ -50,6 +50,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setSelectedTab: (tab) => set({ selectedTab: tab }),
 
   fetchUser: async (LOGIN_ID: string) => {
+    console.log('222222222')
     const currentRequestId = ++requestIds.areas;
     const user = await fetchUser(LOGIN_ID);
 

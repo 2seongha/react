@@ -108,9 +108,10 @@ export interface KeyboardVisibility {
 
 export interface CorpModel {
   // 필요한 corp 모델 속성들 정의
-  corpId: string;
-  corpNm: string;
-  system: {
+  CORP_ID: string;
+  CORP_NM: string;
+  SYSTEM: {
+    webviewLink: string;
     apiEndpoint: string;
     apiKey: string;
   }
