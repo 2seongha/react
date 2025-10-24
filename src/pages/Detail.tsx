@@ -296,8 +296,9 @@ const Detail: React.FC = () => {
             height: "100%",
             scrollSnapType: 'y mandatory',
             overflow: 'auto',
-            paddingBottom: "var(--ion-safe-area-bottom)",
+            // paddingBottom: "var(--ion-safe-area-bottom)",
             backgroundColor: "var(--ion-background-color)",
+            overscrollBehavior: 'none'
           }}
         >
           <motion.div
@@ -477,7 +478,7 @@ const Detail: React.FC = () => {
             className="swiper"
             style={{
               // flex: 1,
-              height: `calc(100vh - 96px - 84px - 28px)`,
+              height: `calc(100vh - 301px)`,
               width: "100%",
               backgroundColor: "var(--ion-background-color)",
             }}
@@ -520,7 +521,7 @@ const Detail: React.FC = () => {
                   <span style={{ fontSize: '12px' }}>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
                 </IonItem>
               </div>}
-              {[...approval.SUB,...approval.SUB,...approval.SUB,...approval.SUB].filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
+              {[...approval.SUB, ...approval.SUB, ...approval.SUB, ...approval.SUB].filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
                 <SubItem
                   style={{ marginTop: index === 0 ? '12px' : 0 }}
                   key={item.FLOWNO + item.FLOWCNT + index}
@@ -892,7 +893,7 @@ const Detail: React.FC = () => {
         {P_AREA_CODE === "TODO" && (
           <div
             style={{
-              height: "83px",
+              height: "auto",
               width: "100%",
               borderTop: "1px solid var(--custom-border-color-100)",
               borderRadius: "16px 16px 0 0",
@@ -901,6 +902,7 @@ const Detail: React.FC = () => {
               justifyContent: "center",
               padding: "12px 21px",
               gap: "12px",
+              paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )'
             }}
           >
             <IonButton
@@ -908,7 +910,7 @@ const Detail: React.FC = () => {
               color="light"
               style={{
                 flex: 1,
-                height: "100%",
+                height: "58px",
                 fontSize: "18px",
                 fontWeight: "600",
               }}
@@ -922,7 +924,7 @@ const Detail: React.FC = () => {
               color="primary"
               style={{
                 flex: 1,
-                height: "100%",
+                height: "58px",
                 fontSize: "18px",
                 fontWeight: "600",
               }}
