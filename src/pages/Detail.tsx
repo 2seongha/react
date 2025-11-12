@@ -186,6 +186,13 @@ const Detail: React.FC = () => {
     const prevScrollTop = prevScrollTopRef.current;
 
     // 스크롤이 위로 올라가고 있고, 현재 스크롤 위치가 0에 가까울 때 (예: 10px 이내)
+    console.log(currentScrollTop)
+    if (currentScrollTop <= 0) {
+      element.style.overscrollBehavior = 'auto'
+    } else {
+      element.style.overscrollBehavior = 'none'
+    }
+
     if (currentScrollTop > prevScrollTop) {
       if (outerScrollRef.current) {
         outerScrollRef.current.scrollTo({
@@ -197,6 +204,40 @@ const Detail: React.FC = () => {
 
     prevScrollTopRef.current = currentScrollTop;
   }, []);
+
+  const handleSwiperSlideTouchMove = useCallback((event: any) => {
+    const element = event.currentTarget;
+    const currentScrollTop = element.scrollTop;
+
+    // 스크롤이 위로 올라가고 있고, 현재 스크롤 위치가 0에 가까울 때 (예: 10px 이내)
+    if (currentScrollTop < 0) {
+      console.log('touch prevent');
+      event.preventDefault();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!swiperRef || !swiperRef.current) return;
+    const handleTouchMove = (e: any) => {
+      const element = e.currentTarget;
+      const currentScrollTop = element.scrollTop;
+      if (currentScrollTop < 0) {
+        console.log('터치무브 막기')
+        e.preventDefault(); // 터치 스크롤 막기
+      }
+    };
+
+    swiperRef.current.slides.forEach(element => {
+      element.addEventListener("touchmove", handleTouchMove, { passive: false });
+    });
+
+    return () => {
+      if (!swiperRef || !swiperRef.current) return;
+      swiperRef.current.slides.forEach(element => {
+        element.removeEventListener("touchmove", handleTouchMove);
+      });
+    };
+  }, [swiperRef])
 
   // 아이템 선택 상태 관리
   const handleItemSelection = useCallback((flowCnt: string, isSelected: boolean) => {
@@ -490,6 +531,7 @@ const Detail: React.FC = () => {
               style={{
                 overflow: "auto",
                 padding: "0px 21px 0 21px",
+                overscrollBehavior: 'none'
               }}
               onScroll={handleSwiperSlideScroll}
             >

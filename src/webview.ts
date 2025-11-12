@@ -136,8 +136,8 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  // const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
-  const isWebView = 'Y'; // 환경변수 가져오기
+  const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
+  // const isWebView = 'Y'; // 환경변수 가져오기
   console.log("----- webview Init Start -----", isWebView);
 
   if (isWebView == "N") {
@@ -145,10 +145,11 @@ const _initWebview = async (): Promise<void> => {
     const setCorp = useAppStore.getState().setCorp;
     const fetchUser = useAppStore.getState().fetchUser;
     setCorp({
-      corpId: "ISTN",
-      corpNm: "아이에스티엔",
-      system: {
-        apiEndpoint: 'http://localhost:4201/v1/api',
+      CORP_ID: "ISTN",
+      CORP_NM: "아이에스티엔",
+      SYSTEM: {
+        webviewLink:'',
+        apiEndpoint: 'http://localhost:4201',
         apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
     });
@@ -235,14 +236,10 @@ const _initWebview = async (): Promise<void> => {
       const detail = JSON.parse(customEvent.detail);
       const corp = JSON.parse(detail.corp);
       const loginId = detail.loginId;
-      console.log(loginId)
-      console.log(loginId)
-      console.log(loginId)
 
       const setCorp = useAppStore.getState().setCorp;
       const fetchUser = useAppStore.getState().fetchUser;
       setCorp(corp);
-      console.log('1111111111')
 
       await fetchUser(loginId);
       // 개발용
