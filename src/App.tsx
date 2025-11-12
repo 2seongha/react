@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const { isLoading: imageLoading, loadedCount } = useImagePreload();
 
   useEffect(() => {
+    if (!themeInitialized) return;
     const initialHeight = document.documentElement.offsetHeight;
     setFixedHeight(initialHeight);
 
@@ -49,7 +50,7 @@ const App: React.FC = () => {
     };
 
     initializeWebview();
-  }, []);
+  }, [themeInitialized]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -71,7 +72,7 @@ const App: React.FC = () => {
     }
 
     // 테마 초기화 완료 표시
-    setThemeInitialized(true);
+    if (!themeInitialized) setThemeInitialized(true);
   }, [themeMode]);
 
   // 웹뷰, 테마, 이미지 모두 초기화 완료되었을 때 앱 초기화 완료

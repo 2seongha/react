@@ -19,18 +19,7 @@ const createApiInstance = () => {
 
 export async function fetchUser(LOGIN_ID: string): Promise<UserModel> {
   try {
-    console.log(LOGIN_ID)
-    console.log(LOGIN_ID)
-    console.log(LOGIN_ID)
-    console.log(LOGIN_ID)
-    console.log(LOGIN_ID)
     const api = createApiInstance();
-    console.log('4444444444')
-    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
-    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
-    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
-    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
-    console.log(`/user/${encodeURIComponent(LOGIN_ID)}`)
     const res = await api.get(`/v1/api/user/${encodeURIComponent(LOGIN_ID)}`);
 
     return res.data;
