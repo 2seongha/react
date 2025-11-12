@@ -91,37 +91,6 @@ const Detail: React.FC = () => {
     document.body.removeChild(tempElement);
   }, []);
 
-  // IntersectionObserver를 사용한 Swiper 컨테이너 가시 영역 감지
-  // useEffect(() => {
-  //   if (!swiperContainerRef.current) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       entries.forEach((entry) => {
-  //         if (entry.isIntersecting) {
-  //           const rect = entry.boundingClientRect;
-  //           const visibleTop = Math.max(0, rect.top);
-  //           const visibleBottom = Math.min(window.innerHeight, rect.bottom);
-  //           const currentVisibleHeight = Math.max(0, visibleBottom - visibleTop);
-
-  //           setVisibleHeight(currentVisibleHeight);
-  //           console.log('Visible height:', currentVisibleHeight);
-  //         }
-  //       });
-  //     },
-  //     {
-  //       root: null, // viewport를 root로 사용
-  //       rootMargin: '0px',
-  //       threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] // 세밀한 감지를 위해 여러 threshold 설정
-  //     }
-  //   );
-
-  //   observer.observe(swiperContainerRef.current);
-  //   return () => {
-  //     observer.disconnect();
-  //   };
-  // }, []);
-
   // Constants
   let { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
   const { FLOWNO } = useParams<{ FLOWNO: string }>();
@@ -185,12 +154,14 @@ const Detail: React.FC = () => {
     const currentScrollTop = element.scrollTop;
     const prevScrollTop = prevScrollTopRef.current;
 
-    // 스크롤이 위로 올라가고 있고, 현재 스크롤 위치가 0에 가까울 때 (예: 10px 이내)
-    console.log(currentScrollTop)
     if (currentScrollTop <= 0) {
-      element.style.overscrollBehavior = 'auto'
+      element.style.overflow = 'hidden';
+      setTimeout(() => {
+        element.style.overscrollBehavior = 'auto';
+        element.style.overflow = 'auto';
+      }, 0)
     } else {
-      element.style.overscrollBehavior = 'none'
+      element.style.overscrollBehavior = 'none';
     }
 
     if (currentScrollTop > prevScrollTop) {
@@ -204,40 +175,6 @@ const Detail: React.FC = () => {
 
     prevScrollTopRef.current = currentScrollTop;
   }, []);
-
-  const handleSwiperSlideTouchMove = useCallback((event: any) => {
-    const element = event.currentTarget;
-    const currentScrollTop = element.scrollTop;
-
-    // 스크롤이 위로 올라가고 있고, 현재 스크롤 위치가 0에 가까울 때 (예: 10px 이내)
-    if (currentScrollTop < 0) {
-      console.log('touch prevent');
-      event.preventDefault();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!swiperRef || !swiperRef.current) return;
-    const handleTouchMove = (e: any) => {
-      const element = e.currentTarget;
-      const currentScrollTop = element.scrollTop;
-      if (currentScrollTop < 0) {
-        console.log('터치무브 막기')
-        e.preventDefault(); // 터치 스크롤 막기
-      }
-    };
-
-    swiperRef.current.slides.forEach(element => {
-      element.addEventListener("touchmove", handleTouchMove, { passive: false });
-    });
-
-    return () => {
-      if (!swiperRef || !swiperRef.current) return;
-      swiperRef.current.slides.forEach(element => {
-        element.removeEventListener("touchmove", handleTouchMove);
-      });
-    };
-  }, [swiperRef])
 
   // 아이템 선택 상태 관리
   const handleItemSelection = useCallback((flowCnt: string, isSelected: boolean) => {
@@ -313,31 +250,15 @@ const Detail: React.FC = () => {
             </span>
           </motion.div>
         }
-      // customEndButtons={
-      //   <IonButton
-      //     mode="md"
-      //     shape="round"
-      //     color={"medium"}
-      //     className="app-bar-button"
-      //     onClick={() => setIsHeaderCollapsed(!isHeaderCollapsed)}
-      //   >
-      //     <IonIcon
-      //       icon={isHeaderCollapsed ? chevronExpand : chevronCollapse}
-      //     />
-      //   </IonButton>
-      // }
       />
       <IonContent scrollEvents={false} scrollY={false} scrollX={false}>
         <div
           ref={outerScrollRef}
           onScroll={handleScroll}
           style={{
-            // display: "flex",
-            // flexDirection: "column",
             height: "100%",
             scrollSnapType: 'y mandatory',
             overflow: 'auto',
-            // paddingBottom: "var(--ion-safe-area-bottom)",
             backgroundColor: "var(--ion-background-color)",
             overscrollBehavior: 'none'
           }}
@@ -519,7 +440,8 @@ const Detail: React.FC = () => {
             className="swiper"
             style={{
               // flex: 1,
-              height: `calc(100vh - 301px)`,
+              height: `calc(100vh - ${P_AREA_CODE === 'TODO' ? '301' : '184'}px)`,
+              // height: `calc(100vh - 184px)`,
               width: "100%",
               backgroundColor: "var(--ion-background-color)",
             }}
@@ -527,11 +449,11 @@ const Detail: React.FC = () => {
             onSlideChange={handleSlideChange}
             resistanceRatio={0}
           >
+
             <SwiperSlide
               style={{
                 overflow: "auto",
                 padding: "0px 21px 0 21px",
-                overscrollBehavior: 'none'
               }}
               onScroll={handleSwiperSlideScroll}
             >
