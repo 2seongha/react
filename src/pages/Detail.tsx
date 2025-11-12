@@ -439,9 +439,8 @@ const Detail: React.FC = () => {
           <Swiper
             className="swiper"
             style={{
-              // flex: 1,
-              height: `calc(100vh - ${P_AREA_CODE === 'TODO' ? '301' : '184'}px)`,
-              // height: `calc(100vh - 184px)`,
+              // height: `calc(100vh - ${P_AREA_CODE === 'TODO' ? '301' : '184'}px)`,
+              height: `calc(100vh - var(--ion-safe-area-top) - 131px - 111px)`,
               width: "100%",
               backgroundColor: "var(--ion-background-color)",
             }}
