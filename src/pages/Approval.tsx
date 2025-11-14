@@ -16,7 +16,7 @@ import ApprovalModal from '../components/ApprovalModal';
 const Approval: React.FC = () => {
   const { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
   const setApprovals = useAppStore(state => state.setApprovals);
-  const fetchApprovals = useAppStore(state => state.fetchApprovals);
+  const getApprovals = useAppStore(state => state.getApprovals);
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
 
@@ -29,7 +29,7 @@ const Approval: React.FC = () => {
     setSelectedItems(new Set());
     setSearchText('');
     setApprovals(null);
-    fetchApprovals(P_AREA_CODE, AREA_CODE);
+    getApprovals(P_AREA_CODE, AREA_CODE, '', '');
 
     return () => setApprovals(null);
     // return;
@@ -50,7 +50,7 @@ const Approval: React.FC = () => {
     setSelectedItems(new Set());
     setSearchText('');
     webviewHaptic("mediumImpact");
-    await Promise.allSettled(([fetchApprovals(P_AREA_CODE, AREA_CODE)]));
+    await Promise.allSettled(([getApprovals(P_AREA_CODE, AREA_CODE, '', '')]));
     event.detail.complete();
   }
 

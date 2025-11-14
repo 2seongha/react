@@ -1,4 +1,4 @@
-import { IonButton, IonContent, IonHeader, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonList, IonPage, IonRefresher, IonRefresherContent, IonSelect, IonSelectOption, isPlatform, RefresherCustomEvent, useIonViewWillEnter } from '@ionic/react';
+import { IonButton, IonContent, IonHeader, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonList, IonPage, IonRefresher, IonRefresherContent, IonSelect, IonSelectOption, isPlatform, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import AppBar from '../components/AppBar';
@@ -17,21 +17,25 @@ const Notifications: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [filterValue, setFilterValue] = useState("A");
 
-  const fetchNotifications = useAppStore(state => state.fetchNotifications);
+  const getApprovals = useAppStore(state => state.getApprovals);
+  const setApprovals = useAppStore(state => state.setApprovals);
+  const getNotifications = useAppStore(state => state.getNotifications);
   const setNotifications = useAppStore(state => state.setNotifications);
+  const patchNotifications = useAppStore(state => state.patchNotifications);
 
   useIonViewWillEnter(() => {
-    fetchNotifications();
+    getNotifications();
   });
 
   const handleRefresh = useCallback(async (event: RefresherCustomEvent) => {
     webviewHaptic("mediumImpact");
     setNotifications(null);
-    await Promise.allSettled(([fetchNotifications()]));
+    await Promise.allSettled([getNotifications()]);
     event.detail.complete();
-  }, [fetchNotifications, setNotifications]);
+  }, [getNotifications, setNotifications]);
 
   const notifications = useAppStore(state => state.notifications);
+  const router = useIonRouter();
 
   const filteredNotifications = useMemo(() => {
     if (!notifications) return null;
@@ -44,22 +48,38 @@ const Notifications: React.FC = () => {
   }, [notifications, filterValue]);
 
   useEffect(() => {
-    setTotalCount(0);
     setTimeout(() => {
-      setTotalCount(filteredNotifications?.length ? filteredNotifications?.length : 0);
-    }, 200)
+      setTotalCount(filteredNotifications?.length ? filteredNotifications?.filter(n => n.READ_YN === 'N').length : 0);
+    }, 100)
   }, [filteredNotifications]);
 
   const { isTop, scrollToTop, scrollCallbackRef, contentRef } = useScrollToTop();
 
-  const handleDeleteNotification = useCallback((notificationId: string) => {
-    setNotifications(notifications?.filter((notification) =>
-      notification.NOTIFY_NO !== notificationId
-    ) || []);
-    webviewToast('알림이 삭제되었습니다');
+  //? 알림 읽음
+  const handleReadNotification = useCallback(async (notifyNo: string) => {
+    setNotifications(notifications?.map(notification => {
+      if (notification.NOTIFY_NO === notifyNo) notification.READ_YN = 'Y';
+      return notification;
+    }) || []);
+    patchNotifications(notifyNo, 'Y', 'N');
 
-    //TODO 알림 단건 삭제 api 호출
-  }, [notifications, setNotifications]);
+    const notifiaction = notifications?.find(n => n.NOTIFY_NO === notifyNo);
+    const link = notifiaction?.LINK?.split('/');
+    if (!link) return webviewToast('결재 내역을 확인할 수 없습니다');
+
+    setApprovals(null);
+    getApprovals('', '', link[0], link[1]); // 0: flowCode, 1: flowNo
+    router.push(`/detail/${link[1]}/a/${link[0]}/a/a`, 'forward', 'push');
+  }, [notifications]);
+
+  //? 알림 삭제
+  const handleDeleteNotification = useCallback((notifyNo: string) => {
+    setNotifications(notifications?.filter(notification =>
+      notification.NOTIFY_NO !== notifyNo
+    ) || []);
+    patchNotifications(notifyNo, 'Y', 'Y');
+    webviewToast('알림이 삭제되었습니다');
+  }, [notifications]);
 
   return (
     <IonPage className="notifications">
@@ -119,6 +139,7 @@ const Notifications: React.FC = () => {
                   <NotificationItem
                     key={notification.NOTIFY_NO}
                     notification={notification}
+                    onRead={handleReadNotification}
                     onDelete={handleDeleteNotification}
                   />
                 ))}
@@ -151,10 +172,11 @@ export default Notifications;
 
 interface NotificationItemProps {
   notification: any;
-  onDelete: (notificationId: string) => void;
+  onRead: (notifyNo: string) => void;
+  onDelete: (notifyNo: string) => void;
 }
 
-const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notification, onDelete }) => {
+const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notification, onDelete, onRead }) => {
   return (
     <motion.div
       key={`notification-${notification.NOTIFY_NO}`}
@@ -165,11 +187,11 @@ const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notifica
       }}
     >
       <IonItemSliding>
-        <IonItem button mode='md' onClick={() => { }}>
+        <IonItem button mode='md' onClick={() => onRead(notification.NOTIFY_NO)}>
           <div
             className={`notification-item ${notification.READ_YN === 'N' ? `not-read ${notification.TYPE}` : ''}`}
           >
-            <span className="notification-date">{notification.ERDAT}</span>
+            <span className={`notification-date ${notification.READ_YN === 'N' ? 'unread' : 'read'}`}>{notification.CREATED_AT}</span>
             <span className={`notification-title ${notification.READ_YN === 'N' ? 'unread' : 'read'}`}>
               {notification.TITLE}
             </span>

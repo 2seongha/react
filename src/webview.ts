@@ -136,14 +136,14 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  // const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
-  const isWebView = 'Y'; // 환경변수 가져오기
+  const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
+  // const isWebView = 'Y'; // 환경변수 가져오기
   console.log("----- webview Init Start -----", isWebView);
 
   if (isWebView == "N") {
     // 개발용
     const setCorp = useAppStore.getState().setCorp;
-    const fetchUser = useAppStore.getState().fetchUser;
+    const getUser = useAppStore.getState().getUser;
     setCorp({
       CORP_ID: "ISTN",
       CORP_NM: "아이에스티엔",
@@ -153,7 +153,7 @@ const _initWebview = async (): Promise<void> => {
         apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
     });
-    await fetchUser("ITK00013");
+    await getUser("ITK00013");
     // 웹뷰가 아닌 경우 바로 완료 처리
     if (paddingResolver) {
       paddingResolver(true);
@@ -238,13 +238,13 @@ const _initWebview = async (): Promise<void> => {
       const loginId = detail.loginId;
 
       const setCorp = useAppStore.getState().setCorp;
-      const fetchUser = useAppStore.getState().fetchUser;
+      const getUser = useAppStore.getState().getUser;
       setCorp(corp);
 
-      await fetchUser(loginId);
+      await getUser(loginId);
       // 개발용
       // const setCorp = useAppStore.getState().setCorp;
-      // const fetchUser = useAppStore.getState().fetchUser;
+      // const getUser = useAppStore.getState().getUser;
       // setCorp({
       //   corpId: "IRIS_BRIGHT",
       //   corpNm: "아이리스 브라이트",
@@ -254,7 +254,7 @@ const _initWebview = async (): Promise<void> => {
       //     apiKey: "",
       //   },
       // });
-      // await fetchUser("w_usl_@irisbr.com");
+      // await getUser("w_usl_@irisbr.com");
 
       if (userInfoResolver) {
         userInfoResolver(true);

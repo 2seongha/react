@@ -64,6 +64,10 @@ ion-popover.select-popover ion-item {
   top: 16px;
 }
 
+.notification-date.read {
+  color: var(--ion-color-step-450);
+}
+
 .notification-title {
   font-weight: 600;
   font-size: 14px;

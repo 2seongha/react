@@ -36,16 +36,16 @@ const Menu: React.FC = () => {
   const location = useLocation();
   const areas = useAppStore(state => state.areas);
   const setAreas = useAppStore(state => state.setAreas);
-  const fetchAreas = useAppStore(state => state.fetchAreas);
+  const getAreas = useAppStore(state => state.getAreas);
 
   const isHomePage = location.pathname.startsWith('/app/');
 
   const handleRefresh = useCallback(async (event: RefresherCustomEvent) => {
     setAreas(null);
     webviewHaptic("mediumImpact");
-    await fetchAreas('');
+    await getAreas('');
     event.detail.complete();
-  }, [setAreas, fetchAreas]);
+  }, [setAreas, getAreas]);
 
   // 닫기 버튼 컴포넌트 - AppBar 버튼과 동일한 스타일
   const closeButton = useMemo(() => (
@@ -64,7 +64,7 @@ const Menu: React.FC = () => {
   return (
     <IonMenu side="end" menuId="main-menu" contentId="main-content" className="slide-menu" swipeGesture={isHomePage}
       onIonWillOpen={() => {
-        fetchAreas('');
+        getAreas('');
       }}>
       <AppBar
         title={<span>메뉴</span>}

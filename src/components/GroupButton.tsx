@@ -18,7 +18,7 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
   const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
 
   const setApprovals = useAppStore(state => state.setApprovals);
-  const fetchApprovals = useAppStore(state => state.fetchApprovals);
+  const getApprovals = useAppStore(state => state.getApprovals);
 
   // todoSummary가 변경될 때 selected index 조정
   useEffect(() => {
@@ -48,7 +48,7 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
     console.log("선택변경");
     if (todoSummary) {
       const selectedItem = todoSummary[selected.value];
-      fetchApprovals('TODO', selectedItem.AREA_CODE!);
+      getApprovals('TODO', selectedItem.AREA_CODE!, '', '');
 
       // 부모에게 선택된 값 전달
       onSelectionChange?.(selectedItem);

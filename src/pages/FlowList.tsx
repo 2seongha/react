@@ -16,14 +16,14 @@ import { webviewHaptic } from '../webview';
 const FlowList: React.FC = () => {
   const { AREA_CODE } = useParams<{ AREA_CODE: string }>();
   const setAreas = useAppStore(state => state.setAreas);
-  const fetchAreas = useAppStore(state => state.fetchAreas);
+  const getAreas = useAppStore(state => state.getAreas);
   const flowList = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === AREA_CODE) || null));
 
   // 캐싱된 타이틀 ref
   const cachedTitleRef = useRef<string>('');
 
   useIonViewWillEnter(() => {
-    fetchAreas('');
+    getAreas('');
   });
 
   // 새로고침 핸들러 최적화
@@ -31,10 +31,10 @@ const FlowList: React.FC = () => {
     setAreas(null);
     webviewHaptic("mediumImpact");
     if (AREA_CODE) {
-      await Promise.allSettled([fetchAreas('')]);
+      await Promise.allSettled([getAreas('')]);
     }
     event.detail.complete();
-  }, [setAreas, fetchAreas, AREA_CODE]);
+  }, [setAreas, getAreas, AREA_CODE]);
 
   // 애니메이션을 위한 count 상태
   const [totalCount, setTotalCount] = useState(0);
@@ -44,7 +44,7 @@ const FlowList: React.FC = () => {
     setTotalCount(0);
     setTimeout(() => {
       setTotalCount(flowList?.CNT ? Number(flowList.CNT) : 0);
-    }, 200)
+    }, 100)
   }, [flowList?.CNT]);
 
   // title 메모이제이션

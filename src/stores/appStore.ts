@@ -1,6 +1,7 @@
-import { AppState, AreaModel } from './types';
-import { fetchApprovals, fetchAreas, fetchNotices, fetchNotifications, fetchUser } from './service';
+import { AppState } from './types';
+import { getApprovals, getAreas, getNotices, getNotifications, getUser, patchNotifications } from './service';
 import { createWithEqualityFn } from 'zustand/traditional'
+import _ from 'lodash';
 
 // themeMode 초기값을 localStorage에서 가져오기
 const getInitialThemeMode = (): 'light' | 'dark' | 'system' => {
@@ -49,53 +50,55 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setNotifications: (notifications) => set({ notifications }),
   setSelectedTab: (tab) => set({ selectedTab: tab }),
 
-  fetchUser: async (LOGIN_ID: string) => {
-    console.log('222222222')
+  getUser: async (LOGIN_ID: string) => {
     const currentRequestId = ++requestIds.areas;
-    const user = await fetchUser(LOGIN_ID);
+    const user = await getUser(LOGIN_ID);
 
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.areas) {
       set({ user: user });
     }
   },
-  fetchAreas: async (P_AREA_CODE: string) => {
+  getAreas: async (P_AREA_CODE: string) => {
     const currentRequestId = ++requestIds.areas;
-    const areas = await fetchAreas(P_AREA_CODE);
+    const areas = await getAreas(P_AREA_CODE);
 
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.areas) {
       set({ areas: areas });
     }
   },
-  fetchApprovals: async (P_AREA_CODE: string, AREA_CODE: string) => {
+  getApprovals: async (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => {
     const currentRequestId = ++requestIds.approvals;
-    let approvals = await fetchApprovals(P_AREA_CODE, AREA_CODE);
+    const approvals = await getApprovals(P_AREA_CODE, AREA_CODE, FLOWCODE, FLOWNO);
 
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.approvals) {
       set({ approvals: approvals });
     }
   },
-  fetchNotices: async () => {
+  getNotices: async () => {
     const currentRequestId = ++requestIds.notices;
-    const notices = await fetchNotices();
+    const notices = await getNotices();
 
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.notices) {
       set({ notices });
     }
   },
-  fetchNotifications: async () => {
+  getNotifications: async () => {
     const currentRequestId = ++requestIds.notifications;
-    const notifications = await fetchNotifications();
-
+    const notifications = await getNotifications();
+    if (_.isEqual(notifications, get().notifications)) return;
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.notifications) {
       set({ notifications });
     }
   },
 
+  patchNotifications: async (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => {
+    await patchNotifications(NOTIFY_NO, READ_YN, DELETE_YN);
+  },
 }));
 
 export default useAppStore;

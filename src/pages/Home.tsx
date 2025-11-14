@@ -33,17 +33,17 @@ const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
   const setApprovals = useAppStore(state => state.setApprovals);
 
-  const fetchAreas = useAppStore(state => state.fetchAreas);
+  const getAreas = useAppStore(state => state.getAreas);
 
   useIonViewWillEnter(() => {
-    fetchAreas('');
+    getAreas('');
   });
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setMenuAreas(null);
     setApprovals(null);
     webviewHaptic("mediumImpact");
-    await Promise.allSettled(([fetchAreas('')]));
+    await Promise.allSettled(([getAreas('')]));
     event.detail.complete();
   }
 
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        <div style={{ marginTop: '12px' }}>
+        <div style={{ marginTop: '0px' }}>
           <NoticeCard />
         </div>
         <div style={{ marginTop: '12px' }}>

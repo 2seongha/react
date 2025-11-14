@@ -17,7 +17,7 @@ const createApiInstance = () => {
   });
 };
 
-export async function fetchUser(LOGIN_ID: string): Promise<UserModel> {
+export async function getUser(LOGIN_ID: string): Promise<UserModel> {
   try {
     const api = createApiInstance();
     const res = await api.get(`/v1/api/user/${encodeURIComponent(LOGIN_ID)}`);
@@ -29,7 +29,7 @@ export async function fetchUser(LOGIN_ID: string): Promise<UserModel> {
   }
 }
 
-export async function fetchAreas(P_AREA_CODE: string): Promise<AreaModel[]> {
+export async function getAreas(P_AREA_CODE: string): Promise<AreaModel[]> {
   try {
     const user = useAppStore.getState().user;
     const LOGIN_ID = user?.LOGIN_ID;
@@ -37,7 +37,7 @@ export async function fetchAreas(P_AREA_CODE: string): Promise<AreaModel[]> {
 
     const api = createApiInstance();
     const res = await api.get(`/v1/api/menus?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}`);
-    console.log(res.data);
+
     return res.data;
   } catch (error: any) {
     console.error(error);
@@ -45,15 +45,14 @@ export async function fetchAreas(P_AREA_CODE: string): Promise<AreaModel[]> {
   }
 }
 
-export async function fetchApprovals(P_AREA_CODE: string, AREA_CODE: string): Promise<ApprovalModel> {
+export async function getApprovals(P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string): Promise<ApprovalModel> {
   try {
     const user = useAppStore.getState().user;
     const LOGIN_ID = user?.LOGIN_ID;
-    // const LOGIN_ID = user?.MAIL;
     const BUKRS = user?.BUKRS;
 
     const api = createApiInstance();
-    const res = await api.get(`/v1/api/approvals?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}&AREA_CODE=${AREA_CODE}`);
+    const res = await api.get(`/v1/api/approvals?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&P_AREA_CODE=${P_AREA_CODE}&AREA_CODE=${AREA_CODE}&FLOWCODE=${FLOWCODE}&FLOWNO=${FLOWNO}`);
 
     return res.data;
   } catch (error: any) {
@@ -62,350 +61,43 @@ export async function fetchApprovals(P_AREA_CODE: string, AREA_CODE: string): Pr
   }
 }
 
-export async function fetchNotifications(): Promise<NotificationModel[]> {
+export async function getNotifications(): Promise<NotificationModel[]> {
   try {
-    // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
 
-    // Function to get random TYPE and corresponding TITLE
-    const getRandomTypeAndTitle = () => {
-      const types = ['START', 'APPROVE', 'REJECT'] as const;
-      const type = types[Math.floor(Math.random() * types.length)];
+    const api = createApiInstance();
+    const res = await api.get(`/v1/api/notify?LOGIN_ID=${LOGIN_ID}`);
 
-      const titleMap = {
-        START: '결재 요청이 도착했습니다.',
-        APPROVE: '결재 요청이 승인되었습니다.',
-        REJECT: '결재 요청이 반려되었습니다.'
-      };
-
-      return { type, title: titleMap[type] };
-    };
-
-    // Mock API call with realistic notice data
-    const mockNotifications: NotificationModel[] = [
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '001',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-          READ_YN: 'N',
-          POPUP_YN: 'Y',
-          LINK: 'EXP001/20240115001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '002',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'VAC001/20240115002',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '003',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'PUR001/20240114001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '004',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'TRN001/20240113001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '005',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'OT001/20240112001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '006',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: '',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '007',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-          READ_YN: 'N',
-          POPUP_YN: 'Y',
-          LINK: 'EXP001/20240115001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '008',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'VAC001/20240115002',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '009',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'PUR001/20240114001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '010',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'TRN001/20240113001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '011',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'OT001/20240112001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '012',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: '',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '013',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-          READ_YN: 'N',
-          POPUP_YN: 'Y',
-          LINK: 'EXP001/20240115001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '014',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'VAC001/20240115002',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '015',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'PUR001/20240114001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '016',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'TRN001/20240113001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '017',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'OT001/20240112001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '018',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: '',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '019',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[출장비] 서울 본사 출장비 결재가 요청되었습니다. (김영수)',
-          READ_YN: 'N',
-          POPUP_YN: 'Y',
-          LINK: 'EXP001/20240115001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '020',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '2024.01.20 ~ 2024.01.22 연차휴가 신청이 승인되었습니다.',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'VAC001/20240115002',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '021',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '[사무용품] 구매요청이 반려되었습니다. 사유: 예산 초과',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'PUR001/20240114001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '022',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: 'AWS 클라우드 교육 신청 마감이 3일 남았습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: 'TRN001/20240113001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '023',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 2주차 초과근무 신청이 승인되었습니다. (12시간)',
-          READ_YN: 'N',
-          POPUP_YN: 'N',
-          LINK: 'OT001/20240112001',
-          ERDAT: '2025-10-17',
-        };
-      })(),
-      (() => {
-        const typeAndTitle = getRandomTypeAndTitle();
-        return {
-          NOTIFY_NO: '024',
-          TYPE: typeAndTitle.type,
-          TITLE: typeAndTitle.title,
-          CONTENT: '1월 20일 02:00 ~ 06:00 시스템 점검이 예정되어 있습니다.',
-          READ_YN: 'Y',
-          POPUP_YN: 'N',
-          LINK: '',
-          ERDAT: '2025-10-17',
-        };
-      })()
-    ];
-
-    return mockNotifications;
-    // set({ menuAreas: mockAreas });
+    return res.data;
   } catch (error: any) {
     console.error(error);
     return error;
   }
 }
 
-export async function fetchNotices(): Promise<NoticeModel[]> {
+export async function patchNotifications(NOTIFY_NO: string, READ_YN: string, DELETE_YN: string): Promise<NotificationModel[]> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+
+    const api = createApiInstance();
+    const payload = {
+      LOGIN_ID,
+      NOTIFY_NO,
+      READ_YN,
+      DELETE_YN,
+    }
+    const res = await api.patch(`/v1/api/notify?LOGIN_ID=${LOGIN_ID}`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function getNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay
     await new Promise(resolve => setTimeout(resolve, 100));

@@ -18,11 +18,12 @@ export interface AppState {
   setNotifications: (notifications: NotificationModel[] | null) => void;
   setSelectedTab: (tab: number) => void;
 
-  fetchUser: (LOGIN_ID: string) => Promise<void>;
-  fetchAreas: (P_AREA_CODE: string) => Promise<void>;
-  fetchApprovals: (P_AREA_CODE: string, AREA_CODE: string) => Promise<void>;
-  fetchNotices: () => Promise<void>;
-  fetchNotifications: () => Promise<void>;
+  getUser: (LOGIN_ID: string) => Promise<void>;
+  getAreas: (P_AREA_CODE: string) => Promise<void>;
+  getApprovals: (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => Promise<void>;
+  getNotices: () => Promise<void>;
+  getNotifications: () => Promise<void>;
+  patchNotifications: (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => Promise<void>;
 }
 
 export interface UserModel {
