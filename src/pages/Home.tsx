@@ -292,7 +292,7 @@ const TodoSummaryCard: React.FC = () => {
               </div> :
               Array.from({ length: approvals?.LIST ? approvals?.LIST.length : 3 }).map((_, index) => (
                 <ApprovalItem key={index} approvalItem={approvals?.LIST?.[index]} isLoading={!approvals?.LIST} index={index} onClick={() => {
-                  router.push(`/detail/${approvals?.LIST?.[index].FLOWNO}/${selectedArea?.P_AREA_CODE}/${selectedArea?.FLOWCODE}/${selectedArea?.P_AREA_CODE_TXT}/${selectedArea?.O_LTEXT}`, 'forward', 'push');
+                  router.push(`/detail/${approvals?.LIST?.[index].FLOWNO}`, 'forward', 'push');
                 }} />
               ))
         }

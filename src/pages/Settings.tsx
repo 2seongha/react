@@ -1,33 +1,22 @@
-import React, { useState, useRef, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import {
   IonContent,
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButtons,
-  IonBackButton,
   IonSegment,
   IonSegmentButton,
-  IonButton,
-  IonAlert,
-  IonActionSheet,
-  IonModal,
-  IonInput,
   IonIcon,
-  IonToggle
+  IonToggle,
+  IonCard,
+  IonItem
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
-import CustomInput from '../components/CustomInput';
-import { webviewTheme, webviewBadge, webviewToast, webviewHaptic } from '../webview';
-import { themeIcon, bellIcon, lockIcon } from '../assets/images';
+import { webviewLogout, webviewTheme } from '../webview';
+import { themeIcon, bellIcon } from '../assets/images';
 import CachedImage from '../components/CachedImage';
 import { contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
-import { Widgets } from '@mui/icons-material';
+import "./Settings.css";
+import CustomDialog from '../components/Dialog';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -43,54 +32,81 @@ const Settings: React.FC = () => {
     webviewTheme(newTheme);
   };
 
-
+  const handleLogout = () => {
+    webviewLogout();
+  };
 
   return (
-    <IonPage>
+    <IonPage className='settings'>
       <AppBar title={<span>설정</span>} showBackButton={true} />
       <IonContent style={{
         '--padding-start': '21px',
         '--padding-end': '21px',
       }}>
-        <span style={{ fontSize: '17px', fontWeight: '600', marginTop: '28px', marginBottom: '12px', display: 'block' }}>테마</span>
-        <MenuItem title={'모드'} iconSrc={themeIcon} content={
-          <IonSegment
-            mode='ios'
-            value={themeMode}
-            onIonChange={e => handleThemeChange(e.detail.value as string)}
-            style={{
-              width: '210px',
-              '--background': 'transparent',
-              border: '1px solid var(--custom-border-color-100)'
-            }}
-          >
-            <IonSegmentButton value="light" style={{
-              '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
-              '--border-color': 'var(--custom-border-color-100)'
-            }}>
-              <IonIcon src={sunnyOutline} size='small'></IonIcon>
-            </IonSegmentButton>
-            <IonSegmentButton value="system" style={{
-              '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
-              '--border-color': 'var(--custom-border-color-100)'
-            }}>
-              <IonIcon src={contrastOutline} size='small'></IonIcon>
-            </IonSegmentButton>
-            <IonSegmentButton value="dark" style={{
-              '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
-              '--border-color': 'var(--custom-border-color-100)'
-            }}>
-              <IonIcon src={moonOutline} size='small'></IonIcon>
-            </IonSegmentButton>
-          </IonSegment>
-        } />
-        <span style={{ fontSize: '17px', fontWeight: '600', marginTop: '36px', marginBottom: '12px', display: 'block' }}>푸시알림</span>
-        <MenuItem title={'개인알림'} iconSrc={bellIcon} content={
-          <IonToggle />
-        } />
-        <MenuItem title={'공지알림'} iconSrc={bellIcon} content={
-          <IonToggle />
-        } />
+        <IonCard className='settings-card' style={{ marginTop: '12px' }}>
+          <span className='settings-card-title'>테마</span>
+          <div className='settings-card-button'>
+            <span>모드</span>
+            <IonSegment
+              mode='ios'
+              value={themeMode}
+              onIonChange={e => handleThemeChange(e.detail.value as string)}
+              style={{
+                width: '210px',
+                '--background': 'transparent',
+                border: '1px solid var(--custom-border-color-100)'
+              }}
+            >
+              <IonSegmentButton value="light" style={{
+                '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
+                '--border-color': 'var(--custom-border-color-100)'
+              }}>
+                <IonIcon src={sunnyOutline} size='small'></IonIcon>
+              </IonSegmentButton>
+              <IonSegmentButton value="system" style={{
+                '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
+                '--border-color': 'var(--custom-border-color-100)'
+              }}>
+                <IonIcon src={contrastOutline} size='small'></IonIcon>
+              </IonSegmentButton>
+              <IonSegmentButton value="dark" style={{
+                '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
+                '--border-color': 'var(--custom-border-color-100)'
+              }}>
+                <IonIcon src={moonOutline} size='small'></IonIcon>
+              </IonSegmentButton>
+            </IonSegment>
+          </div>
+        </IonCard>
+        <IonCard className='settings-card' style={{ marginTop: '12px' }}>
+          <span className='settings-card-title'>푸시 알림</span>
+          <div className='settings-card-button'>
+            <span>개인 알림</span>
+            <IonToggle />
+          </div>
+          <div className='settings-card-button'>
+            <span>공지 알림</span>
+            <IonToggle />
+          </div>
+        </IonCard>
+        <IonItem button mode='ios' style={{
+          marginTop: '12px',
+          '--padding-top': '21px',
+          '--padding-bottom': '21px',
+          '--padding-start': '21px',
+          '--padding-end': '21px',
+          '--border-radius': '16px',
+          fontSize: '16px',
+          color: 'var(--ion-color-step-700)'
+        }} id='logout-trigger'>로그아웃</IonItem>
+        <CustomDialog
+          trigger="logout-trigger"
+          title="알림"
+          message="로그아웃 하시겠습니까?"
+          firstButtonText='아니오'
+          secondButtonText='예'
+          onSecondButtonClick={handleLogout}
+        />
       </IonContent>
     </IonPage >
   );

@@ -1,0 +1,41 @@
+.more {
+  background: var(--ion-background-color2);
+}
+
+.more .app-bar ion-toolbar {
+  --background: var(--ion-background-color2);
+}
+
+.more ion-content {
+  --padding-top: 0px;
+  --padding-bottom: 12px;
+  --padding-start: 21px;
+  --padding-end: 21px;
+  --background: var(--ion-background-color2);
+}
+
+.more-card {
+  box-shadow: none;
+  border-radius: 16px;
+  margin: 0;
+  padding: 18px 11px;
+}
+
+.more-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  padding: 14px 10px;
+  display: block;
+}
+
+.more-card-button {
+  font-size: 16px;
+  font-weight: 500;
+  --padding-bottom: 14px;
+  --padding-top: 14px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --border-radius: 8px;
+  color: var(--ion-color-step-700);
+}

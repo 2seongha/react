@@ -52,7 +52,7 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
         pointerEvents: (isScrolling && !isTop) ? 'auto' : 'none'
       }}
     >
-      <IonButton onTouchStart={onScrollToTop} className='scroll-top-button'>
+      <IonButton mode='md' onTouchStart={onScrollToTop} className='scroll-top-button'>
         <span>상단으로 이동</span>
       </IonButton>
     </IonFab>

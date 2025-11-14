@@ -71,7 +71,6 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   getApprovals: async (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => {
     const currentRequestId = ++requestIds.approvals;
     const approvals = await getApprovals(P_AREA_CODE, AREA_CODE, FLOWCODE, FLOWNO);
-
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.approvals) {
       set({ approvals: approvals });

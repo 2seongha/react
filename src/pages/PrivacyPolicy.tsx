@@ -6,7 +6,7 @@ import React from 'react';
 import AppBar from '../components/AppBar';
 const PrivacyPolicy: React.FC = () => {
   return (
-    <IonPage className="more">
+    <IonPage>
       <AppBar title={<span>개인정보처리방침</span>} showBackButton={true} />
       <IonContent>
         <div style={{ padding: '0 21px var(--ion-safe-area-bottom) 21px', maxWidth: '800px', margin: '0 auto' }}>

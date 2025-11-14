@@ -69,7 +69,7 @@ const Notifications: React.FC = () => {
 
     setApprovals(null);
     getApprovals('', '', link[0], link[1]); // 0: flowCode, 1: flowNo
-    router.push(`/detail/${link[1]}/a/${link[0]}/a/a`, 'forward', 'push');
+    router.push(`/detail/${link[1]}`, 'forward', 'push');
   }, [notifications]);
 
   //? 알림 삭제
@@ -79,6 +79,21 @@ const Notifications: React.FC = () => {
     ) || []);
     patchNotifications(notifyNo, 'Y', 'Y');
     webviewToast('알림이 삭제되었습니다');
+  }, [notifications]);
+
+  //? 모두 읽음 
+  const handleReadAll = useCallback(() => {
+    setNotifications(notifications?.map(notification => {
+      notification.READ_YN = 'Y';
+      return notification;
+    }) || []);
+    patchNotifications('', 'Y', 'N');
+  }, [notifications]);
+
+  //? 모두 삭제
+  const handleDeleteAll = useCallback(() => {
+    setNotifications([]);
+    patchNotifications('', 'N', 'Y');
   }, [notifications]);
 
   return (
@@ -109,6 +124,7 @@ const Notifications: React.FC = () => {
               disabled={useMemo(() => (notifications?.filter(notification => notification.READ_YN === 'N').length ?? 0) === 0, [notifications])}
               mode='md'
               fill='clear'
+              onClick={handleReadAll}
               className="filter-button">모두읽음</IonButton>
             <IonButton
               disabled={useMemo(() => (notifications?.length ?? 0) === 0, [notifications])}
@@ -157,10 +173,7 @@ const Notifications: React.FC = () => {
           message="알림을 모두 삭제하시겠습니까?"
           firstButtonText='아니오'
           secondButtonText='예'
-          onSecondButtonClick={useCallback(() => {
-            //TODO 전체 삭제
-            setNotifications([]);
-          }, [setNotifications])}
+          onSecondButtonClick={handleDeleteAll}
         />
       </IonContent>
       <BottomTabBar />

@@ -19,7 +19,7 @@ import {
   useIonRouter,
   IonFooter,
 } from "@ionic/react";
-import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { useShallow } from "zustand/shallow";
 import "swiper/css";
 import AppBar from "../components/AppBar";
@@ -47,7 +47,7 @@ import {
   PersonOutline,
 } from "@mui/icons-material";
 import ApprovalModal from "../components/ApprovalModal";
-import { chevronCollapse, chevronExpand, chevronForward, person } from "ionicons/icons";
+import { chevronForward, person } from "ionicons/icons";
 import { webviewToast } from "../webview";
 import SubModal from "../components/SubModal";
 import { OrbitProgress } from "react-loading-indicators";
@@ -67,9 +67,31 @@ const Detail: React.FC = () => {
   // Refs
   const swiperRef = useRef<SwiperClass | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
-  const headerHeightRef = useRef<number>(0);
   const outerScrollRef = useRef<HTMLDivElement | null>(null);
   const router = useIonRouter();
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+
+  // Constants
+  const { FLOWNO } = useParams<{ FLOWNO: string }>();
+  const P_AREA_CODE = useAppStore(
+    useShallow((state) => state.approvals?.P_AREA_CODE) || null
+  ) || '-';
+  const P_AREA_CODE_TXT = useAppStore(
+    useShallow((state) => state.approvals?.P_AREA_CODE_TXT) || null
+  ) || '-';
+  const AREA_CODE_TXT = useAppStore(
+    useShallow((state) => state.approvals?.FLOWCODE_TXT) || null
+  ) || '-';
+
+  const approval = useAppStore(
+    useShallow(
+      (state) => {
+        if (state.approvals instanceof Error) return state.approvals;
+        if (state.approvals) return state.approvals.LIST.find((a: any) => a.FLOWNO === FLOWNO);
+        return null;
+      }
+    )
+  );
 
   useLayoutEffect(() => {
     if (!headerRef.current) return;
@@ -86,42 +108,24 @@ const Detail: React.FC = () => {
     // 높이 측정
     const measuredHeight = tempElement.offsetHeight;
     if (measuredHeight > 0) {
-      headerHeightRef.current = measuredHeight;
+      setHeaderHeight(measuredHeight);
     }
 
     document.body.removeChild(tempElement);
-  }, []);
-
-  // Constants
-  let { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
-  const { FLOWNO } = useParams<{ FLOWNO: string }>();
-  P_AREA_CODE = useAppStore(
-    useShallow((state) => state.approvals?.P_AREA_CODE) || null
-  ) || P_AREA_CODE;
-  P_AREA_CODE_TXT = useAppStore(
-    useShallow((state) => state.approvals?.P_AREA_CODE_TXT) || null
-  ) || P_AREA_CODE_TXT;
-  AREA_CODE_TXT = useAppStore(
-    useShallow((state) => state.approvals?.FLOWCODE_TXT) || null
-  ) || AREA_CODE_TXT;
-
-  const approval = useAppStore(
-    useShallow(
-      (state) =>
-        state.approvals ? state.approvals.LIST.find(
-          (approval: any) => approval.FLOWNO === FLOWNO
-        ) || undefined : null
-    )
-  );
+  }, [approval]);
 
   useEffect(() => {
     if (approval === undefined) {
       router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
       webviewToast('존재하지 않는 결재 건입니다');
     }
+    if (approval instanceof Error) {
+      router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
+      webviewToast('예기치 못한 오류가 발생했습니다');
+    }
   }, [approval]);
 
-  const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_H);
+  const titles = useAppStore((state) => state.approvals?.TITLE?.TITLE_H);
   const flds = _(approval)
     .pickBy((_, key) => /^FLD\d+$/.test(key))
     .toPairs()
@@ -130,7 +134,7 @@ const Detail: React.FC = () => {
     .value();
 
 
-  const icon = useMemo(() => getFlowIcon(P_AREA_CODE ?? ""), []);
+  const icon = useMemo(() => getFlowIcon(P_AREA_CODE || ""), [P_AREA_CODE]);
 
   // 슬라이드 변경 핸들러
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
@@ -167,14 +171,14 @@ const Detail: React.FC = () => {
     if (currentScrollTop > prevScrollTop) {
       if (outerScrollRef.current) {
         outerScrollRef.current.scrollTo({
-          top: headerHeightRef.current,
+          top: headerHeight,
           behavior: 'auto'
         });
       }
     }
 
     prevScrollTopRef.current = currentScrollTop;
-  }, []);
+  }, [headerHeight]);
 
   // 아이템 선택 상태 관리
   const handleItemSelection = useCallback((flowCnt: string, isSelected: boolean) => {
@@ -212,11 +216,11 @@ const Detail: React.FC = () => {
     }
   }, [isAllSelected]);
 
-  const opacity = useTransform(scrollY, [0, headerHeightRef.current / 2], [1, 0]);
-  const opacityRev = useTransform(scrollY, [headerHeightRef.current / 2, headerHeightRef.current], [0, 1]);
-  const scale = useTransform(scrollY, [0, headerHeightRef.current], [1, 0.8]);
+  const opacity = useTransform(scrollY, [0, headerHeight / 2], [1, 0]);
+  const opacityRev = useTransform(scrollY, [headerHeight / 2, headerHeight], [0, 1]);
+  const scale = useTransform(scrollY, [0, headerHeight], [1, 0.8]);
 
-  return !approval ?
+  return !approval || approval instanceof Error ?
     (<IonPage>
       <IonContent>
         <div className='loading-indicator-wrapper'>
@@ -398,7 +402,7 @@ const Detail: React.FC = () => {
             <div
               style={{
                 backgroundColor: "var(--ion-background-color2)",
-                height: headerHeightRef.current, // 스크롤한 만큼 높이 감소
+                height: headerHeight, // 스크롤한 만큼 높이 감소
                 willChange: 'height',
                 scrollSnapAlign: 'start'
               }}
@@ -447,8 +451,7 @@ const Detail: React.FC = () => {
             <Swiper
               className="swiper"
               style={{
-                // height: `calc(100vh - ${P_AREA_CODE === 'TODO' ? '301' : '184'}px)`,
-                height: `calc(100vh - var(--ion-safe-area-top) - 131px - 111px)`,
+                height: `calc(100% - var(--ion-safe-area-top) - 77px)`,
                 width: "100%",
                 backgroundColor: "var(--ion-background-color)",
               }}
@@ -539,6 +542,8 @@ const Detail: React.FC = () => {
                   }}
                 >
                   {approval.APPRLINE.map((apprLine: any, index: number) => {
+                    const next = approval.APPRLINE[index + 1];
+                    const isNextRef = next?.WFIT_TYPE === 'D';
                     const isStarter = apprLine.WFIT_TYPE === "ST";
                     const isRef = apprLine.WFIT_TYPE === "D"; //참조
                     const isLast = index === approval.APPRLINE.length - 1;
@@ -563,7 +568,7 @@ const Detail: React.FC = () => {
                         MuiIcon = CheckCircleOutline;
                         color = "var(--gray-color)";
                         borderColor = "var(--ion-color-primary)";
-                        connectorColor = "var(--gray-color)";
+                        connectorColor = isNextRef ?  "var(--yellow)" : "var(--gray-color)";
                         break;
                       case "A":
                         MuiIcon = CheckCircle;
@@ -575,7 +580,7 @@ const Detail: React.FC = () => {
                         MuiIcon = Cancel;
                         color = "var(--red)";
                         borderColor = "var(--red)";
-                        connectorColor = "var(--red)";
+                        connectorColor = "var(--gray-color)";
                         break;
                       case "C":
                         MuiIcon = Close;
@@ -599,7 +604,8 @@ const Detail: React.FC = () => {
                     }
 
                     if (isRef) {
-                      connectorColor = "var(--ion-color-primary)";
+                      borderColor = "var(--yellow)";
+                      connectorColor = "var(--yellow)";
                     }
 
                     return (
@@ -865,7 +871,6 @@ const Detail: React.FC = () => {
         </IonContent >
         <IonFooter style={{
           boxShadow: 'none',
-          backgroundColor: 'var(--ion-background-color)'
         }}>
           {P_AREA_CODE === "TODO" && (
             <div
@@ -879,7 +884,8 @@ const Detail: React.FC = () => {
                 justifyContent: "center",
                 padding: "12px 21px",
                 gap: "12px",
-                paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )'
+                paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
+                backgroundColor: 'var(--ion-background-color)'
               }}
             >
               <IonButton
