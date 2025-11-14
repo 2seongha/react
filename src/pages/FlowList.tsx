@@ -67,6 +67,7 @@ const FlowList: React.FC = () => {
         key={`flow-list-item-${area.AREA_CODE}-${index}`}
         area={area}
         index={index}
+        isLast={index === (flowList.CHILDREN?.length ?? 0) - 1}
       />
     ));
   }, [flowList]);
@@ -107,9 +108,10 @@ export default FlowList;
 interface FlowListProps {
   area: AreaModel;
   index: number;
+  isLast: boolean;
 }
 
-const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
+const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index, isLast }) => {
   const router = useIonRouter();
 
   // 아이콘 정보 메모이제이션
@@ -131,6 +133,9 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index }) => {
       className='flow-list-item'
       onClick={handleClick}
       mode='md'
+      style={{
+        marginBottom: isLast ? 'calc(var(--ion-safe-area-bottom) + 12px)' : '0px'
+      }}
     >
       <div className='flow-list-item-icon' style={iconStyle}>
         <IonImg

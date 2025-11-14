@@ -55,7 +55,7 @@ const Home: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
-        <div style={{ marginTop: '0px' }}>
+        <div style={{ marginTop: '12px' }}>
           <NoticeCard />
         </div>
         <div style={{ marginTop: '12px' }}>
