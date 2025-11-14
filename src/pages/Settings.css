@@ -43,6 +43,7 @@
 ion-item.settings-logout-button {
   margin-top: 12px;
   font-size: 16px;
+  font-weight: 500;
   color: var(--ion-color-step-700);
   --padding-top: 21px;
   --padding-bottom: 21px;

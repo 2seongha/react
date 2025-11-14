@@ -455,7 +455,7 @@ const Detail: React.FC = () => {
             <Swiper
               className="swiper"
               style={{
-                height: `calc(100% - var(--ion-safe-area-top) - 77px)`,
+                height: `calc(100% - 81px)`,
                 width: "100%",
                 backgroundColor: "var(--ion-background-color)",
               }}
