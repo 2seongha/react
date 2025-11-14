@@ -89,16 +89,11 @@ const Settings: React.FC = () => {
             <IonToggle />
           </div>
         </IonCard>
-        <IonItem button mode='ios' style={{
-          marginTop: '12px',
-          '--padding-top': '21px',
-          '--padding-bottom': '21px',
-          '--padding-start': '21px',
-          '--padding-end': '21px',
-          '--border-radius': '16px',
-          fontSize: '16px',
-          color: 'var(--ion-color-step-700)'
-        }} id='logout-trigger'>로그아웃</IonItem>
+        <IonItem
+          className='settings-logout-button'
+          button
+          mode='ios'
+          id='logout-trigger'>로그아웃</IonItem>
         <CustomDialog
           trigger="logout-trigger"
           title="알림"
@@ -109,63 +104,6 @@ const Settings: React.FC = () => {
         />
       </IonContent>
     </IonPage >
-  );
-};
-
-interface MenuItemProps {
-  id?: string;
-  iconSrc?: string;
-  title: string;
-  onClick?: () => void;
-  routerLink?: string;
-  content?: ReactNode;
-}
-
-const MenuItem: React.FC<MenuItemProps> = ({ id, iconSrc, title, onClick, routerLink, content }) => {
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    }
-  };
-
-  const iconContainerStyle = {
-    backgroundColor: 'var(--ion-background-color2)',
-    width: '32px',
-    height: '32px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '12px',
-    marginRight: '12px'
-  };
-
-  const titleStyle = {
-    fontSize: '15px',
-    fontWeight: '500'
-  };
-
-  return (
-    <div
-      style={{
-        padding: '12px 0',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center'
-      }}>
-        {iconSrc && (
-          <div style={iconContainerStyle}>
-            <CachedImage src={iconSrc} width={'22px'} />
-          </div>
-        )}
-        <span style={titleStyle}>{title}</span>
-      </div>
-      {content}
-    </div>
   );
 };
 

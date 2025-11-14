@@ -39,3 +39,18 @@
   color: var(--ion-color-step-700);
   height: 48px;
 }
+
+ion-item.settings-logout-button {
+  margin-top: 12px;
+  font-size: 16px;
+  color: var(--ion-color-step-700);
+  --padding-top: 21px;
+  --padding-bottom: 21px;
+  --padding-start: 21px;
+  --padding-end: 21px;
+  --border-radius: 16px;
+}
+
+ion-item.settings-logout-button::part(native) {
+  transition: none;
+}

@@ -116,11 +116,15 @@ const Detail: React.FC = () => {
 
   useEffect(() => {
     if (approval === undefined) {
-      router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
+      setTimeout(() => {
+        router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
+      }, 0)
       webviewToast('존재하지 않는 결재 건입니다');
     }
     if (approval instanceof Error) {
-      router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
+      setTimeout(() => {
+        router.canGoBack() ? router.goBack() : router.push('/app/home', 'back', 'replace');
+      }, 0)
       webviewToast('예기치 못한 오류가 발생했습니다');
     }
   }, [approval]);
@@ -568,7 +572,7 @@ const Detail: React.FC = () => {
                         MuiIcon = CheckCircleOutline;
                         color = "var(--gray-color)";
                         borderColor = "var(--ion-color-primary)";
-                        connectorColor = isNextRef ?  "var(--yellow)" : "var(--gray-color)";
+                        connectorColor = isNextRef ? "var(--yellow)" : "var(--gray-color)";
                         break;
                       case "A":
                         MuiIcon = CheckCircle;
