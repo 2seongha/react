@@ -13,7 +13,7 @@ export interface AppState {
   setUser: (user: UserModel) => void;
   setCorp: (user: CorpModel) => void;
   setAreas: (areas: AreaModel[] | null) => void;
-  setApprovals: (approvals: ApprovalModel | null) => void;
+  setApprovals: (approvals: ApprovalModel | null | undefined) => void;
   setNotices: (notices: NoticeModel[] | null) => void;
   setNotifications: (notifications: NotificationModel[] | null) => void;
   setSelectedTab: (tab: number) => void;

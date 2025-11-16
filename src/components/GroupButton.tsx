@@ -22,6 +22,7 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
 
   // todoSummary가 변경될 때 selected index 조정
   useEffect(() => {
+    if (!todoSummary) return;
     if (todoSummary && todoSummary.length > 0) {
       // selected index가 배열 범위를 벗어나면 조정
       let newIndex = selected == null ? { value: 0 } : { ...selected };
@@ -40,6 +41,21 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
       setSelected(newIndex);
     } else {
       setSelected(null);
+      setApprovals({
+        LIST: [],
+        LOGIN_ID: '',
+        FLOWCODE: '',
+        FLOWCODE_TXT: '',
+        P_AREA_CODE: '',
+        P_AREA_CODE_TXT: '',
+        AREA_CODE: '',
+        AREA_CODE_TXT: '',
+        TITLE: {
+          TITLE_H: [],
+          TITLE_I: [],
+          TITLE_S: []
+        }
+      });
     }
   }, [todoSummary]);
 
@@ -49,7 +65,6 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
     if (todoSummary) {
       const selectedItem = todoSummary[selected.value];
       getApprovals('TODO', selectedItem.AREA_CODE!, '', '');
-
       // 부모에게 선택된 값 전달
       onSelectionChange?.(selectedItem);
     }

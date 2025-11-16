@@ -164,7 +164,6 @@ const SubModal: React.FC<SubModalProps> = ({
                 padding: "0px 21px var(--ion-safe-area-bottom) 21px",
               }}
             >
-
               {titles?.map((title: string, index: number) => (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
                   <span style={{color:'var(--ion-color-secondary)'}}>{title}</span>
