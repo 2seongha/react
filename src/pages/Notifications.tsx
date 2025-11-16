@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import AppBar from '../components/AppBar';
 import BottomTabBar from '../components/BottomNavigation';
-import ScrollToTopFab, { useScrollToTop } from '../components/ScrollToTopFab';
+import ScrollToTopFab, { useScrollToTop, useVirtuosoScrollToTop } from '../components/ScrollToTopFab';
 import './Notifications.css';
 import useAppStore from '../stores/appStore';
 import { webviewHaptic, webviewToast } from '../webview';
@@ -55,7 +55,7 @@ const Notifications: React.FC = () => {
     }, 100)
   }, [filteredNotifications]);
 
-  const { isTop, scrollToTop, scrollCallbackRef, contentRef } = useScrollToTop();
+  const { isTop, scrollToTop, scrollCallbackRef, contentRef, scrollerRef } = useVirtuosoScrollToTop();
 
   //? 알림 읽음
   const handleReadNotification = useCallback(async (notifyNo: string) => {
@@ -138,8 +138,8 @@ const Notifications: React.FC = () => {
         </div>
       </IonHeader>
       <IonContent
-        ref={contentRef}
         scrollEvents={false}
+        scrollY={false}
       >
         {refreshEnable &&
           <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
@@ -154,18 +154,9 @@ const Notifications: React.FC = () => {
             : (!filteredNotifications || filteredNotifications.length === 0) ?
               <NoData />
               :
-              // <AnimatePresence>
-              //   {filteredNotifications.map((notification: any) => (
-              //     <NotificationItem
-              //       key={notification.NOTIFY_NO}
-              //       notification={notification}
-              //       onRead={handleReadNotification}
-              //       onDelete={handleDeleteNotification}
-              //     />
-              //   ))}
-              // </AnimatePresence>
-
               <Virtuoso
+                ref={contentRef}
+                scrollerRef={scrollerRef}
                 data={filteredNotifications}
                 overscan={15}
                 initialItemCount={15}
@@ -173,19 +164,11 @@ const Notifications: React.FC = () => {
                 increaseViewportBy={{ top: 200, bottom: 200 }}
                 atTopStateChange={atTop => setRefreshEnable(atTop)}
                 itemContent={(index, notification) => (
-                  // <motion.div
-                  //   key={notification.NOTIFY_NO}
-                  //   initial={{ opacity: 1, y: 10 }}
-                  //   animate={{ opacity: 1, y: 0 }}
-                  //   exit={{ opacity: 0, y: -20 }}
-                  //   transition={{ duration: 0.2 }}
-                  // >
                   <NotificationItem
                     notification={notification}
                     onRead={handleReadNotification}
                     onDelete={handleDeleteNotification}
                   />
-                  // </motion.div>
                 )}
               />
         }
@@ -227,7 +210,7 @@ const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notifica
     //     transition: { duration: 0.3 }
     //   }}
     // >
-    <div style={{height:'99.5px'}}>
+    <div style={{ height: '99.5px' }}>
       <IonItemSliding>
         <IonItem button mode='md' onClick={() => onRead(notification.NOTIFY_NO)}>
           <div

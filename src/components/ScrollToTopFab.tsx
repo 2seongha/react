@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { IonButton, IonFab, IonContent } from '@ionic/react';
+import { VirtuosoHandle } from 'react-virtuoso';
 
 interface ScrollToTopFabProps {
   isTop: boolean;
@@ -59,19 +60,31 @@ const ScrollToTopFab: React.FC<ScrollToTopFabProps> = React.memo(({ isTop, onScr
   );
 });
 
+export default ScrollToTopFab;
+
 export const useScrollToTop = () => {
   const [isTop, setIsTop] = useState(true);
   const scrollCallbackRef = useRef<(() => void) | null>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
 
   const scrollToTop = () => {
-    contentRef.current?.scrollToTop(500);
+    if (!contentRef.current) return;
+
+    const contentEl = contentRef.current;
+    if (contentEl) {
+      const height = contentEl.scrollHeight;
+
+      // height에 따라 duration 결정 (예: 1px → 0.5ms)
+      const duration = Math.min(2000, Math.max(500, height * 2));
+
+      contentEl.scrollToTop(duration);
+    }
   };
 
   useEffect(() => {
     const content = contentRef.current;
     if (!content) return;
-
+    
     const handleScroll = () => {
       content.getScrollElement().then((scrollElement) => {
         if (scrollElement) {
@@ -108,4 +121,45 @@ export const useScrollToTop = () => {
   };
 };
 
-export default ScrollToTopFab;
+
+export const useVirtuosoScrollToTop = () => {
+  const [isTop, setIsTop] = useState(true);
+  const scrollCallbackRef = useRef<(() => void) | null>(null);
+
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const scrollerElRef = useRef<HTMLElement | null>(null); // DOM element 저장용
+
+  const scrollToTop = () => {
+    virtuosoRef.current?.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
+
+  const scrollerRef = (ref: HTMLElement | null) => {
+    if (ref) {
+      scrollerElRef.current = ref;
+
+      // 이벤트 등록
+      const onScroll = () => {
+        setIsTop(ref.scrollTop < 100);
+        scrollCallbackRef.current?.();
+      };
+
+      ref.addEventListener("scroll", onScroll, { passive: true });
+
+      // cleanup: ref가 바뀌면 이전 listener 제거
+      return () => {
+        ref.removeEventListener("scroll", onScroll);
+      };
+    }
+  };
+
+  return {
+    isTop,
+    scrollToTop,
+    scrollCallbackRef,
+    contentRef: virtuosoRef,
+    scrollerRef, // Virtuoso에 전달할 ref callback
+  };
+};
