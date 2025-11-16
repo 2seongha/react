@@ -30,6 +30,10 @@
   display: block;
 }
 
+.mypage-card-button > span:first-child {
+  color: var(--ion-color-secondary);
+}
+
 .mypage-card-button {
   font-size: 16px;
   font-weight: 500;

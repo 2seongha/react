@@ -116,7 +116,7 @@ const SubModal: React.FC<SubModalProps> = ({
         // "--max-height": "600px",
       }}
     >
-      <AppBar title={<span style={{ marginLeft: '14px' }}>{subs[initialIndex ?? 0]?.TITLE}</span>} customEndButtons={closeButton} titleCenter={false} />
+      <AppBar title={<span style={{ marginLeft: '14px' }}>{subs?.[initialIndex ?? 0]?.TITLE}</span>} customEndButtons={closeButton} titleCenter={false} />
       {/* <IonContent> */}
       <Swiper style={{ width: '100%' }}>
         <SwiperSlide
