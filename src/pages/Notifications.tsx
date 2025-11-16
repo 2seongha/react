@@ -12,10 +12,12 @@ import NoData from '../components/NoData';
 import { OrbitProgress } from 'react-loading-indicators';
 import CustomDialog from '../components/Dialog';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Virtuoso } from 'react-virtuoso';
 
 const Notifications: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [filterValue, setFilterValue] = useState("A");
+  const [refreshEnable, setRefreshEnable] = useState(true);
 
   const getApprovals = useAppStore(state => state.getApprovals);
   const setApprovals = useAppStore(state => state.setApprovals);
@@ -139,9 +141,11 @@ const Notifications: React.FC = () => {
         ref={contentRef}
         scrollEvents={false}
       >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-          {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
-        </IonRefresher>
+        {refreshEnable &&
+          <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+            {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+          </IonRefresher>
+        }
         {
           !filteredNotifications ?
             <div className='loading-indicator-wrapper'>
@@ -150,16 +154,40 @@ const Notifications: React.FC = () => {
             : (!filteredNotifications || filteredNotifications.length === 0) ?
               <NoData />
               :
-              <AnimatePresence>
-                {filteredNotifications.map((notification: any) => (
+              // <AnimatePresence>
+              //   {filteredNotifications.map((notification: any) => (
+              //     <NotificationItem
+              //       key={notification.NOTIFY_NO}
+              //       notification={notification}
+              //       onRead={handleReadNotification}
+              //       onDelete={handleDeleteNotification}
+              //     />
+              //   ))}
+              // </AnimatePresence>
+
+              <Virtuoso
+                data={filteredNotifications}
+                overscan={15}
+                initialItemCount={15}
+                initialTopMostItemIndex={0}
+                increaseViewportBy={{ top: 200, bottom: 200 }}
+                atTopStateChange={atTop => setRefreshEnable(atTop)}
+                itemContent={(index, notification) => (
+                  // <motion.div
+                  //   key={notification.NOTIFY_NO}
+                  //   initial={{ opacity: 1, y: 10 }}
+                  //   animate={{ opacity: 1, y: 0 }}
+                  //   exit={{ opacity: 0, y: -20 }}
+                  //   transition={{ duration: 0.2 }}
+                  // >
                   <NotificationItem
-                    key={notification.NOTIFY_NO}
                     notification={notification}
                     onRead={handleReadNotification}
                     onDelete={handleDeleteNotification}
                   />
-                ))}
-              </AnimatePresence>
+                  // </motion.div>
+                )}
+              />
         }
         <ScrollToTopFab
           isTop={isTop}
@@ -191,14 +219,15 @@ interface NotificationItemProps {
 
 const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notification, onDelete, onRead }) => {
   return (
-    <motion.div
-      key={`notification-${notification.NOTIFY_NO}`}
-      initial={{ opacity: 1 }}
-      exit={{
-        opacity: 0,
-        transition: { duration: 0.3 }
-      }}
-    >
+    // <motion.div
+    //   key={`notification-${notification.NOTIFY_NO}`}
+    //   initial={{ opacity: 1 }}
+    //   exit={{
+    //     opacity: 0,
+    //     transition: { duration: 0.3 }
+    //   }}
+    // >
+    <div style={{height:'99.5px'}}>
       <IonItemSliding>
         <IonItem button mode='md' onClick={() => onRead(notification.NOTIFY_NO)}>
           <div
@@ -222,7 +251,8 @@ const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notifica
           </IonItemOption>
         </IonItemOptions>
       </IonItemSliding>
-    </motion.div>
+    </div>
+    // </motion.div>
   );
 });
 
