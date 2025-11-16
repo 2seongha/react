@@ -16,6 +16,7 @@ import AppBar from '../components/AppBar';
 import { AreaModel } from '../stores/types';
 import { getFlowIcon } from '../utils';
 import { arrowForwardOutline, closeOutline } from 'ionicons/icons';
+import { webviewHaptic } from '../webview';
 
 const Search: React.FC = () => {
   const user = useAppStore((state) => state.user);
@@ -97,6 +98,7 @@ const Search: React.FC = () => {
       fill='clear'
       color='medium'
       onClick={() => {
+        webviewHaptic('mediumImpact');
         router.goBack();
       }}
       style={{

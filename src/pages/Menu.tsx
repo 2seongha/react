@@ -49,7 +49,7 @@ const Menu: React.FC = () => {
 
   // 닫기 버튼 컴포넌트 - AppBar 버튼과 동일한 스타일
   const closeButton = useMemo(() => (
-    <IonMenuToggle menu="main-menu">
+    <IonMenuToggle menu="main-menu" onClick={() => webviewHaptic('mediumImpact')}>
       <IonButton
         mode='md'
         shape='round'
