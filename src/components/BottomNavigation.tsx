@@ -5,6 +5,7 @@ import { HomeFilled as HomeIcon, Notifications as NotificationsIcon, MoreHoriz a
 import useAppStore from '../stores/appStore';
 import './BottomNavigation.css';
 import _ from 'lodash';
+import { webviewHaptic } from '../webview';
 
 const BottomNavigation: React.FC = () => {
   const selectedTab = useAppStore(state => state.selectedTab);
@@ -19,6 +20,7 @@ const BottomNavigation: React.FC = () => {
         className='bottom-navigation'
         value={selectedTab}
         onChange={(_, newValue) => {
+          webviewHaptic('mediumImpact');
           setSelectedTab(newValue);
           switch (newValue) {
             case 0: return router.push('/app/home', 'none', 'replace');

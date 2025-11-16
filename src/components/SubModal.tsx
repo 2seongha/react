@@ -112,28 +112,13 @@ const SubModal: React.FC<SubModalProps> = ({
       breakpoints={[0, 1]}
       expandToScroll={false}
       style={{
-        '--height': "auto",
-        // "--max-height": "600px",
+        // '--height': "auto",
+        "--max-height": "600px",
       }}
     >
       <AppBar title={<span style={{ marginLeft: '14px' }}>{subs?.[initialIndex ?? 0]?.TITLE}</span>} customEndButtons={closeButton} titleCenter={false} />
-      {/* <IonContent> */}
-      <Swiper style={{ width: '100%' }}>
-        <SwiperSlide
-          style={{
-            overflow: "auto",
-            padding: "0px 21px 0 21px",
-            maxHeight: '600px'
-          }}
-        >
-          {titles?.map((title: string, index: number) => (
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
-              <span>{title}</span>
-              <span>sd</span>
-            </div>
-          ))}
-        </SwiperSlide>
-        {subs?.map((sub: any) => {
+      <IonContent scrollEvents={false}>
+        {/* {subs?.map((sub: any) => {
           const flds = _(sub)
             .pickBy((_, key) => /^FLD\d+$/.test(key))
             .toPairs()
@@ -141,13 +126,8 @@ const SubModal: React.FC<SubModalProps> = ({
             .map(([_, value]) => value)
             .value();
 
-          return <SwiperSlide
-            style={{
-              overflow: "auto",
-              padding: "0px 21px 0 21px",
-              maxHeight: '600px',
-            }}
-          >
+          return <div>
+
             {titles?.map((title: string, index: number) => (
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
                 <span>{title}</span>
@@ -166,11 +146,36 @@ const SubModal: React.FC<SubModalProps> = ({
                 <span>{flds[index]}</span>
               </div>
             ))}
-          </SwiperSlide>
+          </div>
         }
-        )}
-      </Swiper>
-      {/* </IonContent> */}
+        )} */}
+        <Swiper >
+          {subs?.map((sub: any) => {
+            const flds = _(sub)
+              .pickBy((_, key) => /^FLD\d+$/.test(key))
+              .toPairs()
+              .sortBy(([key]) => parseInt(key.replace("FLD", ""), 10))
+              .map(([_, value]) => value)
+              .value();
+
+            return <SwiperSlide
+              style={{
+                overflow: "auto",
+                padding: "0px 21px var(--ion-safe-area-bottom) 21px",
+              }}
+            >
+
+              {titles?.map((title: string, index: number) => (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
+                  <span style={{color:'var(--ion-color-secondary)'}}>{title}</span>
+                  <span>{flds[index]}</span>
+                </div>
+              ))}
+            </SwiperSlide>
+          }
+          )}
+        </Swiper>
+      </IonContent>
     </IonModal>
   );
 };
