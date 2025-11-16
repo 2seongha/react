@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  IonCard,
   IonContent,
   IonPage,
 } from '@ionic/react';
@@ -14,73 +15,55 @@ const MyPage: React.FC = () => {
   return (
     <IonPage className='mypage'>
       <AppBar
-        title={<span></span>}
         showBackButton
       />
       <IonContent>
-        <div style={{ padding: '22px' }}>
-          <span style={{ fontSize: '18px', fontWeight: '600' }}>내 정보</span>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>이름</span>
+        <IonCard className='mypage-card'>
+          <span className='mypage-card-title'>{user?.NAME}님의 정보</span>
+          {/* <div className='mypage-card-button'>
+            <span >이름</span>
             <span>{user?.NAME}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>아이디</span>
+          </div> */}
+          <div className='mypage-card-button'>
+            <span >아이디</span>
             <span>{user?.LOGIN_ID}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>회사코드</span>
+          <div className='mypage-card-button'>
+            <span >회사코드</span>
             <span>{user?.BUKRS}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>이메일</span>
+          <div className='mypage-card-button'>
+            <span >이메일</span>
             <span>{user?.MAIL}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>조직코드</span>
+          <div className='mypage-card-button'>
+            <span >조직코드</span>
             <span>{user?.ORGEH}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>부서명</span>
+          <div className='mypage-card-button'>
+            <span >부서명</span>
             <span>{user?.ORGTX}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>직급</span>
+          <div className='mypage-card-button'>
+            <span >직급</span>
             <span>{user?.RANK || '-'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>직급명</span>
+          <div className='mypage-card-button'>
+            <span >직급명</span>
             <span>{user?.RANK_NAME || '-'}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>직책</span>
-            <span>{user?.POSITIONN || '-'}</span>
+        </IonCard>
+        <IonCard className='mypage-card'>
+          <span className='mypage-card-title'>그룹 정보</span>
+          <div className='mypage-card-button'>
+            <span >그룹코드</span>
+            <span>{corp?.CORP_ID}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>직책명</span>
-            <span>{user?.POSITIONN_NAME || '-'}</span>
+          <div className='mypage-card-button'>
+            <span >그룹명</span>
+            <span>{corp?.CORP_NM}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>코스트센터</span>
-            <span>{user?.KOSTL || '-'}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>코스트센터명</span>
-            <span>{user?.KOSTL_NAME || '-'}</span>
-          </div>
-        </div>
-        <div style={{ height: '22px', backgroundColor: 'var(--ion-background-color2)' }}></div>
-        <div style={{ padding: '22px' }}>
-          <span style={{ fontSize: '18px', fontWeight: '600' }}>그룹 정보</span>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>그룹코드</span>
-            <span>{corp?.corpId}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>그룹명</span>
-            <span>{corp?.corpNm}</span>
-          </div>
-        </div>
+        </IonCard>
       </IonContent>
     </IonPage>
   );

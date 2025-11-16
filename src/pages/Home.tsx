@@ -302,7 +302,7 @@ const TodoSummaryCard: React.FC = () => {
         className='menu-expand-button'
         fill="clear"
         onClick={() => {
-          router.push(`/approval/${selectedArea?.P_AREA_CODE}/${selectedArea?.FLOWCODE}/${selectedArea?.P_AREA_CODE_TXT}/${selectedArea?.O_LTEXT}`);
+          router.push(`/approval/${selectedArea?.P_AREA_CODE}/${selectedArea?.FLOWCODE}/${encodeURIComponent(selectedArea?.P_AREA_CODE_TXT ?? '-')}/${encodeURIComponent(selectedArea?.O_LTEXT ?? '-')}`);
         }}
         disabled={!approvals || !todoSummary || !todoSummary.length}
       >

@@ -119,7 +119,7 @@ const Notifications: React.FC = () => {
               <IonSelectOption value="R">읽은알림</IonSelectOption>
             </IonSelect>
           </IonItem>
-          <div className="filter-buttons">
+          <div>
             <IonButton
               disabled={useMemo(() => (notifications?.filter(notification => notification.READ_YN === 'N').length ?? 0) === 0, [notifications])}
               mode='md'

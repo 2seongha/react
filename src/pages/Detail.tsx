@@ -467,7 +467,7 @@ const Detail: React.FC = () => {
               <SwiperSlide
                 style={{
                   overflow: "auto",
-                  padding: "0px 21px 0 21px",
+                  padding: `0px 21px ${P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'} 21px`,
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
@@ -526,6 +526,7 @@ const Detail: React.FC = () => {
               <SwiperSlide
                 style={{
                   overflow: "auto",
+                  paddingBottom: `${P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'}`,
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
@@ -656,7 +657,7 @@ const Detail: React.FC = () => {
               <SwiperSlide
                 style={{
                   overflow: "auto",
-                  padding: "12px 21px 0 21px",
+                  padding: `0px 21px ${P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'} 21px`,
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
@@ -1083,7 +1084,7 @@ const SubItem: React.FC<SubProps> = React.memo(
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-              <span style={{ fontSize: '13px', fontWeight: '500' }}>{item.TITLE}</span>
+              <span style={{ fontSize: '12px', fontWeight: '500' }}>{item.TITLE}</span>
               <IonIcon src={chevronForward}
                 style={{
                   color: 'var(--ion-color-secondary)'

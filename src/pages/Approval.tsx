@@ -14,7 +14,9 @@ import { webviewHaptic } from '../webview';
 import ApprovalModal from '../components/ApprovalModal';
 
 const Approval: React.FC = () => {
-  const { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
+  let { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
+  P_AREA_CODE_TXT = decodeURIComponent(P_AREA_CODE_TXT);
+  AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
   const setApprovals = useAppStore(state => state.setApprovals);
   const getApprovals = useAppStore(state => state.getApprovals);
   const approvals = useAppStore(state => state.approvals);
@@ -30,7 +32,6 @@ const Approval: React.FC = () => {
     setSearchText('');
     setApprovals(null);
     getApprovals(P_AREA_CODE, AREA_CODE, '', '');
-
     return () => setApprovals(null);
     // return;
   }, []);

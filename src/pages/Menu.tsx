@@ -113,7 +113,7 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ area, level = 0 }) => {
       router.push(`/flowList/${area.AREA_CODE}`);
     } else {
       await menuController.close('main-menu');
-      router.push(`/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${area.P_AREA_CODE_TXT}/${area.O_LTEXT}`);
+      router.push(`/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${encodeURIComponent(area.P_AREA_CODE_TXT ?? '-')}/${encodeURIComponent(area.O_LTEXT ?? '-')}`);
     }
   }, [hasChildren, router, area]);
 

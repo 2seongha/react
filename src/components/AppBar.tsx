@@ -16,6 +16,7 @@ import AnimatedBadge from './AnimatedBadge';
 import useAppStore from '../stores/appStore';
 import { appLogoDark, appLogoLight } from '../assets/images';
 import CachedImage from './CachedImage';
+import { webviewHaptic } from '../webview';
 
 type AppBarProps = {
   title?: ReactNode;
@@ -94,27 +95,33 @@ const AppBar: React.FC<AppBarProps> = ({
           }
           <div className='app-bar-title-wrapper' style={{
             justifyContent: titleCenter ? 'center' : 'start',
-            paddingLeft: titleCenter || !showBackButton ? '0' : '56px',
+            paddingLeft: titleCenter || !showBackButton ? '0' : '64px',
           }}>
             {title}
             {showCount ? <AnimatedBadge count={count} /> : null}
           </div>
           {showBackButton ?
-            <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
-            : <div></div>
+            <IonBackButton defaultHref='/app/home' mode='md' color={'primary'}/>
+            : <span/>
           }
-          <IonButtons slot="end" style={{marginRight:'8px'}}>
+          <IonButtons slot="end" style={{ marginRight: '8px' }}>
             {showSearchButton &&
               <IonButton mode='md' shape='round' color={'medium'}
                 className="app-bar-button"
-                onClick={() => router.push('/search', 'forward', 'push')}>
+                onClick={() => {
+                  webviewHaptic('mediumImpact');
+                  router.push('/search', 'forward', 'push');
+                }}>
                 <IonIcon icon={search} />
               </IonButton>
             }
             {showSettingButton &&
               <IonButton mode='md' shape='round' color={'medium'}
                 className="app-bar-button"
-                onClick={() => router.push('/settings', 'forward', 'push')}>
+                onClick={() => {
+                  webviewHaptic('mediumImpact');
+                  router.push('/settings', 'forward', 'push');
+                }}>
                 <IonIcon icon={settingsSharp} />
               </IonButton>
             }
@@ -125,6 +132,7 @@ const AppBar: React.FC<AppBarProps> = ({
                 color={'medium'}
                 className="app-bar-button"
                 menu="main-menu"
+                onClick={() => webviewHaptic('mediumImpact')}
               />
             }
             {customEndButtons}

@@ -72,7 +72,7 @@ const Search: React.FC = () => {
     return parts.map((part, index) => {
       if (part.toLowerCase() === searchText.toLowerCase()) {
         return (
-          <span key={index} style={{ fontWeight: 700 }}>
+          <span key={index} style={{ color: 'var(--ion-color-primary)' }}>
             {part}
           </span>
         );
@@ -113,7 +113,7 @@ const Search: React.FC = () => {
     <IonPage className='search'>
       <IonContent scrollEvents={true} scrollY={false} scrollX={false}>
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )' }}>
-          <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent: 'center', marginTop: 'var(--ion-safe-area-top)' }}>
+          <div style={{ display: 'flex', height: '48px', alignItems: 'center', justifyContent: 'center', marginTop: 'calc(var(--ion-safe-area-top) + 12px)' }}>
             <IonSearchbar
               ref={searchbarRef}
               mode='ios'
@@ -160,28 +160,40 @@ const Search: React.FC = () => {
                         onClick={() => {
                           // 여기에 area 선택 시 동작 추가
                           if (area.P_AREA_CODE) {
-                            router.push(`/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${area.P_AREA_CODE_TXT}/${area.O_LTEXT}`);
+                            router.push(`/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${encodeURIComponent(area.P_AREA_CODE_TXT ?? '-')}/${encodeURIComponent(area.O_LTEXT ?? '-')}`);
                           } else {
                             router.push(`/flowList/${area.AREA_CODE}`);
                           }
                         }}
                       >
-                        <div style={{ padding: '12px 21px', display: 'flex' }}>
+                        <div style={{ padding: '12px 21px', display: 'flex', width: '100%' }}>
                           {area.P_AREA_CODE && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '8px' }}>
-                              <div className="menu-item-icon" style={{ backgroundColor: pIcon.backgroundColor }}>
+                              <div className="menu-item-icon" style={{ backgroundColor: pIcon.backgroundColor, width: '28px', height: '28px' }}>
                                 <IonImg src={pIcon.image} alt="menu icon" style={{ width: '20px' }} />
                               </div>
-                              <span style={{ fontSize: '14px' }}>{highlightSearchText(area.P_AREA_CODE_TXT || '', searchText)}</span>
+                              <span style={{ fontSize: '14px', fontWeight: 500 }}>{highlightSearchText(area.P_AREA_CODE_TXT || '', searchText)}</span>
                               <IonIcon icon={arrowForwardOutline} style={{ color: 'var(--gray-color)' }}></IonIcon>
                             </div>
                           )}
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div className="menu-item-icon" style={{ backgroundColor: icon.backgroundColor }}>
+                          <div style={{ display: 'flex', alignItems: 'center', flex: 1, overflow: 'hidden' }}>
+                            <div className="menu-item-icon" style={{ backgroundColor: icon.backgroundColor, width: '28px', height: '28px' }}>
                               <IonImg src={icon.image} alt="menu icon" style={{ width: '20px' }} />
                             </div>
-                            <span style={{ paddingLeft: '8px', fontSize: '14px' }}>{highlightSearchText(area.O_LTEXT || '', searchText)}</span>
-                            <span style={{ color: 'var(--ion-color-primary)', marginLeft: '4px', fontSize: '14px' }}>({area.CNT || 0})</span>
+                            <span
+                              style={{
+                                paddingLeft: '8px',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: 'inline-block',
+                              }}
+                            >
+                              {highlightSearchText(area.O_LTEXT || '', searchText)}
+                            </span>
+                            <span style={{ color: 'var(--ion-color-step-700)', marginLeft: '4px', fontSize: '14px' }}>({area.CNT || 0})</span>
                           </div>
                         </div>
                       </IonItem>

@@ -1,4 +1,40 @@
-.mypage span {
-  font-size: 14px;
+.mypage {
+  /* background: var(--ion-background-color2); */
+}
+
+.mypage .app-bar ion-toolbar {
+  --background: var(--ion-background-color2);
+}
+
+.mypage ion-content {
+  --padding-top: 0px;
+  --padding-bottom: 12px;
+  --padding-start: 21px;
+  --padding-end: 21px;
+  --background: var(--ion-background-color2);
+}
+
+.mypage-card {
+  box-shadow: none;
+  border-radius: 16px;
+  margin: 0;
+  padding: 18px 21px;
+  margin-top: 12px;
+}
+
+.mypage-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  padding: 14px 0px;
+  display: block;
+}
+
+.mypage-card-button {
+  font-size: 16px;
   font-weight: 500;
+  color: var(--ion-color-step-700);
+  padding: 14px 0px;
+  display: flex;
+  justify-content: space-between;
 }

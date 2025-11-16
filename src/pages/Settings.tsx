@@ -14,7 +14,7 @@ import AppBar from '../components/AppBar';
 import { webviewLogout, webviewTheme } from '../webview';
 import { themeIcon, bellIcon } from '../assets/images';
 import CachedImage from '../components/CachedImage';
-import { contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
+import { chevronForward, contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
 import "./Settings.css";
 import CustomDialog from '../components/Dialog';
 
@@ -58,20 +58,20 @@ const Settings: React.FC = () => {
               }}
             >
               <IonSegmentButton value="light" style={{
-                '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
-                '--border-color': 'var(--custom-border-color-100)'
+                '--indicator-color': 'var(--ion-color-primary)',
+                '--border-color': 'var(--custom-border-color-100)',
               }}>
                 <IonIcon src={sunnyOutline} size='small'></IonIcon>
               </IonSegmentButton>
               <IonSegmentButton value="system" style={{
-                '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
-                '--border-color': 'var(--custom-border-color-100)'
+                '--indicator-color': 'var(--ion-color-primary)',
+                '--border-color': 'var(--custom-border-color-100)',
               }}>
                 <IonIcon src={contrastOutline} size='small'></IonIcon>
               </IonSegmentButton>
               <IonSegmentButton value="dark" style={{
-                '--indicator-color': 'rgba(var(--ion-color-primary-rgb), .5)',
-                '--border-color': 'var(--custom-border-color-100)'
+                '--indicator-color': 'var(--ion-color-primary)',
+                '--border-color': 'var(--custom-border-color-100)',
               }}>
                 <IonIcon src={moonOutline} size='small'></IonIcon>
               </IonSegmentButton>
@@ -92,8 +92,11 @@ const Settings: React.FC = () => {
         <IonItem
           className='settings-logout-button'
           button
-          mode='ios'
-          id='logout-trigger'>로그아웃</IonItem>
+          mode='md'
+          id='logout-trigger'>
+          로그아웃
+          <IonIcon src={chevronForward} slot='end' style={{ margin: 0 }} size='small'></IonIcon>
+        </IonItem>
         <CustomDialog
           trigger="logout-trigger"
           title="알림"

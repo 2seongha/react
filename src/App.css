@@ -135,6 +135,10 @@ ion-segment-button {
   --background-hover-opacity: 0;
 }
 
+.segment-button-checked {
+  color: #fff !important;
+}
+
 ion-button {
   margin-inline-start: 0px;
   margin-inline-end: 0px;

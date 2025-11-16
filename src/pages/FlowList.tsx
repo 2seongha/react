@@ -119,7 +119,11 @@ const FlowListItem: React.FC<FlowListProps> = React.memo(({ area, index, isLast 
 
   // 클릭 핸들러 최적화
   const handleClick = useCallback(() => {
-    router.push(`/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${area.P_AREA_CODE_TXT}/${area.O_LTEXT}`, 'forward', 'push');
+    router.push(
+      `/approval/${area.P_AREA_CODE}/${area.AREA_CODE}/${encodeURIComponent(area.P_AREA_CODE_TXT ?? '-')}/${encodeURIComponent(area.O_LTEXT ?? '-')}`,
+      'forward',
+      'push'
+    );
   }, [router]);
 
   // 스타일 객체 메모이제이션

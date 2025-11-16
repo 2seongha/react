@@ -104,24 +104,35 @@ const SubModal: React.FC<SubModalProps> = ({
     <IonModal
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
-      className="approval-modal auto-height"
+      // className="approval-modal auto-height"
       mode="ios"
       ref={modal}
       trigger={trigger}
-      initialBreakpoint={0.6}
-      breakpoints={[0.6, 1]}
-      expandToScroll={true}
-      // initialBreakpoint={1}
-      // breakpoints={[0, 1]}
+      initialBreakpoint={1}
+      breakpoints={[0, 1]}
+      expandToScroll={false}
       style={{
-        '--height': "calc(100% - 48px - var(--ion-safe-area-top))",
-        // "--max-height": "calc(100% - 48px - var(--ion-safe-area-top))",
+        '--height': "auto",
+        // "--max-height": "600px",
       }}
     >
-      <AppBar title={<span style={{ marginLeft: '21px' }}>{modalTitle}</span>} customEndButtons={closeButton} titleCenter={false} />
-      {/* <div className="inner-content"> */}
-      {/* <IonContent className="approval-modal-ion-content" scrollY={false} scrollEvents={false}> */}
-      <Swiper >
+      <AppBar title={<span style={{ marginLeft: '14px' }}>{subs[initialIndex ?? 0]?.TITLE}</span>} customEndButtons={closeButton} titleCenter={false} />
+      {/* <IonContent> */}
+      <Swiper style={{ width: '100%' }}>
+        <SwiperSlide
+          style={{
+            overflow: "auto",
+            padding: "0px 21px 0 21px",
+            maxHeight: '600px'
+          }}
+        >
+          {titles?.map((title: string, index: number) => (
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
+              <span>{title}</span>
+              <span>sd</span>
+            </div>
+          ))}
+        </SwiperSlide>
         {subs?.map((sub: any) => {
           const flds = _(sub)
             .pickBy((_, key) => /^FLD\d+$/.test(key))
@@ -134,31 +145,32 @@ const SubModal: React.FC<SubModalProps> = ({
             style={{
               overflow: "auto",
               padding: "0px 21px 0 21px",
+              maxHeight: '600px',
             }}
           >
-            {/* {titles?.map((title: string, index: number) => (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{title}</span>
-                  <span>{flds[index]}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{title}</span>
-                  <span>{flds[index]}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{title}</span>
-                  <span>{flds[index]}</span>
-                </div>
-              </>
-            ))} */}
-            {Array.from({ length: 1000, }).map((_, index) => <span style={{padding:'12px', display:'block'}}>asdfasdfasdfasdf{index}</span>)}
+            {titles?.map((title: string, index: number) => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
+                <span>{title}</span>
+                <span>{flds[index]}</span>
+              </div>
+            ))}
+            {titles?.map((title: string, index: number) => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
+                <span>{title}</span>
+                <span>{flds[index]}</span>
+              </div>
+            ))}
+            {titles?.map((title: string, index: number) => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
+                <span>{title}</span>
+                <span>{flds[index]}</span>
+              </div>
+            ))}
           </SwiperSlide>
         }
         )}
       </Swiper>
       {/* </IonContent> */}
-      {/* </div> */}
     </IonModal>
   );
 };

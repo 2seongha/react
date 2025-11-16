@@ -38,4 +38,5 @@
   --padding-end: 10px;
   --border-radius: 8px;
   color: var(--ion-color-step-700);
+  justify-content: space-between;
 }

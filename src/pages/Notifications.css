@@ -31,11 +31,6 @@ ion-popover.select-popover ion-item {
   font-weight: 500;
 }
 
-.filter-buttons {
-  display: flex;
-  gap: 8px;
-}
-
 .filter-button {
   font-size: 15px;
   height: 42px;
