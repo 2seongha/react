@@ -7,13 +7,13 @@
   --background: var(--ion-background-color2);
 }
 
-.detail .grab-indicator {
+.grab-indicator {
   position: relative;
   height: 28px;
   background-color: var(--ion-background-color2);
 }
 
-.detail .grab-indicator::before {
+.grab-indicator::before {
   content: '';
   position: absolute;
   width: 100%;
@@ -25,7 +25,7 @@
   box-shadow: var(--approval-text-box-shadow);
 }
 
-.detail .grab-indicator::after {
+.grab-indicator::after {
   content: '';
   position: absolute;
   width: 48px;

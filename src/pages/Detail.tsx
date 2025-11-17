@@ -499,7 +499,7 @@ const Detail: React.FC = () => {
                     <span style={{ fontSize: '12px' }}>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedItems.size})</span></span>
                   </IonItem>
                 </div>}
-                {[...approval.SUB, ...approval.SUB, ...approval.SUB, ...approval.SUB].filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
+                {approval.SUB.filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
                   <SubItem
                     style={{ marginTop: index === 0 ? '12px' : 0 }}
                     key={item.FLOWNO + item.FLOWCNT + index}
@@ -687,7 +687,6 @@ const Detail: React.FC = () => {
           {
             <SubModal
               trigger="sub-modal-trigger"
-              modalTitle={selectedSubData?.modalTitle}
               subs={selectedSubData?.subs}
               initialIndex={selectedSubData?.initialIndex}
             />
@@ -1072,7 +1071,7 @@ const SubItem: React.FC<SubProps> = React.memo(
             key={`sub-${index}`}
             mode="md"
             style={{
-              '--background': isSelected ? 'rgba(var(--ion-color-primary-rgb), .05)' : 'rgba(var(--ion-background-color2-rgb), .5)',
+              '--background': isSelected ? 'rgba(var(--ion-color-primary-rgb), .05)' : 'rgba(var(--ion-background-color2-rgb), 1)',
               '--border-radius': '8px',
               '--border-color': isSelected ? 'transparent' : 'var(--custom-border-color-100)',
               marginBottom: sub.length - 1 !== index ? 4 : 0
@@ -1084,7 +1083,7 @@ const SubItem: React.FC<SubProps> = React.memo(
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-              <span style={{ fontSize: '12px', fontWeight: '500' }}>{item.TITLE}</span>
+              <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--ion-color-step-800)' }}>{item.TITLE}</span>
               <IonIcon src={chevronForward}
                 style={{
                   color: 'var(--ion-color-secondary)'
@@ -1104,7 +1103,6 @@ const SubItem: React.FC<SubProps> = React.memo(
         title: titleElement,
         body: bodyElement,
         sub: subElement,
-        // onClick: handleItemClick,
         onCheckboxChange: handleCheckboxChange,
       }),
       [
@@ -1113,7 +1111,6 @@ const SubItem: React.FC<SubProps> = React.memo(
         titleElement,
         bodyElement,
         subElement,
-        // handleItemClick,
         handleCheckboxChange,
       ]
     );

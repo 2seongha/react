@@ -1,43 +1,43 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useState, useRef, useMemo, useEffect, useLayoutEffect } from "react";
 import {
   IonContent,
   IonFooter,
   IonIcon,
   IonModal,
-  IonTextarea,
   useIonRouter,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
-import { checkmarkCircle, close } from "ionicons/icons";
+import { close } from "ionicons/icons";
 import "./ApprovalModal.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import useAppStore from "../stores/appStore";
 import _ from "lodash";
+import { Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 interface SubModalProps {
   trigger?: string;
-  modalTitle?: string;
   subs?: any;
   initialIndex?: number;
 }
 
 const SubModal: React.FC<SubModalProps> = ({
   trigger,
-  modalTitle,
   subs,
   initialIndex
 }) => {
-  const router = useIonRouter();
-  const modal = useRef<HTMLIonModalElement>(null);
-  const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
+  const modalRef = useRef<HTMLIonModalElement>(null);
+  const swiperRef = useRef<any>(null); // Swiper 인스턴스
+  const router = useIonRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   function dismiss() {
-    modal.current?.dismiss();
+    modalRef.current?.dismiss();
   }
 
   const handleModalWillPresent = () => {
@@ -63,6 +63,10 @@ const SubModal: React.FC<SubModalProps> = ({
     closedByBackButtonRef.current = false;
   };
 
+  const handleClose = () => {
+    router.goBack();
+  }
+
   // 브라우저 뒤로가기 버튼 처리
   useEffect(() => {
     if (!isModalOpen) return;
@@ -82,74 +86,51 @@ const SubModal: React.FC<SubModalProps> = ({
     };
   }, [isModalOpen]);
 
-  // 닫기 버튼 컴포넌트 - AppBar 버튼과 동일한 스타일
-  const closeButton = useMemo(
-    () => (
-      <IonButton
-        mode="md"
-        shape="round"
-        color={"medium"}
-        className="app-bar-button"
-        onClick={dismiss}
-      >
-        <IonIcon icon={close} />
-      </IonButton>
-    ),
-    []
-  );
-
   const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_S);
 
   return (
     <IonModal
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
-      // className="approval-modal auto-height"
       mode="ios"
-      ref={modal}
+      ref={modalRef}
       trigger={trigger}
       initialBreakpoint={1}
       breakpoints={[0, 1]}
       expandToScroll={false}
+      className="approval-modal"
       style={{
-        // '--height': "auto",
-        "--max-height": "600px",
+        '--max-height': '600px',
+        '--border-radius': '20px'
       }}
     >
-      <AppBar title={<span style={{ marginLeft: '14px' }}>{subs?.[initialIndex ?? 0]?.TITLE}</span>} customEndButtons={closeButton} titleCenter={false} />
-      <IonContent scrollEvents={false}>
-        {/* {subs?.map((sub: any) => {
-          const flds = _(sub)
-            .pickBy((_, key) => /^FLD\d+$/.test(key))
-            .toPairs()
-            .sortBy(([key]) => parseInt(key.replace("FLD", ""), 10))
-            .map(([_, value]) => value)
-            .value();
-
-          return <div>
-
-            {titles?.map((title: string, index: number) => (
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
-                <span>{title}</span>
-                <span>{flds[index]}</span>
-              </div>
-            ))}
-            {titles?.map((title: string, index: number) => (
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
-                <span>{title}</span>
-                <span>{flds[index]}</span>
-              </div>
-            ))}
-            {titles?.map((title: string, index: number) => (
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
-                <span>{title}</span>
-                <span>{flds[index]}</span>
-              </div>
-            ))}
-          </div>
-        }
-        )} */}
-        <Swiper >
+      <IonContent scrollEvents={false} scrollY={false}>
+        <div className="grab-indicator" style={{
+          position: 'sticky',
+          top: 0,
+          backgroundColor: 'var(--ion-background-color2)',
+          zIndex: 2
+        }}>
+          <span></span>
+        </div>
+        <Swiper
+          style={{
+            background: 'var(--ion-background-color)',
+            zIndex: 2
+          }}
+          initialSlide={initialIndex}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+            requestAnimationFrame(() => {
+              const maxHeight = Math.min(swiper.el.scrollHeight + 110, 600); // 헤더 28 + 푸터 82
+              modalRef.current?.style.setProperty("--max-height", `${maxHeight}px`);
+            });
+          }}
+          pagination={{
+            dynamicBullets: true,
+          }}
+          modules={[Pagination]}
+        >
           {subs?.map((sub: any) => {
             const flds = _(sub)
               .pickBy((_, key) => /^FLD\d+$/.test(key))
@@ -161,12 +142,19 @@ const SubModal: React.FC<SubModalProps> = ({
             return <SwiperSlide
               style={{
                 overflow: "auto",
-                padding: "0px 21px var(--ion-safe-area-bottom) 21px",
+                padding: "0px 24px var(--ion-safe-area-bottom) 24px",
               }}
             >
               {titles?.map((title: string, index: number) => (
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '48px' }}>
-                  <span style={{color:'var(--ion-color-secondary)'}}>{title}</span>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  height: '48px',
+                  borderBottom: '.5px solid var(--ion-color-step-100)',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ color: 'var(--ion-color-secondary)' }}>{title}</span>
                   <span>{flds[index]}</span>
                 </div>
               ))}
@@ -175,6 +163,38 @@ const SubModal: React.FC<SubModalProps> = ({
           )}
         </Swiper>
       </IonContent>
+      <IonFooter style={{
+        boxShadow: 'none',
+      }}>
+        <div
+          style={{
+            height: "auto",
+            width: "100%",
+            borderRadius: "16px 16px 0 0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "12px 21px",
+            gap: "12px",
+            paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
+            backgroundColor: 'var(--ion-background-color)'
+          }}
+        >
+          <IonButton
+            mode="md"
+            color="light"
+            style={{
+              flex: 1,
+              height: "58px",
+              fontSize: "18px",
+              fontWeight: "600",
+            }}
+            onClick={handleClose}
+          >
+            <span>닫기</span>
+          </IonButton>
+        </div>
+      </IonFooter>
     </IonModal>
   );
 };
