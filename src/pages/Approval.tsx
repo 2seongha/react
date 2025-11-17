@@ -367,7 +367,7 @@ const Approval: React.FC = () => {
       </IonHeader >
       <IonContent
         ref={contentRef}
-        scrollEvents={false}
+        scrollEvents={true}
         onIonScrollStart={()=>document.body.classList.add('no-ripple')}
         onIonScrollEnd={()=>document.body.classList.remove('no-ripple')}
       >
