@@ -69,22 +69,14 @@ export const useScrollToTop = () => {
 
   const scrollToTop = () => {
     if (!contentRef.current) return;
-
     const contentEl = contentRef.current;
-    if (contentEl) {
-      const height = contentEl.scrollHeight;
-
-      // height에 따라 duration 결정 (예: 1px → 0.5ms)
-      const duration = Math.min(2000, Math.max(500, height * 2));
-
-      contentEl.scrollToTop(duration);
-    }
+    contentEl.scrollToTop(500);
   };
 
   useEffect(() => {
     const content = contentRef.current;
     if (!content) return;
-    
+
     const handleScroll = () => {
       content.getScrollElement().then((scrollElement) => {
         if (scrollElement) {
