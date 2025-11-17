@@ -81,7 +81,8 @@ const FlowList: React.FC = () => {
         showCount={true}
         count={totalCount}
       />
-      <IonContent scrollEvents={false} scrollX={false}>
+      <IonContent scrollEvents={true} scrollX={false} onIonScrollStart={() => document.body.classList.add('no-ripple')}
+        onIonScrollEnd={() => document.body.classList.remove('no-ripple')}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>

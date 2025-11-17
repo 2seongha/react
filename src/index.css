@@ -13,6 +13,8 @@
   --ion-color-primary-tint: #4c8dff;
   --yellow: #bc47ff;
   --red: #E53935;
+  --swiper-pagination-bullet-inactive-color: #808080;
+  --swiper-pagination-bullet-inactive-opacity: 1;
 
   /* Light theme */
   --ion-background-color: #fff;

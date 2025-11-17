@@ -247,7 +247,8 @@ ion-modal.auto-height .inner-content {
   touch-action: none;
 }
 
-.swiper-horizontal > .swiper-pagination-bullets.swiper-pagination-bullets-dynamic, .swiper-pagination-horizontal.swiper-pagination-bullets.swiper-pagination-bullets-dynamic {
+.swiper-horizontal>.swiper-pagination-bullets.swiper-pagination-bullets-dynamic,
+.swiper-pagination-horizontal.swiper-pagination-bullets.swiper-pagination-bullets-dynamic {
   position: fixed;
   bottom: calc(var(--ion-safe-area-bottom) + 82px);
   width: 100% !important;
@@ -257,4 +258,8 @@ ion-modal.auto-height .inner-content {
 
 .no-ripple ion-ripple-effect {
   display: none !important;
+}
+
+.no-ripple ion-back-button {
+  --ripple-color: transparent;
 }
