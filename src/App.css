@@ -249,7 +249,7 @@ ion-modal.auto-height .inner-content {
 
 .swiper-horizontal > .swiper-pagination-bullets.swiper-pagination-bullets-dynamic, .swiper-pagination-horizontal.swiper-pagination-bullets.swiper-pagination-bullets-dynamic {
   position: fixed;
-  bottom: 82px;
+  bottom: calc(var(--ion-safe-area-bottom) + 82px);
   width: 100% !important;
   background-color: var(--ion-background-color);
   padding: 14px 0 8px 0;
