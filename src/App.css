@@ -252,5 +252,9 @@ ion-modal.auto-height .inner-content {
   bottom: calc(var(--ion-safe-area-bottom) + 82px);
   width: 100% !important;
   background-color: var(--ion-background-color);
-  padding: 14px 0 8px 0;
+  padding: 18px 0 6px 0;
+}
+
+.no-ripple ion-ripple-effect {
+  display: none !important;
 }

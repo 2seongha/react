@@ -105,18 +105,20 @@ const SubModal: React.FC<SubModalProps> = ({
       }}
     >
       <IonContent scrollEvents={false} scrollY={false}>
-        <div className="grab-indicator" style={{
-          position: 'sticky',
+        <div className="grab-indicator no-shadow" style={{
+          position: 'fixed',
+          width: '100%',
           top: 0,
           backgroundColor: 'var(--ion-background-color2)',
-          zIndex: 2
+          zIndex: 2,
+          boxShadow: 'none',
         }}>
           <span></span>
         </div>
         <Swiper
           style={{
+            paddingTop: '28px',
             background: 'var(--ion-background-color)',
-            zIndex: 2
           }}
           initialSlide={initialIndex}
           onSwiper={(swiper) => {
@@ -150,12 +152,14 @@ const SubModal: React.FC<SubModalProps> = ({
                   display: 'flex',
                   justifyContent: 'space-between',
                   width: '100%',
-                  height: '48px',
+                  // height: '48px',
+                  padding:'12px 0',
                   borderBottom: '.5px solid var(--ion-color-step-100)',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  fontWeight: 500
                 }}>
                   <span style={{ color: 'var(--ion-color-secondary)' }}>{title}</span>
-                  <span>{flds[index]}</span>
+                  <span style={{maxWidth:'60%'}}>{flds[index]}</span>
                 </div>
               ))}
             </SwiperSlide>

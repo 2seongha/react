@@ -25,13 +25,17 @@
   box-shadow: var(--approval-text-box-shadow);
 }
 
+.grab-indicator.no-shadow::before {
+  box-shadow: none;
+}
+
 .grab-indicator::after {
   content: '';
   position: absolute;
   width: 48px;
   height: 4px;
   background-color: var(--gray-color);
-  top:  12px;
+  top: 12px;
   left: calc(50% - 24px);
   border-radius: 4px;
 }

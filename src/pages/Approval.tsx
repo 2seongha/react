@@ -368,6 +368,8 @@ const Approval: React.FC = () => {
       <IonContent
         ref={contentRef}
         scrollEvents={false}
+        onIonScrollStart={()=>document.body.classList.add('no-ripple')}
+        onIonScrollEnd={()=>document.body.classList.remove('no-ripple')}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!isTop}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
