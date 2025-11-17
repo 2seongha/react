@@ -136,11 +136,10 @@ export const useVirtuosoScrollToTop = () => {
     });
   };
 
-  const scrollerRef = (ref: HTMLElement | null) => {
-    if (ref) {
+  const scrollerRef = (ref: HTMLElement | Window | null) => {
+    if (ref instanceof HTMLElement) { // HTMLElement일 때만 처리
       scrollerElRef.current = ref;
 
-      // 이벤트 등록
       const onScroll = () => {
         setIsTop(ref.scrollTop < 100);
         scrollCallbackRef.current?.();
@@ -148,10 +147,8 @@ export const useVirtuosoScrollToTop = () => {
 
       ref.addEventListener("scroll", onScroll, { passive: true });
 
-      // cleanup: ref가 바뀌면 이전 listener 제거
-      return () => {
-        ref.removeEventListener("scroll", onScroll);
-      };
+      // cleanup: ref가 바뀌거나 컴포넌트 언마운트될 때 제거
+      return () => ref.removeEventListener("scroll", onScroll);
     }
   };
 

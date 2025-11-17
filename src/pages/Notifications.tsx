@@ -89,13 +89,13 @@ const Notifications: React.FC = () => {
       notification.READ_YN = 'Y';
       return notification;
     }) || []);
-    patchNotifications('', 'Y', 'N');
+    patchNotifications('', 'Y', '');
   }, [notifications]);
 
   //? 모두 삭제
   const handleDeleteAll = useCallback(() => {
     setNotifications([]);
-    patchNotifications('', 'N', 'Y');
+    patchNotifications('', 'Y', 'Y');
   }, [notifications]);
 
   return (
