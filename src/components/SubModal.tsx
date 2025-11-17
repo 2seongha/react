@@ -129,7 +129,7 @@ const SubModal: React.FC<SubModalProps> = ({
             });
           }}
           pagination={{
-            dynamicBullets: true,
+            dynamicBullets: (subs?.length ?? 0) > 1,
           }}
           modules={[Pagination]}
         >
@@ -153,13 +153,13 @@ const SubModal: React.FC<SubModalProps> = ({
                   justifyContent: 'space-between',
                   width: '100%',
                   // height: '48px',
-                  padding:'12px 0',
+                  padding: '12px 0',
                   borderBottom: '.5px solid var(--ion-color-step-100)',
                   alignItems: 'center',
                   fontWeight: 500
                 }}>
                   <span style={{ color: 'var(--ion-color-secondary)' }}>{title}</span>
-                  <span style={{maxWidth:'60%'}}>{flds[index]}</span>
+                  <span style={{ maxWidth: '60%' }}>{flds[index]}</span>
                 </div>
               ))}
             </SwiperSlide>
