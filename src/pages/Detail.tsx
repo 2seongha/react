@@ -1253,9 +1253,9 @@ const AttachItem: React.FC<AttachProps> = React.memo(
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
               }}>
-                {attach.FileName}sdfsdfsdfsdf
+                {attach.FileName}
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ion-color-step-700)' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ion-color-step-500)' }}>
                 {attach.FileTypeText}
               </span>
             </div>
