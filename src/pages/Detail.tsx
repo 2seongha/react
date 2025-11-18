@@ -25,7 +25,7 @@ import "swiper/css";
 import AppBar from "../components/AppBar";
 import CustomDialog from "../components/Dialog";
 import "./Detail.css";
-import { getFlowIcon } from "../utils";
+import { getFileTypeIcon, getFlowIcon } from "../utils";
 import { useParams } from "react-router-dom";
 import useAppStore from "../stores/appStore";
 import { motion, useMotionValue, useTransform } from "framer-motion";
@@ -51,6 +51,8 @@ import { chevronForward, person } from "ionicons/icons";
 import { webviewToast } from "../webview";
 import SubModal from "../components/SubModal";
 import { OrbitProgress } from "react-loading-indicators";
+import CachedImage from "../components/CachedImage";
+import NoData from "../components/NoData";
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -72,16 +74,18 @@ const Detail: React.FC = () => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
 
   // Constants
-  const { FLOWNO } = useParams<{ FLOWNO: string }>();
-  const P_AREA_CODE = useAppStore(
+  let { FLOWNO, P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ FLOWNO: string, P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
+  P_AREA_CODE = useAppStore(
     useShallow((state) => state.approvals?.P_AREA_CODE) || null
-  ) || '-';
-  const P_AREA_CODE_TXT = useAppStore(
+  ) || P_AREA_CODE || '-';
+  P_AREA_CODE_TXT = useAppStore(
     useShallow((state) => state.approvals?.P_AREA_CODE_TXT) || null
-  ) || '-';
-  const AREA_CODE_TXT = useAppStore(
+  ) || P_AREA_CODE_TXT || '-';
+  AREA_CODE_TXT = useAppStore(
     useShallow((state) => state.approvals?.FLOWCODE_TXT) || null
-  ) || '-';
+  ) || AREA_CODE_TXT || '-';
+  P_AREA_CODE_TXT = decodeURIComponent(P_AREA_CODE_TXT);
+  AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
 
   const approval = useAppStore(
     useShallow(
@@ -661,26 +665,14 @@ const Detail: React.FC = () => {
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
-                {approval.SUB.map((sub: any, index: number) => (
-                  <></>
-                  // <SubItem
-                  //   key={sub.FLOWNO + sub.FLOWCNT + index}
-                  //   selectable={P_AREA_CODE === "TODO"}
-                  //   sub={sub}
-                  //   isSelected={false}
-                  //   onSelectionChange={() => { }}
-                  //   onProfitDialogOpen={(profitData) => {
-                  //     setSelectedProfitData(profitData);
-                  //     // 숨김 버튼을 클릭해서 Dialog 열기
-                  //     document.getElementById("profit-dialog-trigger")?.click();
-                  //   }}
-                  //   onAttendeeDialogOpen={(attendeeData) => {
-                  //     setSelectedAttendeeData(attendeeData);
-                  //     // 숨김 버튼을 클릭해서 Dialog 열기
-                  //     document.getElementById("attendee-dialog-trigger")?.click();
-                  //   }}
-                  // />
-                ))}
+                {_.isEmpty(approval.ATTACH) ?
+                  <NoData></NoData>
+                  : approval.ATTACH.map((item: any, index: number) => (
+                    <AttachItem
+                      style={{ marginTop: index === 0 ? '12px' : 0 }}
+                      attach={item}
+                    />
+                  ))}
               </SwiperSlide>
             </Swiper>
           </div>
@@ -1221,6 +1213,96 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
           backgroundColor: "var(--ion-card-background2)",
           border: "1px solid var(--custom-border-color-0)",
           marginBottom: "12px",
+        }}
+      />
+    );
+  }
+);
+interface AttachProps {
+  attach: any;
+  style?: React.CSSProperties;
+}
+
+// ApprovalItem 컴포넌트 - wrapper div 포함
+const AttachItem: React.FC<AttachProps> = React.memo(
+  ({ attach, style }) => {
+    // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
+    const titleElement = useMemo(
+      () => (
+        <div
+          style={{ width: "100%", display: "flex", flexDirection: "column" }}
+        >
+          <div
+            className="custom-item-title"
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "start",
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <CachedImage src={getFileTypeIcon(attach.FileName).image} width={32} height={32}></CachedImage>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
+                {attach.FileName}
+              </span>
+              <span style={{ fontSize: '13px', color: 'var(--ion-color-step-700)' }}>
+                {attach.FileTypeText}
+              </span>
+            </div>
+          </div>
+        </div>
+      ),
+      [attach.FileName]
+    );
+
+    const bodyElement = useMemo(
+      () => (
+        <div className="custom-item-body">
+          <div className="custom-item-body-line">
+            <span>생성일</span>
+            <span>{Number(attach.AttachErdat) ? `${attach.AttachErdat.slice(0, 4)}/${attach.AttachErdat.slice(4, 6)}/${attach.AttachErdat.slice(6)}` : "-"}</span>
+          </div>
+          <div className="custom-item-body-line">
+            <span>생성자</span>
+            <span>{attach.AttachName || '-'}</span>
+          </div>
+        </div>
+      ),
+      []
+    );
+
+    const router = useIonRouter();
+    const handleClick = () => {
+      router.push(`/attach/${encodeURIComponent(attach.FileName)}/${encodeURIComponent(attach.AttachUrl)}`, 'forward', 'push');
+    };
+
+    // CustomItem props 메모이제이션 - state 대신 ref 사용으로 최적화
+    const customItemProps = useMemo(
+      () => ({
+        title: titleElement,
+        body: bodyElement,
+        onClick: handleClick
+      }),
+      [titleElement, bodyElement, handleClick]
+    );
+
+    return (
+      <CustomItem
+        {...customItemProps}
+        style={{
+          backgroundColor: "var(--ion-card-background2)",
+          border: "1px solid var(--custom-border-color-0)",
+          marginBottom: "12px",
+          ...style
         }}
       />
     );

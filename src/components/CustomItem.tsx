@@ -111,12 +111,12 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
         <AnimatePresence initial={false}>
           {sub && isExpanded && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{
-                height: { duration: 0.2, ease: 'easeInOut' },
-                opacity: { duration: 0.1, ease: 'easeOut' }
+                // height: { duration: 0.2, ease: 'easeInOut' },
+                opacity: { duration: 0.3, ease: 'easeOut' }
               }}
               style={{ overflow: 'hidden' }}
             >

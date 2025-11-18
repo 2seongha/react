@@ -104,7 +104,11 @@ const SubModal: React.FC<SubModalProps> = ({
         '--border-radius': '20px'
       }}
     >
-      <IonContent scrollEvents={false} scrollY={false}>
+      <IonContent
+        scrollEvents={false}
+        scrollY={false}
+        scrollX={false}
+      >
         <div className="grab-indicator no-shadow" style={{
           position: 'fixed',
           width: '100%',
@@ -118,6 +122,7 @@ const SubModal: React.FC<SubModalProps> = ({
         <Swiper
           style={{
             paddingTop: '28px',
+            paddingBottom: '32px',
             background: 'var(--ion-background-color)',
           }}
           initialSlide={initialIndex}
@@ -129,7 +134,7 @@ const SubModal: React.FC<SubModalProps> = ({
             });
           }}
           pagination={{
-            dynamicBullets: (subs?.length ?? 0) > 1,
+            dynamicBullets: true,
           }}
           modules={[Pagination]}
         >
@@ -152,14 +157,13 @@ const SubModal: React.FC<SubModalProps> = ({
                   display: 'flex',
                   justifyContent: 'space-between',
                   width: '100%',
-                  // height: '48px',
                   padding: '12px 0',
                   borderBottom: '.5px solid var(--ion-color-step-100)',
-                  alignItems: 'center',
+                  alignItems: 'start',
                   fontWeight: 500
                 }}>
                   <span style={{ color: 'var(--ion-color-secondary)' }}>{title}</span>
-                  <span style={{ maxWidth: '60%' }}>{flds[index]}</span>
+                  <span style={{ maxWidth: '60%', textAlign: 'end' }}>{flds[index]}</span>
                 </div>
               ))}
             </SwiperSlide>

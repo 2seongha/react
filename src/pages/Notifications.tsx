@@ -71,7 +71,7 @@ const Notifications: React.FC = () => {
 
     setApprovals(null);
     getApprovals('', '', link[0], link[1]); // 0: flowCode, 1: flowNo
-    router.push(`/detail/${link[1]}`, 'forward', 'push');
+    router.push(`/detail/${link[1]}/-/-/-/-`, 'forward', 'push');
   }, [notifications]);
 
   //? 알림 삭제
