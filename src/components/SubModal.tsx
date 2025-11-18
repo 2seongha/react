@@ -153,15 +153,17 @@ const SubModal: React.FC<SubModalProps> = ({
               }}
             >
               {titles?.map((title: string, index: number) => (
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: '12px 0',
-                  borderBottom: '.5px solid var(--ion-color-step-100)',
-                  alignItems: 'start',
-                  fontWeight: 500
-                }}>
+                <div
+                  key={'sub-line' + index}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '12px 0',
+                    borderBottom: '.5px solid var(--ion-color-step-100)',
+                    alignItems: 'start',
+                    fontWeight: 500
+                  }}>
                   <span style={{ color: 'var(--ion-color-secondary)' }}>{title}</span>
                   <span style={{ maxWidth: '60%', textAlign: 'end' }}>{flds[index]}</span>
                 </div>

@@ -1,6 +1,6 @@
 import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 
 import Home from './pages/Home';
@@ -91,12 +91,11 @@ const App: React.FC = () => {
       <OrbitProgress color="var(--ion-text-color)" size="small" text="" textColor="" />
     </div>
   );
-
   return (
     <IonApp style={{ height: fixedHeight }}>
       <IonReactRouter >
         <Menu />
-        <IonRouterOutlet mode={getPlatformMode()} id="main-content">
+        <IonRouterOutlet mode={window.location.pathname.startsWith("/attach/") ? 'ios' : getPlatformMode()} id="main-content">
           <Route path="/app/home" component={Home} exact />
           <Route path="/app/notifications" component={Notifications} exact />
           <Route path="/app/more" component={More} exact />

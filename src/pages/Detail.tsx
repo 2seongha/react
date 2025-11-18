@@ -669,6 +669,7 @@ const Detail: React.FC = () => {
                   <NoData></NoData>
                   : approval.ATTACH.map((item: any, index: number) => (
                     <AttachItem
+                      key={'attach' + index}
                       style={{ marginTop: index === 0 ? '12px' : 0 }}
                       attach={item}
                     />
@@ -1243,7 +1244,7 @@ const AttachItem: React.FC<AttachProps> = React.memo(
             }}
           >
             <CachedImage src={getFileTypeIcon(attach.FileName).image} width={32} height={32}></CachedImage>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '200px', flex: 1 }}>
               <span style={{
                 display: 'block',
                 fontSize: '14px',
@@ -1252,7 +1253,7 @@ const AttachItem: React.FC<AttachProps> = React.memo(
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
               }}>
-                {attach.FileName}
+                {attach.FileName}sdfsdfsdfsdf
               </span>
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ion-color-step-700)' }}>
                 {attach.FileTypeText}

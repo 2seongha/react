@@ -292,7 +292,7 @@ const TodoSummaryCard: React.FC = () => {
               </div> :
               Array.from({ length: approvals?.LIST ? approvals?.LIST.length : 3 }).map((_, index) => (
                 <ApprovalItem key={index} approvalItem={approvals?.LIST?.[index]} isLoading={!approvals?.LIST} index={index} onClick={() => {
-                  router.push(`/detail/${approvals?.LIST?.[index].FLOWNO}/${approvals?.P_AREA_CODE}/${approvals?.AREA_CODE}/${encodeURIComponent(approvals?.P_AREA_CODE_TXT ?? '-')}/${encodeURIComponent(approvals?.AREA_CODE_TXT ?? '-')}`, 'forward', 'push');
+                  router.push(`/detail/${approvals?.LIST?.[index].FLOWNO}/TODO/${selectedArea?.AREA_CODE}/미결함/${encodeURIComponent(selectedArea?.O_LTEXT ?? '-')}`, 'forward', 'push');
                 }} />
               ))
         }
