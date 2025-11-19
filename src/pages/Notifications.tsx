@@ -141,11 +141,9 @@ const Notifications: React.FC = () => {
         scrollEvents={false}
         scrollY={false}
       >
-        {refreshEnable &&
-          <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-            {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
-          </IonRefresher>
-        }
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!refreshEnable}  >
+          {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
+        </IonRefresher>
         {
           !filteredNotifications ?
             <div className='loading-indicator-wrapper'>
