@@ -6,6 +6,10 @@
   padding: 0 !important;
 }
 
+.approval-modal.fixed {
+  pointer-events: none !important;
+}
+
 .approval-modal-title-wrapper {
   padding: 36px;
   display: flex;

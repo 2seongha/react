@@ -86,6 +86,19 @@ const SubModal: React.FC<SubModalProps> = ({
     };
   }, [isModalOpen]);
 
+  useEffect(() => {
+    const modalEl = modalRef.current;
+    if (!modalEl) return;
+
+    // Ionic 모달의 제스처 탐색
+    const gesture = (modalEl as any)?.gesture;
+
+    if (gesture) {
+      // Swiper에서 드래그 시 모달 제스처가 가로채지 않도록 비활성화
+      gesture.enable(false);
+    }
+  }, [isModalOpen]);
+
   const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_S);
 
   return (
@@ -97,8 +110,8 @@ const SubModal: React.FC<SubModalProps> = ({
       trigger={trigger}
       initialBreakpoint={1}
       breakpoints={[0, 1]}
-      expandToScroll={false}
-      className="approval-modal"
+      expandToScroll={true}
+      className="approval-modal fixed"
       style={{
         '--max-height': '600px',
         '--border-radius': '20px'
@@ -121,6 +134,7 @@ const SubModal: React.FC<SubModalProps> = ({
         </div>
         <Swiper
           style={{
+            height: '100%',
             paddingTop: '28px',
             paddingBottom: '32px',
             background: 'var(--ion-background-color)',
@@ -148,8 +162,25 @@ const SubModal: React.FC<SubModalProps> = ({
 
             return <SwiperSlide
               style={{
+                height: '100%',
                 overflow: "auto",
                 padding: "0px 24px var(--ion-safe-area-bottom) 24px",
+              }}
+              onScrollEnd={(e) => {
+                const modalEl = modalRef.current;
+                if (!modalEl) return;
+
+                // Ionic 모달의 제스처 탐색
+                const gesture = (modalEl as any)?.gesture;
+
+                if (gesture) {
+                  if ((e.target.scrollTop ?? 0) <= 0) {
+                    gesture.enable(true);
+                  }
+                  else {
+                    gesture.enable(false);
+                  }
+                }
               }}
             >
               {titles?.map((title: string, index: number) => (
@@ -205,7 +236,7 @@ const SubModal: React.FC<SubModalProps> = ({
           </IonButton>
         </div>
       </IonFooter>
-    </IonModal>
+    </IonModal >
   );
 };
 

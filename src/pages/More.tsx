@@ -10,7 +10,7 @@ import React from 'react';
 import AppBar from '../components/AppBar';
 import BottomTabBar from '../components/BottomNavigation';
 import './More.css';
-import { chevronForward, navigate } from 'ionicons/icons';
+import { chevronForward } from 'ionicons/icons';
 
 const More: React.FC = () => {
   const router = useIonRouter();
