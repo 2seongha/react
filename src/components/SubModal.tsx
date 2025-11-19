@@ -92,7 +92,7 @@ const SubModal: React.FC<SubModalProps> = ({
 
     const gesture = (modalEl as any)?.gesture;
     if (gesture) gesture.enable(false);
-    
+
   }, [isModalOpen]);
 
   const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_S);
@@ -167,7 +167,7 @@ const SubModal: React.FC<SubModalProps> = ({
                 if (!modalEl) return;
 
                 const gesture = (modalEl as any)?.gesture;
-                if (gesture) gesture.enable(e.currentTarget.scrollTop <= 0);
+                if (gesture) gesture.enable(e.target.scrollTop <= 0);
               }}
             >
               {titles?.map((title: string, index: number) => (
