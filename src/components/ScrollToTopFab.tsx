@@ -70,7 +70,7 @@ export const useScrollToTop = () => {
   const scrollToTop = () => {
     if (!contentRef.current) return;
     const contentEl = contentRef.current;
-    contentEl.scrollToTop(500);
+    contentEl.scrollToTop(1000);
   };
 
   useEffect(() => {
