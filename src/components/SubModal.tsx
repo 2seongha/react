@@ -90,13 +90,9 @@ const SubModal: React.FC<SubModalProps> = ({
     const modalEl = modalRef.current;
     if (!modalEl) return;
 
-    // Ionic 모달의 제스처 탐색
     const gesture = (modalEl as any)?.gesture;
-
-    if (gesture) {
-      // Swiper에서 드래그 시 모달 제스처가 가로채지 않도록 비활성화
-      gesture.enable(false);
-    }
+    if (gesture) gesture.enable(false);
+    
   }, [isModalOpen]);
 
   const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_S);
@@ -170,17 +166,8 @@ const SubModal: React.FC<SubModalProps> = ({
                 const modalEl = modalRef.current;
                 if (!modalEl) return;
 
-                // Ionic 모달의 제스처 탐색
                 const gesture = (modalEl as any)?.gesture;
-
-                if (gesture) {
-                  if ((e.target.scrollTop ?? 0) <= 0) {
-                    gesture.enable(true);
-                  }
-                  else {
-                    gesture.enable(false);
-                  }
-                }
+                if (gesture) gesture.enable(e.currentTarget.scrollTop <= 0);
               }}
             >
               {titles?.map((title: string, index: number) => (
