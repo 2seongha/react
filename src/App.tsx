@@ -91,11 +91,12 @@ const App: React.FC = () => {
       <OrbitProgress color="var(--ion-text-color)" size="small" text="" textColor="" />
     </div>
   );
+
   return (
     <IonApp style={{ height: fixedHeight }}>
       <IonReactRouter >
         <Menu />
-        <IonRouterOutlet mode={window.location.pathname.startsWith("/attach/") ? 'ios' : getPlatformMode()} id="main-content">
+        <IonRouterOutlet mode={getPlatformMode()} id="main-content">
           <Route path="/app/home" component={Home} exact />
           <Route path="/app/notifications" component={Notifications} exact />
           <Route path="/app/more" component={More} exact />

@@ -250,10 +250,9 @@ ion-modal.auto-height .inner-content {
 .swiper-horizontal>.swiper-pagination-bullets.swiper-pagination-bullets-dynamic,
 .swiper-pagination-horizontal.swiper-pagination-bullets.swiper-pagination-bullets-dynamic {
   position: fixed;
-  bottom: calc(var(--ion-safe-area-bottom) + 82px);
   width: 100% !important;
   background-color: var(--ion-background-color);
-  padding: 18px 0 6px 0;
+  padding: 12px 0 calc(var(--ion-safe-area-bottom) + 24px) 0;
 }
 
 .no-ripple ion-ripple-effect {

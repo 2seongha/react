@@ -178,11 +178,11 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
           }}
           animate={
             step === 1 ? {
-              y: "calc(50vh - 100% - 48px)",
+              y: "calc(50vh - 100% - 36px)",
               scale: 0.9,
             } : step === 2 ? {
               y: "48px",
-              scale: 0.8,
+              scale: 0.85,
             } : {
               y: '0px',
               scale: 1,
@@ -281,6 +281,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 position: "fixed",
                 bottom: 0,
                 width: "100%",
+                zIndex: 2,
                 background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
               }}
             >

@@ -13,9 +13,6 @@ import "./ApprovalModal.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import useAppStore from "../stores/appStore";
 import _ from "lodash";
-import { Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
 
 interface SubModalProps {
   trigger?: string;
@@ -32,9 +29,12 @@ const SubModal: React.FC<SubModalProps> = ({
   const closedByBackButtonRef = useRef(false);
   const modalRef = useRef<HTMLIonModalElement>(null);
   const swiperRef = useRef<any>(null); // Swiper 인스턴스
-  const router = useIonRouter();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+
+  useEffect(() => {
+    setCurrentIndex(swiperRef.current?.activeIndex ?? 0);
+  }, [swiperRef.current]);
 
   function dismiss() {
     modalRef.current?.dismiss();
@@ -63,10 +63,6 @@ const SubModal: React.FC<SubModalProps> = ({
     closedByBackButtonRef.current = false;
   };
 
-  const handleClose = () => {
-    router.goBack();
-  }
-
   // 브라우저 뒤로가기 버튼 처리
   useEffect(() => {
     if (!isModalOpen) return;
@@ -86,16 +82,21 @@ const SubModal: React.FC<SubModalProps> = ({
     };
   }, [isModalOpen]);
 
-  useEffect(() => {
-    const modalEl = modalRef.current;
-    if (!modalEl) return;
-
-    const gesture = (modalEl as any)?.gesture;
-    if (gesture) gesture.enable(false);
-
-  }, [isModalOpen]);
-
   const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_S);
+  const closeButton = useMemo(
+    () => (
+      <IonButton
+        mode="md"
+        shape="round"
+        color={"medium"}
+        className="app-bar-button"
+        onClick={dismiss}
+      >
+        <IonIcon icon={close} />
+      </IonButton>
+    ),
+    []
+  );
 
   return (
     <IonModal
@@ -106,47 +107,54 @@ const SubModal: React.FC<SubModalProps> = ({
       trigger={trigger}
       initialBreakpoint={1}
       breakpoints={[0, 1]}
-      expandToScroll={true}
-      className="approval-modal fixed"
+      expandToScroll={false}
+      className="approval-modal"
       style={{
         '--max-height': '600px',
-        '--border-radius': '20px'
       }}
     >
+      <AppBar title={<></>} titleCenter={false} customEndButtons={closeButton} />
       <IonContent
-        scrollEvents={false}
-        scrollY={false}
-        scrollX={false}
+        style={{
+          overscrollBehavior: 'none',           // 스크롤 끝에서의 bounce 비활성화
+          WebkitOverflowScrolling: 'auto',       // iOS에서의 스크롤 탄력 제거
+        }}
       >
-        <div className="grab-indicator no-shadow" style={{
+        <div style={{
+          height: '88px',
+          paddingBottom: 'var(--ion-safe-area-bottom)',
           position: 'fixed',
+          zIndex: 1,
+          top: '512px',
           width: '100%',
-          top: 0,
-          backgroundColor: 'var(--ion-background-color2)',
-          zIndex: 2,
-          boxShadow: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--ion-background-color)',
+          gap: '8px'
         }}>
-          <span></span>
+          {
+            subs?.map((sub: any, index: number) => <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '12px',
+              backgroundColor: currentIndex === index ? 'var(--ion-color-primary)' : 'var(--ion-color-step-400)'
+            }}></span>)
+          }
         </div>
         <Swiper
           style={{
-            height: '100%',
-            paddingTop: '28px',
-            paddingBottom: '32px',
+            zIndex: 0,
             background: 'var(--ion-background-color)',
+            marginBottom: '42px'
           }}
           initialSlide={initialIndex}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
-            requestAnimationFrame(() => {
-              const maxHeight = Math.min(swiper.el.scrollHeight + 110, 600); // 헤더 28 + 푸터 82
-              modalRef.current?.style.setProperty("--max-height", `${maxHeight}px`);
-            });
           }}
-          pagination={{
-            dynamicBullets: true,
+          onSlideChange={(swiper) => {
+            setCurrentIndex(swiper.activeIndex);
           }}
-          modules={[Pagination]}
         >
           {subs?.map((sub: any) => {
             const flds = _(sub)
@@ -158,16 +166,9 @@ const SubModal: React.FC<SubModalProps> = ({
 
             return <SwiperSlide
               style={{
-                height: '100%',
+                // height:'100%',
                 overflow: "auto",
-                padding: "0px 24px var(--ion-safe-area-bottom) 24px",
-              }}
-              onScrollEnd={(e) => {
-                const modalEl = modalRef.current;
-                if (!modalEl) return;
-
-                const gesture = (modalEl as any)?.gesture;
-                if (gesture) gesture.enable(e.target.scrollTop <= 0);
+                padding: "0px 24px calc(var(--ion-safe-area-bottom) + 12px) 24px",
               }}
             >
               {titles?.map((title: string, index: number) => (
@@ -191,39 +192,7 @@ const SubModal: React.FC<SubModalProps> = ({
           )}
         </Swiper>
       </IonContent>
-      <IonFooter style={{
-        boxShadow: 'none',
-      }}>
-        <div
-          style={{
-            height: "auto",
-            width: "100%",
-            borderRadius: "16px 16px 0 0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "12px 21px",
-            gap: "12px",
-            paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
-            backgroundColor: 'var(--ion-background-color)'
-          }}
-        >
-          <IonButton
-            mode="md"
-            color="light"
-            style={{
-              flex: 1,
-              height: "58px",
-              fontSize: "18px",
-              fontWeight: "600",
-            }}
-            onClick={handleClose}
-          >
-            <span>닫기</span>
-          </IonButton>
-        </div>
-      </IonFooter>
-    </IonModal >
+    </IonModal>
   );
 };
 

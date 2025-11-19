@@ -427,6 +427,7 @@ const Detail: React.FC = () => {
               value={activeTab}
               color="medium"
               mode="md"
+              swipeGesture={false}
               onIonChange={(e) => {
                 const selectedTab = e.detail.value as string;
                 const tabIndex = TAB_KEYS.indexOf(selectedTab);
