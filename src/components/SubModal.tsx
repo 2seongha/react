@@ -121,11 +121,12 @@ const SubModal: React.FC<SubModalProps> = ({
         }}
       >
         <div style={{
-          height: '88px',
+          height: '100px',
+          paddingTop: '12px',
           paddingBottom: 'var(--ion-safe-area-bottom)',
           position: 'fixed',
           zIndex: 1,
-          top: '512px',
+          top: '500px',
           width: '100%',
           display: 'flex',
           alignItems: 'center',
@@ -146,7 +147,7 @@ const SubModal: React.FC<SubModalProps> = ({
           style={{
             zIndex: 0,
             background: 'var(--ion-background-color)',
-            marginBottom: '42px'
+            marginBottom: '54px'
           }}
           initialSlide={initialIndex}
           onSwiper={(swiper) => {
@@ -181,7 +182,8 @@ const SubModal: React.FC<SubModalProps> = ({
                     padding: '12px 0',
                     borderBottom: '.5px solid var(--ion-color-step-100)',
                     alignItems: 'start',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    fontSize: '15px'
                   }}>
                   <span style={{ color: 'var(--ion-color-secondary)' }}>{title}</span>
                   <span style={{ maxWidth: '60%', textAlign: 'end' }}>{flds[index]}</span>

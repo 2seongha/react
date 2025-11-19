@@ -165,9 +165,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent className="approval-modal-ion-content">
         <div style={{
-          background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 140px, transparent 160px)',
+          background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 120px, transparent 140px)',
           width: '100%',
-          height: '160px',
+          height: '140px',
           position: 'fixed',
           zIndex: 2
         }} />
@@ -181,8 +181,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               y: "calc(50vh - 100% - 36px)",
               scale: 0.9,
             } : step === 2 ? {
-              y: "48px",
-              scale: 0.85,
+              y: "40px",
+              scale: 0.8,
             } : {
               y: '0px',
               scale: 1,
@@ -199,7 +199,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               }}
               style={{
                 position: 'absolute',
-                top: '-70px',
+                top: '-60px',
                 left: '50%',
                 transform: 'translateX(-50%)',
               }}
@@ -223,7 +223,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               style={{
                 width: '100%',
                 padding: '16px 21px 24px 21px',
-                marginTop: '144px',
+                marginTop: '124px',
                 marginBottom: 'calc(154px + var(--ion-safe-area-bottom))',
               }}>
               {selectedItems?.map((item: any, index: number) => (
