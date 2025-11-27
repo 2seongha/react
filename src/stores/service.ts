@@ -61,6 +61,28 @@ export async function getApprovals(P_AREA_CODE: string, AREA_CODE: string, FLOWC
   }
 }
 
+export async function postApprovals(ACTIVITY: string | undefined, SEPARATE: boolean | undefined, LIST: Array<any> | undefined): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+
+    const api = createApiInstance();
+    const payload = {
+      LOGIN_ID,
+      ACTIVITY,
+      SEPARATE,
+      LIST
+    }
+
+    const res = await api.post(`/v1/api/confirm`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 export async function getNotifications(): Promise<NotificationModel[]> {
   try {
     const user = useAppStore.getState().user;

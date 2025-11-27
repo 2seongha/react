@@ -367,8 +367,8 @@ const Approval: React.FC = () => {
       <IonContent
         ref={contentRef}
         scrollEvents={true}
-        onIonScrollStart={()=>document.body.classList.add('no-ripple')}
-        onIonScrollEnd={()=>document.body.classList.remove('no-ripple')}
+        onIonScrollStart={() => document.body.classList.add('no-ripple')}
+        onIonScrollEnd={() => document.body.classList.remove('no-ripple')}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!isTop}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
@@ -423,23 +423,19 @@ const Approval: React.FC = () => {
         />
         {/* 승인 Modal */}
         {P_AREA_CODE === 'TODO' && <ApprovalModal
+          activity='APPROVE'
           apprTitle={AREA_CODE_TXT}
-          title="승인"
-          buttonText="승인하기"
-          buttonColor="primary"
           required={false}
           trigger="approval-approve-modal"
-          selectedItems={filteredApprovals?.filter((sub: any) => selectedItems.has(sub.FLOWNO))}
+          selectedApprovals={filteredApprovals?.filter((sub: any) => selectedItems.has(sub.FLOWNO))}
         />}
         {/* 반려 Modal */}
         {P_AREA_CODE === 'TODO' && <ApprovalModal
+          activity='REJECT'
           apprTitle={AREA_CODE_TXT}
-          title="반려"
-          buttonText="반려하기"
-          buttonColor="danger"
           required={true}
           trigger="approval-reject-modal"
-          selectedItems={filteredApprovals?.filter((sub: any) => selectedItems.has(sub.FLOWNO))}
+          selectedApprovals={filteredApprovals?.filter((sub: any) => selectedItems.has(sub.FLOWNO))}
         />}
       </IonContent>
     </IonPage >

@@ -15,32 +15,37 @@ import AnimatedIcon from "./AnimatedIcon";
 import { FlipWords } from "./FlipWords";
 import { motion, AnimatePresence } from "framer-motion";
 import { webviewHaptic } from "../webview";
+import { postApprovals } from "../stores/service";
+import _ from "lodash";
+import useAppStore from "../stores/appStore";
 
 interface ApprovalModalProps {
+  activity?: string;
   trigger?: string;
   apprTitle?: string;
-  title?: string;
-  buttonText?: string;
-  buttonColor?:
-  | "primary"
-  | "secondary"
-  | "error"
-  | "warning"
-  | "info"
-  | "success"
-  | "danger";
+  // buttonText?: string;
+  // buttonColor?:
+  // | "primary"
+  // | "secondary"
+  // | "error"
+  // | "warning"
+  // | "info"
+  // | "success"
+  // | "danger";
   required?: boolean;
-  selectedItems?: Array<object>;
+  selectedApprovals?: Array<any>;
+  separate?: boolean;
 }
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({
+  activity,
   trigger,
   apprTitle,
-  title,
-  buttonText = "확인",
-  buttonColor = "primary",
+  // buttonText = "확인",
+  // buttonColor = "primary",
   required = false,
-  selectedItems,
+  selectedApprovals,
+  separate
 }) => {
   const router = useIonRouter();
   const modal = useRef<HTMLIonModalElement>(null);
@@ -53,6 +58,18 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const [step, setStep] = useState(0); // 0: 결재 전, 1: 결재 중, 2: 결재 후
   const [stepText, setStepText] = useState("할까요?");
   const [status, setStatus] = useState<string | null>(null);
+  const getApprovals = useAppStore(state => state.getApprovals);
+
+  // ⬇️ props → state로 복사
+  const [approvals, setApprovals] = useState(() =>
+    _.cloneDeep(selectedApprovals ?? [])
+  );
+
+  // ⬇️ props가 바뀌면 state도 자동 업데이트 (단방향 데이터 흐름 유지)
+  useEffect(() => {
+    if (_.isEmpty(selectedApprovals)) return;
+    setApprovals(selectedApprovals ?? []);
+  }, [selectedApprovals]);
 
   function dismiss() {
     modal.current?.dismiss();
@@ -132,16 +149,48 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     []
   );
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (step === 0) {
       webviewHaptic("mediumImpact");
       setStep(1);
       setStepText("할게요");
-      setTimeout(() => {
-        const statuses = ["success", "error", "warning"];
-        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-        setStatus(randomStatus);
-      }, 2400);
+
+      // state를 clone 해서 안전하게 수정
+      const updatedApprovals = _.cloneDeep(approvals ?? []);
+
+      const response = await postApprovals(activity, separate, updatedApprovals);
+      const { RETTYPE, LIST } = response;
+      updatedApprovals.forEach(approval => {
+        const matched = LIST.find((l: any) => l.FLOWNO === approval.FLOWNO);
+        approval.STATUS =
+          matched.RETTYPE === "S"
+            ? "success"
+            : matched.RETTYPE === "E"
+              ? "error"
+              : "warning";
+        approval.MESSAGE = matched.RETMSG;
+
+        approval.SUB.forEach((sub: any) => {
+          const matchedSub = matched.SUB.find(
+            (s: any) => sub.LIST_SUB_KEY === s.LIST_SUB_KEY
+          );
+          sub.STATUS =
+            matched.TYPE === "S"
+              ? "success"
+              : matched.TYPE === "E"
+                ? "error"
+                : "warning";
+          sub.MESSAGE = matchedSub.MESSAGE;
+        });
+      });
+
+      // 이제 state에 새로운 객체 넣기
+      setApprovals(updatedApprovals);
+
+      await getApprovals("TODO", updatedApprovals?.[0].FLOWCODE, "", "");
+      setStatus(
+        RETTYPE === "S" ? "success" : RETTYPE === "E" ? "error" : "warning"
+      );
     } else if (step === 2) {
       dismiss();
     }
@@ -206,10 +255,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             />}
           <span>
             {apprTitle}
-            <span style={{ color: `var(--ion-color-${buttonColor})` }}> {selectedItems?.length}건</span>을
+            <span style={{ color: `var(--ion-color-${activity === 'APPROVE' ? 'primary' : 'danger'})` }}> {approvals?.length}건</span>을
           </span>
           <span >
-            <span style={{ color: `var(--ion-color-${buttonColor})` }}>{title}</span>{" "}
+            <span style={{ color: `var(--ion-color-${activity === 'APPROVE' ? 'primary' : 'danger'})` }}>{separate && '분리 '}{activity === 'APPROVE' ? '승인' : '반려'}</span>{" "}
             <FlipWords animation={stepText === '했어요'} words={[stepText]} />
           </span>
         </motion.div>
@@ -226,7 +275,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 marginTop: '124px',
                 marginBottom: 'calc(154px + var(--ion-safe-area-bottom))',
               }}>
-              {selectedItems?.map((item: any, index: number) => (
+              {(separate ? (approvals?.[0].SUB.filter(((s: any) => s.CHECK === 'I'))) : approvals)?.map((item: any, index: number) => (
                 <div key={`approval-modal-item-${index}`}
                   className={`approval-modal-item ${status}`}
                   style={{
@@ -256,13 +305,13 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     }}>
                       {item.APPR_TITLE ? item.APPR_TITLE : (item.TITLE || item.FLD02)}
                     </span>
-                    {status && status !== 'success' && <span
+                    {step !== 0 && <span
                       style={{
                         marginTop: '4px',
                         fontSize: '13px',
-                        color: `var(--ion-color-${status === 'error' ? 'danger' : `${status}`})`
+                        color: `var(--ion-color-${item.STATUS === 'error' ? 'danger' : `${item.STATUS}`})`
                       }}
-                    >오류 메시지 자리</span>}
+                    >{item.MESSAGE}</span>}
                   </div>
                 </div>
               ))}
@@ -302,7 +351,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               ></IonTextarea>
               <IonButton
                 mode="md"
-                color={step === 2 ? 'primary' : buttonColor}
+                color={step === 2 ? 'primary' : activity === 'APPROVE' ? 'primary' : 'danger'}
                 disabled={required && !textValue?.trim()}
                 style={{
                   height: "58px",
@@ -314,7 +363,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 }}
                 onClick={handleApprove}
               >
-                <span>{step === 0 ? buttonText : '닫기'}</span>
+                <span>{step === 0 ? activity === 'APPROVE' ? '승인하기' : '반려하기' : '닫기'}</span>
               </IonButton>
             </motion.div>
           )}

@@ -189,13 +189,13 @@ const Detail: React.FC = () => {
   }, [headerHeight]);
 
   // 아이템 선택 상태 관리
-  const handleItemSelection = useCallback((flowCnt: string, isSelected: boolean) => {
+  const handleItemSelection = useCallback((listSubKey: string, isSelected: boolean) => {
     setSelectedItems(prev => {
       const newSet = new Set(prev);
       if (isSelected) {
-        newSet.add(flowCnt);
+        newSet.add(listSubKey);
       } else {
-        newSet.delete(flowCnt);
+        newSet.delete(listSubKey);
       }
       return newSet;
     });
@@ -204,7 +204,7 @@ const Detail: React.FC = () => {
   // 전체 선택 상태 계산
   const isAllSelected = useMemo(() => {
     if (approval?.SUB?.length === 0) return false;
-    return approval?.SUB?.every((sub: any) => selectedItems.has(sub.FLOWCNT));
+    return approval?.SUB?.every((sub: any) => selectedItems.has(sub.LIST_SUB_KEY));
   }, [selectedItems]);
 
   // 전체 선택/해제 핸들러
@@ -218,7 +218,7 @@ const Detail: React.FC = () => {
       // 전체 선택 (필터된 결과만)
       const newSet = new Set<string>();
       approval.SUB.forEach((sub: any) => {
-        newSet.add(sub.FLOWCNT);
+        newSet.add(sub.LIST_SUB_KEY);
       });
       setSelectedItems(newSet);
     }
@@ -476,7 +476,7 @@ const Detail: React.FC = () => {
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
-                {(P_AREA_CODE === 'TODO' && approval.IS_SEPERATE) && <div style={{
+                {(P_AREA_CODE === 'TODO' && approval.IS_SEPARATE) && <div style={{
                   backgroundColor: "var(--ion-background-color)",
                   position: "sticky",
                   width: "100%",
@@ -487,7 +487,8 @@ const Detail: React.FC = () => {
                   borderBottom: "0.56px solid var(--custom-border-color-50)",
                   left: 0,
                   top: 0,
-                  zIndex: 1,
+                  zIndex: 2,
+                  outline: '3px solid var(--ion-background-color)'
                 }}>
                   <IonItem button onClick={handleSelectAll} mode='md' className='select-all-button' style={{
                     "--padding-start": "12px",
@@ -507,11 +508,11 @@ const Detail: React.FC = () => {
                 {approval.SUB.filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
                   <SubItem
                     style={{ marginTop: index === 0 ? '12px' : 0 }}
-                    key={item.FLOWNO + item.FLOWCNT + index}
-                    selectable={P_AREA_CODE === "TODO" && approval.IS_SEPERATE}
+                    key={item.FLOWNO + item.LIST_SUB_KEY + index}
+                    selectable={P_AREA_CODE === "TODO" && approval.IS_SEPARATE}
                     item={item}
                     sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.FLOWCNT === sub.FLOWCNT)}
-                    isSelected={selectedItems.has(item.FLOWCNT)}
+                    isSelected={selectedItems.has(item.LIST_SUB_KEY)}
                     onSelectionChange={handleItemSelection}
                     onProfitDialogOpen={(profitData) => {
                       setSelectedProfitData(profitData);
@@ -688,25 +689,23 @@ const Detail: React.FC = () => {
           {/* 승인 Modal */}
           {
             P_AREA_CODE === 'TODO' && <ApprovalModal
+              activity="APPROVE"
+              separate={approval.IS_SEPARATE}
               apprTitle={AREA_CODE_TXT}
-              title={approval.IS_SEPERATE ? "분리 승인" : "승인"}
-              buttonText="승인하기"
-              buttonColor="primary"
               required={false}
               trigger="approve-modal"
-              selectedItems={approval.IS_SEPERATE ? approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT) && sub.CHECK === 'I') : [approval]}
+              selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(s.LIST_SUB_KEY)) }]}
             />
           }
           {/* 반려 Modal */}
           {
             P_AREA_CODE === 'TODO' && <ApprovalModal
+              activity="REJECT"
+              separate={approval.IS_SEPARATE}
               apprTitle={AREA_CODE_TXT}
-              title={approval.IS_SEPERATE ? "분리 반려" : "반려"}
-              buttonText="반려하기"
-              buttonColor="danger"
               required={true}
               trigger="reject-modal"
-              selectedItems={approval.IS_SEPERATE ? approval.SUB.filter((sub: any) => selectedItems.has(sub.FLOWCNT) && sub.CHECK === 'I') : [approval]}
+              selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(s.LIST_SUB_KEY)) }]}
             />
           }
           {/* Sub Modal Trigger Button (숨김) */}
@@ -896,7 +895,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="reject-modal"
-                disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
+                disabled={approval.IS_SEPARATE ? selectedItems.size < 1 : false}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -910,7 +909,7 @@ const Detail: React.FC = () => {
                   fontWeight: "600",
                 }}
                 id="approve-modal"
-                disabled={approval.IS_SEPERATE ? selectedItems.size < 1 : false}
+                disabled={approval.IS_SEPARATE ? selectedItems.size < 1 : false}
               >
                 <span>승인하기</span>
               </IonButton>
@@ -958,9 +957,9 @@ const SubItem: React.FC<SubProps> = React.memo(
 
     const handleCheckboxChange = useCallback(
       (checked: boolean) => {
-        onSelectionChange(item.FLOWCNT, checked);
+        onSelectionChange(item.LIST_SUB_KEY, checked);
       },
-      [item.FLOWCNT, onSelectionChange]
+      [item.LIST_SUB_KEY, onSelectionChange]
     );
 
     const titleElement = useMemo(
@@ -1041,7 +1040,7 @@ const SubItem: React.FC<SubProps> = React.memo(
             return (
               <div
                 className="custom-item-body-line"
-                key={item.FLOWNO + item.FLOWCNT + index}
+                key={item.LIST_SUB_KEY + item.CNT + index}
               >
                 <span>{title}</span>
                 <span>{flds[index] || "-"}</span>
