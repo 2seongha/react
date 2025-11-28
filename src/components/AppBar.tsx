@@ -101,7 +101,9 @@ const AppBar: React.FC<AppBarProps> = ({
             {showCount ? <AnimatedBadge count={count} /> : null}
           </div>
           {showBackButton ?
-            <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
+            <div onClick={() => webviewHaptic("mediumImpact")}>
+              <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
+            </div>
             : <span />
           }
           <IonButtons slot="end" style={{ marginRight: '8px' }}>
