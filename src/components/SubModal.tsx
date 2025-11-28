@@ -1,10 +1,8 @@
-import React, { useState, useRef, useMemo, useEffect, useLayoutEffect } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   IonContent,
-  IonFooter,
   IonIcon,
   IonModal,
-  useIonRouter,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
@@ -13,6 +11,7 @@ import "./ApprovalModal.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import useAppStore from "../stores/appStore";
 import _ from "lodash";
+import useIonContentBounceControl from "../hooks/useIonContentBounceControl";
 
 interface SubModalProps {
   trigger?: string;
@@ -31,6 +30,7 @@ const SubModal: React.FC<SubModalProps> = ({
   const swiperRef = useRef<any>(null); // Swiper 인스턴스
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  // useIonContentBounceControl('.sub-modal');
 
   useEffect(() => {
     setCurrentIndex(swiperRef.current?.activeIndex ?? 0);
@@ -115,6 +115,7 @@ const SubModal: React.FC<SubModalProps> = ({
     >
       <AppBar title={<></>} titleCenter={false} customEndButtons={closeButton} />
       <IonContent
+        className="sub-modal"
         style={{
           overscrollBehavior: 'none',           // 스크롤 끝에서의 bounce 비활성화
           WebkitOverflowScrolling: 'auto',       // iOS에서의 스크롤 탄력 제거

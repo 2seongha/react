@@ -1,11 +1,10 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   IonContent,
-  IonFooter,
   IonIcon,
   IonModal,
   IonTextarea,
-  useIonRouter,
+  useIonViewDidEnter,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
@@ -18,6 +17,7 @@ import { webviewHaptic } from "../webview";
 import { postApprovals } from "../stores/service";
 import _ from "lodash";
 import useAppStore from "../stores/appStore";
+import useIonContentBounceControl from "../hooks/useIonContentBounceControl";
 
 interface ApprovalModalProps {
   activity?: string;
@@ -47,7 +47,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   selectedApprovals,
   separate
 }) => {
-  const router = useIonRouter();
   const modal = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const historyPushedRef = useRef(false);
@@ -60,12 +59,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const [status, setStatus] = useState<string | null>(null);
   const getApprovals = useAppStore(state => state.getApprovals);
 
-  // ⬇️ props → state로 복사
   const [approvals, setApprovals] = useState(() =>
     _.cloneDeep(selectedApprovals ?? [])
   );
 
-  // ⬇️ props가 바뀌면 state도 자동 업데이트 (단방향 데이터 흐름 유지)
   useEffect(() => {
     if (_.isEmpty(selectedApprovals)) return;
     setApprovals(selectedApprovals ?? []);
@@ -212,7 +209,26 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       }}
     >
       <AppBar title={<></>} customEndButtons={closeButton} />
-      <IonContent className="approval-modal-ion-content">
+      <IonContent
+        scrollEvents
+        // onscro
+        onScroll={(e) => {
+          debugger;
+          const target = e.currentTarget as HTMLIonContentElement;
+          target.getScrollElement().then((scrollEl) => {
+            const currentScrollTop = scrollEl.scrollTop;
+            if (currentScrollTop <= 0) {
+              scrollEl.style.overflow = 'hidden';
+              setTimeout(() => {
+                scrollEl.style.overscrollBehavior = 'auto';
+                scrollEl.style.overflow = 'auto';
+              }, 0);
+            } else {
+              scrollEl.style.overscrollBehavior = 'none';
+            }
+          });
+        }}
+        className="approval-modal-ion-content">
         <div style={{
           background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 120px, transparent 140px)',
           width: '100%',
@@ -277,7 +293,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               }}>
               {(separate ? (approvals?.[0].SUB.filter(((s: any) => s.CHECK === 'I'))) : approvals)?.map((item: any, index: number) => (
                 <div key={`approval-modal-item-${index}`}
-                  className={`approval-modal-item ${status}`}
+                  className={`approval-modal-item ${status ?? ''}`}
                   style={{
                     backgroundColor: 'var(--ion-background-color2)',
                     padding: '16px 21px',
@@ -301,7 +317,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      maxWidth: '100%', // 말줄임표가 보일 수 있도록 너비 제한 필요
+                      maxWidth: '100%',
                     }}>
                       {item.APPR_TITLE ? item.APPR_TITLE : (item.TITLE || item.FLD02)}
                     </span>
@@ -368,7 +384,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
-        {/* </div> */}
       </IonContent>
     </IonModal>
   );

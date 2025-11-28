@@ -31,6 +31,7 @@ import './Menu.css';
 import AppBar from '../components/AppBar';
 import { webviewHaptic } from '../webview';
 import { OrbitProgress } from 'react-loading-indicators';
+import useIonContentBounceControl from '../hooks/useIonContentBounceControl';
 
 const Menu: React.FC = () => {
   const location = useLocation();

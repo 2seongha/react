@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import {
   IonContent,
   IonPage,
@@ -12,8 +12,6 @@ import {
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import { webviewLogout, webviewTheme } from '../webview';
-import { themeIcon, bellIcon } from '../assets/images';
-import CachedImage from '../components/CachedImage';
 import { chevronForward, contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
 import "./Settings.css";
 import CustomDialog from '../components/Dialog';
@@ -39,10 +37,14 @@ const Settings: React.FC = () => {
   return (
     <IonPage className='settings'>
       <AppBar title={<span>설정</span>} showBackButton={true} />
-      <IonContent style={{
-        '--padding-start': '21px',
-        '--padding-end': '21px',
-      }}>
+      <IonContent
+        scrollX={false}
+        scrollY={false}
+        scrollEvents={false}
+        style={{
+          '--padding-start': '21px',
+          '--padding-end': '21px',
+        }}>
         <IonCard className='settings-card' style={{ marginTop: '12px' }}>
           <span className='settings-card-title'>테마</span>
           <div className='settings-card-button'>
