@@ -47,7 +47,7 @@ const AppBar: React.FC<AppBarProps> = ({
   customEndButtons,
 }) => {
   const router = useIonRouter();
-  const { themeMode } = useAppStore();
+  const themeMode = useAppStore(state => state.themeMode);
 
   // 실제 적용된 테마 확인 (메모이제이션)
   const actualTheme = useMemo(() => {
@@ -101,8 +101,8 @@ const AppBar: React.FC<AppBarProps> = ({
             {showCount ? <AnimatedBadge count={count} /> : null}
           </div>
           {showBackButton ?
-            <IonBackButton defaultHref='/app/home' mode='md' color={'primary'}/>
-            : <span/>
+            <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
+            : <span />
           }
           <IonButtons slot="end" style={{ marginRight: '8px' }}>
             {showSearchButton &&

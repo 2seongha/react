@@ -24,7 +24,7 @@ import TermsOfUse from './pages/TermsOfUse';
 import Attach from './pages/Attach';
 
 const App: React.FC = () => {
-  const { themeMode } = useAppStore();
+  const themeMode = useAppStore(state => state.themeMode);
   const [completeInit, setCompleteInit] = useState<boolean>(false);
   const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
   const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
