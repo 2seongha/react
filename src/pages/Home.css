@@ -195,7 +195,6 @@ ion-item.menu-ion-item {
 
 .todo-summary-index {
   margin-left: 4px;
-  margin-top: 2px;
   color: var(--ion-color-primary);
   font-size: 13px;
   font-weight: 600;
@@ -203,10 +202,14 @@ ion-item.menu-ion-item {
 
 .todo-summary-content {
   margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: space-between;
 }
 
 .todo-summary-item-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 

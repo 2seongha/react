@@ -14,7 +14,7 @@ import {
 } from '@ionic/react';
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { chevronDown, chevronUp, chevronForwardOutline, person, refreshOutline } from 'ionicons/icons';
+import { chevronDown, chevronUp, chevronForwardOutline, person, refreshOutline, attachOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
@@ -334,7 +334,13 @@ const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = f
       <div className='todo-summary-item-wrapper'>
         <span className='todo-summary-index'>{`${index + 1}.`}</span>
         <div className='todo-summary-content'>
-          <span className='todo-summary-item-title'>{approvalItem.APPR_TITLE}</span>
+          <span className={!_.isEmpty(approvalItem.ATTACH) ? 'attach-title todo-summary-item-title' : 'todo-summary-item-title'}>{approvalItem.APPR_TITLE}</span>
+          {!_.isEmpty(approvalItem.ATTACH) && <IonIcon src={attachOutline} style={{
+            position: 'absolute',
+            height: '17px',
+            color: 'var(--ion-color-secondary)'
+          }} />
+          }
           <div className='todo-summary-item-sub-wrapper'>
             <span>{approvalItem.CREATE_DATE + '・'}</span>
             <IonIcon src={person} ></IonIcon>
