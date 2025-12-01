@@ -6,9 +6,6 @@ import {
   IonSearchbar,
   useIonRouter,
   IonItem,
-  IonLabel,
-  IonList,
-  IonImg,
   IonIcon,
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
@@ -17,10 +14,9 @@ import { AreaModel } from '../stores/types';
 import { getFlowIcon } from '../utils';
 import { arrowForwardOutline, closeOutline } from 'ionicons/icons';
 import { webviewHaptic } from '../webview';
+import CachedImage from '../components/CachedImage';
 
 const Search: React.FC = () => {
-  const user = useAppStore((state) => state.user);
-  const corp = useAppStore((state) => state.corp);
   const areas = useAppStore((state) => state.areas);
   const router = useIonRouter();
   const searchbarRef = useRef<HTMLIonSearchbarElement>(null);
@@ -172,7 +168,7 @@ const Search: React.FC = () => {
                           {area.P_AREA_CODE && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '8px' }}>
                               <div className="menu-item-icon" style={{ backgroundColor: pIcon.backgroundColor, width: '28px', height: '28px' }}>
-                                <IonImg src={pIcon.image} alt="menu icon" style={{ width: '20px' }} />
+                                <CachedImage src={pIcon.image} alt="menu icon" style={{ width: '20px' }} />
                               </div>
                               <span style={{ fontSize: '14px', fontWeight: 500 }}>{highlightSearchText(area.P_AREA_CODE_TXT || '', searchText)}</span>
                               <IonIcon icon={arrowForwardOutline} style={{ color: 'var(--gray-color)' }}></IonIcon>
@@ -180,7 +176,7 @@ const Search: React.FC = () => {
                           )}
                           <div style={{ display: 'flex', alignItems: 'center', flex: 1, overflow: 'hidden' }}>
                             <div className="menu-item-icon" style={{ backgroundColor: icon.backgroundColor, width: '28px', height: '28px' }}>
-                              <IonImg src={icon.image} alt="menu icon" style={{ width: '20px' }} />
+                              <CachedImage src={icon.image} alt="menu icon" style={{ width: '20px' }} />
                             </div>
                             <span
                               style={{

@@ -122,8 +122,9 @@ export const useVirtuosoScrollToTop = () => {
   const scrollerElRef = useRef<HTMLElement | null>(null); // DOM element 저장용
 
   const scrollToTop = () => {
-    virtuosoRef.current?.scrollTo({
-      top: 0,
+    virtuosoRef.current?.scrollToIndex({
+      index: 0,
+      align: "start", // or "center", "end"
       behavior: "smooth"
     });
   };
@@ -132,15 +133,28 @@ export const useVirtuosoScrollToTop = () => {
     if (ref instanceof HTMLElement) { // HTMLElement일 때만 처리
       scrollerElRef.current = ref;
 
+      let scrollEndTimer: any = null;
+
       const onScroll = () => {
         setIsTop(ref.scrollTop < 100);
         scrollCallbackRef.current?.();
+        document.body.classList.add('no-ripple');
+
+        // 스크롤 종료 감지 (디바운스)
+        clearTimeout(scrollEndTimer);
+        scrollEndTimer = setTimeout(() => {
+          document.body.classList.remove('no-ripple');
+          console.log("scroll end");
+        }, 120); // 80~200ms 추천
       };
 
       ref.addEventListener("scroll", onScroll, { passive: true });
 
       // cleanup: ref가 바뀌거나 컴포넌트 언마운트될 때 제거
-      return () => ref.removeEventListener("scroll", onScroll);
+      return () => {
+        ref.removeEventListener("scroll", onScroll);
+        document.body.classList.remove('no-ripple');
+      };
     }
   };
 

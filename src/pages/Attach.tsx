@@ -19,7 +19,8 @@ const Attach: React.FC = () => {
           display: "inline-block",
           whiteSpace: "nowrap",   // 줄바꿈 금지
           overflow: "hidden",     // 넘치는 부분 숨김
-          textOverflow: "ellipsis" // ... 처리
+          textOverflow: "ellipsis", // ... 처리
+          paddingRight: '21px'
         }}
       >
         {FileName}

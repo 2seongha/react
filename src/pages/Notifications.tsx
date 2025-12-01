@@ -1,9 +1,9 @@
-import { IonButton, IonContent, IonHeader, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonList, IonPage, IonRefresher, IonRefresherContent, IonSelect, IonSelectOption, isPlatform, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { IonButton, IonContent, IonHeader, IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding, IonPage, IonRefresher, IonRefresherContent, IonSelect, IonSelectOption, isPlatform, RefresherCustomEvent, useIonRouter, useIonViewWillEnter } from '@ionic/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import AppBar from '../components/AppBar';
 import BottomTabBar from '../components/BottomNavigation';
-import ScrollToTopFab, { useScrollToTop, useVirtuosoScrollToTop } from '../components/ScrollToTopFab';
+import ScrollToTopFab, { useVirtuosoScrollToTop } from '../components/ScrollToTopFab';
 import './Notifications.css';
 import useAppStore from '../stores/appStore';
 import { webviewHaptic, webviewToast } from '../webview';
@@ -11,7 +11,6 @@ import { refreshOutline, trashOutline } from 'ionicons/icons';
 import NoData from '../components/NoData';
 import { OrbitProgress } from 'react-loading-indicators';
 import CustomDialog from '../components/Dialog';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Virtuoso } from 'react-virtuoso';
 
 const Notifications: React.FC = () => {

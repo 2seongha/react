@@ -211,8 +211,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent
         scrollEvents
-        // onscro
-        onScroll={(e) => {
+          onScroll={(e) => {
           debugger;
           const target = e.currentTarget as HTMLIonContentElement;
           target.getScrollElement().then((scrollEl) => {

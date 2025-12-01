@@ -151,3 +151,7 @@
   /* will-change: transform;
   transform: translateZ(0); */
 }
+
+.attach-title {
+  padding-left: 18px;
+}

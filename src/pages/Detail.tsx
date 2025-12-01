@@ -452,7 +452,7 @@ const Detail: React.FC = () => {
               <IonSegmentButton value="tab3">
                 <div className="detail-segment-label">
                   <span>첨부파일</span>
-                  <span></span>
+                  <span>({approval.ATTACH.length})</span>
                 </div>
               </IonSegmentButton>
             </IonSegment>
@@ -1249,14 +1249,12 @@ const AttachItem: React.FC<AttachProps> = React.memo(
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: 600,
-                whiteSpace: 'nowrap',
+                // whiteSpace: 'nowrap',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                // textOverflow: 'ellipsis',
+                paddingRight: '8px'
               }}>
                 {attach.FileName}
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ion-color-step-500)' }}>
-                {attach.FileTypeText}
               </span>
             </div>
           </div>
@@ -1268,6 +1266,10 @@ const AttachItem: React.FC<AttachProps> = React.memo(
     const bodyElement = useMemo(
       () => (
         <div className="custom-item-body">
+          <div className="custom-item-body-line">
+            <span>파일유형</span>
+            <span>{attach.FileTypeText}</span>
+          </div>
           <div className="custom-item-body-line">
             <span>생성일</span>
             <span>{Number(attach.AttachErdat) ? `${attach.AttachErdat.slice(0, 4)}/${attach.AttachErdat.slice(4, 6)}/${attach.AttachErdat.slice(6)}` : "-"}</span>

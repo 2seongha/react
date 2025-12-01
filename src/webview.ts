@@ -145,8 +145,8 @@ const _initWebview = async (): Promise<void> => {
     const setCorp = useAppStore.getState().setCorp;
     const getUser = useAppStore.getState().getUser;
     setCorp({
-      CORP_ID: "ISTN",
-      CORP_NM: "아이에스티엔",
+      CORP_ID: "BLUEWARD",
+      CORP_NM: "블루어드",
       SYSTEM: {
         webviewLink:'',
         apiEndpoint: 'http://localhost:4201',

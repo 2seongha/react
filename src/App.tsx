@@ -1,7 +1,7 @@
 import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect, useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import Home from './pages/Home';
 import FlowList from './pages/FlowList';
@@ -25,70 +25,96 @@ import Attach from './pages/Attach';
 
 const App: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
-  const [completeInit, setCompleteInit] = useState<boolean>(false);
-  const [webviewInitialized, setWebviewInitialized] = useState<boolean>(false);
-  const [themeInitialized, setThemeInitialized] = useState<boolean>(false);
-  const [fixedHeight, setFixedHeight] = useState<number>();
+
+  // 렌더링과 무관한 플래그들은 모두 ref
+  const webviewInitializedRef = useRef(false);
+  const themeInitializedRef = useRef(false);
+
+  const [fixedHeight, setFixedHeight] = useState<number>(0);
   const { isLoading: imageLoading, loadedCount } = useImagePreload();
 
-  useEffect(() => {
-    if (!themeInitialized) return;
-    const initialHeight = document.documentElement.offsetHeight;
-    setFixedHeight(initialHeight);
 
-    // 웹뷰 초기화
-    const initializeWebview = async () => {
-      try {
-        console.log('웹뷰 초기화 시작...');
-        const success = await initWebview();
-        if (success) {
-          console.log('웹뷰 초기화 완료!');
-          setWebviewInitialized(true);
-        }
-      } catch (error) {
-        console.error('웹뷰 초기화 실패:', error);
-      }
-    };
+  // 초기화 상태를 모두 확인하는 함수
+  const checkAllInitialized = useCallback(() => {
+     if (
+      webviewInitializedRef.current &&
+      themeInitializedRef.current &&
+      imageLoading
+    ) {
 
-    initializeWebview();
-  }, [themeInitialized]);
+      console.log("앱 초기화 완료!");
+      console.log(`이미지 ${loadedCount}개 캐싱 완료`);
 
+      const initialHeight = document.documentElement.offsetHeight;
+      setFixedHeight(initialHeight); // 여기서 단 1번 렌더링
+    }
+  }, [imageLoading, loadedCount]);
+
+
+  // 1) 테마 설정 + 테마 완료 플래그 등록
   useEffect(() => {
     const html = document.documentElement;
 
-    if (themeMode === 'dark') {
-      html.setAttribute('data-theme', 'dark');
-    } else if (themeMode === 'light') {
-      html.setAttribute('data-theme', 'light');
+    if (themeMode === "dark") {
+      html.setAttribute("data-theme", "dark");
+    } else if (themeMode === "light") {
+      html.setAttribute("data-theme", "light");
     } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      html.setAttribute("data-theme", prefersDark ? "dark" : "light");
 
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = (e: MediaQueryListEvent) => {
-        html.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+        html.setAttribute("data-theme", e.matches ? "dark" : "light");
       };
 
-      mediaQuery.addEventListener('change', handleChange);
+      mediaQuery.addEventListener("change", handleChange);
     }
 
-    // 테마 초기화 완료 표시
-    if (!themeInitialized) setThemeInitialized(true);
+    // 플래그 업데이트
+    if (!themeInitializedRef.current) {
+      themeInitializedRef.current = true;
+      initializeWebview(); // 테마가 준비되면 웹뷰 초기화 시작
+    }
+
   }, [themeMode]);
 
-  // 웹뷰, 테마, 이미지 모두 초기화 완료되었을 때 앱 초기화 완료
-  useEffect(() => {
-    if (webviewInitialized && themeInitialized && !imageLoading) {
-      console.log('앱 초기화 완료!');
-      console.log(`이미지 ${loadedCount}개 캐싱 완료`);
 
-      setCompleteInit(true);
+  // 2) 웹뷰 초기화
+  const initializeWebview = async () => {
+    try {
+      console.log("웹뷰 초기화 시작...");
+      const success = await initWebview();
+      if (success) {
+        console.log("웹뷰 초기화 완료!");
+        webviewInitializedRef.current = true;
+        checkAllInitialized();
+      }
+    } catch (err) {
+      console.error("웹뷰 초기화 실패:", err);
     }
-  }, [webviewInitialized, themeInitialized, imageLoading, loadedCount]);
+  };
 
-  if (!completeInit) return (
-    <div style={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ion-background-color)' }} >
-      <OrbitProgress color="var(--ion-text-color)" size="small" text="" textColor="" />
+
+  // 3) 이미지 로딩 완료 감지 후 최종 체크
+  useEffect(() => {
+    checkAllInitialized();
+  }, [imageLoading, loadedCount]);
+
+
+  // 4) 초기화 로딩 화면
+  if (!fixedHeight) return (
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--ion-background-color)",
+      }}
+    >
+      <OrbitProgress color="var(--ion-text-color)" size="small" />
     </div>
   );
 

@@ -1,10 +1,10 @@
 import { IonContent, IonIcon, IonPage, IonRefresher, IonRefresherContent, IonSearchbar, RefresherCustomEvent, useIonRouter, IonButton, IonDatetime, IonPopover, IonItem, IonCheckbox, isPlatform, IonHeader, useIonViewWillLeave } from '@ionic/react';
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import AppBar from '../components/AppBar';
 import useAppStore from '../stores/appStore';
-import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, checkmarkOutline } from 'ionicons/icons';
+import { chevronForwardOutline, refreshOutline, refresh, calendarClear, person, closeOutline, clipboard, clipboardSharp, attachOutline } from 'ionicons/icons';
 import CustomItem from '../components/CustomItem';
-import ScrollToTopFab, { useScrollToTop } from '../components/ScrollToTopFab';
+import ScrollToTopFab, { useVirtuosoScrollToTop } from '../components/ScrollToTopFab';
 import CustomSkeleton from '../components/CustomSkeleton';
 import './Approval.css';
 import { useParams } from 'react-router-dom';
@@ -12,6 +12,7 @@ import NoData from '../components/NoData';
 import _ from 'lodash';
 import { webviewHaptic } from '../webview';
 import ApprovalModal from '../components/ApprovalModal';
+import { Virtuoso } from 'react-virtuoso';
 
 const Approval: React.FC = () => {
   let { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
@@ -20,10 +21,11 @@ const Approval: React.FC = () => {
   const setApprovals = useAppStore(state => state.setApprovals);
   const getApprovals = useAppStore(state => state.getApprovals);
   const approvals = useAppStore(state => state.approvals);
+  const [refreshEnable, setRefreshEnable] = useState(true);
   const router = useIonRouter();
 
   // 캐싱된 타이틀들
-  const { isTop, scrollToTop, scrollCallbackRef, contentRef } = useScrollToTop();
+  const { isTop, scrollToTop, scrollCallbackRef, contentRef, scrollerRef } = useVirtuosoScrollToTop();
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState<string>('');
 
@@ -32,8 +34,8 @@ const Approval: React.FC = () => {
     setSearchText('');
     setApprovals(null);
     getApprovals(P_AREA_CODE, AREA_CODE, '', '');
+
     return () => setApprovals(null);
-    // return;
   }, []);
 
   // useIonViewWillEnter(() => {
@@ -365,12 +367,12 @@ const Approval: React.FC = () => {
         </div>
       </IonHeader >
       <IonContent
-        ref={contentRef}
-        scrollEvents={true}
-        onIonScrollStart={() => document.body.classList.add('no-ripple')}
-        onIonScrollEnd={() => document.body.classList.remove('no-ripple')}
+        // ref={contentRef}
+        scrollEvents={false}
+      // onIonScrollStart={() => document.body.classList.add('no-ripple')}
+      // onIonScrollEnd={() => document.body.classList.remove('no-ripple')}
       >
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!isTop}>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!refreshEnable}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>
         {
@@ -384,37 +386,49 @@ const Approval: React.FC = () => {
                 ))}
               </div>
             ) : filteredApprovals && filteredApprovals.length > 0 ? (
-              filteredApprovals.map((approval: any, index: number) =>
-                <ApprovalItem
-                  key={`approval-${approval.FLOWNO}-${index}`}
-                  selectable={P_AREA_CODE === 'TODO'}
-                  approval={approval}
-                  index={index}
-                  isSelected={selectedItems.has(approval.FLOWNO)}
-                  onSelectionChange={handleItemSelection}
-                  searchText={searchText}
-                  isFirstItem={index === 0}
-                  isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
-                  handleItemClick={handleItemClick}
-                />
-              )
+              // filteredApprovals.map((approval: any, index: number) =>
+              //   <ApprovalItem
+              //     key={`approval-${approval.FLOWNO}-${index}`}
+              //     selectable={P_AREA_CODE === 'TODO'}
+              //     approval={approval}
+              //     index={index}
+              //     isSelected={selectedItems.has(approval.FLOWNO)}
+              //     onSelectionChange={handleItemSelection}
+              //     searchText={searchText}
+              //     isFirstItem={index === 0}
+              //     isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
+              //     handleItemClick={handleItemClick}
+              //   />
+              // )
 
-              // <Virtuoso
-              //   className='virtuoso'
-              //   ref={virtuosoRef}
-              //   data={filteredApprovals}
-              //   overscan={30}
-              //   initialItemCount={20}
-              //   initialTopMostItemIndex={0}
-              //   increaseViewportBy={{ top: 800, bottom: 800 }}
-              //   atTopStateChange={(atTop) => setIsTop(atTop)}
-              //   rangeChanged={() => {
-              //     if (scrollCallbackRef.current) {
-              //       scrollCallbackRef.current();
-              //     }
-              //   }}
-              //   itemContent={renderItem}
-              // />
+              <Virtuoso
+                ref={contentRef}
+                scrollerRef={scrollerRef}
+                data={filteredApprovals}
+                overscan={15}
+                initialItemCount={15}
+                initialTopMostItemIndex={0}
+                increaseViewportBy={{ top: 200, bottom: 200 }}
+                atTopStateChange={atTop => setRefreshEnable(atTop)}
+                itemContent={(index, approval) => {
+                  if (!approval) return null;
+
+                  return (
+                    <ApprovalItem
+                      key={`approval-${approval.FLOWNO}-${index}`}
+                      selectable={P_AREA_CODE === "TODO"}
+                      approval={approval}
+                      index={index}
+                      isSelected={selectedItems.has(approval.FLOWNO)}
+                      onSelectionChange={handleItemSelection}
+                      searchText={searchText}
+                      isFirstItem={index === 0}
+                      isLastItem={index === (filteredApprovals?.length ?? 0) - 1}
+                      handleItemClick={handleItemClick}
+                    />
+                  );
+                }}
+              />
             ) : <NoData message="해당 항목에 대한 데이터가 없습니다." />}
         <ScrollToTopFab
           isTop={isTop}
@@ -471,7 +485,6 @@ const highlightText = (text: string, searchText: string) => {
 
 // ApprovalItem 컴포넌트 - wrapper div 포함
 const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, selectable, isSelected, onSelectionChange, searchText, isFirstItem, isLastItem, handleItemClick }) => {
-  const router = useIonRouter();
   const titles = useAppStore(state => state.approvals?.TITLE.TITLE_H);
   const flds = _(approval)
     .pickBy((_, key) => /^FLD\d+$/.test(key))
@@ -489,7 +502,14 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, sel
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
   const titleElement = useMemo(() => (
     <div className='custom-item-title'>
-      <span>{highlightText(approval.APPR_TITLE, searchText)}</span>
+      <span className={!_.isEmpty(approval.ATTACH) ? 'attach-title' : ''}>{highlightText(approval.APPR_TITLE, searchText)}</span>
+      {!_.isEmpty(approval.ATTACH) && <IonIcon src={attachOutline} style={{
+        position: 'absolute',
+        width: '17px',
+        height: '17px',
+        color: 'var(--ion-color-secondary)'
+      }} />
+      }
       <div className='custom-item-sub-title'>
         <IonIcon src={person} />
         <span>{highlightText(approval.CREATOR_NAME, searchText)} ・ </span>

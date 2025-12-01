@@ -1,13 +1,5 @@
-html {
-  overflow: hidden;
-  height: 100%;
-  position: fixed;
-}
-
-body {
-  overflow: auto;
-  height: 100%;
-  position: relative;
+body, html {
+  overscroll-behavior: none;
 }
 
 /* 스크롤 관련 */
@@ -265,6 +257,10 @@ ion-modal.auto-height .inner-content {
   width: 100% !important;
   background-color: var(--ion-background-color);
   padding: 12px 0 calc(var(--ion-safe-area-bottom) + 24px) 0;
+}
+
+.no-ripple {
+  --ripple-color: transparent;
 }
 
 .no-ripple ion-ripple-effect {
