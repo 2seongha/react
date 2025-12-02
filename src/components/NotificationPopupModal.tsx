@@ -206,7 +206,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 justifyContent: 'center',
                 gap: '4px'
               }}>
-                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>반려{typeCounts.APPROVE > 0 && <span
+                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>반려{typeCounts.REJECT > 0 && <span
                   style={{
                     position: 'absolute',
                     width: '6px',
