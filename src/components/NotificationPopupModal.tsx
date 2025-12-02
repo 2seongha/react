@@ -81,21 +81,6 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
     };
   }, [isModalOpen]);
 
-  const closeButton = useMemo(
-    () => (
-      <IonButton
-        mode="md"
-        shape="round"
-        color={"medium"}
-        className="app-bar-button"
-        onClick={dismiss}
-      >
-        <IonIcon icon={close} />
-      </IonButton>
-    ),
-    []
-  );
-
   return (
     <IonModal
       onIonModalWillPresent={handleModalWillPresent}
@@ -107,40 +92,55 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
       style={{
         alignItems: 'end',
         '--width': 'calc(100% - 22px)',
-        '--height': '400px',
+        '--height': '350px',
         '--background': 'transparent',
-        '--max-height': '400px',
+        '--max-height': '350px',
         paddingBottom: 'calc(11px + var(--ion-safe-area-bottom))',
         '--border-radius': '21px',
       }}
     >
-      <AppBar title={<></>} titleCenter={false} customEndButtons={closeButton} />
+      {/* <AppBar title={<></>} titleCenter={false} customEndButtons={closeButton} />  */}
       <IonContent
         scrollY={false}
         scrollX={false}
         scrollEvents={false}
       >
         <div style={{
-          // paddingTop: '36px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           height: '100%'
         }}>
+          <div style={{ height: '48px', display: 'flex', width: '100%', justifyContent: 'end', alignItems: 'end', paddingRight: '4px', position: 'absolute', top: 0 }}>
+            <IonButton
+              mode="md"
+              shape="round"
+              // color={"medium"}
+              className="app-bar-button"
+              onClick={dismiss}
+              style={{
+                backgroundColor: 'transparent',
+                '--background': 'transparent'
+              }}
+            >
+              <IonIcon icon={close} style={{ width: '24px', height: '24px' }} />
+            </IonButton>
+          </div>
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center'
+            justifyContent: 'start',
+            alignItems: 'center',
+            paddingTop: '24px'
           }}>
-            <CachedImage src={emailIcon} width='96px'></CachedImage>
-            <span style={{ fontSize: '16px', fontWeight: '500' }}>새로운 결재가 있습니다.</span>
+            <CachedImage src={emailIcon} width='78px'></CachedImage>
+            <span style={{ fontSize: '14px', fontWeight: '500', color:'var(--ion-color-secondary)' }}>새로운 결재 항목이 있습니다.</span>
           </div>
           <div style={{
             flex: 1,
             width: '100%',
-            padding: '28px 21px 42px 21px'
+            padding: '32px 21px 12px 21px'
           }}>
             <div style={{
               backgroundColor: 'var(--ion-background-color2)',
@@ -221,9 +221,9 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "12px 21px",
+              padding: "21px",
               gap: "12px",
-              paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
+              paddingBottom: '12px',
               backgroundColor: 'var(--ion-background-color)'
             }}
           >
@@ -257,7 +257,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 }, 250);
               }}
             >
-              <span>바로가기</span>
+              <span>확인하기</span>
             </IonButton>
           </div>
         </div>
