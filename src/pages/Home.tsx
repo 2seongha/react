@@ -12,7 +12,7 @@ import {
   useIonRouter,
   isPlatform,
 } from '@ionic/react';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { chevronDown, chevronUp, chevronForwardOutline, person, refreshOutline, attachOutline } from 'ionicons/icons';
 import CustomSkeleton from '../components/CustomSkeleton';
@@ -28,16 +28,31 @@ import { useShallow } from 'zustand/shallow';
 import { webviewHaptic } from '../webview';
 import CachedImage from '../components/CachedImage';
 import _ from 'lodash';
+import NotificationPopupModal from '../components/NotificationPopupModal';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
   const setApprovals = useAppStore(state => state.setApprovals);
+  const notificationPopupShown = useAppStore(state => state.notificationPopupShown);
+  const getNotifications = useAppStore(state => state.getNotifications);
+  const setNotificationPopupShown = useAppStore(state => state.setNotificationPopupShown);
 
   const getAreas = useAppStore(state => state.getAreas);
 
   useIonViewWillEnter(() => {
     getAreas('');
   });
+
+  useEffect(() => {
+    if (notificationPopupShown) return;
+    async function setNotiPopup() {
+      setNotificationPopupShown(true);
+      await getNotifications();
+      document.getElementById("noti-popup-modal-trigger")?.click();
+    }
+    setNotiPopup();
+  }, [notificationPopupShown]);
+
 
   async function handleRefresh(event: RefresherCustomEvent) {
     setMenuAreas(null);
@@ -70,6 +85,18 @@ const Home: React.FC = () => {
         <div style={{ marginTop: '12px', marginBottom: '12px' }}>
           <TodoSummaryCard />
         </div>
+        {
+          <>
+            <NotificationPopupModal
+              trigger="noti-popup-modal-trigger"
+            />
+
+            <IonButton
+              id="noti-popup-modal-trigger"
+              style={{ display: "none" }}
+            ></IonButton>
+          </>
+        }
       </IonContent>
       <BottomTabBar />
     </IonPage>

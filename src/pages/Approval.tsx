@@ -411,7 +411,7 @@ const Approval: React.FC = () => {
                 increaseViewportBy={{ top: 200, bottom: 200 }}
                 atTopStateChange={atTop => setRefreshEnable(atTop)}
                 itemContent={(index, approval) => {
-                  if (!approval) return null;
+                  if (!approval) return <div style={{ minHeight: 50 }} />;
 
                   return (
                     <ApprovalItem

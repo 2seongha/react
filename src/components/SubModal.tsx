@@ -11,7 +11,6 @@ import "./ApprovalModal.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import useAppStore from "../stores/appStore";
 import _ from "lodash";
-import useIonContentBounceControl from "../hooks/useIonContentBounceControl";
 
 interface SubModalProps {
   trigger?: string;
@@ -136,12 +135,14 @@ const SubModal: React.FC<SubModalProps> = ({
           gap: '8px'
         }}>
           {
-            subs?.map((sub: any, index: number) => <span style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '12px',
-              backgroundColor: currentIndex === index ? 'var(--ion-color-primary)' : 'var(--ion-color-step-400)'
-            }}></span>)
+            subs?.map((sub: any, index: number) => <span
+              key={'sub-modal-item' + index}
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '12px',
+                backgroundColor: currentIndex === index ? 'var(--ion-color-primary)' : 'var(--ion-color-step-400)'
+              }}></span>)
           }
         </div>
         <Swiper

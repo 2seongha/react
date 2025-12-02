@@ -8,6 +8,7 @@ export interface AppState {
   notices: NoticeModel[] | null;
   notifications: NotificationModel[] | null;
   selectedTab: number;
+  notificationPopupShown: boolean;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: UserModel) => void;
@@ -17,13 +18,15 @@ export interface AppState {
   setNotices: (notices: NoticeModel[] | null) => void;
   setNotifications: (notifications: NotificationModel[] | null) => void;
   setSelectedTab: (tab: number) => void;
+  setNotificationPopupShown: (shown: boolean) => void;
 
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
   getApprovals: (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => Promise<void>;
   getNotices: () => Promise<void>;
-  getNotifications: () => Promise<void>;
+  getNotifications: () => Promise<NotificationModel[] | undefined>;
   patchNotifications: (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => Promise<void>;
+  getNotificationPopupShown: () => boolean;
 }
 
 export interface UserModel {

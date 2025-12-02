@@ -31,9 +31,9 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   areas: null,
   approvals: null,
   notices: null,
-  notificationPopupShown: false,
   notifications: null,
   selectedTab: 0,
+  notificationPopupShown: false,
 
   setThemeMode: (mode) => {
     // localStorage에 저장
@@ -49,6 +49,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setNotices: (notices) => set({ notices }),
   setNotifications: (notifications) => set({ notifications }),
   setSelectedTab: (tab) => set({ selectedTab: tab }),
+  setNotificationPopupShown: (shown) => set({ notificationPopupShown: shown }),
 
   getUser: async (LOGIN_ID: string) => {
     const currentRequestId = ++requestIds.areas;
@@ -93,10 +94,15 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
     if (currentRequestId === requestIds.notifications) {
       set({ notifications });
     }
+    return notifications;
   },
 
   patchNotifications: async (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => {
     await patchNotifications(NOTIFY_NO, READ_YN, DELETE_YN);
+  },
+
+  getNotificationPopupShown: () => {
+    return get().notificationPopupShown;
   },
 }));
 
