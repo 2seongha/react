@@ -110,7 +110,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
         '--height': '400px',
         '--background': 'transparent',
         '--max-height': '400px',
-        paddingBottom: '11px',
+        paddingBottom: 'calc(11px + var(--ion-safe-area-bottom))',
         '--border-radius': '21px',
       }}
     >
@@ -135,7 +135,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
             alignItems: 'center'
           }}>
             <CachedImage src={emailIcon} width='96px'></CachedImage>
-            <span style={{ fontSize: '16px', fontWeight: '500' }}>새로운 결재가 있습니다</span>
+            <span style={{ fontSize: '16px', fontWeight: '500' }}>새로운 결재가 있습니다.</span>
           </div>
           <div style={{
             flex: 1,

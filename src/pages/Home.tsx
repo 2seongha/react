@@ -47,7 +47,9 @@ const Home: React.FC = () => {
     if (notificationPopupShown) return;
     async function setNotiPopup() {
       setNotificationPopupShown(true);
-      await getNotifications();
+      const notifications = await getNotifications();
+      const notReadNotis = notifications?.filter(noti => noti.READ_YN === 'N');
+      if (_.isEmpty(notReadNotis)) return;
       document.getElementById("noti-popup-modal-trigger")?.click();
     }
     setNotiPopup();

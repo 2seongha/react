@@ -17,7 +17,6 @@ import { webviewHaptic } from "../webview";
 import { postApprovals } from "../stores/service";
 import _ from "lodash";
 import useAppStore from "../stores/appStore";
-import useIonContentBounceControl from "../hooks/useIonContentBounceControl";
 
 interface ApprovalModalProps {
   activity?: string;
