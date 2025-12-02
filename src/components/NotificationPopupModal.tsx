@@ -89,6 +89,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
       mode="ios"
       ref={modalRef}
       trigger={trigger}
+      backdropDismiss={false}
       style={{
         alignItems: 'end',
         '--width': 'calc(100% - 22px)',
@@ -138,7 +139,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
             gap: '12px',
             paddingLeft: '21px'
           }}>
-            <div style={{ backgroundColor: 'rgba(var(--ion-color-primary-rgb), .04)', padding: '8px', borderRadius: '50px' }}>
+            <div style={{ backgroundColor: 'rgba(var(--ion-color-primary-rgb), .04)', padding: '4px', borderRadius: '50px' }}>
               <CachedImage src={emailIcon} width='48px'></CachedImage>
             </div>
             <span style={{ fontSize: '16px', fontWeight: '600' }}>새로운 알림이 도착했습니다.</span>
@@ -146,7 +147,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
           <div style={{
             flex: 1,
             width: '100%',
-            padding: '21px 21px 12px 21px'
+            padding: '28px 21px 28px 21px'
           }}>
             <div style={{
               backgroundColor: 'var(--ion-background-color2)',
@@ -229,7 +230,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
               justifyContent: "center",
               padding: "21px",
               gap: "12px",
-              paddingBottom: '12px',
+              paddingBottom: '21px',
               backgroundColor: 'var(--ion-background-color)'
             }}
           >
