@@ -78,7 +78,9 @@ const AppBar: React.FC<AppBarProps> = ({
                   position: 'absolute',
                   width: '100%',
                   height: '100%',
-                  display: actualTheme === 'light' ? 'block' : 'none'
+                  display: actualTheme === 'light' ? 'block' : 'none',
+                  scale: 1.1,
+                  transformOrigin: 'left center'
                 }}
               />
               <CachedImage
@@ -88,7 +90,9 @@ const AppBar: React.FC<AppBarProps> = ({
                   position: 'absolute',
                   width: '100%',
                   height: '100%',
-                  display: actualTheme === 'dark' ? 'block' : 'none'
+                  display: actualTheme === 'dark' ? 'block' : 'none',
+                  scale: 1.1,
+                  transformOrigin: 'left center'
                 }}
               />
             </div>
