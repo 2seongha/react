@@ -112,7 +112,8 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
           alignItems: 'center',
           height: '100%'
         }}>
-          <div style={{ height: '48px', display: 'flex', width: '100%', justifyContent: 'end', alignItems: 'end', paddingRight: '4px', position: 'absolute', top: 0 }}>
+          <div style={{ height: '48px', display: 'flex', width: '100%', justifyContent: 'end', alignItems: 'center', paddingRight: '4px', position: 'absolute', top: 0 }}>
+            {/* <span style={{ fontSize: '16px', fontWeight: '600', paddingLeft:'21px' }}>새로운 알림이 있습니다</span> */}
             <IonButton
               mode="md"
               shape="round"
@@ -129,18 +130,23 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
           </div>
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row',
             justifyContent: 'start',
             alignItems: 'center',
-            paddingTop: '24px'
+            paddingTop: '36px',
+            width: '100%',
+            gap: '12px',
+            paddingLeft: '21px'
           }}>
-            <CachedImage src={emailIcon} width='78px'></CachedImage>
-            <span style={{ fontSize: '14px', fontWeight: '500', color:'var(--ion-color-secondary)' }}>새로운 결재 항목이 있습니다.</span>
+            <div style={{ backgroundColor: 'rgba(var(--ion-color-primary-rgb), .04)', padding: '8px', borderRadius: '50px' }}>
+              <CachedImage src={emailIcon} width='48px'></CachedImage>
+            </div>
+            <span style={{ fontSize: '16px', fontWeight: '600' }}>새로운 알림이 도착했습니다.</span>
           </div>
           <div style={{
             flex: 1,
             width: '100%',
-            padding: '32px 21px 12px 21px'
+            padding: '21px 21px 12px 21px'
           }}>
             <div style={{
               backgroundColor: 'var(--ion-background-color2)',
@@ -155,7 +161,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '2px',
+                gap: '4px',
               }}>
                 <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>상신{typeCounts.START > 0 && <span
                   style={{
@@ -177,7 +183,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 justifyContent: 'center',
                 borderLeft: '3px dotted var(--ion-color-step-200)',
                 borderRight: '3px dotted var(--ion-color-step-200)',
-                gap: '2px'
+                gap: '4px'
               }}>
                 <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>승인{typeCounts.APPROVE > 0 && <span
                   style={{
@@ -197,7 +203,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '2px'
+                gap: '4px'
               }}>
                 <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>반려{typeCounts.APPROVE > 0 && <span
                   style={{
