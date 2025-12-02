@@ -137,8 +137,8 @@ const WelcomeCard: React.FC = () => {
           alt="person"
         />
         <div className='welcome-card-name'>
-          <span>{name}님</span>
-          <span>좋은 하루 보내세요!</span>
+          <span style={{ fontSize: '16px', fontWeight: '700' }}>{name}님</span>
+          <span style={{ fontSize: '12px', fontWeight: '500' }}>좋은 하루 보내세요!</span>
         </div>
         <IonButton fill='clear' mode='md' className='welcome-card-button' onClick={() => {
           router.push(`/myPage`, 'forward', 'push');
