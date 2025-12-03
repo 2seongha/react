@@ -63,6 +63,8 @@ const Detail: React.FC = () => {
   const [selectedAttendeeData, setSelectedAttendeeData] = useState<any>(null);
   const [selectedSubData, setSelectedSubData] = useState<any>(null);
   const [approval, setApproval] = useState<any>(null);
+  const [initialSeparate, setInitialSeparate] = useState<boolean>(false);
+  const [isAllCompleted, setIsAllCompleted] = useState<boolean>(false);
 
   // framer motion values - 스크롤 값 직접 사용
   const scrollY = useMotionValue(0);
@@ -99,10 +101,12 @@ const Detail: React.FC = () => {
   );
 
   useEffect(() => {
-    if (!oriApproval) {
+    // 결재가 있었는데 없어진 경우 = 결재가 완료되어 사라진경우
+    setSelectedItems(new Set());
+    if (!oriApproval && approval) {
       approval.SUB = [];
       setApproval(approval);
-      router.goBack();
+      setIsAllCompleted(true);
       return;
     }
     setApproval(oriApproval);
@@ -731,22 +735,24 @@ const Detail: React.FC = () => {
           {
             P_AREA_CODE === 'TODO' && <ApprovalModal
               activity="APPROVE"
-              separate={approval.IS_SEPARATE && !isAllSelected}
+              separate={initialSeparate}
               apprTitle={AREA_CODE_TXT}
               required={false}
               trigger="approve-modal"
               selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
+              goBack={isAllCompleted}
             />
           }
           {/* 반려 Modal */}
           {
             P_AREA_CODE === 'TODO' && <ApprovalModal
               activity="REJECT"
-              separate={approval.IS_SEPARATE && !isAllSelected}
+              separate={initialSeparate}
               apprTitle={AREA_CODE_TXT}
               required={true}
               trigger="reject-modal"
               selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
+              goBack={isAllCompleted}
             />
           }
           {/* Sub Modal Trigger Button (숨김) */}
@@ -910,7 +916,7 @@ const Detail: React.FC = () => {
         <IonFooter style={{
           boxShadow: 'none',
         }}>
-          {P_AREA_CODE === "TODO" && (
+          {P_AREA_CODE === "TODO" && !isAllCompleted && (
             <div
               style={{
                 height: "auto",
@@ -937,6 +943,9 @@ const Detail: React.FC = () => {
                 }}
                 id="reject-modal"
                 disabled={approval.IS_SEPARATE ? selectedItems.size < 1 : false}
+                onClick={() => {
+                  setInitialSeparate(approval.IS_SEPARATE && !isAllSelected);
+                }}
               >
                 <span>반려하기</span>
               </IonButton>
@@ -951,6 +960,9 @@ const Detail: React.FC = () => {
                 }}
                 id="approve-modal"
                 disabled={approval.IS_SEPARATE ? selectedItems.size < 1 : false}
+                onClick={() => {
+                  setInitialSeparate(approval.IS_SEPARATE && !isAllSelected);
+                }}
               >
                 <span>승인하기</span>
               </IonButton>

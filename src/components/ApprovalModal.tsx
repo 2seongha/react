@@ -4,6 +4,7 @@ import {
   IonIcon,
   IonModal,
   IonTextarea,
+  useIonRouter,
   useIonViewDidEnter,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
@@ -34,6 +35,7 @@ interface ApprovalModalProps {
   required?: boolean;
   selectedApprovals?: Array<any>;
   separate?: boolean;
+  goBack?: boolean;
 }
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({
@@ -44,12 +46,14 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   // buttonColor = "primary",
   required = false,
   selectedApprovals,
-  separate
+  separate,
+  goBack
 }) => {
   const modal = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
+  const router = useIonRouter();
 
   const [textValue, setTextValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,8 +73,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     setApprovals(_.cloneDeep(selectedApprovals) ?? []);
   }, [selectedApprovals]);
 
-  function dismiss() {
-    modal.current?.dismiss();
+  async function dismiss() {
+    await modal.current?.dismiss();
+    if (goBack) router.goBack();
   }
 
   const handleTextChange = (e: any) => {
@@ -193,7 +198,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
         });
       }
 
-      // 이제 state에 새로운 객체 넣기
       setApprovals(approvals);
 
       await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");

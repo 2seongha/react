@@ -269,4 +269,5 @@ ion-modal.auto-height .inner-content {
 
 .no-ripple ion-back-button {
   --ripple-color: transparent;
+  color: #42424223;
 }

@@ -203,7 +203,7 @@ const Approval: React.FC = () => {
   }, [filteredApprovals, isAllSelected]);
 
   const handleItemClick = useCallback((approval: any) => {
-    router.push(`/detail/${approval.FLOWNO}/${P_AREA_CODE}/${AREA_CODE}/${encodeURIComponent(P_AREA_CODE_TXT)}/${encodeURIComponent(AREA_CODE_TXT)}`, 'forward', 'push');
+    router.push(`/detail/${approval.FLOWNO || '-'}/${P_AREA_CODE}/${AREA_CODE}/${encodeURIComponent(P_AREA_CODE_TXT)}/${encodeURIComponent(AREA_CODE_TXT)}`, 'forward', 'push');
   }, []); // router 의존성 제거
 
   return (
