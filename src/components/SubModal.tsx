@@ -115,10 +115,7 @@ const SubModal: React.FC<SubModalProps> = ({
       <AppBar title={<></>} titleCenter={false} customEndButtons={closeButton} />
       <IonContent
         className="sub-modal"
-        style={{
-          overscrollBehavior: 'none',           // 스크롤 끝에서의 bounce 비활성화
-          WebkitOverflowScrolling: 'auto',       // iOS에서의 스크롤 탄력 제거
-        }}
+        forceOverscroll={false}
       >
         <div style={{
           height: '100px',

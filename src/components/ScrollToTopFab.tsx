@@ -144,7 +144,6 @@ export const useVirtuosoScrollToTop = () => {
         clearTimeout(scrollEndTimer);
         scrollEndTimer = setTimeout(() => {
           document.body.classList.remove('no-ripple');
-          console.log("scroll end");
         }, 120); // 80~200ms 추천
       };
 

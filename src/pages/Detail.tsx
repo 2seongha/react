@@ -25,7 +25,7 @@ import "swiper/css";
 import AppBar from "../components/AppBar";
 import CustomDialog from "../components/Dialog";
 import "./Detail.css";
-import { getFileTypeIcon, getFlowIcon } from "../utils";
+import { getFileTypeIcon, getFlowIcon, getPlatformMode } from "../utils";
 import { useParams } from "react-router-dom";
 import useAppStore from "../stores/appStore";
 import { motion, useMotionValue, useTransform } from "framer-motion";
@@ -141,11 +141,25 @@ const Detail: React.FC = () => {
     .map(([_, value]) => value)
     .value();
 
+  // 스크롤 시 리플 제거
+  const scrollEndTimer = useRef<any>(null);
+  const disableRippleTemporarily = useCallback(() => {
+    document.body.classList.add('no-ripple');
+
+    if (scrollEndTimer.current) {
+      clearTimeout(scrollEndTimer.current);
+    }
+
+    scrollEndTimer.current = setTimeout(() => {
+      document.body.classList.remove('no-ripple');
+    }, 120);
+  }, []);
 
   const icon = useMemo(() => getFlowIcon(P_AREA_CODE || ""), [P_AREA_CODE]);
 
   // 슬라이드 변경 핸들러
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
+    disableRippleTemporarily();
     const newIndex = swiper.activeIndex;
     const newTab = TAB_KEYS[newIndex];
     setActiveTab(newTab);
@@ -153,27 +167,31 @@ const Detail: React.FC = () => {
 
   // 스크롤 핸들러 - 스크롤 값 직접 전달
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    disableRippleTemporarily();
     const scrollTop = event.currentTarget.scrollTop;
     scrollY.set(scrollTop); // 스크롤 값 직접 설정
   }, [scrollY]);
 
-  // SwiperSlide 내부 스크롤 핸들러 - 위로 스크롤시 outer scroll을 헤더 높이만큼 스크롤
 
+  // SwiperSlide 내부 스크롤 핸들러 - 위로 스크롤시 outer scroll을 헤더 높이만큼 스크롤
   const prevScrollTopRef = useRef(0);
 
   const handleSwiperSlideScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    disableRippleTemporarily();
     const element = event.currentTarget;
     const currentScrollTop = element.scrollTop;
     const prevScrollTop = prevScrollTopRef.current;
 
-    if (currentScrollTop <= 0) {
-      element.style.overflow = 'hidden';
-      setTimeout(() => {
-        element.style.overscrollBehavior = 'auto';
-        element.style.overflow = 'auto';
-      }, 0)
-    } else {
-      element.style.overscrollBehavior = 'none';
+    if (getPlatformMode() === 'ios') {
+      if (currentScrollTop <= 0) {
+        element.style.overflow = 'hidden';
+        setTimeout(() => {
+          element.style.overscrollBehavior = 'auto';
+          element.style.overflow = 'auto';
+        }, 0)
+      } else {
+        element.style.overscrollBehavior = 'none';
+      }
     }
 
     if (currentScrollTop > prevScrollTop) {
@@ -204,7 +222,7 @@ const Detail: React.FC = () => {
   // 전체 선택 상태 계산
   const isAllSelected = useMemo(() => {
     if (approval?.SUB?.length === 0) return false;
-    return approval?.SUB?.every((sub: any) => selectedItems.has(sub.LIST_SUB_KEY));
+    return approval?.SUB?.filter((sub: any) => sub.CHECK === 'I')?.every((sub: any) => selectedItems.has(sub.LIST_SUB_KEY));
   }, [selectedItems]);
 
   // 전체 선택/해제 핸들러
@@ -217,7 +235,7 @@ const Detail: React.FC = () => {
     } else {
       // 전체 선택 (필터된 결과만)
       const newSet = new Set<string>();
-      approval.SUB.forEach((sub: any) => {
+      approval.SUB.filter((sub: any) => sub.CHECK === 'I').forEach((sub: any) => {
         newSet.add(sub.LIST_SUB_KEY);
       });
       setSelectedItems(newSet);
@@ -440,7 +458,7 @@ const Detail: React.FC = () => {
               <IonSegmentButton value="tab1">
                 <div className="detail-segment-label">
                   <span>상세목록</span>
-                  <span>({approval.SUB.length})</span>
+                  <span>({approval.SUB.filter((sub: any) => sub.CHECK === 'I').length})</span>
                 </div>
               </IonSegmentButton>
               <IonSegmentButton value="tab2">
@@ -466,6 +484,7 @@ const Detail: React.FC = () => {
               }}
               onSwiper={(swiper) => (swiperRef.current = swiper)}
               onSlideChange={handleSlideChange}
+              onSliderMove={disableRippleTemporarily}
               resistanceRatio={0}
             >
 

@@ -3,13 +3,13 @@ import React, { ReactNode, useState, useMemo, useCallback, useRef } from 'react'
 import './CustomItem.css';
 import { chevronForwardOutline, chevronDownOutline, chevronUpOutline } from 'ionicons/icons';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getPlatformMode } from '../utils';
 interface CustomItemProps {
   selectable?: boolean;
   title?: ReactNode;
   body?: ReactNode;
   sub?: ReactNode;
   onClick?: () => void;
-  onLongPress?: () => void;
   onCheckboxChange?: (checked: boolean) => void;
   checked?: boolean;
   expandable?: boolean;
@@ -23,7 +23,6 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
   body,
   sub,
   onClick,
-  onLongPress,
   onCheckboxChange,
   checked,
   style,
@@ -121,7 +120,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
               style={{ overflow: 'hidden' }}
             >
               <div className="custom-item-sub">
-                <div style={{ padding: " 0 16px 12px 16px" }}>
+                <div style={{ padding: "0 16px 12px 16px" }}>
                   {sub}
                 </div>
               </div>

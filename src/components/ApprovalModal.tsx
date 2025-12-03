@@ -210,22 +210,23 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent
         scrollEvents
-          onScroll={(e) => {
-          debugger;
-          const target = e.currentTarget as HTMLIonContentElement;
-          target.getScrollElement().then((scrollEl) => {
-            const currentScrollTop = scrollEl.scrollTop;
-            if (currentScrollTop <= 0) {
-              scrollEl.style.overflow = 'hidden';
-              setTimeout(() => {
-                scrollEl.style.overscrollBehavior = 'auto';
-                scrollEl.style.overflow = 'auto';
-              }, 0);
-            } else {
-              scrollEl.style.overscrollBehavior = 'none';
-            }
-          });
-        }}
+        forceOverscroll={false}
+        //   onScroll={(e) => {
+        //   debugger;
+        //   const target = e.currentTarget as HTMLIonContentElement;
+        //   target.getScrollElement().then((scrollEl) => {
+        //     const currentScrollTop = scrollEl.scrollTop;
+        //     if (currentScrollTop <= 0) {
+        //       scrollEl.style.overflow = 'hidden';
+        //       setTimeout(() => {
+        //         scrollEl.style.overscrollBehavior = 'auto';
+        //         scrollEl.style.overflow = 'auto';
+        //       }, 0);
+        //     } else {
+        //       scrollEl.style.overscrollBehavior = 'none';
+        //     }
+        //   });
+        // }}
         className="approval-modal-ion-content">
         <div style={{
           background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 120px, transparent 140px)',

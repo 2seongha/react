@@ -312,6 +312,7 @@ const Approval: React.FC = () => {
             showBackdrop={true}
           >
             <IonDatetime
+              mode='md'
               class='date-picker-pop-up'
               value={startDate}
               onClick={(e) => {
@@ -343,6 +344,7 @@ const Approval: React.FC = () => {
             showBackdrop={true}
           >
             <IonDatetime
+              mode='md'
               class='date-picker-pop-up'
               value={endDate}
               onClick={(e) => {
