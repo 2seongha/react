@@ -8,7 +8,7 @@ import {
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
-import { checkmarkCircle, close } from "ionicons/icons";
+import { alertCircle, checkmarkCircle, close, warning } from "ionicons/icons";
 import "./ApprovalModal.css";
 import AnimatedIcon from "./AnimatedIcon";
 import { FlipWords } from "./FlipWords";
@@ -63,8 +63,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   );
 
   useEffect(() => {
-    if (_.isEmpty(selectedApprovals)) return;
-    setApprovals(selectedApprovals ?? []);
+    if (_.isEmpty(selectedApprovals) || (approvals.some(item =>
+      "MESSAGE" in item && "STATUS" in item
+    ) && step !== 0)) return;
+    setApprovals(_.cloneDeep(selectedApprovals) ?? []);
   }, [selectedApprovals]);
 
   function dismiss() {
@@ -151,42 +153,51 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       setStep(1);
       setStepText("할게요");
 
-      // state를 clone 해서 안전하게 수정
-      const updatedApprovals = _.cloneDeep(approvals ?? []);
+      const response = await postApprovals(activity, separate, approvals);
+      let RETTYPE;
+      if (response instanceof Error) {
+        RETTYPE = 'E';
+        approvals.forEach(approval => {
+          approval.STATUS = "error";
+          approval.MESSAGE = "예상치 못한 오류가 발생했습니다.";
 
-      const response = await postApprovals(activity, separate, updatedApprovals);
-      const { RETTYPE, LIST } = response;
-      updatedApprovals.forEach(approval => {
-        const matched = LIST.find((l: any) => l.FLOWNO === approval.FLOWNO);
-        approval.STATUS =
-          matched.RETTYPE === "S"
-            ? "success"
-            : matched.RETTYPE === "E"
-              ? "error"
-              : "warning";
-        approval.MESSAGE = matched.RETMSG;
-
-        approval.SUB.forEach((sub: any) => {
-          const matchedSub = matched.SUB.find(
-            (s: any) => sub.LIST_SUB_KEY === s.LIST_SUB_KEY
-          );
-          sub.STATUS =
-            matched.TYPE === "S"
+          approval.SUB.forEach((sub: any) => {
+            sub.STATUS = "error";
+            sub.MESSAGE = "예상치 못한 오류가 발생했습니다.";
+          });
+        });
+      } else {
+        RETTYPE = response.RETTYPE;
+        const { LIST } = response;
+        approvals.forEach(approval => {
+          const matched = LIST.find((l: any) => l.FLOWNO === approval.FLOWNO);
+          approval.STATUS =
+            matched.RETTYPE === "S"
               ? "success"
-              : matched.TYPE === "E"
+              : matched.RETTYPE === "E"
                 ? "error"
                 : "warning";
-          sub.MESSAGE = matchedSub.MESSAGE;
+          approval.MESSAGE = matched.RETMSG;
+          -          approval.SUB.forEach((sub: any) => {
+            const matchedSub = matched.SUB.find(
+              (s: any) => sub.LIST_SUB_KEY === s.LIST_SUB_KEY
+            );
+            sub.STATUS =
+              matched.TYPE === "S"
+                ? "success"
+                : matched.TYPE === "E"
+                  ? "error"
+                  : "warning";
+            sub.MESSAGE = matchedSub.MESSAGE;
+          });
         });
-      });
+      }
 
       // 이제 state에 새로운 객체 넣기
-      setApprovals(updatedApprovals);
+      setApprovals(approvals);
 
-      await getApprovals("TODO", updatedApprovals?.[0].FLOWCODE, "", "");
-      setStatus(
-        RETTYPE === "S" ? "success" : RETTYPE === "E" ? "error" : "warning"
-      );
+      await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");
+      setStatus(RETTYPE === "S" ? "success" : RETTYPE === "E" ? "error" : "warning");
     } else if (step === 2) {
       dismiss();
     }
@@ -211,22 +222,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <IonContent
         scrollEvents
         forceOverscroll={false}
-        //   onScroll={(e) => {
-        //   debugger;
-        //   const target = e.currentTarget as HTMLIonContentElement;
-        //   target.getScrollElement().then((scrollEl) => {
-        //     const currentScrollTop = scrollEl.scrollTop;
-        //     if (currentScrollTop <= 0) {
-        //       scrollEl.style.overflow = 'hidden';
-        //       setTimeout(() => {
-        //         scrollEl.style.overscrollBehavior = 'auto';
-        //         scrollEl.style.overflow = 'auto';
-        //       }, 0);
-        //     } else {
-        //       scrollEl.style.overscrollBehavior = 'none';
-        //     }
-        //   });
-        // }}
         className="approval-modal-ion-content">
         <div style={{
           background: 'linear-gradient(to bottom, var(--ion-background-color) 0%, var(--ion-background-color) 120px, transparent 140px)',
@@ -303,7 +298,11 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     alignItems: 'center',
                     position: 'relative'
                   }}>
-                  {step === 2 && <IonIcon icon={checkmarkCircle} style={{ fontSize: '24px' }} color={status === 'error' ? 'danger' : `${status}`} />}
+                  {step === 2 && <IonIcon
+                    icon={status === 'error' ? alertCircle : status === 'success' ? checkmarkCircle : warning}
+                    style={{ fontSize: '24px' }}
+                    color={status === 'error' ? 'danger' : `${status}`}
+                  />}
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -324,7 +323,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                       style={{
                         marginTop: '4px',
                         fontSize: '13px',
-                        color: `var(--ion-color-${item.STATUS === 'error' ? 'danger' : `${item.STATUS}`})`
+                        // color: `var(--ion-color-${item.STATUS === 'error' ? 'danger' : `${item.STATUS}`})`
+                        color: 'var(--ion-color-step-700)'
                       }}
                     >{item.MESSAGE}</span>}
                   </div>

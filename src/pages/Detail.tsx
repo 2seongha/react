@@ -62,6 +62,7 @@ const Detail: React.FC = () => {
   const [selectedProfitData, setSelectedProfitData] = useState<any>(null);
   const [selectedAttendeeData, setSelectedAttendeeData] = useState<any>(null);
   const [selectedSubData, setSelectedSubData] = useState<any>(null);
+  const [approval, setApproval] = useState<any>(null);
 
   // framer motion values - 스크롤 값 직접 사용
   const scrollY = useMotionValue(0);
@@ -87,7 +88,7 @@ const Detail: React.FC = () => {
   P_AREA_CODE_TXT = decodeURIComponent(P_AREA_CODE_TXT);
   AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
 
-  const approval = useAppStore(
+  const oriApproval = useAppStore(
     useShallow(
       (state) => {
         if (state.approvals instanceof Error) return state.approvals;
@@ -97,14 +98,24 @@ const Detail: React.FC = () => {
     )
   );
 
+  useEffect(() => {
+    if (!oriApproval) {
+      approval.SUB = [];
+      setApproval(approval);
+      router.goBack();
+      return;
+    }
+    setApproval(oriApproval);
+  }, [oriApproval])
+
   useLayoutEffect(() => {
     if (!headerRef.current) return;
 
     // 임시로 화면 밖에서 측정
     const tempElement = headerRef.current.cloneNode(true) as HTMLElement;
     tempElement.style.position = "absolute";
-    tempElement.style.top = "-0";
-    tempElement.style.left = "-0";
+    tempElement.style.top = "-999";
+    tempElement.style.left = "-999";
     tempElement.style.width = window.innerWidth + "px";
 
     document.body.appendChild(tempElement);
@@ -156,6 +167,17 @@ const Detail: React.FC = () => {
   }, []);
 
   const icon = useMemo(() => getFlowIcon(P_AREA_CODE || ""), [P_AREA_CODE]);
+
+  const getKey = useCallback((sub: any) => {
+    let result = "";
+    for (const key in sub) {
+      if (key.startsWith("KEY")) {
+        if (result) result += ", ";
+        result += sub[key];
+      }
+    }
+    return result;
+  }, [approval]);
 
   // 슬라이드 변경 핸들러
   const handleSlideChange = useCallback((swiper: SwiperClass) => {
@@ -222,8 +244,8 @@ const Detail: React.FC = () => {
   // 전체 선택 상태 계산
   const isAllSelected = useMemo(() => {
     if (approval?.SUB?.length === 0) return false;
-    return approval?.SUB?.filter((sub: any) => sub.CHECK === 'I')?.every((sub: any) => selectedItems.has(sub.LIST_SUB_KEY));
-  }, [selectedItems]);
+    return approval?.SUB?.filter((sub: any) => sub.CHECK === 'I')?.every((sub: any) => selectedItems.has(getKey(sub)));
+  }, [approval, selectedItems]);
 
   // 전체 선택/해제 핸들러
   const handleSelectAll = useCallback(() => {
@@ -236,7 +258,7 @@ const Detail: React.FC = () => {
       // 전체 선택 (필터된 결과만)
       const newSet = new Set<string>();
       approval.SUB.filter((sub: any) => sub.CHECK === 'I').forEach((sub: any) => {
-        newSet.add(sub.LIST_SUB_KEY);
+        newSet.add(getKey(sub));
       });
       setSelectedItems(newSet);
     }
@@ -531,7 +553,7 @@ const Detail: React.FC = () => {
                     selectable={P_AREA_CODE === "TODO" && approval.IS_SEPARATE}
                     item={item}
                     sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.FLOWCNT === sub.FLOWCNT)}
-                    isSelected={selectedItems.has(item.LIST_SUB_KEY)}
+                    isSelected={selectedItems.has(getKey(item))}
                     onSelectionChange={handleItemSelection}
                     onProfitDialogOpen={(profitData) => {
                       setSelectedProfitData(profitData);
@@ -709,22 +731,22 @@ const Detail: React.FC = () => {
           {
             P_AREA_CODE === 'TODO' && <ApprovalModal
               activity="APPROVE"
-              separate={approval.IS_SEPARATE}
+              separate={approval.IS_SEPARATE && !isAllSelected}
               apprTitle={AREA_CODE_TXT}
               required={false}
               trigger="approve-modal"
-              selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(s.LIST_SUB_KEY)) }]}
+              selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
             />
           }
           {/* 반려 Modal */}
           {
             P_AREA_CODE === 'TODO' && <ApprovalModal
               activity="REJECT"
-              separate={approval.IS_SEPARATE}
+              separate={approval.IS_SEPARATE && !isAllSelected}
               apprTitle={AREA_CODE_TXT}
               required={true}
               trigger="reject-modal"
-              selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(s.LIST_SUB_KEY)) }]}
+              selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
             />
           }
           {/* Sub Modal Trigger Button (숨김) */}
@@ -966,6 +988,16 @@ const SubItem: React.FC<SubProps> = React.memo(
     onSubModalOpen,
     style,
   }) => {
+    const getKey = useCallback((sub: any) => {
+      let result = "";
+      for (const key in sub) {
+        if (key.startsWith("KEY")) {
+          if (result) result += ", ";
+          result += sub[key];
+        }
+      }
+      return result;
+    }, [item]);
     const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_I);
     const flds = _(item)
       .pickBy((_, key) => /^FLD\d+$/.test(key))
@@ -976,9 +1008,9 @@ const SubItem: React.FC<SubProps> = React.memo(
 
     const handleCheckboxChange = useCallback(
       (checked: boolean) => {
-        onSelectionChange(item.LIST_SUB_KEY, checked);
+        onSelectionChange(getKey(item), checked);
       },
-      [item.LIST_SUB_KEY, onSelectionChange]
+      [getKey(item), onSelectionChange]
     );
 
     const titleElement = useMemo(

@@ -127,7 +127,7 @@ const CustomItem: React.FC<CustomItemProps> = React.memo(({
             </motion.div>
           )}
         </AnimatePresence>
-        {(onClick || (!onClick && selectable)) && <IonRippleEffect />}
+        {(onClick || (!onClick && selectable)) && <IonRippleEffect/>}
       </div>
       {selectable &&
         <div
