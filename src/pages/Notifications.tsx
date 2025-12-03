@@ -70,7 +70,7 @@ const Notifications: React.FC = () => {
 
     setApprovals(null);
     getApprovals('', '', link[0], link[1]); // 0: flowCode, 1: flowNo
-    router.push(`/detail/${link[1]}/-/-/-/-`, 'forward', 'push');
+    router.push(`/detail/${link[1]}/-/-/-/-/Y`, 'forward', 'push');
   }, [notifications]);
 
   //? 알림 삭제
@@ -199,14 +199,6 @@ interface NotificationItemProps {
 
 const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notification, onDelete, onRead }) => {
   return (
-    // <motion.div
-    //   key={`notification-${notification.NOTIFY_NO}`}
-    //   initial={{ opacity: 1 }}
-    //   exit={{
-    //     opacity: 0,
-    //     transition: { duration: 0.3 }
-    //   }}
-    // >
     <div style={{ height: '99.5px' }}>
       <IonItemSliding>
         <IonItem button mode='md' onClick={() => onRead(notification.NOTIFY_NO)}>
@@ -232,7 +224,6 @@ const NotificationItem: React.FC<NotificationItemProps> = React.memo(({ notifica
         </IonItemOptions>
       </IonItemSliding>
     </div>
-    // </motion.div>
   );
 });
 

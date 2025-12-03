@@ -36,6 +36,7 @@ interface ApprovalModalProps {
   selectedApprovals?: Array<any>;
   separate?: boolean;
   goBack?: boolean;
+  isNotification?: boolean;
 }
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({
@@ -47,7 +48,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   required = false,
   selectedApprovals,
   separate,
-  goBack
+  goBack,
+  isNotification
 }) => {
   const modal = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
@@ -200,7 +202,11 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
       setApprovals(approvals);
 
-      await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");
+      if (isNotification) {
+        await getApprovals("", "", approvals?.[0].FLOWCODE, approvals?.[0].FLOWNO);
+      } else {
+        await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");
+      }
       setStatus(RETTYPE === "S" ? "success" : RETTYPE === "E" ? "error" : "warning");
     } else if (step === 2) {
       dismiss();

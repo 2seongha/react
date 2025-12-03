@@ -77,7 +77,7 @@ const Detail: React.FC = () => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
 
   // Constants
-  let { FLOWNO, P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ FLOWNO: string, P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
+  let { FLOWNO, P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT, isNotification } = useParams<{ FLOWNO: string, P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string, isNotification: any }>();
   P_AREA_CODE = useAppStore(
     useShallow((state) => state.approvals?.P_AREA_CODE) || null
   ) || P_AREA_CODE || '-';
@@ -89,6 +89,7 @@ const Detail: React.FC = () => {
   ) || AREA_CODE_TXT || '-';
   P_AREA_CODE_TXT = decodeURIComponent(P_AREA_CODE_TXT);
   AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
+  isNotification = isNotification === 'Y' ? true : false;
 
   const oriApproval = useAppStore(
     useShallow(
@@ -741,6 +742,7 @@ const Detail: React.FC = () => {
               trigger="approve-modal"
               selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
               goBack={isAllCompleted}
+              isNotification={isNotification}
             />
           }
           {/* 반려 Modal */}
@@ -753,6 +755,7 @@ const Detail: React.FC = () => {
               trigger="reject-modal"
               selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
               goBack={isAllCompleted}
+              isNotification={isNotification}
             />
           }
           {/* Sub Modal Trigger Button (숨김) */}
@@ -1253,7 +1256,7 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
             <span>{Number(apprLine.END_DATE) ? `${apprLine.END_DATE.slice(0, 4)}/${apprLine.END_DATE.slice(4, 6)}/${apprLine.END_DATE.slice(6)}` : "-"}</span>
           </div>
           <div className="custom-item-body-line">
-            <span>결재완료시간</span>
+            <span style={{ maxWidth: '40%' }}>결재완료시간</span>
             <span>{Number(apprLine.END_TIME) ? `${apprLine.END_TIME.slice(0, 2)}:${apprLine.END_TIME.slice(2, 4)}:${apprLine.END_TIME.slice(4)}` : "-"}</span>
           </div>
         </div>
