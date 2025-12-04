@@ -2,8 +2,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import './GroupButton.css';
 import useAppStore from '../stores/appStore';
 import CustomSkeleton from './CustomSkeleton';
-import { shallow, useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/shallow';
 import { elementScrollIntoView } from 'seamless-scroll-polyfill';
+import _ from 'lodash';
 
 interface GroupButtonProps {
   onSelectionChange?: (selectedItem: any) => void;
@@ -14,7 +15,7 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
+  const prevTodoSummary = useRef<any>(null);
   const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
 
   const setApprovals = useAppStore(state => state.setApprovals);
@@ -22,10 +23,14 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
 
   // todoSummary가 변경될 때 selected index 조정
   useEffect(() => {
+    if (_.isEqual(prevTodoSummary.current, todoSummary)) {
+      return;
+    }
+    prevTodoSummary.current = todoSummary;
     if (!todoSummary) return;
     if (todoSummary && todoSummary.length > 0) {
       // selected index가 배열 범위를 벗어나면 조정
-      let newIndex = selected == null ? { value: 0 } : { ...selected };
+      let newIndex = selected === null ? { value: 0 } : { ...selected };
       if (newIndex.value >= todoSummary.length) {
         newIndex.value = Math.max(0, todoSummary.length - 1);
         // 새로 선택된 버튼으로 스크롤
