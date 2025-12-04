@@ -53,6 +53,7 @@ import SubModal from "../components/SubModal";
 import { OrbitProgress } from "react-loading-indicators";
 import CachedImage from "../components/CachedImage";
 import NoData from "../components/NoData";
+import { getApprovals } from "../stores/service";
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -63,6 +64,7 @@ const Detail: React.FC = () => {
   const [selectedAttendeeData, setSelectedAttendeeData] = useState<any>(null);
   const [selectedSubData, setSelectedSubData] = useState<any>(null);
   const [approval, setApproval] = useState<any>(null);
+  const [header, setHeader] = useState<any>(null);
   const [initialSeparate, setInitialSeparate] = useState<boolean>(false);
   const [isAllCompleted, setIsAllCompleted] = useState<boolean>(false);
 
@@ -78,18 +80,38 @@ const Detail: React.FC = () => {
 
   // Constants
   let { FLOWNO, P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT, isNotification } = useParams<{ FLOWNO: string, P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string, isNotification: any }>();
-  P_AREA_CODE = useAppStore(
-    useShallow((state) => state.approvals?.P_AREA_CODE) || null
-  ) || P_AREA_CODE || '-';
-  P_AREA_CODE_TXT = useAppStore(
-    useShallow((state) => state.approvals?.P_AREA_CODE_TXT) || null
-  ) || P_AREA_CODE_TXT || '-';
-  AREA_CODE_TXT = useAppStore(
-    useShallow((state) => state.approvals?.FLOWCODE_TXT) || null
-  ) || AREA_CODE_TXT || '-';
-  P_AREA_CODE_TXT = decodeURIComponent(P_AREA_CODE_TXT);
-  AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
-  isNotification = isNotification === 'Y' ? true : false;
+  // P_AREA_CODE = useAppStore(
+  //   useShallow((state) => state.approvals?.P_AREA_CODE) || null
+  // ) || P_AREA_CODE || '-';
+  // P_AREA_CODE_TXT = useAppStore(
+  //   useShallow((state) => state.approvals?.P_AREA_CODE_TXT) || null
+  // ) || P_AREA_CODE_TXT || '-';
+  // AREA_CODE_TXT = useAppStore(
+  //   useShallow((state) => state.approvals?.FLOWCODE_TXT) || null
+  // ) || AREA_CODE_TXT || '-';
+  // P_AREA_CODE_TXT = decodeURIComponent(P_AREA_CODE_TXT);
+  // AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
+  // isNotification = isNotification === 'Y' ? true : false;
+
+  const oriHeader = useAppStore(
+    useShallow(
+      (state) => {
+        if (state.approvals instanceof Error) return state.approvals;
+        if (state.approvals) {
+          const approvals = {
+            ...state.approvals,
+            P_AREA_CODE: state.approvals.P_AREA_CODE || P_AREA_CODE || '-',
+            P_AREA_CODE_TXT: state.approvals.P_AREA_CODE_TXT || decodeURIComponent(P_AREA_CODE_TXT) || '-',
+            AREA_CODE: state.approvals.FLOWCODE || AREA_CODE || '-',
+            AREA_CODE_TXT: state.approvals.FLOWCODE_TXT || decodeURIComponent(AREA_CODE_TXT) || '-',
+          };
+          delete approvals.LIST;
+          return approvals;
+        }
+        return null;
+      }
+    )
+  );
 
   const oriApproval = useAppStore(
     useShallow(
@@ -102,14 +124,36 @@ const Detail: React.FC = () => {
   );
 
   useEffect(() => {
+    if (!oriHeader?.AREA_CODE) return;
+    setHeader(oriHeader);
+  }, [oriHeader]);
+
+  useEffect(() => {
     // 결재가 있었는데 없어진 경우 = 결재가 완료되어 사라진경우
     setSelectedItems(new Set());
+
+    async function setNewApproval() {
+      const newApprovals = await getApprovals('', '', approval.FLOWCODE, approval.FLOWNO);
+      let newApproval;
+      if (_.isEmpty(newApprovals?.LIST)) {
+        approval.LIST = [];
+        newApproval = approval;
+      } else {
+        newApproval = newApprovals.LIST[0];
+        newApprovals.AREA_CODE = newApprovals.FLOWCODE;
+        newApprovals.AREA_CODE_TXT = newApprovals.FLOWCODE_TXT;
+        delete newApprovals.LIST;
+        setHeader(newApprovals);
+      }
+      setApproval(newApproval);
+    }
+
     if (!oriApproval && approval) {
-      approval.SUB = [];
-      setApproval(approval);
       setIsAllCompleted(true);
+      setNewApproval();
       return;
     }
+
     setApproval(oriApproval);
   }, [oriApproval])
 
@@ -149,7 +193,9 @@ const Detail: React.FC = () => {
     }
   }, [approval]);
 
-  const titles = useAppStore((state) => state.approvals?.TITLE?.TITLE_H);
+  // const titles = useAppStore((state) => state.approvals?.TITLE?.TITLE_H);
+  const titles = useMemo(() => header?.TITLE?.TITLE_H, [header]);
+  const titlesI = useMemo(() => header?.TITLE?.TITLE_I, [header]);
   const flds = _(approval)
     .pickBy((_, key) => /^FLD\d+$/.test(key))
     .toPairs()
@@ -171,7 +217,7 @@ const Detail: React.FC = () => {
     }, 120);
   }, []);
 
-  const icon = useMemo(() => getFlowIcon(P_AREA_CODE || ""), [P_AREA_CODE]);
+  const icon = useMemo(() => getFlowIcon(header?.P_AREA_CODE || ""), [header?.P_AREA_CODE]);
 
   const getKey = useCallback((sub: any) => {
     let result = "";
@@ -311,7 +357,7 @@ const Detail: React.FC = () => {
               <span
                 style={{ fontSize: "13px", color: "var(--ion-color-secondary)" }}
               >
-                {P_AREA_CODE_TXT}
+                {header.P_AREA_CODE_TXT}
               </span>
             </motion.div >
           }
@@ -359,7 +405,7 @@ const Detail: React.FC = () => {
                   >
                     <IonImg src={icon.image} style={{ width: "20px" }} />
                     <span style={{ fontSize: "13px", fontWeight: "500" }}>
-                      {P_AREA_CODE_TXT}
+                      {header.P_AREA_CODE_TXT}
                     </span>
                     <span
                       style={{
@@ -377,7 +423,7 @@ const Detail: React.FC = () => {
                         color: "var(--ion-color-secondary)",
                       }}
                     >
-                      {AREA_CODE_TXT}
+                      {header.AREA_CODE_TXT}
                     </span>
                   </div>
                   <span
@@ -436,7 +482,7 @@ const Detail: React.FC = () => {
                       </span>
                     </div>
                     <div className="custom-item-body">
-                      {titles?.map((title, index) => {
+                      {titles?.map((title: any, index: number) => {
                         return (
                           <div
                             className="custom-item-body-line"
@@ -518,11 +564,11 @@ const Detail: React.FC = () => {
               <SwiperSlide
                 style={{
                   overflow: "auto",
-                  padding: `0px 21px ${P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'} 21px`,
+                  padding: `0px 21px ${header.P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'} 21px`,
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
-                {(P_AREA_CODE === 'TODO' && approval.IS_SEPARATE) && <div style={{
+                {(header.P_AREA_CODE === 'TODO' && approval.IS_SEPARATE) && <div style={{
                   backgroundColor: "var(--ion-background-color)",
                   position: "sticky",
                   width: "100%",
@@ -555,7 +601,7 @@ const Detail: React.FC = () => {
                   <SubItem
                     style={{ marginTop: index === 0 ? '12px' : 0 }}
                     key={item.FLOWNO + item.LIST_SUB_KEY + index}
-                    selectable={P_AREA_CODE === "TODO" && approval.IS_SEPARATE}
+                    selectable={header.P_AREA_CODE === "TODO" && approval.IS_SEPARATE}
                     item={item}
                     sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.FLOWCNT === sub.FLOWCNT)}
                     isSelected={selectedItems.has(getKey(item))}
@@ -572,13 +618,14 @@ const Detail: React.FC = () => {
                       setSelectedSubData({ modalTitle: item.TITLE || item.FLD02, subs: subs, initialIndex: index });
                       document.getElementById("sub-modal-trigger")?.click();
                     }}
+                    titles={titlesI}
                   />
                 ))}
               </SwiperSlide>
               <SwiperSlide
                 style={{
                   overflow: "auto",
-                  paddingBottom: `${P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'}`,
+                  paddingBottom: `${header.P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'}`,
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
@@ -709,7 +756,7 @@ const Detail: React.FC = () => {
               <SwiperSlide
                 style={{
                   overflow: "auto",
-                  padding: `0px 21px ${P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'} 21px`,
+                  padding: `0px 21px ${header.P_AREA_CODE === "TODO" ? '0' : 'var(--ion-safe-area-bottom)'} 21px`,
                 }}
                 onScroll={handleSwiperSlideScroll}
               >
@@ -734,28 +781,24 @@ const Detail: React.FC = () => {
           }
           {/* 승인 Modal */}
           {
-            P_AREA_CODE === 'TODO' && <ApprovalModal
+            <ApprovalModal
               activity="APPROVE"
               separate={initialSeparate}
-              apprTitle={AREA_CODE_TXT}
+              apprTitle={header.AREA_CODE_TXT}
               required={false}
               trigger="approve-modal"
               selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
-              goBack={isAllCompleted}
-              isNotification={isNotification}
             />
           }
           {/* 반려 Modal */}
           {
-            P_AREA_CODE === 'TODO' && <ApprovalModal
+            <ApprovalModal
               activity="REJECT"
               separate={initialSeparate}
-              apprTitle={AREA_CODE_TXT}
+              apprTitle={header.AREA_CODE_TXT}
               required={true}
               trigger="reject-modal"
               selectedApprovals={[{ ...approval, SUB: approval.SUB.filter((s: any) => selectedItems.has(getKey(s))) }]}
-              goBack={isAllCompleted}
-              isNotification={isNotification}
             />
           }
           {/* Sub Modal Trigger Button (숨김) */}
@@ -919,7 +962,7 @@ const Detail: React.FC = () => {
         <IonFooter style={{
           boxShadow: 'none',
         }}>
-          {P_AREA_CODE === "TODO" && !isAllCompleted && (
+          {header.P_AREA_CODE === "TODO" && !isAllCompleted && (
             <div
               style={{
                 height: "auto",
@@ -988,6 +1031,7 @@ interface SubProps {
   onAttendeeDialogOpen?: (attendeeData: any) => void;
   onSubModalOpen?: (subs: any, index: number) => void;
   style?: React.CSSProperties;
+  titles: any;
 }
 
 // ApprovalItem 컴포넌트 - wrapper div 포함
@@ -1002,6 +1046,7 @@ const SubItem: React.FC<SubProps> = React.memo(
     onAttendeeDialogOpen,
     onSubModalOpen,
     style,
+    titles
   }) => {
     const getKey = useCallback((sub: any) => {
       let result = "";
@@ -1013,7 +1058,7 @@ const SubItem: React.FC<SubProps> = React.memo(
       }
       return result;
     }, [item]);
-    const titles = useAppStore((state) => state.approvals?.TITLE.TITLE_I);
+
     const flds = _(item)
       .pickBy((_, key) => /^FLD\d+$/.test(key))
       .toPairs()
@@ -1102,7 +1147,7 @@ const SubItem: React.FC<SubProps> = React.memo(
     const bodyElement = useMemo(
       () => (
         <div className="custom-item-body">
-          {titles?.map((title, index) => {
+          {titles?.map((title: any, index: number) => {
             return (
               <div
                 className="custom-item-body-line"
@@ -1261,7 +1306,7 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
           </div>
         </div>
       ),
-      []
+      [apprLine.END_DATE, apprLine.END_TIME]
     );
 
     // CustomItem props 메모이제이션 - state 대신 ref 사용으로 최적화

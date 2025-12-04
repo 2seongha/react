@@ -35,7 +35,6 @@ interface ApprovalModalProps {
   required?: boolean;
   selectedApprovals?: Array<any>;
   separate?: boolean;
-  goBack?: boolean;
   isNotification?: boolean;
 }
 
@@ -48,25 +47,29 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   required = false,
   selectedApprovals,
   separate,
-  goBack,
-  isNotification
+  isNotification,
 }) => {
   const modal = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
-  const router = useIonRouter();
 
   const [textValue, setTextValue] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState(0); // 0: 결재 전, 1: 결재 중, 2: 결재 후
   const [stepText, setStepText] = useState("할까요?");
   const [status, setStatus] = useState<string | null>(null);
+  const [flowCodeText, setFlowCodeText] = useState<string | null>(null);
   const getApprovals = useAppStore(state => state.getApprovals);
 
   const [approvals, setApprovals] = useState(() =>
     _.cloneDeep(selectedApprovals ?? [])
   );
+
+  useEffect(() => {
+    if (!apprTitle || apprTitle === '-') return;
+    setFlowCodeText(apprTitle);
+  }, [apprTitle])
 
   useEffect(() => {
     if (_.isEmpty(selectedApprovals) || (approvals.some(item =>
@@ -76,8 +79,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   }, [selectedApprovals]);
 
   async function dismiss() {
-    await modal.current?.dismiss();
-    if (goBack) router.goBack();
+    modal.current?.dismiss();
   }
 
   const handleTextChange = (e: any) => {
@@ -201,10 +203,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       }
 
       setApprovals(approvals);
-
-      if (isNotification) {
-        await getApprovals("", "", approvals?.[0].FLOWCODE, approvals?.[0].FLOWNO);
-      } else {
+      if (!isNotification) {
         await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");
       }
       setStatus(RETTYPE === "S" ? "success" : RETTYPE === "E" ? "error" : "warning");
@@ -274,7 +273,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               }}
             />}
           <span>
-            {apprTitle}
+            {flowCodeText}
             <span style={{ color: `var(--ion-color-${activity === 'APPROVE' ? 'primary' : 'danger'})` }}> {approvals?.length}건</span>을
           </span>
           <span >
