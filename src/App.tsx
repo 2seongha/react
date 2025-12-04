@@ -22,6 +22,7 @@ import { useImagePreload } from './hooks/useImagePreload';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import Attach from './pages/Attach';
+import PersonalExpense from './pages/PersonalExpense';
 
 const App: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -136,6 +137,7 @@ const App: React.FC = () => {
           <Route path="/privacyPolicy" component={PrivacyPolicy} exact />
           <Route path="/termsOfUse" component={TermsOfUse} exact />
           <Route path="/attach/:FileName/:AttachUrl" component={Attach} exact />
+          <Route path="/personalExpense" component={PersonalExpense} exact />
           <Redirect exact from="/" to="/app/home" />
         </IonRouterOutlet>
       </IonReactRouter>

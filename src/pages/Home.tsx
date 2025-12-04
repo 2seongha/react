@@ -29,6 +29,7 @@ import { webviewHaptic } from '../webview';
 import CachedImage from '../components/CachedImage';
 import _ from 'lodash';
 import NotificationPopupModal from '../components/NotificationPopupModal';
+import { Router } from 'react-router-dom';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
@@ -382,6 +383,7 @@ const ApprovalItem: React.FC<ApprovalItemProps> = ({ approvalItem, isLoading = f
 };
 
 const StartButtons: React.FC = () => {
+  const router = useIonRouter();
 
   return (
     <div style={{ marginTop: '32px' }}>
@@ -418,7 +420,7 @@ const StartButtons: React.FC = () => {
           button
           mode='md'
           style={{ flex: 1, '--border-radius': '12px' }}
-          onClick={() => { console.log('adsf') }}
+          onClick={() => { router.push('/personalExpense', 'forward', 'push') }}
         >
           <div style={{
             padding: '12px',
@@ -426,7 +428,7 @@ const StartButtons: React.FC = () => {
             width: '100%',
             background: 'linear-gradient(to bottom, transparent 0%, transparent calc(100% - 10px), rgba(var(--ion-color-primary-rgb), .08) 100%)'
           }}>
-            <span style={{ fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: 4 }}>임직원개인경비</span>
+            <span style={{ fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: 4 }}>임직원 개인경비</span>
             {/* <span style={{ fontSize: '15px', fontWeight: '600', color: 'var(--ion-color-secondary)' }}> 38건</span> */}
             <CachedImage src={banknotesGlassIcon}
               style={{
