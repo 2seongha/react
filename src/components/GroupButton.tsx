@@ -18,14 +18,17 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
   const prevTodoSummary = useRef<any>(null);
   const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
 
-  const setApprovals = useAppStore(state => state.setApprovals);
   const getApprovals = useAppStore(state => state.getApprovals);
+  const setApprovals = useAppStore(state => state.setApprovals);
+  const summaryForceRefresh = useAppStore(state => state.summaryForceRefresh);
+  const setSummaryForceRefresh = useAppStore(state => state.setSummaryForceRefresh);
 
   // todoSummary가 변경될 때 selected index 조정
   useEffect(() => {
-    if (_.isEqual(prevTodoSummary.current, todoSummary)) {
+    if (_.isEqual(prevTodoSummary.current, todoSummary) && !summaryForceRefresh) {
       return;
     }
+    setSummaryForceRefresh(false);
     prevTodoSummary.current = todoSummary;
     if (!todoSummary) return;
     if (todoSummary && todoSummary.length > 0) {

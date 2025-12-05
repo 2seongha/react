@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   overscroll-behavior: none;
 }
 
@@ -270,4 +271,16 @@ ion-modal.auto-height .inner-content {
 .no-ripple ion-back-button {
   --ripple-color: transparent;
   color: #42424223;
+}
+
+ion-input {
+  --border-radius: 12px !important;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 500;
+  display: block;
+  margin-left: 4px;
+  margin-bottom: 6px;
 }

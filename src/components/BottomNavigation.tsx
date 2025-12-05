@@ -39,7 +39,14 @@ const BottomNavigation: React.FC = () => {
           disableRipple
           label="알림"
           icon={
-            <Badge badgeContent={notifications?.filter(n=>n.READ_YN === 'N')?.length} color='error' max={999} invisible={_.isEmpty(notifications)}>
+            <Badge
+              badgeContent={notifications?.filter(n => n.READ_YN === 'N')?.length} color='error' max={999} invisible={_.isEmpty(notifications)}
+              sx={{
+                "& .MuiBadge-badge": {
+                  backgroundColor: "#f65353",
+                }
+              }}
+            >
               <NotificationsIcon />
             </Badge>
           }

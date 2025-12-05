@@ -9,6 +9,7 @@ export interface AppState {
   notifications: NotificationModel[] | null;
   selectedTab: number;
   notificationPopupShown: boolean;
+  summaryForceRefresh: boolean;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: UserModel) => void;
@@ -19,6 +20,7 @@ export interface AppState {
   setNotifications: (notifications: NotificationModel[] | null) => void;
   setSelectedTab: (tab: number) => void;
   setNotificationPopupShown: (shown: boolean) => void;
+  setSummaryForceRefresh: (force: boolean) => void;
 
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
@@ -27,6 +29,7 @@ export interface AppState {
   getNotifications: () => Promise<NotificationModel[] | undefined>;
   patchNotifications: (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => Promise<void>;
   getNotificationPopupShown: () => boolean;
+  getSummaryForceRefresh: () => boolean;
 }
 
 export interface UserModel {

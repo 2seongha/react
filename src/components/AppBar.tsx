@@ -30,6 +30,7 @@ type AppBarProps = {
   showCount?: boolean;
   count?: number;
   titleCenter?: boolean; // 타이틀 완전 가운데 정렬
+  customStartButtons?: ReactNode; // 동적 버튼 추가
   customEndButtons?: ReactNode; // 동적 버튼 추가
 };
 
@@ -44,6 +45,7 @@ const AppBar: React.FC<AppBarProps> = ({
   showCount = false,
   count = 0,
   titleCenter = true,
+  customStartButtons,
   customEndButtons,
 }) => {
   const router = useIonRouter();
@@ -106,7 +108,7 @@ const AppBar: React.FC<AppBarProps> = ({
           </div>
           {showBackButton ?
             <IonBackButton defaultHref='/app/home' mode='md' color={'primary'} />
-            : <span />
+            : customStartButtons ? <>{customStartButtons}</> : <span />
           }
           <IonButtons slot="end" style={{ marginRight: '8px' }}>
             {showSearchButton &&

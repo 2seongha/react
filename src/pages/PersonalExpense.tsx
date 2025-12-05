@@ -14,13 +14,12 @@ import "./PersonalExpense.css";
 import { addOutline, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
 import NoData from '../components/NoData';
 import { MobileStepper, Step, StepLabel, Stepper } from '@mui/material';
+import PersonalExpenseAddModal from '../components/PersonalExpenseAddModal';
+import CachedImage from '../components/CachedImage';
+import { banknotesGlassIcon } from '../assets/images';
 
 const PersonalExpense: React.FC = () => {
   const [step, setStep] = useState(0);
-
-  // useIonViewDidEnter(() => {
-  //   setStep(1);
-  // });
 
   return (
     <IonPage className='personal-expense'>
@@ -35,16 +34,16 @@ const PersonalExpense: React.FC = () => {
           '--padding-start': '21px',
           '--padding-end': '21px',
         }}>
-        <MobileStepper
+        {/* <MobileStepper
           variant="progress"
           steps={3}
           position="static"
           activeStep={step}
           sx={{
             padding: 0,
-            width: '100%',
             flexGrow: 1,
             "& .MuiLinearProgress-root": {
+              width: '100%',
               height: '2px',
               backgroundColor: 'var(--custom-border-color-50)',      // 진행 바 색
             },
@@ -53,34 +52,53 @@ const PersonalExpense: React.FC = () => {
             },
           }}
           backButton={undefined}
-          nextButton={undefined} />
-        {/* <Stepper alternativeLabel activeStep={0} >
-          <Step>
-            <StepLabel></StepLabel>
-          </Step>
-          <Step>
-            <StepLabel></StepLabel>
-          </Step>
-          <Step>
-            <StepLabel></StepLabel>
-          </Step>
-        </Stepper> */}
-        <NoData message={`데이터가 없습니다.\n아래 '행 추가' 버튼을 눌러 경비 항목을 추가해 주세요.`}></NoData>
+          nextButton={undefined} /> */}
+        <div style={{
+          paddingTop: '26px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%'
+        }}>
+          <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            padding: '24px 0'
+          }}>
+            <span style={{ fontSize: '19px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
+            <span style={{ fontSize: '19px', fontWeight: '500' }}>행을 추가해주세요</span>
+          </div>
+        </div>
+        {/* <NoData message={`데이터가 없습니다.\n경비 항목을 추가해 주세요.`}></NoData> */}
         {/* <span>아래 '행 추가' 버튼을 눌러 경비 항목을 추가해 주세요.</span> */}
         <IonButton
+          type='button'
+          id='personal-expense-add-modal-trigger'
           mode='md'
           style={{
+            marginTop: '21px',
             width: '100%',
             height: '58px',
             '--background': 'transparent',
-            '--color': 'var(--ion-color-step-700)',
+            '--color': 'var(--ion-color-step-900)',
             borderRadius: '17px',
-            border: '3px dashed var(--custom-border-color-50)',
+            border: '1px dashed var(--custom-border-color-100)',
             fontSize: '16px'
-          }}>{<IonIcon src={addOutline} style={{ marginRight: '4px' }} />}행추가
+          }}>
+          {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}행 추가
         </IonButton>
+        <PersonalExpenseAddModal
+          trigger='personal-expense-add-modal-trigger'
+        />
       </IonContent>
-      <IonFooter>
+      <IonFooter style={{
+        boxShadow: 'none',
+      }}>
         <div
           style={{
             height: "auto",
@@ -94,21 +112,6 @@ const PersonalExpense: React.FC = () => {
             paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
           }}
         >
-          {/* <IonButton
-            mode="md"
-            color="light"
-            style={{
-              flex: 0.5,
-              height: "58px",
-              fontSize: "18px",
-              fontWeight: "600",
-            }}
-            id="reject-modal"
-            onClick={() => {
-            }}
-          >
-            <IonIcon src={arrowBackOutline} />
-          </IonButton> */}
           <IonButton
             mode="md"
             color="primary"

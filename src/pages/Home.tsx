@@ -29,7 +29,6 @@ import { webviewHaptic } from '../webview';
 import CachedImage from '../components/CachedImage';
 import _ from 'lodash';
 import NotificationPopupModal from '../components/NotificationPopupModal';
-import { Router } from 'react-router-dom';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
@@ -37,10 +36,12 @@ const Home: React.FC = () => {
   const notificationPopupShown = useAppStore(state => state.notificationPopupShown);
   const getNotifications = useAppStore(state => state.getNotifications);
   const setNotificationPopupShown = useAppStore(state => state.setNotificationPopupShown);
+  const setSummaryForceRefresh = useAppStore(state => state.setSummaryForceRefresh);
 
   const getAreas = useAppStore(state => state.getAreas);
 
   useIonViewWillEnter(() => {
+    setSummaryForceRefresh(true);
     getAreas('');
   });
 
@@ -405,7 +406,7 @@ const StartButtons: React.FC = () => {
             width: '100%',
             background: 'linear-gradient(to bottom, transparent 0%, transparent calc(100% - 10px), rgba(var(--ion-color-primary-rgb), .08) 100%)'
           }}>
-            <span style={{ fontSize: '14px', fontWeight: '600', display: 'block', marginBottom: 4 }}>법인카드</span>
+            <span style={{ fontSize: '15px', fontWeight: '600', display: 'block', marginBottom: 4 }}>법인카드</span>
             {/* <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--ion-color-secondary)' }}> 5건</span> */}
             <CachedImage src={creditcardGlassIcon}
               style={{
@@ -428,7 +429,7 @@ const StartButtons: React.FC = () => {
             width: '100%',
             background: 'linear-gradient(to bottom, transparent 0%, transparent calc(100% - 10px), rgba(var(--ion-color-primary-rgb), .08) 100%)'
           }}>
-            <span style={{ fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: 4 }}>임직원 개인경비</span>
+            <span style={{ fontSize: '15px', fontWeight: '500', display: 'block', marginBottom: 4 }}>임직원 개인경비</span>
             {/* <span style={{ fontSize: '15px', fontWeight: '600', color: 'var(--ion-color-secondary)' }}> 38건</span> */}
             <CachedImage src={banknotesGlassIcon}
               style={{

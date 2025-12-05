@@ -20,6 +20,7 @@ const Approval: React.FC = () => {
   AREA_CODE_TXT = decodeURIComponent(AREA_CODE_TXT);
   const setApprovals = useAppStore(state => state.setApprovals);
   const getApprovals = useAppStore(state => state.getApprovals);
+
   const approvals = useAppStore(state => state.approvals);
   const [refreshEnable, setRefreshEnable] = useState(true);
   const router = useIonRouter();
@@ -35,7 +36,9 @@ const Approval: React.FC = () => {
     setApprovals(null);
     getApprovals(P_AREA_CODE, AREA_CODE, '', '');
 
-    return () => setApprovals(null);
+    return () => {
+      setApprovals(null);
+    }
   }, []);
 
   // useIonViewWillEnter(() => {
@@ -64,11 +67,11 @@ const Approval: React.FC = () => {
   //* 날짜 관련
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
     const today = new Date();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    const oneYearAgo = new Date();
+    oneYearAgo.setMonth(today.getMonth() - 12);
 
     return {
-      defaultStartDate: sixMonthsAgo.toISOString().split('T')[0], // YYYY-MM-DD 형식
+      defaultStartDate: oneYearAgo.toISOString().split('T')[0], // YYYY-MM-DD 형식
       defaultEndDate: today.toISOString().split('T')[0]
     };
   }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
@@ -369,10 +372,7 @@ const Approval: React.FC = () => {
         </div>
       </IonHeader >
       <IonContent
-        // ref={contentRef}
         scrollEvents={false}
-      // onIonScrollStart={() => document.body.classList.add('no-ripple')}
-      // onIonScrollEnd={() => document.body.classList.remove('no-ripple')}
       >
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh} disabled={!refreshEnable}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
