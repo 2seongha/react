@@ -82,7 +82,11 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
           mode='md'
           fill="clear"
           color='medium'
-          onClick={dismiss}>
+          onClick={dismiss}
+          style={{
+            width: '80px'
+          }}
+        >
           <span style={{ fontSize: '16px', fontWeight: '600' }}>취소</span>
         </IonButton>
       }></AppBar>
@@ -91,7 +95,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
           height: '100%',
           overflow: 'auto',
           padding: '21px',
-          paddingBottom: 'calc(80px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
+          paddingBottom: 'calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
         }}>
           <div style={{ marginBottom: '21px' }}>
             <span className="label">계정그룹명 <span style={{ color: 'var(--red)' }}>(필수)</span></span>
@@ -145,7 +149,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
           </div>
           <div
             style={{
-              position: 'fixed',
+              position: 'absolute',
               left: 0,
               bottom: 0,
               height: "102px",
@@ -156,7 +160,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
               padding: "12px 21px",
               zIndex: '2',
               background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
-              paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
+              paddingBottom: 'calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
             }}
           >
             <IonButton
