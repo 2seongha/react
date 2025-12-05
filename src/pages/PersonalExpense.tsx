@@ -70,8 +70,8 @@ const PersonalExpense: React.FC = () => {
             width: '100%',
             padding: '24px 0'
           }}>
-            <span style={{ fontSize: '19px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
-            <span style={{ fontSize: '19px', fontWeight: '500' }}>행을 추가해주세요</span>
+            <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
+            <span style={{ fontSize: '18px', fontWeight: '500' }}>행을 추가해주세요</span>
           </div>
         </div>
         {/* <NoData message={`데이터가 없습니다.\n경비 항목을 추가해 주세요.`}></NoData> */}
