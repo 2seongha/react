@@ -278,9 +278,15 @@ ion-input {
 }
 
 .label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   display: block;
   margin-left: 4px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  color: var(--ion-color-step-850);
+}
+
+.input-fill-outline.sc-ion-input-md-h {
+  min-height: 48px !important;
+  --border-color: var(--custom-border-color-150);
 }

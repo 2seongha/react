@@ -22,7 +22,7 @@
   --ion-background-color-gradient: linear-gradient(to top, #fff 0%, #fff calc(100% - 20px), transparent 100%);
   --ion-background-color-rgb: 255, 255, 255;
   --ion-background-color2-rgb: 241, 242, 244;
-  --ion-text-color: #000000;
+  --ion-text-color: #171717;
   --ion-text-on-color: #fff;
   --ion-text-color-rgb: 0, 0, 0;
   --ion-color-step-50: #f2f2f2;
@@ -56,6 +56,7 @@
   --custom-border-color-0: #f2f2f2;
   --custom-border-color-50: #f2f2f2;
   --custom-border-color-100: #E8E8E8;
+  --custom-border-color-150: #dcdcdc;
 
   --approval-text-color: #fff;
   --approval-text-box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
@@ -109,6 +110,7 @@
   --custom-border-color-0: #19191a;
   --custom-border-color-50: #242526;
   --custom-border-color-100: #2E3238;
+  --custom-border-color-150: #35393f;
 
   --approval-text-color: #2E3238;
   --approval-text-box-shadow: none;

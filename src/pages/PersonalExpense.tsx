@@ -71,7 +71,7 @@ const PersonalExpense: React.FC = () => {
             padding: '24px 0'
           }}>
             <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
-            <span style={{ fontSize: '18px', fontWeight: '500' }}>행을 추가해주세요</span>
+            <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
           </div>
         </div>
         {/* <NoData message={`데이터가 없습니다.\n경비 항목을 추가해 주세요.`}></NoData> */}
@@ -90,7 +90,7 @@ const PersonalExpense: React.FC = () => {
             border: '1px dashed var(--custom-border-color-100)',
             fontSize: '16px'
           }}>
-          {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}행 추가
+          {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
         </IonButton>
         <PersonalExpenseAddModal
           trigger='personal-expense-add-modal-trigger'
