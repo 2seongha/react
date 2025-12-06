@@ -79,9 +79,6 @@ import txtIcon from './icon/filetype/txt.webp';
 import xlsIcon from './icon/filetype/xls.webp';
 import zipIcon from './icon/filetype/zip.webp';
 
-// Custom Icon
-import valuehelpIcon from './icon/valuehelp.svg';
-
 export {
   // App logos
   appLogoDark,
@@ -163,6 +160,4 @@ export {
   txtIcon,
   xlsIcon,
   zipIcon,
-
-  valuehelpIcon,
 };

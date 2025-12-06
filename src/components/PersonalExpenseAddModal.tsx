@@ -13,6 +13,9 @@ import _ from "lodash";
 import { color } from "framer-motion";
 import { copy, copyOutline, person } from "ionicons/icons";
 import { FilterNoneOutlined } from "@mui/icons-material";
+import { ValueHelp } from "./CustomIcon";
+import CustomInput, { FormRef } from "./CustomInput";
+
 interface NotificationPopupProps {
   trigger?: string;
 }
@@ -25,6 +28,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   const modalRef = useRef<HTMLIonModalElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const formRef = useRef<FormRef>({});
 
   function dismiss() {
     modalRef.current?.dismiss();
@@ -123,65 +127,91 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             padding: '21px',
             paddingBottom: 'calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
           }}>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">계정그룹명 <span style={{ color: 'var(--red)' }}>(필수)</span></span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} readonly >
-              <IonButton
-                fill="clear"
-                slot="end"
-                color='medium'
-                style={{
-                  width: '62px',
-                  height: '48px',
-                  transform: 'translateX(15px)',
-                  // '--border-radius': '24px'
-                }}
-              >
-                <FilterNoneOutlined
-                  style={{
-                    color: 'var(--custom-border-color-150)',
-                  }}
-                />
-              </IonButton>
-              {/* <IonIcon slot="end" src={FilterNoneOutlined} style={{ width: '24px', height: '24px', color: 'var(--ion-color-secondary)' }} /> */}
-            </IonInput>
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">코스트센터</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">오더번호</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">WBS요소</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">전표통화금액 <span style={{ color: 'var(--red)' }}>(필수)</span></span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">현지통화금액</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">항목텍스트 <span style={{ color: 'var(--red)' }}>(필수)</span></span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">지정</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">기준일자</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
-          <div style={{ marginBottom: '21px' }}>
-            <span className="label">만기계산일</span>
-            <IonInput className="input" mode="md" fill="outline" placeholder="" onIonFocus={handleFocus} />
-          </div>
+          <CustomInput
+            ref={formRef}
+            path="1"
+            label="계정그룹명"
+            required
+            onFocus={handleFocus}
+            onValueHelp={() => console.log('ValueHelp clicked')}
+            readOnly
+            style={{ marginBottom: '21px' }}
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="코스트센터"
+            onFocus={handleFocus}
+            onValueHelp={() => console.log('ValueHelp clicked')}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="오더번호"
+            onFocus={handleFocus}
+            onValueHelp={() => console.log('ValueHelp clicked')}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="WBS요소"
+            onFocus={handleFocus}
+            onValueHelp={() => console.log('ValueHelp clicked')}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="전표통화금액"
+            onFocus={handleFocus}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="현지통화금액"
+            onFocus={handleFocus}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="항목텍스트"
+            onFocus={handleFocus}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="지정"
+            onFocus={handleFocus}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="기준일자"
+            onFocus={handleFocus}
+            style={{ marginBottom: '21px' }}
+
+          />
+          <CustomInput
+            ref={formRef}
+            path="2"
+            label="만기계산일"
+            onFocus={handleFocus}
+            style={{ marginBottom: '21px' }}
+
+          />
           <div
             style={{
               position: 'fixed',

@@ -1,139 +1,103 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { IonButton, IonInput, isPlatform } from "@ionic/react";
-import type { IonInputCustomEvent } from "@ionic/core";
+import { IonInput, IonButton } from '@ionic/react';
+import {
+  forwardRef,
+  useRef,
+  Ref,
+} from 'react';
+import { ValueHelp } from './CustomIcon';
 
-interface CustomInputProps extends React.ComponentProps<typeof IonInput> {
-  // IonInput의 모든 props를 상속받음
+export interface CustomInputProps {
+  path: string; // ★ 반드시 필요
+  label: string;
+  required?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
+  onFocus?: (e: Event) => void;
+  onValueHelp?: () => void;
+  placeholder?: string;
+  readOnly?: boolean;
+  style?: React.CSSProperties;
 }
 
-const CustomInput: React.FC<CustomInputProps> = ({
-  onIonFocus,
-  onIonBlur,
-  onIonInput,
-  value,
-  style,
-  className,
-  ...props
-}) => {
-  const visibleInputRef = useRef<HTMLIonInputElement>(null);
-  const hiddenInputRef = useRef<HTMLIonInputElement>(null);
-
-  const handleFocus = useCallback(
-    (e: any) => {
-      // if (!shouldUseCustomLogic) {
-      //   onIonFocus?.(e);
-      //   return;
-      // }
-
-      // 숨겨진 input에 포커스
-      // if (hiddenInputRef.current && !isHidden) {
-      // setIsHidden(true);
-      hiddenInputRef.current!.style.position = "static";
-      visibleInputRef.current!.style.visibility = "hidden";
-      visibleInputRef.current!.style.position = "fixed";
-
-      setTimeout(() => {
-        hiddenInputRef.current?.setFocus();
-      }, 10);
-      // }
-
-      // onIonFocus?.(e);
-    },
-    []
-  );
-
-  const handleBlur = useCallback(
-    (e: CustomEvent) => {
-      // if (!shouldUseCustomLogic) {
-      //   onIonBlur?.(e);
-      //   return;
-      // }
-
-      // 다시 보이는 input으로 전환
-      // if (isHidden) {
-      visibleInputRef.current!.style.visibility = "visible";
-      visibleInputRef.current!.style.position = "static";
-      hiddenInputRef.current!.style.position = "fixed";
-
-      // setIsHidden(false);
-      // }
-
-      // onIonBlur?.(e);
-    },
-    []
-  );
-
-  const handleInput = useCallback(
-    (e: CustomEvent) => {
-      const newValue = e.detail.value;
-      visibleInputRef.current!.innerText = newValue;
-      // onIonInput?.(e);
-    },
-    [onIonInput]
-  );
-
-  // value prop이 변경되면 내부 상태도 업데이트
-  // useEffect(() => {
-  //   setInputValue(value || "");
-  // }, [value]);
-
-  const inputProps = {
-    // ...props,
-    onIonInput: handleInput,
-    onblur: handleBlur,
-  };
-
-  // if (!shouldUseCustomLogic) {
-  //   // iOS가 아닌 경우 일반 IonInput 반환
-  //   return (
-  //     <IonInput
-  //       ref={visibleInputRef}
-  //       onIonFocus={handleFocus}
-  //       style={style}
-  //       className={className}
-  //       {...inputProps}
-  //     />
-  //   );
-  // }
-
-  return (
-    <div style={{ position: "relative", ...style }}>
-      {/* 보이는 input (포커스 전까지) */}
-      {/* {!isHidden && ( */}
-      <IonInput
-        label="a"
-        mode="md"
-        fill="outline"
-        color="primary"
-        inputMode="none"
-        ref={visibleInputRef}
-        onFocus={handleFocus}
-        value={value}
-        // className={className}
-        // {...inputProps}
-      />
-      {/* )} */}
-
-      {/* 숨겨진 input (포커스 시 활성화) */}
-      <IonInput
-        label="d"
-        fill="outline"
-        color="primary"
-        mode="md"
-        ref={hiddenInputRef}
-        {...inputProps}
-        style={{
-          position: "fixed",
-          left: "-99999px",
-          top: "-99999px",
-          // visibility: isHidden ? "visible" : "hidden",
-          // opacity: isHidden ? 1 : 1,
-          // width: isHidden ? "100%" : "auto",
-        }}
-        // className={isHidden ? className : ""}
-      />
-    </div>
-  );
+// ref는 모든 input 값을 담는 객체의 ref
+export type FormRef = {
+  [key: string]: string | undefined;
 };
+
+const CustomInput = forwardRef<FormRef, CustomInputProps>(
+  (
+    {
+      path,
+      label,
+      required = false,
+      value,
+      onChange,
+      onFocus,
+      onValueHelp,
+      placeholder = '',
+      readOnly = false,
+      style
+    },
+    formRef: Ref<FormRef>
+  ) => {
+    const inputRef = useRef<HTMLIonInputElement>(null);
+    const handleInput = (val: string) => {
+      if (!formRef || typeof formRef !== 'object') return;
+
+      // ref.current 초기화
+      if (!('current' in formRef) || formRef.current == null) {
+        // @ts-ignore
+        formRef.current = {};
+      }
+
+      // ref.current[name] 에 값 저장
+      (formRef.current as FormRef)[path] = val;
+
+      onChange?.(val);
+    };
+
+    return (
+      <>
+        <span className="label">
+          {label}
+          {required && <span style={{ color: 'var(--red)' }}>*</span>}
+        </span>
+
+        <IonInput
+          className="input"
+          mode="md"
+          fill="outline"
+          placeholder={placeholder}
+          value={value}
+          readonly={readOnly}
+          onIonFocus={onFocus}
+          onIonInput={(e) => handleInput(e.detail.value!)}
+          style={style}
+          ref={inputRef}
+        >
+          {onValueHelp && <IonButton
+            fill="clear"
+            slot="end"
+            color="medium"
+            onClick={async () => {
+              // input에 focus
+              inputRef.current?.setFocus();
+              // ValueHelp 클릭 이벤트 호출
+              onValueHelp();
+            }}
+            style={{
+              width: '62px',
+              height: '48px',
+              transform: 'translateX(15px)',
+            }}
+          >
+            <ValueHelp color="var(--ion-color-light)" size={28} />
+          </IonButton>
+          }
+        </IonInput>
+      </>
+    );
+  }
+);
 
 export default CustomInput;
