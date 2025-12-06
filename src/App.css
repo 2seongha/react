@@ -289,5 +289,7 @@ ion-input {
 .input-fill-outline.sc-ion-input-md-h {
   min-height: 48px !important;
   --background: var(--input-color);
-  --border-color: var(--custom-border-color-50);
+  --border-color: var(--input-color);
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
 }

@@ -112,7 +112,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
           style={{
             '--border-radius': '24px',
             width: '64px',
-            '--color': 'var(--ion-color-step-700)'
+            // '--color': 'var(--ion-color-step-700)'
           }}
         >
           <span style={{ fontSize: '16px', fontWeight: '600' }}>취소</span>

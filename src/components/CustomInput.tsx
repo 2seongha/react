@@ -91,7 +91,7 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
               transform: 'translateX(15px)',
             }}
           >
-            <ValueHelp color="var(--ion-color-light)" size={28} />
+            <ValueHelp color="var(--value-help-color)" size={28} />
           </IonButton>
           }
         </IonInput>
