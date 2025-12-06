@@ -288,5 +288,6 @@ ion-input {
 
 .input-fill-outline.sc-ion-input-md-h {
   min-height: 48px !important;
-  --border-color: var(--custom-border-color-150);
+  --background: var(--input-color);
+  --border-color: var(--custom-border-color-50);
 }
