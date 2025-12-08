@@ -39,9 +39,21 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
   const handleModalDidDismiss = () => {
     setSearchHelp({ ...searchHelp, IS_OPEN: false });
-    // setTimeout(()=>{
-    //   searchHelp?.INPUT.current?.setFocus();
-    // }, 0)
+    setTimeout(() => {
+      // 원래 readonly 상태 저장
+      const wasReadonly = searchHelp?.INPUT.current?.hasAttribute("readonly");
+
+      // 임시로 readonly 추가
+      searchHelp?.INPUT.current?.setAttribute("readonly", "true");
+
+      // 포커스
+      searchHelp?.INPUT.current?.setFocus();
+
+      // 원래 상태 복원
+      if (!wasReadonly) {
+        searchHelp?.INPUT.current?.removeAttribute("readonly");
+      }
+    }, 0);
 
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
     if (historyPushedRef.current && !closedByBackButtonRef.current) {

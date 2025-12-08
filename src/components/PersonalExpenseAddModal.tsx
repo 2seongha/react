@@ -142,6 +142,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
             readOnly
+            clearInput
             style={{ marginBottom: '21px' }}
           />
           <CustomInput
@@ -151,7 +152,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
             style={{ marginBottom: '21px' }}
-
+            clearInput
           />
           <CustomInput
             ref={formRef}
@@ -160,7 +161,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
             style={{ marginBottom: '21px' }}
-
+            clearInput
           />
           <CustomInput
             ref={formRef}
@@ -169,7 +170,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
             style={{ marginBottom: '21px' }}
-
+            clearInput
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
             <CustomInput
@@ -201,7 +202,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             required
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
-
+            clearInput
           />
           <CustomInput
             ref={formRef}
@@ -209,7 +210,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             label="지정"
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
-
+            clearInput
           />
           <CustomInput
             ref={formRef}
@@ -219,7 +220,6 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             onDatePicker={() => { }}
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
-
           />
           <CustomInput
             ref={formRef}
@@ -229,7 +229,6 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             onDatePicker={() => { }}
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
-
           />
           <div
             style={{
