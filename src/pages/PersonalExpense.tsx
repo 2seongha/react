@@ -127,6 +127,7 @@ const PersonalExpense: React.FC = () => {
           <IonButton
             mode="md"
             color="primary"
+            disabled
             style={{
               flex: 1.5,
               height: "58px",
