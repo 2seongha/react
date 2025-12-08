@@ -39,9 +39,9 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
   const handleModalDidDismiss = () => {
     setSearchHelp({ ...searchHelp, IS_OPEN: false });
-    setTimeout(()=>{
-      searchHelp?.INPUT.current?.setFocus();
-    }, 0)
+    // setTimeout(()=>{
+    //   searchHelp?.INPUT.current?.setFocus();
+    // }, 0)
 
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
     if (historyPushedRef.current && !closedByBackButtonRef.current) {
