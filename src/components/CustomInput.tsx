@@ -5,6 +5,7 @@ import {
   Ref,
 } from 'react';
 import { ValueHelp } from './CustomIcon';
+import SearchHelpModal from './SearchHelpModal';
 
 export interface CustomInputProps {
   path: string; // ★ 반드시 필요
@@ -76,6 +77,7 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
           ref={inputRef}
         >
           {onValueHelp && <IonButton
+            id="search-help-modal-trigger"
             fill="clear"
             slot="end"
             color="medium"

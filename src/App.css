@@ -291,5 +291,5 @@ ion-input {
   --background: var(--input-color);
   --border-color: var(--input-color);
   border-radius: 12px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
 }

@@ -150,7 +150,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
             padding: '28px 21px 28px 21px'
           }}>
             <div style={{
-              backgroundColor: 'var(--ion-background-color2)',
+              backgroundColor: 'var(--ion-color-light)',
               height: '100%',
               padding: '21px 0',
               display: 'flex',
@@ -182,8 +182,8 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderLeft: '3px dotted var(--ion-color-step-200)',
-                borderRight: '3px dotted var(--ion-color-step-200)',
+                borderLeft: '1px dotted var(--ion-color-step-200)',
+                borderRight: '1px dotted var(--ion-color-step-200)',
                 gap: '4px'
               }}>
                 <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>승인{typeCounts.APPROVE > 0 && <span

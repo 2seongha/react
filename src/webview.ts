@@ -148,7 +148,7 @@ const _initWebview = async (): Promise<void> => {
       CORP_ID: "BLUEWARD",
       CORP_NM: "블루어드",
       SYSTEM: {
-        webviewLink:'',
+        webviewLink: '',
         apiEndpoint: 'http://localhost:4201',
         apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
@@ -188,7 +188,15 @@ const _initWebview = async (): Promise<void> => {
         `${result.top}px`
       );
       document.documentElement.style.setProperty(
+        "--root-safe-area-top",
+        `${result.top}px`
+      );
+      document.documentElement.style.setProperty(
         "--ion-safe-area-bottom",
+        `${result.bottom}px`
+      );
+      document.documentElement.style.setProperty(
+        "--root-safe-area-bottom",
         `${result.bottom}px`
       );
 

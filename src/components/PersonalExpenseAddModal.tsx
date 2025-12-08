@@ -15,6 +15,8 @@ import { copy, copyOutline, person } from "ionicons/icons";
 import { FilterNoneOutlined } from "@mui/icons-material";
 import { ValueHelp } from "./CustomIcon";
 import CustomInput, { FormRef } from "./CustomInput";
+import SearchHelpModal from "./SearchHelpModal";
+import { Button } from "@mui/material";
 
 interface NotificationPopupProps {
   trigger?: string;
@@ -103,6 +105,12 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
       ref={modalRef}
       trigger={trigger}
       mode="ios"
+      style={{
+        '--width': '100%',
+        '--height': '100%',
+        '--ion-safe-area-top': 'var(--root-safe-area-top) !important',
+        '--ion-safe-area-bottom': 'var(--root-safe-area-bottom) !important',
+      }}
     >
       <AppBar title={<span>항목 추가</span>} customStartButtons={
         <IonButton

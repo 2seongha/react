@@ -17,9 +17,12 @@ import { MobileStepper, Step, StepLabel, Stepper } from '@mui/material';
 import PersonalExpenseAddModal from '../components/PersonalExpenseAddModal';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
+import SearchHelpModal from '../components/SearchHelpModal';
 
 const PersonalExpense: React.FC = () => {
   const [step, setStep] = useState(0);
+  const [searchHelpTitle, setSearchHelpTitle] = useState('');
+  const [searchHelpList, setSearchHelpList] = useState(null);
 
   return (
     <IonPage className='personal-expense'>
@@ -92,9 +95,18 @@ const PersonalExpense: React.FC = () => {
           }}>
           {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
         </IonButton>
+
+        {/* 항목 추가 모달 */}
         <PersonalExpenseAddModal
           trigger='personal-expense-add-modal-trigger'
         />
+        {/* 서치 헬프 모달 */}
+        <SearchHelpModal
+          trigger='search-help-modal-trigger'
+          title={searchHelpTitle}
+          list={searchHelpList}
+        />
+
       </IonContent>
       <IonFooter style={{
         boxShadow: 'none',
