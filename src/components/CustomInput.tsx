@@ -59,42 +59,57 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
 
     return (
       <>
-        <span className="label">
+        {/* <span className="label">
           {label}
           {required && <span style={{ color: 'var(--red)' }}>*</span>}
-        </span>
+        </span> */}
 
         <IonInput
-          className="input"
+          // className="input"
           mode="md"
-          fill="outline"
+          // fill='outline'
+          // label={label}
+          required={required}
+          labelPlacement='stacked'
           placeholder={placeholder}
           value={value}
           readonly={readOnly}
+          clearInput={true}
           onIonFocus={onFocus}
           onIonInput={(e) => handleInput(e.detail.value!)}
           style={style}
           ref={inputRef}
         >
-          {onValueHelp && <IonButton
-            id="search-help-modal-trigger"
-            fill="clear"
-            slot="end"
-            color="medium"
-            onClick={async () => {
-              // input에 focus
-              inputRef.current?.setFocus();
-              // ValueHelp 클릭 이벤트 호출
-              onValueHelp();
-            }}
-            style={{
-              width: '62px',
-              height: '48px',
-              transform: 'translateX(15px)',
-            }}
-          >
-            <ValueHelp color="var(--value-help-color)" size={28} />
-          </IonButton>
+          <div slot="label">
+            <span>
+              {label}
+              {required && <span style={{ color: 'var(--red)', marginLeft: '4px' }}>*</span>}
+            </span>
+          </div>
+          {onValueHelp &&
+            <IonButton
+              id="search-help-modal-trigger"
+              fill="clear"
+              slot="end"
+              color="medium"
+              onClick={async () => {
+                // input에 focus
+                inputRef.current?.setFocus();
+                // ValueHelp 클릭 이벤트 호출
+                onValueHelp();
+              }}
+              style={{
+                width: '30px',
+                height: '30px',
+                '--padding-start': '0',
+                '--padding-end': '0',
+                '--padding-top': '0',
+                '--padding-bottom': '0',
+                // transform: 'translateX(15px)',
+              }}
+            >
+              <ValueHelp color="var(--ion-color-step-600)" size={16} />
+            </IonButton>
           }
         </IonInput>
       </>

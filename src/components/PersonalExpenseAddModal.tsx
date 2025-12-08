@@ -65,10 +65,6 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
 
     const handlePopState = (event: PopStateEvent) => {
       if (isModalOpen) {
-        // event.preventDefault();
-        // 히스토리를 다시 앞으로 이동
-        window.history.pushState({ modalOpen: true }, "");
-        // // 뒤로가기로 인한 모달 닫기
         closedByBackButtonRef.current = true;
         dismiss();
       }
@@ -108,8 +104,8 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
       style={{
         '--width': '100%',
         '--height': '100%',
-        '--ion-safe-area-top': 'var(--root-safe-area-top) !important',
-        '--ion-safe-area-bottom': 'var(--root-safe-area-bottom) !important',
+        '--ion-safe-area-top': 'var(--root-safe-area-top)',
+        '--ion-safe-area-bottom': 'var(--root-safe-area-bottom)',
       }}
     >
       <AppBar title={<span>항목 추가</span>} customStartButtons={

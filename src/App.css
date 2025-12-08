@@ -270,14 +270,13 @@ ion-modal.auto-height .inner-content {
 
 .no-ripple ion-back-button {
   --ripple-color: transparent;
-  color: #42424223;
 }
 
 ion-input {
   --border-radius: 12px !important;
 }
 
-.label {
+/* .label {
   font-size: 13px;
   font-weight: 500;
   display: block;
@@ -292,4 +291,12 @@ ion-input {
   --border-color: var(--input-color);
   border-radius: 12px;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
+} */
+
+.sc-ion-input-md-h {
+  border-bottom: 1px solid var(--input-color);
+}
+
+.sc-ion-input-md-s>[slot=end]:first-of-type {
+  margin-inline-start: 0;
 }
