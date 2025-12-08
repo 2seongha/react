@@ -428,7 +428,7 @@ const StartButtons: React.FC = () => {
             width: '100%',
             background: 'linear-gradient(to bottom, transparent 0%, transparent calc(100% - 10px), rgba(var(--ion-color-primary-rgb), .08) 100%)'
           }}>
-            <span style={{ fontSize: '14px', fontWeight: '500', display: 'block', marginBottom: 4 }}>임직원 개인경비</span>
+            <span style={{ fontSize: '14px', fontWeight: '600', display: 'block', marginBottom: 4 }}>임직원 개인경비</span>
             <CachedImage src={banknotesGlassIcon}
               style={{
                 width: '48px',
