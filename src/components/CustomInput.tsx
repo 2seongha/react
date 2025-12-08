@@ -97,9 +97,12 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
                 slot="end"
                 color="medium"
                 onClick={async () => {
-                  // inputRef.current?.setFocus();
+                  inputRef.current?.setFocus();
+                  setTimeout(()=>{
+                    inputRef.current?.classList.add("has-focus");
+                  }, 50);
                   // onValueHelp();
-                  setSearchHelp({ IS_OPEN: true, TITLE: label });
+                  setSearchHelp({ IS_OPEN: true, TITLE: label, INPUT: inputRef });
                 }}
                 style={{
                   width: '42px',

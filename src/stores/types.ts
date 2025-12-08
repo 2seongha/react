@@ -135,4 +135,5 @@ export interface SearchHelpModel {
   IS_OPEN: boolean;
   TITLE?: string;
   LIST?: any;
+  INPUT?: any;
 }
