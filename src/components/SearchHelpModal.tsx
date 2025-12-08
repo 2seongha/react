@@ -9,43 +9,40 @@ import AppBar from "./AppBar";
 import { close } from "ionicons/icons";
 import "./ApprovalModal.css";
 import _ from "lodash";
-
+import useAppStore from "../stores/appStore";
+import { getTopModalId, popModal, pushModal } from "../pages/PersonalExpense";
 interface SearchHelpModalProps {
-  trigger?: string;
-  title?: string;
-  list?: any;
 }
 
 const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
-  trigger,
-  title,
-  list
 }) => {
+  const searchHelp = useAppStore(state => state.searchHelp);
+  const setSearchHelp = useAppStore(state => state.setSearchHelp);
+
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
   const modalRef = useRef<HTMLIonModalElement>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalId = 'searchHelp';
 
   function dismiss() {
     modalRef.current?.dismiss();
   }
 
   const handleModalWillPresent = () => {
-    setIsModalOpen(true);
-
+    pushModal(modalId);
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
-    window.history.pushState({ ...currentState, modalOpen: true }, "");
+    window.history.pushState({ ...currentState, searchHelpOpen: true }, "");
     historyPushedRef.current = true;
     closedByBackButtonRef.current = false;
   };
 
   const handleModalDidDismiss = () => {
-    setIsModalOpen(false);
+    setSearchHelp({ ...searchHelp, IS_OPEN: false });
 
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
     if (historyPushedRef.current && !closedByBackButtonRef.current) {
-      if (window.history.state?.modalOpen) {
+      if (window.history.state?.searchHelpOpen) {
         window.history.back();
       }
     }
@@ -55,14 +52,11 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
   // 브라우저 뒤로가기 버튼 처리
   useEffect(() => {
-    if (!isModalOpen) return;
+    if (!searchHelp?.IS_OPEN) return;
 
     const handlePopState = (event: PopStateEvent) => {
-      if (isModalOpen) {
-        // 뒤로가기로 인한 모달 닫기
-        closedByBackButtonRef.current = true;
-        dismiss();
-      }
+      closedByBackButtonRef.current = true;
+      dismiss();
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -70,7 +64,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [isModalOpen]);
+  }, [searchHelp?.IS_OPEN]);
 
   const closeButton = useMemo(
     () => (
@@ -89,20 +83,19 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
   return (
     <IonModal
+      isOpen={searchHelp?.IS_OPEN}
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
       mode="ios"
       ref={modalRef}
-      trigger={trigger}
       initialBreakpoint={1}
       breakpoints={[0, 1]}
       expandToScroll={false}
-      // className="approval-modal"
       style={{
         '--max-height': '600px',
       }}
     >
-      <AppBar title={<span>{title}</span>} customEndButtons={closeButton} />
+      <AppBar title={<span>{searchHelp?.TITLE}</span>} customEndButtons={closeButton} />
       <IonContent
         forceOverscroll={false}
       >

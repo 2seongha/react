@@ -1,28 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   IonButton,
   IonContent,
   IonFooter,
   IonIcon,
   IonPage,
-  useIonViewDidEnter,
-  useIonViewWillEnter,
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { addOutline, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
-import NoData from '../components/NoData';
-import { MobileStepper, Step, StepLabel, Stepper } from '@mui/material';
+import { addOutline } from 'ionicons/icons';
 import PersonalExpenseAddModal from '../components/PersonalExpenseAddModal';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
 
+export const modalStack: string[] = [];
+
+export const pushModal = (id: string) => {
+  modalStack.push(id);
+};
+
+export const popModal = () => {
+  modalStack.pop();
+};
+
+export const getTopModalId = () => {
+  return modalStack[modalStack.length - 1] || null;
+};
+
 const PersonalExpense: React.FC = () => {
-  const [step, setStep] = useState(0);
-  const [searchHelpTitle, setSearchHelpTitle] = useState('');
-  const [searchHelpList, setSearchHelpList] = useState(null);
+  const searchHelp = useAppStore(state => state.searchHelp);
 
   return (
     <IonPage className='personal-expense'>
@@ -101,11 +109,7 @@ const PersonalExpense: React.FC = () => {
           trigger='personal-expense-add-modal-trigger'
         />
         {/* 서치 헬프 모달 */}
-        <SearchHelpModal
-          trigger='search-help-modal-trigger'
-          title={searchHelpTitle}
-          list={searchHelpList}
-        />
+        <SearchHelpModal />
 
       </IonContent>
       <IonFooter style={{

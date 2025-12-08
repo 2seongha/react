@@ -22,6 +22,7 @@ const requestIds = {
   notices: 0,
   todoSummary: 0,
   notifications: 0,
+  searchHelp: 0,
 };
 
 const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
@@ -35,6 +36,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   selectedTab: 0,
   notificationPopupShown: false,
   summaryForceRefresh: false,
+  searchHelp: { IS_OPEN: false },
 
   setThemeMode: (mode) => {
     // localStorage에 저장
@@ -52,6 +54,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setSelectedTab: (tab) => set({ selectedTab: tab }),
   setNotificationPopupShown: (shown) => set({ notificationPopupShown: shown }),
   setSummaryForceRefresh: (force) => set({ summaryForceRefresh: force }),
+  setSearchHelp: (searchHelp) => set({ searchHelp: searchHelp }),
 
   getUser: async (LOGIN_ID: string) => {
     const currentRequestId = ++requestIds.areas;
@@ -109,6 +112,10 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
 
   getSummaryForceRefresh: () => {
     return get().summaryForceRefresh;
+  },
+
+  getSearchHelp: () => {
+    return true;
   },
 }));
 

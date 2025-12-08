@@ -2,7 +2,7 @@ import { isPlatform, useIonRouter } from "@ionic/react";
 import useAppStore from "./stores/appStore";
 import {
   CorpModel,
-  DeviceInfo,
+  DeviceInfoModel,
   KeyboardVisibility,
   ShellPadding,
 } from "./stores/types";
@@ -349,7 +349,7 @@ export const getStoredToken = (
   return null;
 };
 
-export const getStoredDeviceInfo = (): DeviceInfo | null => {
+export const getStoredDeviceInfo = (): DeviceInfoModel | null => {
   if (typeof window !== "undefined") {
     const deviceInfo = localStorage.getItem("deviceInfo");
     return deviceInfo ? JSON.parse(deviceInfo) : null;

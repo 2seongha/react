@@ -24,7 +24,7 @@ export const ValueHelp = ({ size = 24, color = "currentColor", ...props }) => {
     // </svg>
     <svg width={size} height={size * (58 / 55)} viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path d="M48 0C54.6274 0 60 5.37258 60 12V32C60 38.6274 54.6274 44 48 44H44V38H48C51.3137 38 54 35.3137 54 32V12C54 8.68629 51.3137 6 48 6H28C24.6863 6 22 8.68629 22 12V17H16V12C16 5.37258 21.3726 0 28 0H48Z" fill={color} />
-      <rect x="3" y="19" width="38" height="38" rx="9" stroke={color} stroke-width="6" />
+      <rect x="3" y="19" width="38" height="38" rx="9" stroke={color} strokeWidth="6" />
     </svg>
   );
 };

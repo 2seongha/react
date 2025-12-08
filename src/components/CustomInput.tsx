@@ -1,4 +1,4 @@
-import { IonInput, IonButton } from '@ionic/react';
+import { IonInput, IonButton, IonIcon } from '@ionic/react';
 import {
   forwardRef,
   useRef,
@@ -6,15 +6,20 @@ import {
 } from 'react';
 import { ValueHelp } from './CustomIcon';
 import SearchHelpModal from './SearchHelpModal';
+import { calendarOutline } from 'ionicons/icons';
+import useAppStore from '../stores/appStore';
 
 export interface CustomInputProps {
   path: string; // ★ 반드시 필요
   label: string;
   required?: boolean;
   value?: string;
+  clearInput?: boolean;
+  onClick?: () => void;
   onChange?: (value: string) => void;
   onFocus?: (e: Event) => void;
   onValueHelp?: () => void;
+  onDatePicker?: () => void;
   placeholder?: string;
   readOnly?: boolean;
   style?: React.CSSProperties;
@@ -32,16 +37,21 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
       label,
       required = false,
       value,
+      clearInput = false,
+      onClick,
       onChange,
       onFocus,
       onValueHelp,
+      onDatePicker,
       placeholder = '',
       readOnly = false,
       style
     },
     formRef: Ref<FormRef>
   ) => {
+    const setSearchHelp = useAppStore(state => state.setSearchHelp);
     const inputRef = useRef<HTMLIonInputElement>(null);
+
     const handleInput = (val: string) => {
       if (!formRef || typeof formRef !== 'object') return;
 
@@ -59,22 +69,15 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
 
     return (
       <>
-        {/* <span className="label">
-          {label}
-          {required && <span style={{ color: 'var(--red)' }}>*</span>}
-        </span> */}
-
         <IonInput
-          // className="input"
           mode="md"
-          // fill='outline'
-          // label={label}
           required={required}
           labelPlacement='stacked'
           placeholder={placeholder}
           value={value}
           readonly={readOnly}
-          clearInput={true}
+          clearInput={clearInput}
+          onClick={onClick}
           onIonFocus={onFocus}
           onIonInput={(e) => handleInput(e.detail.value!)}
           style={style}
@@ -87,29 +90,60 @@ const CustomInput = forwardRef<FormRef, CustomInputProps>(
             </span>
           </div>
           {onValueHelp &&
-            <IonButton
-              id="search-help-modal-trigger"
-              fill="clear"
-              slot="end"
-              color="medium"
-              onClick={async () => {
-                // input에 focus
-                inputRef.current?.setFocus();
-                // ValueHelp 클릭 이벤트 호출
-                onValueHelp();
-              }}
-              style={{
-                width: '30px',
-                height: '30px',
-                '--padding-start': '0',
-                '--padding-end': '0',
-                '--padding-top': '0',
-                '--padding-bottom': '0',
-                // transform: 'translateX(15px)',
-              }}
-            >
-              <ValueHelp color="var(--ion-color-step-600)" size={16} />
-            </IonButton>
+            <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
+              <IonButton
+                id="search-help-modal-trigger"
+                fill="clear"
+                slot="end"
+                color="medium"
+                onClick={async () => {
+                  // inputRef.current?.setFocus();
+                  // onValueHelp();
+                  setSearchHelp({ IS_OPEN: true, TITLE: label });
+                }}
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  '--border-radius': '24px',
+                  '--padding-start': '0',
+                  '--padding-end': '0',
+                  '--padding-top': '0',
+                  '--padding-bottom': '0',
+                  'position': 'absolute',
+                  'right': '-8px',
+                  'top': '-6px'
+                }}
+              >
+                <ValueHelp color="var(--ion-color-step-600)" size={16} />
+              </IonButton>
+            </div>
+          }
+          {onDatePicker &&
+            <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
+              <IonButton
+                fill="clear"
+                slot="end"
+                color="medium"
+                onClick={async () => {
+                  inputRef.current?.setFocus();
+                  onDatePicker();
+                }}
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  '--border-radius': '24px',
+                  '--padding-start': '0',
+                  '--padding-end': '0',
+                  '--padding-top': '0',
+                  '--padding-bottom': '0',
+                  'position': 'absolute',
+                  'right': '-6px',
+                  'top': '-6px'
+                }}
+              >
+                <IonIcon src={calendarOutline} />
+              </IonButton>
+            </div>
           }
         </IonInput>
       </>

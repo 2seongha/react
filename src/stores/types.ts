@@ -10,6 +10,7 @@ export interface AppState {
   selectedTab: number;
   notificationPopupShown: boolean;
   summaryForceRefresh: boolean;
+  searchHelp: SearchHelpModel | null;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: UserModel) => void;
@@ -21,6 +22,7 @@ export interface AppState {
   setSelectedTab: (tab: number) => void;
   setNotificationPopupShown: (shown: boolean) => void;
   setSummaryForceRefresh: (force: boolean) => void;
+  setSearchHelp: (searchHelp: SearchHelpModel) => void;
 
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
@@ -30,6 +32,7 @@ export interface AppState {
   patchNotifications: (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => Promise<void>;
   getNotificationPopupShown: () => boolean;
   getSummaryForceRefresh: () => boolean;
+  getSearchHelp: () => boolean;
 }
 
 export interface UserModel {
@@ -124,6 +127,12 @@ export interface CorpModel {
   }
 }
 
-export interface DeviceInfo {
+export interface DeviceInfoModel {
   [key: string]: any;
+}
+
+export interface SearchHelpModel {
+  IS_OPEN: boolean;
+  TITLE?: string;
+  LIST?: any;
 }

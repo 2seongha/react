@@ -1,22 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   IonContent,
-  IonFooter,
-  IonIcon,
-  IonInput,
   IonModal,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
-import useAppStore from "../stores/appStore";
 import _ from "lodash";
-import { color } from "framer-motion";
-import { copy, copyOutline, person } from "ionicons/icons";
-import { FilterNoneOutlined } from "@mui/icons-material";
-import { ValueHelp } from "./CustomIcon";
 import CustomInput, { FormRef } from "./CustomInput";
-import SearchHelpModal from "./SearchHelpModal";
-import { Button } from "@mui/material";
+import useAppStore from "../stores/appStore";
+import { getTopModalId, popModal, pushModal } from "../pages/PersonalExpense";
 
 interface NotificationPopupProps {
   trigger?: string;
@@ -31,6 +23,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef<FormRef>({});
+  const modalId = 'addItem';
 
   function dismiss() {
     modalRef.current?.dismiss();
@@ -38,7 +31,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
 
   const handleModalWillPresent = () => {
     setIsModalOpen(true);
-
+    pushModal(modalId);
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
     window.history.pushState({ ...currentState, modalOpen: true }, "");
@@ -57,6 +50,11 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
     }
     historyPushedRef.current = false;
     closedByBackButtonRef.current = false;
+
+    // 스택에서 제거
+    if (getTopModalId() === modalId) {
+      popModal();
+    }
   };
 
   // 브라우저 뒤로가기 버튼 처리
@@ -64,9 +62,14 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
     if (!isModalOpen) return;
 
     const handlePopState = (event: PopStateEvent) => {
+      if (getTopModalId() === 'searchHelp') {
+        return popModal();
+      }
+      if (getTopModalId() !== modalId) return;
       if (isModalOpen) {
         closedByBackButtonRef.current = true;
         dismiss();
+        popModal();
       }
     };
 
@@ -168,26 +171,34 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             style={{ marginBottom: '21px' }}
 
           />
-          <CustomInput
-            ref={formRef}
-            path="2"
-            label="전표통화금액"
-            onFocus={handleFocus}
-            style={{ marginBottom: '21px' }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+            <CustomInput
+              ref={formRef}
+              path="2"
+              label="전표통화금액"
+              required
+              onFocus={handleFocus}
+              style={{ marginBottom: '21px', textAlign: 'right' }}
+            />
+            <span>KRW</span>
+          </div>
 
-          />
-          <CustomInput
-            ref={formRef}
-            path="2"
-            label="현지통화금액"
-            onFocus={handleFocus}
-            style={{ marginBottom: '21px' }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+            <CustomInput
+              ref={formRef}
+              path="2"
+              label="현지통화금액"
+              onFocus={handleFocus}
+              style={{ marginBottom: '21px', textAlign: 'right' }}
+            />
+            <span>KRW</span>
+          </div>
 
-          />
           <CustomInput
             ref={formRef}
             path="2"
             label="항목텍스트"
+            required
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
 
@@ -204,6 +215,8 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             ref={formRef}
             path="2"
             label="기준일자"
+            readOnly
+            onDatePicker={() => { }}
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
 
@@ -212,6 +225,8 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             ref={formRef}
             path="2"
             label="만기계산일"
+            readOnly
+            onDatePicker={() => { }}
             onFocus={handleFocus}
             style={{ marginBottom: '21px' }}
 
