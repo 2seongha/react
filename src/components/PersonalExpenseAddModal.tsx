@@ -15,15 +15,17 @@ export type FormRef = {
 interface NotificationPopupProps {
   trigger?: string;
   docItem?: any;
+  modalRef: any;
 }
 
 const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   trigger,
-  docItem
+  docItem,
+  modalRef
 }) => {
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
-  const modalRef = useRef<HTMLIonModalElement>(null);
+  // const modalRef = useRef<HTMLIonModalElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef<FormRef>({});
@@ -108,9 +110,9 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
 
   return (
     <IonModal
+      ref={modalRef}
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
-      ref={modalRef}
       trigger={trigger}
       mode="ios"
       style={{
@@ -129,7 +131,6 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             '--border-radius': '24px',
             marginLeft: '8px',
             width: '64px',
-            // '--color': 'var(--ion-color-step-700)'
           }}
         >
           <span style={{ fontSize: '16px', fontWeight: '600' }}>취소</span>
