@@ -51,7 +51,9 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
       // 원래 상태 복원
       if (!wasReadonly) {
-        searchHelp?.INPUT.current?.removeAttribute("readonly");
+        setTimeout(() => {
+          searchHelp?.INPUT.current?.removeAttribute("readonly");
+        })
       }
     }, 0);
 
