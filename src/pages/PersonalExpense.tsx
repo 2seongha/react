@@ -91,6 +91,7 @@ const PersonalExpense: React.FC = () => {
             height: '58px',
             '--background': 'transparent',
             '--color': 'var(--ion-color-step-900)',
+            '--ripple-color': 'transparent',
             borderRadius: '17px',
             border: '1px dashed var(--custom-border-color-100)',
             fontSize: '16px'
