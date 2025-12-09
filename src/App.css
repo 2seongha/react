@@ -48,6 +48,11 @@ ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
+html.ios ion-modal ion-toolbar, html.ios .modal-footer-moving ion-toolbar {
+  padding-right: 0;
+  padding-left: 0;
+}
+
 /* Popover 관련 */
 ion-popover {
   --width: 300px;

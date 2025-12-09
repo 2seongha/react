@@ -127,6 +127,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
           onClick={dismiss}
           style={{
             '--border-radius': '24px',
+            marginLeft: '8px',
             width: '64px',
             // '--color': 'var(--ion-color-step-700)'
           }}
