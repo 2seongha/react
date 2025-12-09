@@ -117,7 +117,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
       className="approval-modal"
       expandToScroll={false}
       style={{
-        '--max-height': '600px',
+        '--max-height': '400px',
       }}
     >
       <AppBar title={<span>{searchHelp?.TITLE}</span>} customEndButtons={closeButton} />
