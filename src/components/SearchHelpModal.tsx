@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import {
   IonContent,
   IonIcon,
@@ -10,7 +10,7 @@ import { close } from "ionicons/icons";
 import "./ApprovalModal.css";
 import _ from "lodash";
 import useAppStore from "../stores/appStore";
-import { getTopModalId, popModal, pushModal } from "../pages/PersonalExpense";
+import { pushModal } from "../App";
 interface SearchHelpModalProps {
 }
 
@@ -24,9 +24,10 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   const modalRef = useRef<HTMLIonModalElement>(null);
   const modalId = 'searchHelp';
 
-  function dismiss() {
+  // 닫기
+  const dismiss = useCallback(() => {
     modalRef.current?.dismiss();
-  }
+  }, []);
 
   const handleModalWillPresent = () => {
     pushModal(modalId);
@@ -40,20 +41,26 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   const handleModalDidDismiss = () => {
     setSearchHelp({ ...searchHelp, IS_OPEN: false });
     setTimeout(() => {
-      // 원래 readonly 상태 저장
-      const wasReadonly = searchHelp?.INPUT.current?.hasAttribute("readonly");
+      const input = searchHelp?.INPUT.current;
+      if (!input) return;
 
-      // 임시로 readonly 추가
-      searchHelp?.INPUT.current?.setAttribute("readonly", "true");
+      // 기존 has-focus 제거
+      document.querySelectorAll('.has-focus').forEach((el) => {
+        if (el !== input) el.classList.remove('has-focus');
+      });
 
-      // 포커스
-      searchHelp?.INPUT.current?.setFocus();
+      const wasReadonly = input.hasAttribute("readonly");
 
-      // 원래 상태 복원
+      input.setAttribute("readonly", "true");
+      input.setFocus();
+
+      // 현재 input에 has-focus 추가
+      input.classList.add('has-focus');
+
       if (!wasReadonly) {
         setTimeout(() => {
-          searchHelp?.INPUT.current?.removeAttribute("readonly");
-        })
+          input.removeAttribute("readonly");
+        });
       }
     }, 0);
 
@@ -107,6 +114,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
       ref={modalRef}
       initialBreakpoint={1}
       breakpoints={[0, 1]}
+      className="approval-modal"
       expandToScroll={false}
       style={{
         '--max-height': '600px',

@@ -146,3 +146,17 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+export const modalStack: string[] = [];
+
+export const pushModal = (id: string) => {
+  modalStack.push(id);
+};
+
+export const popModal = () => {
+  modalStack.pop();
+};
+
+export const getTopModalId = () => {
+  return modalStack[modalStack.length - 1] || null;
+};

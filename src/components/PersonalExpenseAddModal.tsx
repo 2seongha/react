@@ -6,16 +6,20 @@ import {
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
 import _ from "lodash";
-import CustomInput, { FormRef } from "./CustomInput";
-import useAppStore from "../stores/appStore";
-import { getTopModalId, popModal, pushModal } from "../pages/PersonalExpense";
+import CustomInput from "./CustomInput";
+import { getTopModalId, popModal, pushModal } from "../App";
 
+export type FormRef = {
+  [key: string]: string | undefined;
+};
 interface NotificationPopupProps {
   trigger?: string;
+  docItem?: any;
 }
 
 const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   trigger,
+  docItem
 }) => {
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
@@ -24,6 +28,11 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const formRef = useRef<FormRef>({});
   const modalId = 'addItem';
+
+  // docItem 변경 시 form 재할당
+  useEffect(() => {
+    formRef.current = docItem || {};
+  }, [docItem]);
 
   function dismiss() {
     modalRef.current?.dismiss();
@@ -135,100 +144,87 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             paddingBottom: 'calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
           }}>
           <CustomInput
-            ref={formRef}
-            path="1"
             label="계정그룹명"
             required
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
             readOnly
             clearInput
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
           />
           <CustomInput
-            ref={formRef}
-            path="2"
+            value={formRef.current.KOSTL}
+            helperText={formRef.current.KOSTL_T}
             label="코스트센터"
             onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.KOSTL = value;
+            }}
             onValueHelp={() => console.log('ValueHelp clicked')}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
-            ref={formRef}
-            path="2"
             label="오더번호"
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
-            ref={formRef}
-            path="2"
             label="WBS요소"
             onFocus={handleFocus}
             onValueHelp={() => console.log('ValueHelp clicked')}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
             clearInput
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
             <CustomInput
-              ref={formRef}
-              path="2"
               label="전표통화금액"
               required
               onFocus={handleFocus}
-              style={{ marginBottom: '21px', textAlign: 'right' }}
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
             />
-            <span>KRW</span>
+            <span>{docItem?.WAERS}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
             <CustomInput
-              ref={formRef}
-              path="2"
               label="현지통화금액"
               onFocus={handleFocus}
-              style={{ marginBottom: '21px', textAlign: 'right' }}
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
             />
-            <span>KRW</span>
+            <span>{docItem?.WAERS}</span>
           </div>
 
           <CustomInput
-            ref={formRef}
-            path="2"
             label="항목텍스트"
             required
             onFocus={handleFocus}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
-            ref={formRef}
-            path="2"
             label="지정"
             onFocus={handleFocus}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
-            ref={formRef}
-            path="2"
             label="기준일자"
             readOnly
             onDatePicker={() => { }}
             onFocus={handleFocus}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
           />
           <CustomInput
-            ref={formRef}
-            path="2"
             label="만기계산일"
             readOnly
             onDatePicker={() => { }}
             onFocus={handleFocus}
-            style={{ marginBottom: '21px' }}
+            style={{ marginBottom: '28px' }}
           />
           <div
             style={{

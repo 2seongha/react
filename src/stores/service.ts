@@ -119,6 +119,22 @@ export async function patchNotifications(NOTIFY_NO: string, READ_YN: string, DEL
   }
 }
 
+export async function getStart(FLOWCODE: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    const BUKRS = user?.BUKRS;
+
+    const api = createApiInstance();
+    const res = await api.get(`/v1/api/start?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&FLOWCODE=${FLOWCODE}`);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 export async function getNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay

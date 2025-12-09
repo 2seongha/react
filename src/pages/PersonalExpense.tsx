@@ -1,10 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   IonButton,
   IonContent,
   IonFooter,
   IonIcon,
   IonPage,
+  useIonRouter,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
@@ -14,23 +16,35 @@ import PersonalExpenseAddModal from '../components/PersonalExpenseAddModal';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-
-export const modalStack: string[] = [];
-
-export const pushModal = (id: string) => {
-  modalStack.push(id);
-};
-
-export const popModal = () => {
-  modalStack.pop();
-};
-
-export const getTopModalId = () => {
-  return modalStack[modalStack.length - 1] || null;
-};
+import { getStart } from '../stores/service';
+import { webviewToast } from '../webview';
+import _ from 'lodash';
 
 const PersonalExpense: React.FC = () => {
-  const searchHelp = useAppStore(state => state.searchHelp);
+  const router = useIonRouter();
+  const [approval, setApproval] = useState(null); // 상신 템플릿
+  const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
+  const oriItem = useRef(null); // 항목 템플릿
+
+  useIonViewWillEnter(() => {
+    const initApproval = async () => {
+      const approval = await getStart('IA103');
+      if (approval instanceof Error) {
+        router.goBack();
+        webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
+      }
+      console.log(approval);
+      oriItem.current = approval.FLOWHD_DOCITEM[0];
+      approval.FLOW_DOCITEM = [];
+      setApproval(approval);
+    }
+    initApproval();
+  });
+
+  // 항목 추가
+  const handleAddItem = useCallback(() => {
+    setDocItem(_.cloneDeep(oriItem.current));
+  }, []);
 
   return (
     <IonPage className='personal-expense'>
@@ -45,25 +59,6 @@ const PersonalExpense: React.FC = () => {
           '--padding-start': '21px',
           '--padding-end': '21px',
         }}>
-        {/* <MobileStepper
-          variant="progress"
-          steps={3}
-          position="static"
-          activeStep={step}
-          sx={{
-            padding: 0,
-            flexGrow: 1,
-            "& .MuiLinearProgress-root": {
-              width: '100%',
-              height: '2px',
-              backgroundColor: 'var(--custom-border-color-50)',      // 진행 바 색
-            },
-            "& .MuiLinearProgress-bar": {
-              backgroundColor: 'var(--ion-color-primary)',      // 진행 바 색
-            },
-          }}
-          backButton={undefined}
-          nextButton={undefined} /> */}
         <div style={{
           paddingTop: '26px',
           display: 'flex',
@@ -85,12 +80,11 @@ const PersonalExpense: React.FC = () => {
             <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
           </div>
         </div>
-        {/* <NoData message={`데이터가 없습니다.\n경비 항목을 추가해 주세요.`}></NoData> */}
-        {/* <span>아래 '행 추가' 버튼을 눌러 경비 항목을 추가해 주세요.</span> */}
         <IonButton
           type='button'
           id='personal-expense-add-modal-trigger'
           mode='md'
+          onClick={handleAddItem}
           style={{
             marginTop: '21px',
             width: '100%',
@@ -107,6 +101,7 @@ const PersonalExpense: React.FC = () => {
         {/* 항목 추가 모달 */}
         <PersonalExpenseAddModal
           trigger='personal-expense-add-modal-trigger'
+          docItem={docItem}
         />
         {/* 서치 헬프 모달 */}
         <SearchHelpModal />

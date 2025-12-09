@@ -69,7 +69,7 @@ const AppBar: React.FC<AppBarProps> = ({
 
   return (
     <IonHeader mode='ios' translucent={false} className='app-bar'>
-      <IonToolbar>
+      <IonToolbar mode='ios'>
         <div style={{ display: 'flex', justifyContent: 'space-between', height: '48px' }}>
           {showLogo &&
             <div style={{ position: 'relative', width: '80px', height: '48px', marginLeft: '20px' }}>
