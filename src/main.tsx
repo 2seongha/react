@@ -1,11 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
 import { createRoot } from 'react-dom/client'
 import { setupIonicReact } from '@ionic/react'
-import Lottie, { LottieRefCurrentProps } from 'lottie-react'
-import lottieSuccessData from './assets/lottie_success.json'
-import lottieLoadingData from './assets/lottie_loading.json'
-import lottieWarningData from './assets/lottie_warning.json'
-import lottieErrorData from './assets/lottie_error.json'
 
 import App from './App'
 

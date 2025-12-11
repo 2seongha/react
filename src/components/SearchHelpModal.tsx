@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo, useEffect, useCallback } from "react"
 import {
   IonContent,
   IonIcon,
+  IonItem,
   IonModal,
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
@@ -11,6 +12,7 @@ import "./ApprovalModal.css";
 import _ from "lodash";
 import useAppStore from "../stores/appStore";
 import { pushModal } from "../App";
+import LoadingIndicator from "./LoadingIndicator";
 interface SearchHelpModalProps {
 }
 
@@ -18,6 +20,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 }) => {
   const searchHelp = useAppStore(state => state.searchHelp);
   const setSearchHelp = useAppStore(state => state.setSearchHelp);
+  const [list, setList] = useState<any[] | null>(null);
 
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
@@ -30,6 +33,13 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   }, []);
 
   const handleModalWillPresent = () => {
+    const initList = async () => {
+      const list = await searchHelp?.onValueHelp();
+      console.log(list);
+      setList(list);
+    };
+    initList();
+
     pushModal(modalId);
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
@@ -39,29 +49,12 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   };
 
   const handleModalDidDismiss = () => {
-    setSearchHelp({ ...searchHelp, IS_OPEN: false });
+    setSearchHelp({ isOpen: false });
+    setList(null);
     setTimeout(() => {
-      const input = searchHelp?.INPUT.current;
+      const input = searchHelp?.input.current;
       if (!input) return;
-
-      // 기존 has-focus 제거
-      document.querySelectorAll('.has-focus').forEach((el) => {
-        if (el !== input) el.classList.remove('has-focus');
-      });
-
-      const wasReadonly = input.hasAttribute("readonly");
-
-      input.setAttribute("readonly", "true");
-      input.setFocus();
-
-      // 현재 input에 has-focus 추가
       input.classList.add('has-focus');
-
-      if (!wasReadonly) {
-        setTimeout(() => {
-          input.removeAttribute("readonly");
-        });
-      }
     }, 0);
 
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
@@ -76,7 +69,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
   // 브라우저 뒤로가기 버튼 처리
   useEffect(() => {
-    if (!searchHelp?.IS_OPEN) return;
+    if (!searchHelp?.isOpen) return;
 
     const handlePopState = (event: PopStateEvent) => {
       closedByBackButtonRef.current = true;
@@ -88,7 +81,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [searchHelp?.IS_OPEN]);
+  }, [searchHelp?.isOpen]);
 
   const closeButton = useMemo(
     () => (
@@ -107,7 +100,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
 
   return (
     <IonModal
-      isOpen={searchHelp?.IS_OPEN}
+      isOpen={searchHelp?.isOpen}
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
       mode="ios"
@@ -120,11 +113,58 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
         '--max-height': '400px',
       }}
     >
-      <AppBar title={<span>{searchHelp?.TITLE}</span>} customEndButtons={closeButton} />
+      <AppBar title={<span>{searchHelp?.title}</span>} customEndButtons={closeButton} />
       <IonContent
         forceOverscroll={false}
       >
-
+        {list === null
+          ? <LoadingIndicator
+            color="var(--ion-text-color)"
+            style={{
+              margin: '0 auto',
+              marginTop: '120px'
+            }} />
+          : list.map((item, index) => {
+            return (
+              <IonItem
+                key={'search-help-item' + index}
+                mode="md"
+                button
+                style={{
+                  '--min-height': '48px',
+                  '--padding-start': '21px',
+                  '--padding-end': '21px',
+                  borderBottom: '.5px solid var(--ion-color-step-100)',
+                }}
+                onClick={() => {
+                  searchHelp?.onChange(item);
+                  dismiss();
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: '500'
+                  }}>{item.Type === 'ACCOUNT_CODE_T' ? item.Name : item.Key}</span>
+                <div
+                  slot="end"
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: 'var(--ion-color-secondary)'
+                  }}>
+                  {item.Type === 'ACCOUNT_CODE_T'
+                    ? <>
+                      <span>{item.Add1}</span>
+                      <span> ({item.KeyName})</span>
+                    </>
+                    : <span>{item.Name}</span>
+                  }
+                </div>
+              </IonItem>
+            );
+          })
+        }
       </IonContent>
     </IonModal>
   );

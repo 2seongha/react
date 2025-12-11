@@ -9,9 +9,9 @@ import useAppStore from '../stores/appStore';
 import { webviewHaptic, webviewToast } from '../webview';
 import { refreshOutline, trashOutline } from 'ionicons/icons';
 import NoData from '../components/NoData';
-import { OrbitProgress } from 'react-loading-indicators';
 import CustomDialog from '../components/Dialog';
 import { Virtuoso } from 'react-virtuoso';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const Notifications: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
@@ -146,7 +146,7 @@ const Notifications: React.FC = () => {
         {
           !filteredNotifications ?
             <div className='loading-indicator-wrapper'>
-              <OrbitProgress color="var(--ion-color-primary)" size="small" text="" textColor="" />
+              <LoadingIndicator color="var(--ion-color-primary)" />
             </div>
             : (!filteredNotifications || filteredNotifications.length === 0) ?
               <NoData />

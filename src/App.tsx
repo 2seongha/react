@@ -17,12 +17,12 @@ import Notifications from './pages/Notifications';
 import More from './pages/More';
 import MyPage from './pages/MyPage';
 import Search from './pages/Search';
-import { OrbitProgress } from 'react-loading-indicators';
 import { useImagePreload } from './hooks/useImagePreload';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfUse from './pages/TermsOfUse';
 import Attach from './pages/Attach';
 import PersonalExpense from './pages/PersonalExpense';
+import LoadingIndicator from './components/LoadingIndicator';
 
 const App: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   // 초기화 상태를 모두 확인하는 함수
   const checkAllInitialized = useCallback(() => {
-     if (
+    if (
       webviewInitializedRef.current &&
       themeInitializedRef.current &&
       imageLoading
@@ -115,7 +115,7 @@ const App: React.FC = () => {
         background: "var(--ion-background-color)",
       }}
     >
-      <OrbitProgress color="var(--ion-text-color)" size="small" />
+      <LoadingIndicator color="var(--ion-text-color)" />
     </div>
   );
 

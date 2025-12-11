@@ -36,7 +36,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   selectedTab: 0,
   notificationPopupShown: false,
   summaryForceRefresh: false,
-  searchHelp: { IS_OPEN: false },
+  searchHelp: { isOpen: false },
 
   setThemeMode: (mode) => {
     // localStorage에 저장

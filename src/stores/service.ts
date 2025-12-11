@@ -135,6 +135,22 @@ export async function getStart(FLOWCODE: string): Promise<any> {
   }
 }
 
+export async function getSearchHelp(ENTITYSET: string, FLOWCODE?: string, INPUT1?: string, INPUT2?: string ): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    const BUKRS = user?.BUKRS;
+
+    const api = createApiInstance();
+    const res = await api.get(`/v1/api/searchHelp?ENTITYSET=${ENTITYSET}&LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&FLOWCODE=${FLOWCODE ?? ''}&INPUT1=${INPUT1 ?? ''}&INPUT2=${INPUT2 ?? ''}`);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 export async function getNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay

@@ -30,8 +30,7 @@ import { getFlowIcon } from '../utils';
 import './Menu.css';
 import AppBar from '../components/AppBar';
 import { webviewHaptic } from '../webview';
-import { OrbitProgress } from 'react-loading-indicators';
-import useIonContentBounceControl from '../hooks/useIonContentBounceControl';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -78,7 +77,7 @@ const Menu: React.FC = () => {
         </IonRefresher>
         {!areas ?
           <div className='loading-indicator-wrapper'>
-            <OrbitProgress color="var(--ion-color-primary)" size="small" text="" textColor="" />
+            <LoadingIndicator color="var(--ion-color-primary)" />
           </div>
           :
           <IonList style={{ paddingBottom: 'var(--ion-safe-area-bottom)' }}>

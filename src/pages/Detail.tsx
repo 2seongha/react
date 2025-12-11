@@ -50,10 +50,10 @@ import ApprovalModal from "../components/ApprovalModal";
 import { chevronForward, person } from "ionicons/icons";
 import { webviewToast } from "../webview";
 import SubModal from "../components/SubModal";
-import { OrbitProgress } from "react-loading-indicators";
 import CachedImage from "../components/CachedImage";
 import NoData from "../components/NoData";
 import { getApprovals } from "../stores/service";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const TAB_KEYS = ["tab1", "tab2", "tab3"];
 
@@ -323,7 +323,7 @@ const Detail: React.FC = () => {
     (<IonPage>
       <IonContent>
         <div className='loading-indicator-wrapper'>
-          <OrbitProgress color="var(--ion-color-primary)" size="small" text="" textColor="" />
+          <LoadingIndicator color="var(--ion-color-primary)" />
         </div>
       </IonContent>
     </IonPage>)

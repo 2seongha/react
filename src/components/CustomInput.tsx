@@ -1,11 +1,10 @@
 import { IonInput, IonButton, IonIcon } from '@ionic/react';
 import {
-  forwardRef,
+  useEffect,
   useRef,
-  Ref,
+  useState,
 } from 'react';
 import { ValueHelp } from './CustomIcon';
-import SearchHelpModal from './SearchHelpModal';
 import { calendarOutline } from 'ionicons/icons';
 import useAppStore from '../stores/appStore';
 
@@ -18,7 +17,8 @@ export interface CustomInputProps {
   onClick?: () => void;
   onChange?: (value: string) => void;
   onFocus?: (e: Event) => void;
-  onValueHelp?: () => void;
+  onValueHelp?: () => void | Promise<void>;
+  onChangeValueHelp?: (value: any) => void;
   onDatePicker?: () => void;
   placeholder?: string;
   readOnly?: boolean;
@@ -35,6 +35,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   onChange,
   onFocus,
   onValueHelp,
+  onChangeValueHelp,
   onDatePicker,
   placeholder = '',
   readOnly = false,
@@ -44,6 +45,22 @@ const CustomInput: React.FC<CustomInputProps> = ({
 }) => {
   const setSearchHelp = useAppStore(state => state.setSearchHelp);
   const inputRef = useRef<HTMLIonInputElement>(null);
+  const [localValue, setLocalValue] = useState(value);
+  const [localHelper, setLocalHelper] = useState(helperText);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    setLocalHelper(helperText);
+  }, [helperText]);
+
+  const handleValueHelp = (val: any) => {
+    setLocalValue(val.Key);
+    setLocalHelper(val.Name);
+    onChangeValueHelp?.(val);
+  };
 
   const handleInput = (val: string) => {
     onChange?.(val);
@@ -56,7 +73,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
         required={required}
         labelPlacement='stacked'
         placeholder={placeholder}
-        value={value}
+        value={localValue}
+        helperText={localHelper}
         readonly={readOnly}
         clearInput={clearInput}
         onClick={onClick}
@@ -65,7 +83,6 @@ const CustomInput: React.FC<CustomInputProps> = ({
         style={style}
         ref={inputRef}
         inputMode={inputMode}
-        helperText={helperText ?? ''}
       >
         <div slot="label">
           <span>
@@ -81,12 +98,19 @@ const CustomInput: React.FC<CustomInputProps> = ({
               slot="end"
               color="medium"
               onClick={async () => {
-                // inputRef.current?.setFocus();
                 setTimeout(() => {
-                  inputRef.current?.classList.add("has-focus");
+                  if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
+                    inputRef.current.classList.add("has-focus");
+                  }
                 }, 50);
-                // onValueHelp();
-                setSearchHelp({ IS_OPEN: true, TITLE: label, INPUT: inputRef });
+                setSearchHelp({
+                  isOpen: true,
+                  title: label,
+                  input: inputRef,
+                  onValueHelp: onValueHelp,
+                  onChange: handleValueHelp,
+                  list: null
+                });
               }}
               style={{
                 width: '42px',
@@ -112,7 +136,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
               slot="end"
               color="medium"
               onClick={async () => {
-                inputRef.current?.setFocus();
+                // inputRef.current?.setFocus();
                 onDatePicker();
               }}
               style={{

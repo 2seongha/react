@@ -21,6 +21,7 @@ import { getStart } from '../stores/service';
 import { webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion } from 'framer-motion';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -149,6 +150,20 @@ const PersonalExpense: React.FC = () => {
           '--padding-start': '21px',
           '--padding-end': '21px',
         }}>
+        {approval === null && <div style={{
+          background: 'rgba(var(--ion-background-color-rgb), .95)',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 3,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <LoadingIndicator />
+        </div>}
         <AnimatePresence mode="wait" initial={false}>
           {/* 항목 추가 페이지 */}
           {step === 0 && <motion.div
@@ -158,7 +173,7 @@ const PersonalExpense: React.FC = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
             <div style={{
               paddingTop: '26px',
@@ -209,7 +224,7 @@ const PersonalExpense: React.FC = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             style={{
               width: '100%',
               height: '100%',

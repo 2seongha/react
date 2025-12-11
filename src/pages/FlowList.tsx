@@ -1,8 +1,6 @@
 import { IonContent, IonImg, IonItem, IonPage, IonRefresher, IonRefresherContent, RefresherCustomEvent, useIonRouter, useIonViewWillEnter, isPlatform } from '@ionic/react';
 import { useParams } from 'react-router-dom';
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Commet, OrbitProgress } from 'react-loading-indicators';
 import { refreshOutline } from 'ionicons/icons';
 import { useShallow } from 'zustand/shallow';
 import useAppStore from '../stores/appStore';
@@ -12,6 +10,7 @@ import NoData from '../components/NoData';
 import AppBar from '../components/AppBar';
 import './FlowList.css';
 import { webviewHaptic } from '../webview';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const FlowList: React.FC = () => {
   const { AREA_CODE } = useParams<{ AREA_CODE: string }>();
@@ -89,7 +88,7 @@ const FlowList: React.FC = () => {
 
         {!flowList ?
           <div className='loading-indicator-wrapper'>
-            <OrbitProgress color="var(--ion-color-primary)" size="small" text="" textColor="" />
+            <LoadingIndicator color="var(--ion-color-primary)" />
           </div>
           : (!flowList.CHILDREN || flowList.CHILDREN.length === 0) ?
             <NoData message="해당 항목에 대한 데이터가 없습니다." />

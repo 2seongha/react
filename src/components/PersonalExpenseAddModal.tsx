@@ -8,6 +8,7 @@ import AppBar from "./AppBar";
 import _ from "lodash";
 import CustomInput from "./CustomInput";
 import { getTopModalId, popModal, pushModal } from "../App";
+import { getSearchHelp } from "../stores/service";
 
 export type FormRef = {
   [key: string]: string | undefined;
@@ -92,6 +93,10 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   }, [isModalOpen]);
 
   const handleFocus = (e: any) => {
+    document.querySelectorAll('.has-focus').forEach((el) => {
+      el.classList.remove('has-focus');
+    });
+
     const container = containerRef.current;
     const el = e.target;
     if (!container || !el) return;
@@ -149,7 +154,13 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             label="계정그룹명"
             required
             onFocus={handleFocus}
-            onValueHelp={() => console.log('ValueHelp clicked')}
+            onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
+            onChange={(value) => {
+              formRef.current.KOSTL = value;
+            }}
+            onChangeValueHelp={(value) => {
+
+            }}
             readOnly
             clearInput
             style={{ marginBottom: '28px' }}
@@ -159,24 +170,26 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             helperText={formRef.current.KOSTL_T}
             label="코스트센터"
             onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
             onChange={(value) => {
               formRef.current.KOSTL = value;
             }}
-            onValueHelp={() => console.log('ValueHelp clicked')}
+            onChangeValueHelp={(value) => {
+              formRef.current.KOSTL = value.Key;
+              formRef.current.KOSTL_T = value.Name;
+            }}
             style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
             label="오더번호"
             onFocus={handleFocus}
-            onValueHelp={() => console.log('ValueHelp clicked')}
             style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
             label="WBS요소"
             onFocus={handleFocus}
-            onValueHelp={() => console.log('ValueHelp clicked')}
             style={{ marginBottom: '28px' }}
             clearInput
           />

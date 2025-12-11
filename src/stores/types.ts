@@ -10,7 +10,7 @@ export interface AppState {
   selectedTab: number;
   notificationPopupShown: boolean;
   summaryForceRefresh: boolean;
-  searchHelp: SearchHelpModel | null;
+  searchHelp: any;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: UserModel) => void;
@@ -22,7 +22,7 @@ export interface AppState {
   setSelectedTab: (tab: number) => void;
   setNotificationPopupShown: (shown: boolean) => void;
   setSummaryForceRefresh: (force: boolean) => void;
-  setSearchHelp: (searchHelp: SearchHelpModel) => void;
+  setSearchHelp: (searchHelp: any) => void;
 
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
@@ -129,11 +129,4 @@ export interface CorpModel {
 
 export interface DeviceInfoModel {
   [key: string]: any;
-}
-
-export interface SearchHelpModel {
-  IS_OPEN: boolean;
-  TITLE?: string;
-  LIST?: any;
-  INPUT?: any;
 }
