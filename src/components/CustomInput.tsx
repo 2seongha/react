@@ -1,5 +1,6 @@
 import { IonInput, IonButton, IonIcon } from '@ionic/react';
 import {
+  RefObject,
   useEffect,
   useRef,
   useState,
@@ -7,8 +8,10 @@ import {
 import { ValueHelp } from './CustomIcon';
 import { calendarOutline } from 'ionicons/icons';
 import useAppStore from '../stores/appStore';
+import { FormRef } from '../stores/types';
 
 export interface CustomInputProps {
+  formRef?: RefObject<FormRef>;
   label: string;
   required?: boolean;
   value?: string;
@@ -24,9 +27,11 @@ export interface CustomInputProps {
   readOnly?: boolean;
   style?: React.CSSProperties;
   inputMode?: any;
+  currency?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
+  formRef,
   label,
   required = false,
   value,
@@ -41,29 +46,74 @@ const CustomInput: React.FC<CustomInputProps> = ({
   readOnly = false,
   style,
   inputMode,
-  helperText
+  helperText,
+  currency
 }) => {
   const setSearchHelp = useAppStore(state => state.setSearchHelp);
   const inputRef = useRef<HTMLIonInputElement>(null);
-  const [localValue, setLocalValue] = useState(value);
-  const [localHelper, setLocalHelper] = useState(helperText);
+  const [localValue, setLocalValue] = useState('');
+  const [localHelper, setLocalHelper] = useState('');
 
   useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+    setLocalValue(resolveTemplate(value ?? ''));
+    setLocalHelper(resolveTemplate(helperText ?? ''));
+  }, [formRef?.current])
 
-  useEffect(() => {
-    setLocalHelper(helperText);
-  }, [helperText]);
+  const resolveTemplate = (template: string) => {
+    if (!template) return "";
+
+    // 템플릿에 사용된 모든 key 추출
+    const keys = [...template.matchAll(/\$([A-Za-z0-9_]+)/g)].map(
+      match => match[1]
+    );
+
+    // key 전부 formRef에 없는 경우
+    const hasAnyValue = keys.some(
+      key => formRef?.current?.[key]
+    );
+
+    if (!hasAnyValue) {
+      return "";
+    }
+
+    // 하나라도 있으면 정상 치환
+    return template.replace(/\$([A-Za-z0-9_]+)/g, (_, key) => {
+      return formRef?.current?.[key] ?? "";
+    });
+  };
 
   const handleValueHelp = (val: any) => {
-    setLocalValue(val.Key);
-    setLocalHelper(val.Name);
     onChangeValueHelp?.(val);
+    setLocalValue(resolveTemplate(value ?? ''));
+    setLocalHelper(resolveTemplate(helperText ?? ''));
   };
 
   const handleInput = (val: string) => {
-    onChange?.(val);
+    if (currency) {
+      const rawValue = val.replaceAll(',', '');
+      onChange?.(rawValue);
+      setLocalValue(Number(rawValue).toLocaleString("ko-KR"));
+    } else {
+      onChange?.(val);
+      setLocalValue(resolveTemplate(value ?? ''));
+      setLocalHelper(resolveTemplate(helperText ?? ''));
+    }
+  };
+
+  const handleOpenValueHelp = async () => {
+    setTimeout(() => {
+      if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
+        inputRef.current.classList.add("has-focus");
+      }
+    }, 50);
+    setSearchHelp({
+      isOpen: true,
+      title: label,
+      input: inputRef,
+      onValueHelp: onValueHelp,
+      onChange: handleValueHelp,
+      list: null
+    });
   };
 
   return (
@@ -77,7 +127,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
         helperText={localHelper}
         readonly={readOnly}
         clearInput={clearInput}
-        onClick={onClick}
+        onClick={readOnly && onValueHelp ? handleOpenValueHelp ?? onDatePicker : onClick}
         onIonFocus={onFocus}
         onIonInput={(e) => handleInput(e.detail.value!)}
         style={style}
@@ -97,21 +147,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
               fill="clear"
               slot="end"
               color="medium"
-              onClick={async () => {
-                setTimeout(() => {
-                  if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
-                    inputRef.current.classList.add("has-focus");
-                  }
-                }, 50);
-                setSearchHelp({
-                  isOpen: true,
-                  title: label,
-                  input: inputRef,
-                  onValueHelp: onValueHelp,
-                  onChange: handleValueHelp,
-                  list: null
-                });
-              }}
+              onClick={handleOpenValueHelp}
               style={{
                 width: '42px',
                 height: '42px',
@@ -136,7 +172,6 @@ const CustomInput: React.FC<CustomInputProps> = ({
               slot="end"
               color="medium"
               onClick={async () => {
-                // inputRef.current?.setFocus();
                 onDatePicker();
               }}
               style={{

@@ -9,10 +9,8 @@ import _ from "lodash";
 import CustomInput from "./CustomInput";
 import { getTopModalId, popModal, pushModal } from "../App";
 import { getSearchHelp } from "../stores/service";
+import { FormRef } from "../stores/types";
 
-export type FormRef = {
-  [key: string]: string | undefined;
-};
 interface NotificationPopupProps {
   trigger?: string;
   docItem?: any;
@@ -34,6 +32,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
+    console.log(docItem)
     formRef.current = docItem || {};
   }, [docItem]);
 
@@ -151,28 +150,43 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             paddingBottom: 'calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
           }}>
           <CustomInput
+            formRef={formRef}
+            value="$ACCOUNT_CODE_T"
+            helperText="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
             label="계정그룹명"
             required
             onFocus={handleFocus}
             onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
             onChange={(value) => {
-              formRef.current.KOSTL = value;
+              formRef.current.ACCOUNT_CODE_T = value;
+              if (!value) {
+                formRef.current.ACCOUNT_CODE = '';
+                formRef.current.SAKNR = '';
+                formRef.current.SAKNR_T = '';
+              }
             }}
             onChangeValueHelp={(value) => {
-
+              formRef.current.ACCOUNT_CODE = value.Key;
+              formRef.current.ACCOUNT_CODE_T = value.Name;
+              formRef.current.SAKNR = value.Add1;
+              formRef.current.SAKNR_T = value.KeyName;
             }}
             readOnly
             clearInput
             style={{ marginBottom: '28px' }}
           />
           <CustomInput
-            value={formRef.current.KOSTL}
-            helperText={formRef.current.KOSTL_T}
+            formRef={formRef}
+            value="$KOSTL"
+            helperText="코스트센터명 : $KOSTL_T"
             label="코스트센터"
             onFocus={handleFocus}
             onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
             onChange={(value) => {
               formRef.current.KOSTL = value;
+              if (!value) {
+                formRef.current.KOSTL_T = '';
+              }
             }}
             onChangeValueHelp={(value) => {
               formRef.current.KOSTL = value.Key;
@@ -182,36 +196,76 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             clearInput
           />
           <CustomInput
+            formRef={formRef}
+            value="$AUFNR"
+            helperText="오더명 : $AUFNR_T"
             label="오더번호"
             onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
+            onChange={(value) => {
+              formRef.current.AUFNR = value;
+              if (!value) {
+                formRef.current.AUFNR_T = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.AUFNR = value.Key;
+              formRef.current.AUFNR_T = value.Name;
+            }}
             style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
+            formRef={formRef}
+            value="$PROJK"
+            helperText="WBS요소명 : $PROJK_T"
             label="WBS요소"
             onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
+            onChange={(value) => {
+              formRef.current.PROJK = value;
+              if (!value) {
+                formRef.current.PROJK_T = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.PROJK = value.Key;
+              formRef.current.PROJK_T = value.Name;
+            }}
             style={{ marginBottom: '28px' }}
             clearInput
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
             <CustomInput
+              currency
+              formRef={formRef}
+              value="$WRBTR"
               label="전표통화금액"
               required
               onFocus={handleFocus}
+              onChange={(value) => {
+                formRef.current.WRBTR = value;
+              }}
               style={{ marginBottom: '28px', textAlign: 'right' }}
               inputMode='numeric'
             />
-            <span>{docItem?.WAERS}</span>
+            <span style={{ paddingBottom: '10px' }}>{docItem?.WAERS}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
             <CustomInput
+              currency
+              formRef={formRef}
+              value="$DMBTR"
               label="현지통화금액"
               onFocus={handleFocus}
+              onChange={(value) => {
+                formRef.current.DMBTR = value;
+              }}
               style={{ marginBottom: '28px', textAlign: 'right' }}
               inputMode='numeric'
             />
-            <span>{docItem?.WAERS}</span>
+            <span style={{ paddingBottom: '10px' }}>{docItem?.HWAER}</span>
           </div>
 
           <CustomInput

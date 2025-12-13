@@ -151,7 +151,7 @@ const PersonalExpense: React.FC = () => {
           '--padding-end': '21px',
         }}>
         {approval === null && <div style={{
-          background: 'rgba(var(--ion-background-color-rgb), .95)',
+          // background: 'rgba(var(--ion-background-color-rgb), .95)',
           position: 'fixed',
           top: 0,
           left: 0,

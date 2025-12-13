@@ -130,3 +130,7 @@ export interface CorpModel {
 export interface DeviceInfoModel {
   [key: string]: any;
 }
+
+export type FormRef = {
+  [key: string]: string | undefined;
+};
