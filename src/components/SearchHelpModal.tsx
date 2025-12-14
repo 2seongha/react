@@ -35,7 +35,6 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   const handleModalWillPresent = () => {
     const initList = async () => {
       const list = await searchHelp?.onValueHelp();
-      console.log(list);
       setList(list);
     };
     initList();
@@ -134,6 +133,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
                   '--min-height': '48px',
                   '--padding-start': '21px',
                   '--padding-end': '21px',
+                  marginBottom: list.length - 1 === index ? 'var(--ion-safe-area-bottom)' : 0,
                   borderBottom: '.5px solid var(--ion-color-step-100)',
                 }}
                 onClick={() => {

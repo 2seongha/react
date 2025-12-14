@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   IonContent,
   IonModal,
@@ -10,6 +10,7 @@ import CustomInput from "./CustomInput";
 import { getTopModalId, popModal, pushModal } from "../App";
 import { getSearchHelp } from "../stores/service";
 import { FormRef } from "../stores/types";
+import dayjs from "dayjs";
 
 interface NotificationPopupProps {
   trigger?: string;
@@ -27,6 +28,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
   // const modalRef = useRef<HTMLIonModalElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
   const formRef = useRef<FormRef>({});
   const modalId = 'addItem';
 
@@ -35,6 +37,16 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
     console.log(docItem)
     formRef.current = docItem || {};
   }, [docItem]);
+
+  const checkRequired = useCallback(() => {
+    if (formRef.current.ACCOUNT_CODE_T
+      && formRef.current.WRBTR
+      && formRef.current.SGTXT) {
+      setIsSaveEnabled(true);
+    } else {
+      setIsSaveEnabled(false);
+    }
+  }, []);
 
   function dismiss() {
     modalRef.current?.dismiss();
@@ -164,6 +176,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
                 formRef.current.SAKNR = '';
                 formRef.current.SAKNR_T = '';
               }
+              checkRequired();
             }}
             onChangeValueHelp={(value) => {
               formRef.current.ACCOUNT_CODE = value.Key;
@@ -242,9 +255,21 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
               value="$WRBTR"
               label="전표통화금액"
               required
+              formatter={(value) => {
+                if (!value) return "";
+
+                const raw = value
+                  .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
+                  .replace(/(?!^)-/g, "");  // - 는 맨 앞만
+
+                if (raw === "" || raw === "-") return raw;
+
+                return Number(raw).toLocaleString("ko-KR");
+              }}
               onFocus={handleFocus}
               onChange={(value) => {
-                formRef.current.WRBTR = value;
+                formRef.current.WRBTR = String(Math.trunc(Number(value)));
+                checkRequired();
               }}
               style={{ marginBottom: '28px', textAlign: 'right' }}
               inputMode='numeric'
@@ -258,9 +283,20 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
               formRef={formRef}
               value="$DMBTR"
               label="현지통화금액"
+              formatter={(value) => {
+                if (!value) return "";
+
+                const raw = value
+                  .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
+                  .replace(/(?!^)-/g, "");  // - 는 맨 앞만
+
+                if (raw === "" || raw === "-") return raw;
+
+                return Number(raw).toLocaleString("ko-KR");
+              }}
               onFocus={handleFocus}
               onChange={(value) => {
-                formRef.current.DMBTR = value;
+                formRef.current.DMBTR = String(Math.trunc(Number(value)));
               }}
               style={{ marginBottom: '28px', textAlign: 'right' }}
               inputMode='numeric'
@@ -269,30 +305,57 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
           </div>
 
           <CustomInput
+            formRef={formRef}
+            value="$SGTXT"
             label="항목텍스트"
             required
             onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.SGTXT = value;
+              checkRequired();
+            }}
             style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
+            formRef={formRef}
+            value="$ZUONR"
             label="지정"
             onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.ZUONR = value;
+            }}
             style={{ marginBottom: '28px' }}
             clearInput
           />
           <CustomInput
+            formRef={formRef}
+            value="$VALUT"
             label="기준일자"
             readOnly
-            onDatePicker={() => { }}
+            date
+            formatter={(value) => {
+              return dayjs(value).format('YYYY-MM-DD');
+            }}
             onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.VALUT = value;
+            }}
             style={{ marginBottom: '28px' }}
           />
           <CustomInput
+            formRef={formRef}
+            value="$ZFBDT"
             label="만기계산일"
             readOnly
-            onDatePicker={() => { }}
+            date
+            formatter={(value) => {
+              return dayjs(value).format('YYYY-MM-DD');
+            }}
             onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.ZFBDT = value;
+            }}
             style={{ marginBottom: '28px' }}
           />
           <div
@@ -319,7 +382,9 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
                 fontSize: "18px",
                 fontWeight: "600",
               }}
+              disabled={!isSaveEnabled}
               onClick={() => {
+                dismiss();
               }}
             >
               <span>저장</span>

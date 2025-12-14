@@ -20,14 +20,16 @@ export interface CustomInputProps {
   onClick?: () => void;
   onChange?: (value: string) => void;
   onFocus?: (e: Event) => void;
+  formatter?: (value: any) => string;
+  onBlur?: (e: Event) => void;
   onValueHelp?: () => void | Promise<void>;
   onChangeValueHelp?: (value: any) => void;
-  onDatePicker?: () => void;
   placeholder?: string;
   readOnly?: boolean;
   style?: React.CSSProperties;
   inputMode?: any;
   currency?: boolean;
+  date?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -39,17 +41,20 @@ const CustomInput: React.FC<CustomInputProps> = ({
   onClick,
   onChange,
   onFocus,
+  formatter,
+  onBlur,
   onValueHelp,
   onChangeValueHelp,
-  onDatePicker,
   placeholder = '',
   readOnly = false,
   style,
   inputMode,
   helperText,
-  currency
+  currency,
+  date
 }) => {
   const setSearchHelp = useAppStore(state => state.setSearchHelp);
+  const setDatePicker = useAppStore(state => state.setDatePicker);
   const inputRef = useRef<HTMLIonInputElement>(null);
   const [localValue, setLocalValue] = useState('');
   const [localHelper, setLocalHelper] = useState('');
@@ -77,9 +82,16 @@ const CustomInput: React.FC<CustomInputProps> = ({
     }
 
     // 하나라도 있으면 정상 치환
-    return template.replace(/\$([A-Za-z0-9_]+)/g, (_, key) => {
+    const result = template.replace(/\$([A-Za-z0-9_]+)/g, (_, key) => {
       return formRef?.current?.[key] ?? "";
     });
+
+    return formatter && !currency ? formatter(result) : result;
+  };
+
+  const handleBlur = (e: any) => {
+    onBlur?.(e);
+    (formatter && currency) && setLocalValue(formatter(localValue));
   };
 
   const handleValueHelp = (val: any) => {
@@ -89,15 +101,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
   };
 
   const handleInput = (val: string) => {
-    if (currency) {
-      const rawValue = val.replaceAll(',', '');
-      onChange?.(rawValue);
-      setLocalValue(Number(rawValue).toLocaleString("ko-KR"));
-    } else {
-      onChange?.(val);
-      setLocalValue(resolveTemplate(value ?? ''));
-      setLocalHelper(resolveTemplate(helperText ?? ''));
-    }
+    onChange?.(val);
+    setLocalValue(resolveTemplate(value ?? ''));
+    setLocalHelper(resolveTemplate(helperText ?? ''));
   };
 
   const handleOpenValueHelp = async () => {
@@ -116,6 +122,19 @@ const CustomInput: React.FC<CustomInputProps> = ({
     });
   };
 
+  const handleOpenDatePicker = async () => {
+    setTimeout(() => {
+      if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
+        inputRef.current.classList.add("has-focus");
+      }
+    }, 50);
+    setDatePicker({
+      isOpen: true,
+      input: inputRef,
+      onChange: handleInput,
+    });
+  };
+
   return (
     <>
       <IonInput
@@ -127,8 +146,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
         helperText={localHelper}
         readonly={readOnly}
         clearInput={clearInput}
-        onClick={readOnly && onValueHelp ? handleOpenValueHelp ?? onDatePicker : onClick}
+        onClick={readOnly && !date ? handleOpenValueHelp : date ? handleOpenDatePicker : onClick}
         onIonFocus={onFocus}
+        onIonBlur={handleBlur}
         onIonInput={(e) => handleInput(e.detail.value!)}
         style={style}
         ref={inputRef}
@@ -165,15 +185,13 @@ const CustomInput: React.FC<CustomInputProps> = ({
             </IonButton>
           </div>
         }
-        {onDatePicker &&
+        {date &&
           <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
             <IonButton
               fill="clear"
               slot="end"
               color="medium"
-              onClick={async () => {
-                onDatePicker();
-              }}
+              onClick={handleOpenDatePicker}
               style={{
                 width: '42px',
                 height: '42px',

@@ -37,6 +37,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   notificationPopupShown: false,
   summaryForceRefresh: false,
   searchHelp: { isOpen: false },
+  datePicker: { isOpen: false },
 
   setThemeMode: (mode) => {
     // localStorage에 저장
@@ -55,6 +56,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setNotificationPopupShown: (shown) => set({ notificationPopupShown: shown }),
   setSummaryForceRefresh: (force) => set({ summaryForceRefresh: force }),
   setSearchHelp: (searchHelp) => set({ searchHelp: searchHelp }),
+  setDatePicker: (datePicker) => set({ datePicker: datePicker }),
 
   getUser: async (LOGIN_ID: string) => {
     const currentRequestId = ++requestIds.areas;

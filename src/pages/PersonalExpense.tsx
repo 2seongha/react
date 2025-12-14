@@ -22,6 +22,7 @@ import { webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingIndicator from '../components/LoadingIndicator';
+import DatePickerModal from '../components/DatePicker';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -233,14 +234,17 @@ const PersonalExpense: React.FC = () => {
           >
           </motion.div>}
         </AnimatePresence>
+
         {/* 항목 추가 모달 */}
         <PersonalExpenseAddModal
           modalRef={addItemModalRef}
-          // trigger='personal-expense-add-modal-trigger'
           docItem={docItem}
         />
         {/* 서치 헬프 모달 */}
         <SearchHelpModal />
+
+        {/* DatePicker 모달 */}
+        <DatePickerModal />
 
       </IonContent>
       <IonFooter style={{

@@ -11,6 +11,7 @@ export interface AppState {
   notificationPopupShown: boolean;
   summaryForceRefresh: boolean;
   searchHelp: any;
+  datePicker: any;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: UserModel) => void;
@@ -23,6 +24,7 @@ export interface AppState {
   setNotificationPopupShown: (shown: boolean) => void;
   setSummaryForceRefresh: (force: boolean) => void;
   setSearchHelp: (searchHelp: any) => void;
+  setDatePicker: (datePicker: any) => void;
 
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
