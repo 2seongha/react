@@ -91,7 +91,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   const handleBlur = (e: any) => {
     onBlur?.(e);
-    (formatter && currency) && setLocalValue(formatter(localValue));
+    if (formatter && currency) setLocalValue(formatter(localValue));
   };
 
   const handleValueHelp = (val: any) => {

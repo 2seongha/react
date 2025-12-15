@@ -12,7 +12,7 @@ import {
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { addOutline } from 'ionicons/icons';
+import { addOutline, close, remove, removeCircleOutline, trashBin } from 'ionicons/icons';
 import PersonalExpenseAddModal from '../components/PersonalExpenseAddModal';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
@@ -30,11 +30,10 @@ import dayjs from 'dayjs';
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
   const [step, setStep] = useState(0);
-  const [approval, setApproval] = useState(null); // 상신 템플릿
+  const [approval, setApproval] = useState<any>(null); // 상신 템플릿
   const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
   const oriItem = useRef(null); // 항목 템플릿
   const prevStepRef = useRef(step);
-  const addItemModalRef = useRef<HTMLIonModalElement>(null);
   const direction = step > prevStepRef.current ? 1 : -1; // 자동 판단
 
   // step이 바뀔 때마다 prev 업데이트
@@ -80,8 +79,53 @@ const PersonalExpense: React.FC = () => {
 
   // 항목 추가
   const handleAddItem = useCallback(() => {
-    setDocItem(_.cloneDeep(oriItem.current));
+    const cloneItem = _.cloneDeep<any>(oriItem.current);
+    if (cloneItem) {
+      cloneItem.BUZEI = ''; // 공란
+      cloneItem.SEQNR = '1'; // 임직원개인경비 - 1고정
+      cloneItem.WRBTR = '';
+      cloneItem.DMBTR = '';
+    }
+
+    setDocItem(cloneItem);
     setStep(99);
+  }, [approval]);
+
+  // 항목 저장
+  const handleSaveItem = useCallback((item: any) => {
+    // 안전하게 새 객체 생성
+    const newItem = { ...item };
+
+    setApproval((prev: any) => {
+      if (!prev || !prev.FLOW_DOCITEM) return { FLOW_DOCITEM: [newItem] };
+
+      const newList = [...prev.FLOW_DOCITEM, newItem].map((itm, i) => ({
+        ...itm,
+        CNT: i + 1,
+        ITEMNO: i + 1,
+      }));
+
+      return { ...prev, FLOW_DOCITEM: newList };
+    });
+
+    setStep(0);
+  }, []);
+
+  // 항목 삭제
+  const handleDeleteItem = useCallback((deleteIndex: number) => {
+    setApproval((prev: any) => {
+      if (!prev || !prev.FLOW_DOCITEM) return { FLOW_DOCITEM: [] };
+
+      // deleteIndex 기준으로 필터링 + 재정렬
+      const newList = prev.FLOW_DOCITEM
+        .filter((_: any, i: number) => i !== deleteIndex)
+        .map((item: any, i: number) => ({ ...item, CNT: i + 1, ITEMNO: i + 1 }));
+
+      return {
+        ...prev,
+        FLOW_DOCITEM: newList,
+      };
+    });
   }, []);
 
   const title = useMemo(() => {
@@ -169,8 +213,6 @@ const PersonalExpense: React.FC = () => {
         scrollEvents={false}
         style={{
           '--padding-top': '12px',
-          '--padding-start': '21px',
-          '--padding-end': '21px',
         }}>
         {approval === null && <div style={{
           // background: 'rgba(var(--ion-background-color-rgb), .95)',
@@ -196,50 +238,143 @@ const PersonalExpense: React.FC = () => {
             animate="center"
             exit="exit"
             transition={{ duration: 0.2 }}
+            style={{ height: '100%', padding: '12px 21px 82px 21px', overflow: 'auto' }}
           >
-            <div style={{
-              paddingTop: '26px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%'
-            }}>
-              <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+            {approval?.FLOW_DOCITEM?.length > 0
+              ?
+              approval?.FLOW_DOCITEM.map((item: any, index: number) => {
+                return <div style={{
+                  padding: '21px',
+                  borderRadius: '12px',
+                  position: 'relative',
+                  boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                  marginBottom: '12px'
+                }}>
+                  <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 12 }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
+                  <span style={{
+                    display: 'block',
+                    color: 'var(--ion-color-step-500)',
+                    fontSize: '13px',
+                    marginBottom: '15px'
+                  }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
+                  <span style={{
+                    display: 'block',
+                    marginBottom: '4px',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}>{item.ACCOUNT_CODE_T}</span>
+                  <span style={{
+                    fontSize: '17px',
+                    fontWeight: '700'
+                  }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
+                  <span style={{
+                    height: '1px',
+                    backgroundColor: 'var(--custom-border-color-50)',
+                    margin: '12px 0',
+                    display: 'block'
+                  }}></span>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>항목텍스트</span>
+                    <span>{item.SGTXT || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>코스트센터</span>
+                    <span>{item.KOSTL || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>코스트센터명</span>
+                    <span>{item.KOSTL_T || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>오더번호</span>
+                    <span>{item.AUFNR || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line">
+                    <span>오더명</span>
+                    <span>{item.AUFNR_T || '-'}</span>
+                  </div>
+                </div>
+              })
+              :
               <div style={{
+                paddingTop: '26px',
+                marginBottom: '21px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '100%',
-                padding: '24px 0'
+                width: '100%'
               }}>
-                <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
-                <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
+                <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  padding: '24px 0'
+                }}>
+                  <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
+                  <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
+                </div>
               </div>
-            </div>
+            }
             <IonButton
               type='button'
               id='personal-expense-add-modal-trigger'
               mode='md'
               onClick={handleAddItem}
               style={{
-                marginTop: '21px',
                 width: '100%',
                 height: '58px',
                 '--background': 'transparent',
                 '--color': 'var(--ion-color-step-900)',
-                '--ripple-color': 'transparent',
                 borderRadius: '17px',
                 border: '1px dashed var(--custom-border-color-100)',
                 fontSize: '16px'
               }}>
               {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
             </IonButton>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                height: "auto",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "12px 21px",
+                paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
+                backgroundColor: 'var(--ion-background-color)'
+              }}
+            >
+              <IonButton
+                mode="md"
+                color="primary"
+                disabled={!approval?.FLOW_DOCITEM?.length}
+                style={{
+                  flex: 1.5,
+                  height: "58px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                }}
+                id="approve-modal"
+                onClick={() => {
+                  setStep(step + 1);
+                }}
+              >
+                <span>다음 단계</span>
+              </IonButton>
+            </div>
           </motion.div>}
 
           {/* 항목 추가 페이지 */}
-          {step === 99 && <AddItem docItem={docItem} />}
+          {step === 99 && <AddItem
+            docItem={docItem}
+            onSave={handleSaveItem}
+          />}
 
           {/* 헤더 페이지 */}
           {step === 1 && <motion.div
@@ -271,42 +406,6 @@ const PersonalExpense: React.FC = () => {
         <DatePickerModal />
 
       </IonContent>
-      <IonFooter style={{
-        boxShadow: 'none',
-      }}>
-        <div
-          style={{
-            height: "auto",
-            width: "100%",
-            borderRadius: "16px 16px 0 0",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "12px 21px",
-            gap: "12px",
-            paddingBottom: 'calc( var(--ion-safe-area-bottom) + 12px )',
-            backgroundColor: 'var(--ion-background-color)'
-          }}
-        >
-          <IonButton
-            mode="md"
-            color="primary"
-            // disabled
-            style={{
-              flex: 1.5,
-              height: "58px",
-              fontSize: "18px",
-              fontWeight: "600",
-            }}
-            id="approve-modal"
-            onClick={() => {
-              setStep(step + 1);
-            }}
-          >
-            <span>다음 단계</span>
-          </IonButton>
-        </div>
-      </IonFooter>
     </IonPage >
   );
 };
@@ -315,20 +414,17 @@ export default PersonalExpense;
 
 interface AddItemProps {
   docItem?: any;
+  onSave?: (item: any) => void;
 }
 
 const AddItem: React.FC<AddItemProps> = ({
   docItem,
+  onSave,
 }) => {
-  const historyPushedRef = useRef(false);
-  const closedByBackButtonRef = useRef(false);
-  // const modalRef = useRef<HTMLIonModalElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaveEnabled, setIsSaveEnabled] = useState(false);
   const formRef = useRef<FormRef>({});
   const [, forceRender] = useState(0);
-  const modalId = 'addItem';
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
@@ -355,16 +451,16 @@ const AddItem: React.FC<AddItemProps> = ({
     const el = e.target;
     if (!container || !el) return;
 
-    setTimeout(() => {
-      const offset = 60; // 위에서 50px 밑으로
-      const containerTop = container.getBoundingClientRect().top;
-      const elTop = e.target.getBoundingClientRect().top;
-      const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
-      container.scrollTo({
-        top: scrollTop,
-        behavior: "smooth",
-      });
-    }, 150)
+    // setTimeout(() => {
+    //   const offset = 60; // 위에서 50px 밑으로
+    //   const containerTop = container.getBoundingClientRect().top;
+    //   const elTop = e.target.getBoundingClientRect().top;
+    //   const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
+    //   container.scrollTo({
+    //     top: scrollTop,
+    //     behavior: "smooth",
+    //   });
+    // }, 150)
   };
   const variants = {
     enter: { y: "5%", opacity: 0 },   // 화면 밑에서 시작
@@ -374,7 +470,6 @@ const AddItem: React.FC<AddItemProps> = ({
   return (
     <motion.div
       key={docItem + 'item'}
-      // custom={direction}
       variants={variants}
       initial="enter"
       animate="center"
@@ -384,6 +479,7 @@ const AddItem: React.FC<AddItemProps> = ({
       style={{
         height: '100%',
         overflow: 'auto',
+        padding: '0 21px',
         paddingBottom: 'calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
       }}>
       <CustomInput
@@ -482,7 +578,6 @@ const AddItem: React.FC<AddItemProps> = ({
           required
           formatter={(value) => {
             if (!value) return "";
-
             const raw = value
               .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
               .replace(/(?!^)-/g, "");  // - 는 맨 앞만
@@ -493,7 +588,7 @@ const AddItem: React.FC<AddItemProps> = ({
           }}
           onFocus={handleFocus}
           onChange={(value) => {
-            formRef.current.WRBTR = String(Math.trunc(Number(value)));
+            formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
             checkRequired();
           }}
           style={{ marginBottom: '28px', textAlign: 'right' }}
@@ -521,7 +616,7 @@ const AddItem: React.FC<AddItemProps> = ({
           }}
           onFocus={handleFocus}
           onChange={(value) => {
-            formRef.current.DMBTR = String(Math.trunc(Number(value)));
+            formRef.current.DMBTR = value.replace(/[^0-9.-]/g, '');
           }}
           style={{ marginBottom: '28px', textAlign: 'right' }}
           inputMode='numeric'
@@ -609,6 +704,7 @@ const AddItem: React.FC<AddItemProps> = ({
           }}
           disabled={!isSaveEnabled}
           onClick={() => {
+            onSave?.(docItem);
             // dismiss();
           }}
         >
