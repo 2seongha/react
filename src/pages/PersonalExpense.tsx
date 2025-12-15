@@ -238,7 +238,7 @@ const PersonalExpense: React.FC = () => {
             animate="center"
             exit="exit"
             transition={{ duration: 0.2 }}
-            style={{ height: '100%', padding: '12px 21px 82px 21px', overflow: 'auto' }}
+            style={{ height: '100%', padding: '12px 21px calc(82px + var(--ion-safe-area-bottom)) 21px', overflow: 'auto' }}
           >
             {approval?.FLOW_DOCITEM?.length > 0
               ?
@@ -321,7 +321,6 @@ const PersonalExpense: React.FC = () => {
             }
             <IonButton
               type='button'
-              id='personal-expense-add-modal-trigger'
               mode='md'
               onClick={handleAddItem}
               style={{
@@ -337,7 +336,7 @@ const PersonalExpense: React.FC = () => {
             </IonButton>
             <div
               style={{
-                position: 'absolute',
+                position: 'fixed',
                 bottom: 0,
                 left: 0,
                 height: "auto",
