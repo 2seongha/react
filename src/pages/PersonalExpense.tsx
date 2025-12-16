@@ -59,7 +59,7 @@ const PersonalExpense: React.FC = () => {
     },
     exit: (direction: number) => ({
       x: direction > 0 ? 40 : -40,
-      opacity: [1, 0],          // 나갈 때도 중간에 머물게 가능
+      opacity: [1, 0.5],          // 나갈 때도 중간에 머물게 가능
     })
   };
 
@@ -337,7 +337,8 @@ const PersonalExpense: React.FC = () => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '100%'
+                  width: '100%',
+                  height:'250px'
                 }}>
                   <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
                   <div style={{
