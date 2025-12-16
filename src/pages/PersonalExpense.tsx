@@ -5,6 +5,7 @@ import {
   IonContent,
   IonIcon,
   IonPage,
+  IonRippleEffect,
   useIonRouter,
   useIonViewWillEnter,
 } from '@ionic/react';
@@ -305,6 +306,10 @@ const PersonalExpense: React.FC = () => {
                       position: 'relative',
                       boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
                       marginBottom: '12px'
+                    }}
+                    onClick={() => {
+                      debugger;
+                      goStep(99);
                     }}>
                     <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 14, '--ripple-color': 'transparent' }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
                     <span style={{
@@ -349,6 +354,7 @@ const PersonalExpense: React.FC = () => {
                       <span>오더명</span>
                       <span>{item.AUFNR_T || '-'}</span>
                     </div>
+                    <IonRippleEffect></IonRippleEffect>
                   </div>
                 })
                 :
