@@ -31,9 +31,12 @@ const PersonalExpense: React.FC = () => {
   const [approval, setApproval] = useState<any>(null); // 상신 템플릿
   const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
   const oriItem = useRef(null); // 항목 템플릿
-  const prevStepRef = useRef(step);
-  const direction = step > prevStepRef.current ? 1 : -1; // 자동 판단
+  const prevStepRef = useRef(0);
+  const currStepRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const ignorePopRef = useRef(false);
+  const interactPopRef = useRef(false);
+
   const setScrollRef = (node: HTMLDivElement) => {
     if (node) {
       scrollRef.current = node;
@@ -41,26 +44,24 @@ const PersonalExpense: React.FC = () => {
         node.scrollTop = node.scrollHeight;
       });
     }
-  };
+  }
 
-  // step이 바뀔 때마다 prev 업데이트
-  useEffect(() => {
-    prevStepRef.current = step;
-  }, [step]);
+  const goStep = useCallback((newStep: number) => {
+    prevStepRef.current = currStepRef.current;
+    currStepRef.current = newStep;
+    setStep(newStep);
+  }, []);
 
   const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 40 : -40,
-      opacity: [0.5, 1],          // keyframes
+    enter: (dir: number) => ({
+      x: dir > 0 ? 40 : -40,
+      opacity: [0.5, 1],
     }),
-    center: {
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-      x: direction > 0 ? 40 : -40,
-      opacity: [1, 0],          // 나갈 때도 중간에 머물게 가능
-    })
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({
+      // x: dir > 0 ? 400 : -400,
+      opacity: [1, 0],
+    }),
   };
 
   const titleVariants = {
@@ -95,7 +96,7 @@ const PersonalExpense: React.FC = () => {
     }
 
     setDocItem(cloneItem);
-    setStep(99);
+    goStep(99);
   }, [approval]);
 
   // 항목 저장
@@ -115,8 +116,8 @@ const PersonalExpense: React.FC = () => {
       return { ...prev, FLOW_DOCITEM: newList };
     });
 
-    setStep(0);
-  }, []);
+    goStep(0);
+  }, [step]);
 
   // 항목 삭제
   const handleDeleteItem = useCallback((deleteIndex: number) => {
@@ -153,28 +154,34 @@ const PersonalExpense: React.FC = () => {
       default:
         title = 'test';
     }
-    return <AnimatePresence mode="wait">
+    return <AnimatePresence mode='sync'>
       <motion.span
         key={title} // key가 바뀌면 AnimatePresence가 새 요소로 인식
         variants={titleVariants}
-        initial="enter"
-        animate="center"
-        exit="exit"
-        transition={{ duration: 0.2 }}
-        style={{ display: "inline-block" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{
+          duration: 0.2,
+          ease: 'easeOut',
+        }}
+        style={{ display: "inline-block", position: 'absolute' }}
       >
         {title}
       </motion.span>
     </AnimatePresence>;
   }, [step]);
 
-
   useEffect(() => {
-    if (window.history.state?.step > 0) {
-      // window.history.back();
-    }
-    if (step > 0) {
+    if (step > prevStepRef.current) {
       window.history.pushState({ step }, '', window.location.href);
+    } else if ((step < prevStepRef.current)) {
+      if (!interactPopRef.current) {
+        ignorePopRef.current = true;
+        window.history.back();
+      } else {
+        interactPopRef.current = false;
+      }
     }
   }, [step]);
 
@@ -183,8 +190,15 @@ const PersonalExpense: React.FC = () => {
       if (['searchHelp', 'datePicker'].includes(getTopModalId() ?? '')) {
         return popModal();
       }
-      if (prevStepRef.current > 0) {
-        setStep(prev => (prev === 99 ? 0 : prev - 1));
+
+      if (ignorePopRef.current) {
+        ignorePopRef.current = false;
+        return;
+      }
+
+      if (currStepRef.current > 0) {
+        interactPopRef.current = true;
+        goStep((currStepRef.current === 99 ? 0 : currStepRef.current - 1));
       }
     };
 
@@ -194,13 +208,16 @@ const PersonalExpense: React.FC = () => {
 
   return (
     <IonPage className='personal-expense'>
-      <AppBar title={title} customStartButtons={<AnimatePresence mode="wait">
+      <AppBar title={title} customStartButtons={<AnimatePresence mode='popLayout'>
         <motion.div
           key={'start-button' + step}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: 0.3,
+            ease: 'easeOut',
+          }}
           style={{ display: 'flex', alignItems: 'center' }}
         >
           {step === 0 && (
@@ -215,11 +232,12 @@ const PersonalExpense: React.FC = () => {
             <IonButton
               mode="md"
               fill="clear"
-              onClick={() => setStep(step - 1)}
+              onClick={() => goStep(step - 1)}
               style={{
                 '--border-radius': '24px',
                 marginLeft: '8px',
                 width: '64px',
+                height: '48px'
               }}
             >
               <span style={{ fontSize: '16px', fontWeight: '600' }}>이전</span>
@@ -230,11 +248,12 @@ const PersonalExpense: React.FC = () => {
             <IonButton
               mode='md'
               fill="clear"
-              onClick={() => setStep(0)}
+              onClick={() => goStep(0)}
               style={{
                 '--border-radius': '24px',
                 marginLeft: '8px',
                 width: '64px',
+                height: '48px'
               }}
             >
               <span style={{ fontSize: '16px', fontWeight: '600' }}>취소</span>
@@ -242,7 +261,7 @@ const PersonalExpense: React.FC = () => {
           )}
         </motion.div>
       </AnimatePresence>} />
-      <IonContent
+      < IonContent
         fullscreen
         scrollX={false}
         scrollY={false}
@@ -266,7 +285,7 @@ const PersonalExpense: React.FC = () => {
           {/* 항목 추가 페이지 */}
           {step === 0 && <motion.div
             key="step0"
-            custom={direction}
+            custom={step - prevStepRef.current}
             variants={variants}
             initial="enter"
             animate="center"
@@ -400,7 +419,7 @@ const PersonalExpense: React.FC = () => {
                   fontWeight: "600",
                 }}
                 onClick={() => {
-                  setStep(prev => prev + 1);
+                  goStep(1);
                 }}
               >
                 <span>다음 단계</span>
@@ -417,7 +436,7 @@ const PersonalExpense: React.FC = () => {
           {/* 헤더 페이지 */}
           {step === 1 && <motion.div
             key="step1"
-            custom={direction}
+            custom={step - prevStepRef.current}
             variants={variants}
             initial="enter"
             animate="center"
@@ -440,7 +459,7 @@ const PersonalExpense: React.FC = () => {
                 fontWeight: "600",
               }}
               onClick={() => {
-                setStep(2);
+                goStep(2);
               }}
             >
               <span>다음 단계</span>
@@ -450,7 +469,7 @@ const PersonalExpense: React.FC = () => {
           {/* 헤더 페이지 */}
           {step === 2 && <motion.div
             key="step2"
-            custom={direction}
+            custom={step - prevStepRef.current}
             variants={variants}
             initial="enter"
             animate="center"
@@ -477,7 +496,7 @@ const PersonalExpense: React.FC = () => {
         {/* DatePicker 모달 */}
         <DatePickerModal />
 
-      </IonContent>
+      </IonContent >
     </IonPage >
   );
 };
