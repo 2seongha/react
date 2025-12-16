@@ -1,19 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   IonBackButton,
   IonButton,
   IonContent,
-  IonFooter,
   IonIcon,
   IonPage,
   useIonRouter,
   useIonViewWillEnter,
 } from '@ionic/react';
-import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { addOutline, close, remove, removeCircleOutline, trashBin } from 'ionicons/icons';
-import PersonalExpenseAddModal from '../components/PersonalExpenseAddModal';
+import { addOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
@@ -26,6 +23,7 @@ import DatePickerModal from '../components/DatePicker';
 import { FormRef } from '../stores/types';
 import CustomInput from '../components/CustomInput';
 import dayjs from 'dayjs';
+import { getTopModalId, popModal } from '../App';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -35,6 +33,15 @@ const PersonalExpense: React.FC = () => {
   const oriItem = useRef(null); // 항목 템플릿
   const prevStepRef = useRef(step);
   const direction = step > prevStepRef.current ? 1 : -1; // 자동 판단
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const setScrollRef = (node: HTMLDivElement) => {
+    if (node) {
+      scrollRef.current = node;
+      requestAnimationFrame(() => {
+        node.scrollTop = node.scrollHeight;
+      });
+    }
+  };
 
   // step이 바뀔 때마다 prev 업데이트
   useEffect(() => {
@@ -44,7 +51,7 @@ const PersonalExpense: React.FC = () => {
   const variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 40 : -40,
-      opacity: [0, 1],          // keyframes
+      opacity: [0.5, 1],          // keyframes
     }),
     center: {
       x: 0,
@@ -57,9 +64,9 @@ const PersonalExpense: React.FC = () => {
   };
 
   const titleVariants = {
-    enter: { opacity: 0, y: 10 },
+    enter: { opacity: 0, y: 5 },
     center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
+    exit: { opacity: 0, y: -5 },
   };
 
   useIonViewWillEnter(() => {
@@ -156,6 +163,32 @@ const PersonalExpense: React.FC = () => {
     </AnimatePresence>;
   }, [step]);
 
+  const stepRef = useRef(step);
+
+  useEffect(() => {
+    stepRef.current = step;
+    if (window.history.state?.step > 0) {
+      window.history.back();
+    }
+    if (step > 0) {
+      window.history.pushState({ step }, '', window.location.href);
+    }
+  }, [step]);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (['searchHelp', 'datePicker'].includes(getTopModalId() ?? '')) {
+        return popModal();
+      }
+      if (stepRef.current > 0) {
+        setStep(prev => (prev === 99 ? 0 : prev - 1));
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   return (
     <IonPage className='personal-expense'>
       <AppBar title={title} customStartButtons={<AnimatePresence mode="wait">
@@ -211,9 +244,7 @@ const PersonalExpense: React.FC = () => {
         scrollX={false}
         scrollY={false}
         scrollEvents={false}
-        style={{
-          '--padding-top': '12px',
-        }}>
+      >
         {approval === null && <div style={{
           // background: 'rgba(var(--ion-background-color-rgb), .95)',
           position: 'fixed',
@@ -238,105 +269,109 @@ const PersonalExpense: React.FC = () => {
             animate="center"
             exit="exit"
             transition={{ duration: 0.2 }}
-            style={{ height: '100%', padding: '12px 21px calc(82px + var(--ion-safe-area-bottom)) 21px', overflow: 'auto' }}
+            style={{ height: '100%', padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
           >
-            {approval?.FLOW_DOCITEM?.length > 0
-              ?
-              approval?.FLOW_DOCITEM.map((item: any, index: number) => {
-                return <div style={{
-                  padding: '21px',
-                  borderRadius: '12px',
-                  position: 'relative',
-                  boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
-                  marginBottom: '12px'
-                }}>
-                  <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 12 }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
-                  <span style={{
-                    display: 'block',
-                    color: 'var(--ion-color-step-500)',
-                    fontSize: '13px',
-                    marginBottom: '15px'
-                  }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
-                  <span style={{
-                    display: 'block',
-                    marginBottom: '4px',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}>{item.ACCOUNT_CODE_T}</span>
-                  <span style={{
-                    fontSize: '17px',
-                    fontWeight: '700'
-                  }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
-                  <span style={{
-                    height: '1px',
-                    backgroundColor: 'var(--custom-border-color-50)',
-                    margin: '12px 0',
-                    display: 'block'
-                  }}></span>
-                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                    <span>항목텍스트</span>
-                    <span>{item.SGTXT || '-'}</span>
+            <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
+              {approval?.FLOW_DOCITEM?.length > 0
+                ?
+                approval?.FLOW_DOCITEM.map((item: any, index: number) => {
+                  return <div
+                    key={'doc-item-' + item.CNT}
+                    style={{
+                      padding: '21px',
+                      borderRadius: '12px',
+                      position: 'relative',
+                      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                      marginBottom: '12px'
+                    }}>
+                    <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 14 }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
+                    <span style={{
+                      display: 'block',
+                      color: 'var(--ion-color-step-500)',
+                      fontSize: '13px',
+                      marginBottom: '15px'
+                    }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
+                    <span style={{
+                      display: 'block',
+                      marginBottom: '4px',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}>{item.ACCOUNT_CODE_T}</span>
+                    <span style={{
+                      fontSize: '17px',
+                      fontWeight: '700'
+                    }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
+                    <span style={{
+                      height: '1px',
+                      backgroundColor: 'var(--custom-border-color-50)',
+                      margin: '12px 0',
+                      display: 'block'
+                    }}></span>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>항목텍스트</span>
+                      <span>{item.SGTXT || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>코스트센터</span>
+                      <span>{item.KOSTL || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>코스트센터명</span>
+                      <span>{item.KOSTL_T || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>오더번호</span>
+                      <span>{item.AUFNR || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line">
+                      <span>오더명</span>
+                      <span>{item.AUFNR_T || '-'}</span>
+                    </div>
                   </div>
-                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                    <span>코스트센터</span>
-                    <span>{item.KOSTL || '-'}</span>
-                  </div>
-                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                    <span>코스트센터명</span>
-                    <span>{item.KOSTL_T || '-'}</span>
-                  </div>
-                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                    <span>오더번호</span>
-                    <span>{item.AUFNR || '-'}</span>
-                  </div>
-                  <div className="custom-item-body-line">
-                    <span>오더명</span>
-                    <span>{item.AUFNR_T || '-'}</span>
-                  </div>
-                </div>
-              })
-              :
-              <div style={{
-                paddingTop: '26px',
-                marginBottom: '21px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%'
-              }}>
-                <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+                })
+                :
                 <div style={{
+                  paddingTop: '26px',
+                  marginBottom: '21px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '100%',
-                  padding: '24px 0'
+                  width: '100%'
                 }}>
-                  <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
-                  <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
+                  <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    padding: '24px 0'
+                  }}>
+                    <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
+                    <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
+                  </div>
                 </div>
-              </div>
-            }
-            <IonButton
-              type='button'
-              mode='md'
-              onClick={handleAddItem}
-              style={{
-                width: '100%',
-                height: '58px',
-                '--background': 'transparent',
-                '--color': 'var(--ion-color-step-900)',
-                borderRadius: '17px',
-                border: '1px dashed var(--custom-border-color-100)',
-                fontSize: '16px'
-              }}>
-              {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
-            </IonButton>
+              }
+              <IonButton
+                type='button'
+                mode='md'
+                onClick={handleAddItem}
+                style={{
+                  width: '100%',
+                  height: '58px',
+                  '--background': 'transparent',
+                  '--color': 'var(--ion-color-step-900)',
+                  borderRadius: '17px',
+                  border: '1px dashed var(--custom-border-color-100)',
+                  fontSize: '16px'
+                }}>
+                {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
+              </IonButton>
+            </div>
             <div
               style={{
-                position: 'fixed',
+                position: 'absolute',
                 bottom: 0,
                 left: 0,
                 height: "auto",
@@ -450,21 +485,21 @@ const AddItem: React.FC<AddItemProps> = ({
     const el = e.target;
     if (!container || !el) return;
 
-    // setTimeout(() => {
-    //   const offset = 60; // 위에서 50px 밑으로
-    //   const containerTop = container.getBoundingClientRect().top;
-    //   const elTop = e.target.getBoundingClientRect().top;
-    //   const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
-    //   container.scrollTo({
-    //     top: scrollTop,
-    //     behavior: "smooth",
-    //   });
-    // }, 150)
+    setTimeout(() => {
+      const offset = 60; // 위에서 50px 밑으로
+      const containerTop = container.getBoundingClientRect().top;
+      const elTop = e.target.getBoundingClientRect().top;
+      const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
+      container.scrollTo({
+        top: scrollTop,
+        behavior: "smooth",
+      });
+    }, 150)
   };
   const variants = {
-    enter: { y: "5%", opacity: 0 },   // 화면 밑에서 시작
+    enter: { y: "5%", opacity: 0.5 },   // 화면 밑에서 시작
     center: { y: 0, opacity: 1 },       // 원래 위치
-    exit: { y: "5%", opacity: 0 }     // 다시 밑으로
+    exit: { y: "5%", opacity: 0.5 }     // 다시 밑으로
   };
   return (
     <motion.div
@@ -475,211 +510,214 @@ const AddItem: React.FC<AddItemProps> = ({
       exit="exit"
       transition={{ duration: 0.2 }}
       ref={containerRef}
-      style={{
+      style={{ height: '100%' }}
+    >
+      <div style={{
         height: '100%',
         overflow: 'auto',
-        padding: '0 21px',
-        paddingBottom: 'calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))'
+        overflowX: 'hidden',
+        padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
       }}>
-      <CustomInput
-        formRef={formRef}
-        value="$ACCOUNT_CODE_T"
-        helperText="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
-        label="계정그룹명"
-        required
-        onFocus={handleFocus}
-        onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
-        onChange={(value) => {
-          formRef.current.ACCOUNT_CODE_T = value;
-          if (!value) {
-            formRef.current.ACCOUNT_CODE = '';
-            formRef.current.SAKNR = '';
-            formRef.current.SAKNR_T = '';
-          }
-          checkRequired();
-        }}
-        onChangeValueHelp={(value) => {
-          formRef.current.ACCOUNT_CODE = value.Key;
-          formRef.current.ACCOUNT_CODE_T = value.Name;
-          formRef.current.SAKNR = value.Add1;
-          formRef.current.SAKNR_T = value.KeyName;
-        }}
-        readOnly
-        clearInput
-        style={{ marginBottom: '28px' }}
-      />
-      <CustomInput
-        formRef={formRef}
-        value="$KOSTL"
-        helperText="코스트센터명 : $KOSTL_T"
-        label="코스트센터"
-        onFocus={handleFocus}
-        onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
-        onChange={(value) => {
-          formRef.current.KOSTL = value;
-          if (!value) {
-            formRef.current.KOSTL_T = '';
-          }
-        }}
-        onChangeValueHelp={(value) => {
-          formRef.current.KOSTL = value.Key;
-          formRef.current.KOSTL_T = value.Name;
-        }}
-        style={{ marginBottom: '28px' }}
-        clearInput
-      />
-      <CustomInput
-        formRef={formRef}
-        value="$AUFNR"
-        helperText="오더명 : $AUFNR_T"
-        label="오더번호"
-        onFocus={handleFocus}
-        onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
-        onChange={(value) => {
-          formRef.current.AUFNR = value;
-          if (!value) {
-            formRef.current.AUFNR_T = '';
-          }
-        }}
-        onChangeValueHelp={(value) => {
-          formRef.current.AUFNR = value.Key;
-          formRef.current.AUFNR_T = value.Name;
-        }}
-        style={{ marginBottom: '28px' }}
-        clearInput
-      />
-      <CustomInput
-        formRef={formRef}
-        value="$PROJK"
-        helperText="WBS요소명 : $PROJK_T"
-        label="WBS요소"
-        onFocus={handleFocus}
-        onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
-        onChange={(value) => {
-          formRef.current.PROJK = value;
-          if (!value) {
-            formRef.current.PROJK_T = '';
-          }
-        }}
-        onChangeValueHelp={(value) => {
-          formRef.current.PROJK = value.Key;
-          formRef.current.PROJK_T = value.Name;
-        }}
-        style={{ marginBottom: '28px' }}
-        clearInput
-      />
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
         <CustomInput
-          currency
           formRef={formRef}
-          value="$WRBTR"
-          label="전표통화금액"
+          value="$ACCOUNT_CODE_T"
+          helperText="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
+          label="계정그룹명"
           required
-          formatter={(value) => {
-            if (!value) return "";
-            const raw = value
-              .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
-              .replace(/(?!^)-/g, "");  // - 는 맨 앞만
-
-            if (raw === "" || raw === "-") return raw;
-
-            return Number(raw).toLocaleString("ko-KR");
-          }}
           onFocus={handleFocus}
+          onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
           onChange={(value) => {
-            formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
+            formRef.current.ACCOUNT_CODE_T = value;
+            if (!value) {
+              formRef.current.ACCOUNT_CODE = '';
+              formRef.current.SAKNR = '';
+              formRef.current.SAKNR_T = '';
+            }
             checkRequired();
           }}
-          style={{ marginBottom: '28px', textAlign: 'right' }}
-          inputMode='numeric'
+          onChangeValueHelp={(value) => {
+            formRef.current.ACCOUNT_CODE = value.Key;
+            formRef.current.ACCOUNT_CODE_T = value.Name;
+            formRef.current.SAKNR = value.Add1;
+            formRef.current.SAKNR_T = value.KeyName;
+          }}
+          readOnly
+          clearInput
+          style={{ marginBottom: '28px' }}
         />
-        <span style={{ paddingBottom: '10px' }}>{docItem?.WAERS}</span>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
         <CustomInput
-          currency
           formRef={formRef}
-          value="$DMBTR"
-          label="현지통화금액"
+          value="$KOSTL"
+          helperText="코스트센터명 : $KOSTL_T"
+          label="코스트센터"
+          onFocus={handleFocus}
+          onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
+          onChange={(value) => {
+            formRef.current.KOSTL = value;
+            if (!value) {
+              formRef.current.KOSTL_T = '';
+            }
+          }}
+          onChangeValueHelp={(value) => {
+            formRef.current.KOSTL = value.Key;
+            formRef.current.KOSTL_T = value.Name;
+          }}
+          style={{ marginBottom: '28px' }}
+          clearInput
+        />
+        <CustomInput
+          formRef={formRef}
+          value="$AUFNR"
+          helperText="오더명 : $AUFNR_T"
+          label="오더번호"
+          onFocus={handleFocus}
+          onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
+          onChange={(value) => {
+            formRef.current.AUFNR = value;
+            if (!value) {
+              formRef.current.AUFNR_T = '';
+            }
+          }}
+          onChangeValueHelp={(value) => {
+            formRef.current.AUFNR = value.Key;
+            formRef.current.AUFNR_T = value.Name;
+          }}
+          style={{ marginBottom: '28px' }}
+          clearInput
+        />
+        <CustomInput
+          formRef={formRef}
+          value="$PROJK"
+          helperText="WBS요소명 : $PROJK_T"
+          label="WBS요소"
+          onFocus={handleFocus}
+          onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
+          onChange={(value) => {
+            formRef.current.PROJK = value;
+            if (!value) {
+              formRef.current.PROJK_T = '';
+            }
+          }}
+          onChangeValueHelp={(value) => {
+            formRef.current.PROJK = value.Key;
+            formRef.current.PROJK_T = value.Name;
+          }}
+          style={{ marginBottom: '28px' }}
+          clearInput
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+          <CustomInput
+            currency
+            formRef={formRef}
+            value="$WRBTR"
+            label="전표통화금액"
+            required
+            formatter={(value) => {
+              if (!value) return "";
+              const raw = value
+                .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
+                .replace(/(?!^)-/g, "");  // - 는 맨 앞만
+
+              if (raw === "" || raw === "-") return raw;
+
+              return Number(raw).toLocaleString("ko-KR");
+            }}
+            onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
+              checkRequired();
+            }}
+            style={{ marginBottom: '28px', textAlign: 'right' }}
+            inputMode='numeric'
+          />
+          <span style={{ paddingBottom: '10px' }}>{docItem?.WAERS}</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+          <CustomInput
+            currency
+            formRef={formRef}
+            value="$DMBTR"
+            label="현지통화금액"
+            formatter={(value) => {
+              if (!value) return "";
+
+              const raw = value
+                .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
+                .replace(/(?!^)-/g, "");  // - 는 맨 앞만
+
+              if (raw === "" || raw === "-") return raw;
+
+              return Number(raw).toLocaleString("ko-KR");
+            }}
+            onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.DMBTR = value.replace(/[^0-9.-]/g, '');
+            }}
+            style={{ marginBottom: '28px', textAlign: 'right' }}
+            inputMode='numeric'
+          />
+          <span style={{ paddingBottom: '10px' }}>{docItem?.HWAER}</span>
+        </div>
+
+        <CustomInput
+          formRef={formRef}
+          value="$SGTXT"
+          label="항목텍스트"
+          required
+          onFocus={handleFocus}
+          onChange={(value) => {
+            formRef.current.SGTXT = value;
+            checkRequired();
+          }}
+          style={{ marginBottom: '28px' }}
+          clearInput
+        />
+        <CustomInput
+          formRef={formRef}
+          value="$ZUONR"
+          label="지정"
+          onFocus={handleFocus}
+          onChange={(value) => {
+            formRef.current.ZUONR = value;
+          }}
+          style={{ marginBottom: '28px' }}
+          clearInput
+        />
+        <CustomInput
+          formRef={formRef}
+          value="$VALUT"
+          label="기준일자"
+          readOnly
+          date
           formatter={(value) => {
-            if (!value) return "";
-
-            const raw = value
-              .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
-              .replace(/(?!^)-/g, "");  // - 는 맨 앞만
-
-            if (raw === "" || raw === "-") return raw;
-
-            return Number(raw).toLocaleString("ko-KR");
+            return dayjs(value).format('YYYY-MM-DD');
           }}
           onFocus={handleFocus}
           onChange={(value) => {
-            formRef.current.DMBTR = value.replace(/[^0-9.-]/g, '');
+            formRef.current.VALUT = value;
           }}
-          style={{ marginBottom: '28px', textAlign: 'right' }}
-          inputMode='numeric'
+          style={{ marginBottom: '28px' }}
         />
-        <span style={{ paddingBottom: '10px' }}>{docItem?.HWAER}</span>
+        <CustomInput
+          formRef={formRef}
+          value="$ZFBDT"
+          label="만기계산일"
+          readOnly
+          date
+          formatter={(value) => {
+            return dayjs(value).format('YYYY-MM-DD');
+          }}
+          onFocus={handleFocus}
+          onChange={(value) => {
+            formRef.current.ZFBDT = value;
+          }}
+          style={{ marginBottom: '28px' }}
+        />
       </div>
-
-      <CustomInput
-        formRef={formRef}
-        value="$SGTXT"
-        label="항목텍스트"
-        required
-        onFocus={handleFocus}
-        onChange={(value) => {
-          formRef.current.SGTXT = value;
-          checkRequired();
-        }}
-        style={{ marginBottom: '28px' }}
-        clearInput
-      />
-      <CustomInput
-        formRef={formRef}
-        value="$ZUONR"
-        label="지정"
-        onFocus={handleFocus}
-        onChange={(value) => {
-          formRef.current.ZUONR = value;
-        }}
-        style={{ marginBottom: '28px' }}
-        clearInput
-      />
-      <CustomInput
-        formRef={formRef}
-        value="$VALUT"
-        label="기준일자"
-        readOnly
-        date
-        formatter={(value) => {
-          return dayjs(value).format('YYYY-MM-DD');
-        }}
-        onFocus={handleFocus}
-        onChange={(value) => {
-          formRef.current.VALUT = value;
-        }}
-        style={{ marginBottom: '28px' }}
-      />
-      <CustomInput
-        formRef={formRef}
-        value="$ZFBDT"
-        label="만기계산일"
-        readOnly
-        date
-        formatter={(value) => {
-          return dayjs(value).format('YYYY-MM-DD');
-        }}
-        onFocus={handleFocus}
-        onChange={(value) => {
-          formRef.current.ZFBDT = value;
-        }}
-        style={{ marginBottom: '28px' }}
-      />
       <div
         style={{
-          position: 'fixed',
+          position: 'absolute',
           left: 0,
           bottom: 0,
           width: "100%",

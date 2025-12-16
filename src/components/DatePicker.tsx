@@ -72,7 +72,7 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
   return (
     <IonPopover
       ref={modalRef}
-      side="bottom"
+      side='top'
       alignment="center"
       isOpen={datePicker?.isOpen}
       onIonPopoverWillPresent={handleModalWillPresent}

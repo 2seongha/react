@@ -130,7 +130,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
                 mode="md"
                 button
                 style={{
-                  '--min-height': '48px',
+                  '--min-height': '52px',
                   '--padding-start': '21px',
                   '--padding-end': '21px',
                   marginBottom: list.length - 1 === index ? 'var(--ion-safe-area-bottom)' : 0,
