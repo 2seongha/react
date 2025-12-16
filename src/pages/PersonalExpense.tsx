@@ -338,9 +338,10 @@ const PersonalExpense: React.FC = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   width: '100%',
-                  height:'250px'
                 }}>
-                  <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+                  <div style={{ height: '130px' }}>
+                    <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+                  </div>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column',
