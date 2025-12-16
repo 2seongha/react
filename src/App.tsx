@@ -23,6 +23,7 @@ import TermsOfUse from './pages/TermsOfUse';
 import Attach from './pages/Attach';
 import PersonalExpense from './pages/PersonalExpense';
 import LoadingIndicator from './components/LoadingIndicator';
+import 'simple-notify/dist/simple-notify.css'
 
 const App: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);

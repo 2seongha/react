@@ -39,6 +39,7 @@
     "react-slot-counter": "^3.3.1",
     "react-virtuoso": "^4.14.0",
     "seamless-scroll-polyfill": "^2.3.4",
+    "simple-notify": "^1.0.6",
     "swiper": "^11.2.10",
     "zustand": "^5.0.7"
   },

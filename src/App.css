@@ -283,7 +283,7 @@ ion-input {
 }
 
 .input-wrapper.sc-ion-input-md {
-  border-bottom: 0.5px solid var(--input-color);
+  border-bottom: 1px solid var(--input-color);
 }
 
 .label-text-wrapper.sc-ion-input-md {
@@ -320,4 +320,13 @@ ion-input {
 .sc-ion-input-md-s>[slot=label] {
   color: var(--ion-color-step-700);
   font-weight: 500;
+  font-size: 14px;
+}
+
+.sn-notifications-container {
+  padding-bottom: calc(82px + var(--ion-safe-area-bottom));
+}
+
+.personal-expense-header .input-wrapper.sc-ion-input-md input.sc-ion-input-md {
+  font-size: 14px;
 }

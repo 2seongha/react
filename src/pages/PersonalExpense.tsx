@@ -4,6 +4,7 @@ import {
   IonButton,
   IonContent,
   IonIcon,
+  IonItem,
   IonPage,
   IonRippleEffect,
   useIonRouter,
@@ -25,6 +26,7 @@ import { FormRef } from '../stores/types';
 import CustomInput from '../components/CustomInput';
 import dayjs from 'dayjs';
 import { getTopModalId, popModal } from '../App';
+import Notify from 'simple-notify';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -102,13 +104,25 @@ const PersonalExpense: React.FC = () => {
 
   // 항목 저장
   const handleSaveItem = useCallback((item: any) => {
-    // 안전하게 새 객체 생성
     const newItem = { ...item };
 
     setApproval((prev: any) => {
-      if (!prev || !prev.FLOW_DOCITEM) return { FLOW_DOCITEM: [newItem] };
-
-      const newList = [...prev.FLOW_DOCITEM, newItem].map((itm, i) => ({
+      if (!prev || !prev.FLOW_DOCITEM) {
+        return { ...prev, FLOW_DOCITEM: [{ ...newItem, CNT: '1', ITEMNO: '1' }] };
+      }
+      const list = [...prev.FLOW_DOCITEM];
+      const index = list.findIndex(
+        (itm) => String(itm.CNT) === String(newItem.CNT)
+      );
+      let newList;
+      if (index > -1) {
+        newList = list.map((itm, i) =>
+          i === index ? { ...itm, ...newItem } : itm
+        );
+      } else {
+        newList = [...list, newItem];
+      }
+      newList = newList.map((itm, i) => ({
         ...itm,
         CNT: String(i + 1),
         ITEMNO: String(i + 1),
@@ -116,15 +130,26 @@ const PersonalExpense: React.FC = () => {
 
       return { ...prev, FLOW_DOCITEM: newList };
     });
-
     goStep(0);
+    new Notify({
+      title: '저장되었습니다.',
+      text: `${newItem.ACCOUNT_CODE_T} ${Number(newItem.WRBTR).toLocaleString("ko-KR")}원`,
+      position: 'x-center bottom',
+      autotimeout: 2000,
+    });
   }, [step]);
 
   // 항목 삭제
   const handleDeleteItem = useCallback((deleteIndex: number) => {
     setApproval((prev: any) => {
       if (!prev || !prev.FLOW_DOCITEM) return { FLOW_DOCITEM: [] };
-
+      new Notify({
+        status: 'error',
+        title: '삭제되었습니다.',
+        text: `${prev.FLOW_DOCITEM[deleteIndex].ACCOUNT_CODE_T} ${Number(prev.FLOW_DOCITEM[deleteIndex].WRBTR).toLocaleString("ko-KR")}원`,
+        position: 'x-center bottom',
+        autotimeout: 2000
+      });
       // deleteIndex 기준으로 필터링 + 재정렬
       const newList = prev.FLOW_DOCITEM
         .filter((_: any, i: number) => i !== deleteIndex)
@@ -135,6 +160,7 @@ const PersonalExpense: React.FC = () => {
         FLOW_DOCITEM: newList,
       };
     });
+
   }, []);
 
   const title = useMemo(() => {
@@ -298,64 +324,78 @@ const PersonalExpense: React.FC = () => {
               {approval?.FLOW_DOCITEM?.length > 0
                 ?
                 approval?.FLOW_DOCITEM.map((item: any, index: number) => {
-                  return <div
+                  return <IonItem
+                    button
+                    mode='md'
                     key={'doc-item-' + item.CNT}
                     style={{
+                      marginBottom: '12px',
+                      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                      borderRadius: '12px'
+                    }}
+                    onClick={() => {
+                      setDocItem(item);
+                      goStep(99);
+                    }}>
+                    <div style={{
+                      width: '100%',
                       padding: '21px',
                       borderRadius: '12px',
                       position: 'relative',
-                      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
-                      marginBottom: '12px'
-                    }}
-                    onClick={() => {
-                      debugger;
-                      goStep(99);
                     }}>
-                    <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 14, '--ripple-color': 'transparent' }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
-                    <span style={{
-                      display: 'block',
-                      color: 'var(--ion-color-step-500)',
-                      fontSize: '13px',
-                      marginBottom: '15px'
-                    }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
-                    <span style={{
-                      display: 'block',
-                      marginBottom: '4px',
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}>{item.ACCOUNT_CODE_T}</span>
-                    <span style={{
-                      fontSize: '17px',
-                      fontWeight: '700'
-                    }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
-                    <span style={{
-                      height: '1px',
-                      backgroundColor: 'var(--custom-border-color-50)',
-                      margin: '12px 0',
-                      display: 'block'
-                    }}></span>
-                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                      <span>항목텍스트</span>
-                      <span>{item.SGTXT || '-'}</span>
+                      <IonButton
+                        mode='md'
+                        color='danger'
+                        fill='clear'
+                        style={{ position: 'absolute', right: 6, top: 14, '--ripple-color': 'transparent' }}
+                        onClick={(e) => {
+                          e.stopPropagation();   // ⭐ 핵심
+                          handleDeleteItem(index);
+                        }}>삭제</IonButton>
+                      <span style={{
+                        display: 'block',
+                        color: 'var(--ion-color-step-500)',
+                        fontSize: '13px',
+                        marginBottom: '15px'
+                      }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
+                      <span style={{
+                        display: 'block',
+                        marginBottom: '4px',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>{item.ACCOUNT_CODE_T}</span>
+                      <span style={{
+                        fontSize: '17px',
+                        fontWeight: '700'
+                      }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
+                      <span style={{
+                        height: '1px',
+                        backgroundColor: 'var(--custom-border-color-50)',
+                        margin: '12px 0',
+                        display: 'block'
+                      }}></span>
+                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                        <span>항목텍스트</span>
+                        <span>{item.SGTXT || '-'}</span>
+                      </div>
+                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                        <span>코스트센터</span>
+                        <span>{item.KOSTL || '-'}</span>
+                      </div>
+                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                        <span>코스트센터명</span>
+                        <span>{item.KOSTL_T || '-'}</span>
+                      </div>
+                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                        <span>오더번호</span>
+                        <span>{item.AUFNR || '-'}</span>
+                      </div>
+                      <div className="custom-item-body-line">
+                        <span>오더명</span>
+                        <span>{item.AUFNR_T || '-'}</span>
+                      </div>
                     </div>
-                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                      <span>코스트센터</span>
-                      <span>{item.KOSTL || '-'}</span>
-                    </div>
-                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                      <span>코스트센터명</span>
-                      <span>{item.KOSTL_T || '-'}</span>
-                    </div>
-                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                      <span>오더번호</span>
-                      <span>{item.AUFNR || '-'}</span>
-                    </div>
-                    <div className="custom-item-body-line">
-                      <span>오더명</span>
-                      <span>{item.AUFNR_T || '-'}</span>
-                    </div>
-                    <IonRippleEffect></IonRippleEffect>
-                  </div>
+                  </IonItem>
                 })
                 :
                 <div style={{
@@ -519,6 +559,7 @@ const AddItem: React.FC<AddItemProps> = ({
   useEffect(() => {
     formRef.current = docItem || {};
     forceRender(prev => prev + 1);
+    checkRequired();
   }, [docItem]);
 
   const checkRequired = useCallback(() => {
@@ -596,6 +637,7 @@ const AddItem: React.FC<AddItemProps> = ({
             formRef.current.ACCOUNT_CODE_T = value.Name;
             formRef.current.SAKNR = value.Add1;
             formRef.current.SAKNR_T = value.KeyName;
+            checkRequired();
           }}
           readOnly
           clearInput
@@ -860,6 +902,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <div
+        className='personal-expense-header'
         ref={containerRef}
         style={{
           height: '100%',
