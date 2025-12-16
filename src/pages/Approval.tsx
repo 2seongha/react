@@ -308,6 +308,7 @@ const Approval: React.FC = () => {
 
           {/* 시작일 선택 팝오버 */}
           <IonPopover
+            mode='ios'
             side="bottom" alignment="center"
             trigger="start-date-trigger"
             isOpen={isStartDateOpen}
@@ -340,6 +341,7 @@ const Approval: React.FC = () => {
 
           {/* 종료일 선택 팝오버 */}
           <IonPopover
+            mode='ios'
             side="bottom" alignment="center"
             trigger="end-date-trigger"
             isOpen={isEndDateOpen}

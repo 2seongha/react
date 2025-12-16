@@ -11,6 +11,7 @@ import useAppStore from '../stores/appStore';
 import { FormRef } from '../stores/types';
 
 export interface CustomInputProps {
+  disabled?: boolean;
   formRef?: RefObject<FormRef>;
   label: string;
   required?: boolean;
@@ -30,9 +31,12 @@ export interface CustomInputProps {
   inputMode?: any;
   currency?: boolean;
   date?: boolean;
+  labelPlacement?: any;
+  datePickerFixed?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
+  disabled,
   formRef,
   label,
   required = false,
@@ -51,7 +55,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
   inputMode,
   helperText,
   currency,
-  date
+  date,
+  labelPlacement = 'stacked',
+  datePickerFixed = true,
 }) => {
   const setSearchHelp = useAppStore(state => state.setSearchHelp);
   const setDatePicker = useAppStore(state => state.setDatePicker);
@@ -122,25 +128,28 @@ const CustomInput: React.FC<CustomInputProps> = ({
     });
   };
 
-  const handleOpenDatePicker = async () => {
+  const handleOpenDatePicker = async (e: any) => {
     setTimeout(() => {
       if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
         inputRef.current.classList.add("has-focus");
       }
     }, 50);
     setDatePicker({
+      fixed: datePickerFixed,
       isOpen: true,
       input: inputRef,
       onChange: handleInput,
+      buttonEvent: e
     });
   };
 
   return (
     <>
       <IonInput
+        disabled={disabled}
         mode="md"
         required={required}
-        labelPlacement='stacked'
+        labelPlacement={labelPlacement}
         placeholder={placeholder}
         value={localValue}
         helperText={localHelper}

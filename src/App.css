@@ -48,7 +48,8 @@ ion-tab-bar {
   --border: 1px solid var(--custom-border-color-50);
 }
 
-html.ios ion-modal ion-toolbar, html.ios .modal-footer-moving ion-toolbar {
+html.ios ion-modal ion-toolbar,
+html.ios .modal-footer-moving ion-toolbar {
   padding-right: 0;
   padding-left: 0;
 }
@@ -278,38 +279,31 @@ ion-modal.auto-height .inner-content {
 }
 
 ion-input {
-  --border-radius: 12px !important;
+  /* --border-radius: 12px !important; */
 }
 
-/* .label {
-  font-size: 13px;
-  font-weight: 500;
-  display: block;
-  margin-left: 4px;
-  margin-bottom: 4px;
-  color: var(--ion-color-step-850);
+.input-wrapper.sc-ion-input-md {
+  border-bottom: 0.5px solid var(--input-color);
 }
 
-.input-fill-outline.sc-ion-input-md-h {
-  min-height: 48px !important;
-  --background: var(--input-color);
-  --border-color: var(--input-color);
-  border-radius: 12px;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 2px 0px;
-} */
+.label-text-wrapper.sc-ion-input-md {
+  min-width: 28%;
+}
+
+.input-disabled.sc-ion-input-md-h {
+  opacity: 0.5;
+}
 
 .input-bottom.sc-ion-input-md {
   border-top: none;
-}
-.native-wrapper.sc-ion-input-md {
-  border-bottom: 1px solid var(--input-color);
 }
 
 .sc-ion-input-md-s>[slot=end]:first-of-type {
   margin-inline-start: 0;
 }
 
-.input-label-placement-floating.sc-ion-input-md-h, .input-label-placement-stacked.sc-ion-input-md-h {
+.input-label-placement-floating.sc-ion-input-md-h,
+.input-label-placement-stacked.sc-ion-input-md-h {
   height: 56px;
 }
 
@@ -322,7 +316,8 @@ ion-input {
   transform: translateY(40%) scale(0.75);
 }
 
-.label-text.sc-ion-input-md, .sc-ion-input-md-s>[slot=label] {
+.label-text.sc-ion-input-md,
+.sc-ion-input-md-s>[slot=label] {
   color: var(--ion-color-step-700);
   font-weight: 500;
 }

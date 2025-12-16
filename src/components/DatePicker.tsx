@@ -26,13 +26,19 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
     setDatePicker({ ...datePicker, isOpen: false });
   }, [datePicker]);
 
-  const handleModalWillPresent = () => {
+  const handleModalWillPresent = (event: Event) => {
     pushModal(modalId);
+
+    if (modalRef.current && event) {
+      modalRef.current.event = event; // 위치 계산용 이벤트
+    }
+
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
     window.history.pushState({ ...currentState, datePickerOpen: true }, "");
     historyPushedRef.current = true;
     closedByBackButtonRef.current = false;
+    if (modalRef.current) modalRef.current.event = datePicker.buttonEvent;
   };
 
   const handleModalDidDismiss = () => {
@@ -71,13 +77,18 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
 
   return (
     <IonPopover
+      mode="ios"
       ref={modalRef}
-      side='top'
+      side='bottom'
       alignment="center"
-      isOpen={datePicker?.isOpen}
-      onIonPopoverWillPresent={handleModalWillPresent}
+      isOpen={datePicker?.isOpen && !!datePicker.buttonEvent} // 이벤트가 준비될 때까지 열지 않음
+      event={datePicker.buttonEvent}
+      onIonPopoverWillPresent={() => handleModalWillPresent(datePicker.buttonEvent)}
       onIonPopoverDidDismiss={handleModalDidDismiss}
       showBackdrop={true}
+      style={{
+        ...(datePicker.fixed ? { '--offset-y': 0 } : {}),
+      }}
     >
       <IonDatetime
         mode='md'

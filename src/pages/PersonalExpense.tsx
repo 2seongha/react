@@ -109,8 +109,8 @@ const PersonalExpense: React.FC = () => {
 
       const newList = [...prev.FLOW_DOCITEM, newItem].map((itm, i) => ({
         ...itm,
-        CNT: i + 1,
-        ITEMNO: i + 1,
+        CNT: String(i + 1),
+        ITEMNO: String(i + 1),
       }));
 
       return { ...prev, FLOW_DOCITEM: newList };
@@ -419,6 +419,15 @@ const PersonalExpense: React.FC = () => {
                   fontWeight: "600",
                 }}
                 onClick={() => {
+                  let totalWRBTR = 0;
+                  let totalDMBTR = 0;
+                  approval.FLOW_DOCITEM.forEach((item: any) => {
+                    totalWRBTR += Number(item.WRBTR);
+                    totalDMBTR += Number(item.DMBTR);
+                  });
+
+                  approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
+                  approval.FLOWHD_DOCHD.SUM_DMBTR = totalDMBTR.toString();
                   goStep(1);
                 }}
               >
@@ -434,37 +443,20 @@ const PersonalExpense: React.FC = () => {
           />}
 
           {/* 헤더 페이지 */}
-          {step === 1 && <motion.div
-            key="step1"
-            custom={step - prevStepRef.current}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.2 }}
-            style={{
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'red'
-            }}
-          >
-            <IonButton
-              mode="md"
-              color="primary"
-              disabled={!approval?.FLOW_DOCITEM?.length}
-              style={{
-                flex: 1.5,
-                height: "58px",
-                fontSize: "18px",
-                fontWeight: "600",
-              }}
-              onClick={() => {
-                goStep(2);
-              }}
+          {step === 1 &&
+            <motion.div
+              key="step1"
+              custom={step - prevStepRef.current}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.2 }}
+              style={{ height: '100%', padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
             >
-              <span>다음 단계</span>
-            </IonButton>
-          </motion.div>}
+              <Header docHeader={approval.FLOWHD_DOCHD} />
+            </motion.div>
+          }
 
           {/* 헤더 페이지 */}
           {step === 2 && <motion.div
@@ -807,5 +799,186 @@ const AddItem: React.FC<AddItemProps> = ({
         </IonButton>
       </div>
     </motion.div>
+  );
+};
+
+interface HeaderProps {
+  docHeader?: any;
+  onSave?: (item: any) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  docHeader,
+  onSave,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
+  const formRef = useRef<FormRef>({});
+  const [, forceRender] = useState(0);
+
+  // docItem 변경 시 form 재할당
+  useEffect(() => {
+    formRef.current = docHeader || {};
+    forceRender(prev => prev + 1);
+  }, [docHeader]);
+
+  const checkRequired = useCallback(() => {
+    if (formRef.current.BLDAT) {
+      setIsSaveEnabled(true);
+    } else {
+      setIsSaveEnabled(false);
+    }
+  }, []);
+
+  const handleFocus = (e: any) => {
+    document.querySelectorAll('.has-focus').forEach((el) => {
+      el.classList.remove('has-focus');
+    });
+
+    const container = containerRef.current;
+    const el = e.target;
+    if (!container || !el) return;
+
+    setTimeout(() => {
+      const offset = 60; // 위에서 50px 밑으로
+      const containerTop = container.getBoundingClientRect().top;
+      const elTop = e.target.getBoundingClientRect().top;
+      const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
+      container.scrollTo({
+        top: scrollTop,
+        behavior: "smooth",
+      });
+    }, 150)
+  };
+
+  return (
+    <>
+      <div
+        ref={containerRef}
+        style={{
+          height: '100%',
+          overflow: 'auto',
+          overflowX: 'hidden',
+          padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
+        }}>
+        <CustomInput
+          disabled
+          formRef={formRef}
+          value="$BUKRS_T($BUKRS)"
+          label="회사코드"
+          labelPlacement='fixed'
+          style={{ marginBottom: '28px' }}
+        />
+        <CustomInput
+          disabled
+          formRef={formRef}
+          value="$BLART_T($BLART)"
+          label="전표유형"
+          labelPlacement='fixed'
+          style={{ marginBottom: '28px' }}
+        />
+        <CustomInput
+          disabled
+          formRef={formRef}
+          value="$CREATOR_LOGIN_ID | $CREATOR_NAME | $CREATOR_ORGTX"
+          label="생성인"
+          labelPlacement='fixed'
+          style={{ marginBottom: '28px' }}
+        />
+        <CustomInput
+          required
+          formRef={formRef}
+          value="$BLDAT"
+          label="증빙일자"
+          labelPlacement='fixed'
+          readOnly
+          date
+          datePickerFixed={false}
+          formatter={(value) => {
+            return dayjs(value).format('YYYY-MM-DD');
+          }}
+          onFocus={handleFocus}
+          onChange={(value) => {
+            formRef.current.BLDAT = value;
+          }}
+          style={{ marginBottom: '28px' }}
+        />
+        <CustomInput
+          required
+          disabled
+          formRef={formRef}
+          value="$BUDAT"
+          label="전기일자"
+          labelPlacement='fixed'
+          formatter={(value) => {
+            return dayjs(value).format('YYYY-MM-DD');
+          }}
+          style={{ marginBottom: '28px' }}
+        />
+        <CustomInput
+          required
+          disabled
+          formRef={formRef}
+          value="$WAERS"
+          label="전표통화"
+          labelPlacement='fixed'
+          style={{ marginBottom: '28px' }}
+        />
+        {/* <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}> */}
+        <CustomInput
+          disabled
+          formRef={formRef}
+          value="$SUM_WRBTR"
+          label="전표통화 계"
+          labelPlacement='fixed'
+          formatter={(value) => {
+            if (!value) return "";
+            const raw = value
+              .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
+              .replace(/(?!^)-/g, "");  // - 는 맨 앞만
+
+            if (raw === "" || raw === "-") return raw;
+
+            return Number(raw).toLocaleString("ko-KR") + ' KRW';
+          }}
+          style={{ marginBottom: '28px' }}
+        />
+        {/* <span style={{ paddingBottom: '10px' }}>{docHeader?.WAERS}</span>
+        </div> */}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          bottom: 0,
+          width: "100%",
+          display: "flex",
+          padding: "12px 21px",
+          zIndex: '2',
+          paddingTop: '32px',
+          background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
+          paddingBottom: 'calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))',
+          transform: 'translateZ(0)'
+        }}
+      >
+        <IonButton
+          mode="md"
+          color="primary"
+          style={{
+            flex: 1,
+            height: "58px",
+            fontSize: "18px",
+            fontWeight: "600",
+          }}
+          // disabled={!isSaveEnabled}
+          onClick={() => {
+            onSave?.(docHeader);
+            // dismiss();
+          }}
+        >
+          <span>다음 단계</span>
+        </IonButton>
+      </div>
+    </>
   );
 };
