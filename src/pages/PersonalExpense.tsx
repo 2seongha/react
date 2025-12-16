@@ -154,7 +154,7 @@ const PersonalExpense: React.FC = () => {
       default:
         title = 'test';
     }
-    return <AnimatePresence mode='sync'>
+    return <AnimatePresence mode='wait'>
       <motion.span
         key={title} // key가 바뀌면 AnimatePresence가 새 요소로 인식
         variants={titleVariants}
@@ -208,14 +208,14 @@ const PersonalExpense: React.FC = () => {
 
   return (
     <IonPage className='personal-expense'>
-      <AppBar title={title} customStartButtons={<AnimatePresence mode='popLayout'>
+      <AppBar title={title} customStartButtons={<AnimatePresence mode='wait'>
         <motion.div
           key={'start-button' + step}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: 0.3,
+            duration: 0.2,
             ease: 'easeOut',
           }}
           style={{ display: 'flex', alignItems: 'center' }}
@@ -237,7 +237,7 @@ const PersonalExpense: React.FC = () => {
                 '--border-radius': '24px',
                 marginLeft: '8px',
                 width: '64px',
-                height: '48px'
+                height: '48px',
               }}
             >
               <span style={{ fontSize: '16px', fontWeight: '600' }}>이전</span>
@@ -253,7 +253,7 @@ const PersonalExpense: React.FC = () => {
                 '--border-radius': '24px',
                 marginLeft: '8px',
                 width: '64px',
-                height: '48px'
+                height: '48px',
               }}
             >
               <span style={{ fontSize: '16px', fontWeight: '600' }}>취소</span>
@@ -306,7 +306,7 @@ const PersonalExpense: React.FC = () => {
                       boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
                       marginBottom: '12px'
                     }}>
-                    <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 14 }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
+                    <IonButton mode='md' color='danger' fill='clear' style={{ position: 'absolute', right: 6, top: 14, '--ripple-color': 'transparent' }} onClick={() => handleDeleteItem(index)}>삭제</IonButton>
                     <span style={{
                       display: 'block',
                       color: 'var(--ion-color-step-500)',
