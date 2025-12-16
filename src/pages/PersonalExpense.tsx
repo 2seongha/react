@@ -59,7 +59,7 @@ const PersonalExpense: React.FC = () => {
     },
     exit: (direction: number) => ({
       x: direction > 0 ? 40 : -40,
-      opacity: [1, 0.5],          // 나갈 때도 중간에 머물게 가능
+      opacity: [1, 0],          // 나갈 때도 중간에 머물게 가능
     })
   };
 
@@ -144,9 +144,14 @@ const PersonalExpense: React.FC = () => {
       case 1:
         title = '헤더 설정';
         break;
+      case 2:
+        title = '첨부 파일';
+        break;
       case 99:
         title = '항목 추가';
         break;
+      default:
+        title = 'test';
     }
     return <AnimatePresence mode="wait">
       <motion.span
@@ -163,12 +168,10 @@ const PersonalExpense: React.FC = () => {
     </AnimatePresence>;
   }, [step]);
 
-  const stepRef = useRef(step);
 
   useEffect(() => {
-    stepRef.current = step;
     if (window.history.state?.step > 0) {
-      window.history.back();
+      // window.history.back();
     }
     if (step > 0) {
       window.history.pushState({ step }, '', window.location.href);
@@ -180,7 +183,7 @@ const PersonalExpense: React.FC = () => {
       if (['searchHelp', 'datePicker'].includes(getTopModalId() ?? '')) {
         return popModal();
       }
-      if (stepRef.current > 0) {
+      if (prevStepRef.current > 0) {
         setStep(prev => (prev === 99 ? 0 : prev - 1));
       }
     };
@@ -396,9 +399,8 @@ const PersonalExpense: React.FC = () => {
                   fontSize: "18px",
                   fontWeight: "600",
                 }}
-                id="approve-modal"
                 onClick={() => {
-                  setStep(step + 1);
+                  setStep(prev => prev + 1);
                 }}
               >
                 <span>다음 단계</span>
@@ -427,6 +429,40 @@ const PersonalExpense: React.FC = () => {
               backgroundColor: 'red'
             }}
           >
+            <IonButton
+              mode="md"
+              color="primary"
+              disabled={!approval?.FLOW_DOCITEM?.length}
+              style={{
+                flex: 1.5,
+                height: "58px",
+                fontSize: "18px",
+                fontWeight: "600",
+              }}
+              onClick={() => {
+                setStep(2);
+              }}
+            >
+              <span>다음 단계</span>
+            </IonButton>
+          </motion.div>}
+
+          {/* 헤더 페이지 */}
+          {step === 2 && <motion.div
+            key="step2"
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.2 }}
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'green'
+            }}
+          >
+            <>ㅁㄴㅇㄹ</>
           </motion.div>}
         </AnimatePresence>
 
@@ -511,15 +547,16 @@ const AddItem: React.FC<AddItemProps> = ({
       animate="center"
       exit="exit"
       transition={{ duration: 0.2 }}
-      ref={containerRef}
       style={{ height: '100%' }}
     >
-      <div style={{
-        height: '100%',
-        overflow: 'auto',
-        overflowX: 'hidden',
-        padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
-      }}>
+      <div
+        ref={containerRef}
+        style={{
+          height: '100%',
+          overflow: 'auto',
+          overflowX: 'hidden',
+          padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
+        }}>
         <CustomInput
           formRef={formRef}
           value="$ACCOUNT_CODE_T"
