@@ -3,6 +3,7 @@ import {
   IonBackButton,
   IonButton,
   IonContent,
+  IonFooter,
   IonIcon,
   IonItem,
   IonPage,
@@ -17,7 +18,7 @@ import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
 import { getSearchHelp, getStart } from '../stores/service';
-import { webviewToast } from '../webview';
+import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion } from 'framer-motion';
 import LoadingIndicator from '../components/LoadingIndicator';
@@ -30,15 +31,19 @@ import Notify from 'simple-notify';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
+  //* 전체
   const [step, setStep] = useState(0);
-  const [approval, setApproval] = useState<any>(null); // 상신 템플릿
-  const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
-  const oriItem = useRef(null); // 항목 템플릿
-  const prevStepRef = useRef(0);
-  const currStepRef = useRef(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [approval, setApproval] = useState<any>(null);
   const ignorePopRef = useRef(false);
   const interactPopRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const prevStepRef = useRef(0);
+  const currStepRef = useRef(0);
+
+  //* 항목 추가
+  const oriItem = useRef(null); // 항목 템플릿
+  const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
+  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
 
   const setScrollRef = (node: HTMLDivElement) => {
     if (node) {
@@ -73,6 +78,13 @@ const PersonalExpense: React.FC = () => {
     exit: { opacity: 0, y: -5 },
   };
 
+  const buttonMotion = {
+    initial: { opacity: 1, y: 82 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 1, y: 82 },
+    transition: { duration: 0.2 },
+  };
+
   useIonViewWillEnter(() => {
     const initApproval = async () => {
       const approval = await getStart('IA103');
@@ -99,29 +111,35 @@ const PersonalExpense: React.FC = () => {
     }
 
     setDocItem(cloneItem);
+    setIsSaveEnabled(false);
     goStep(99);
   }, [approval]);
 
   // 항목 저장
   const handleSaveItem = useCallback((item: any) => {
     const newItem = { ...item };
+    let isEdit = false; // ✅ 수정 여부 플래그
 
     setApproval((prev: any) => {
       if (!prev || !prev.FLOW_DOCITEM) {
         return { ...prev, FLOW_DOCITEM: [{ ...newItem, CNT: '1', ITEMNO: '1' }] };
       }
+
       const list = [...prev.FLOW_DOCITEM];
       const index = list.findIndex(
         (itm) => String(itm.CNT) === String(newItem.CNT)
       );
+
       let newList;
       if (index > -1) {
+        isEdit = true; // ✅ 수정
         newList = list.map((itm, i) =>
           i === index ? { ...itm, ...newItem } : itm
         );
       } else {
-        newList = [...list, newItem];
+        newList = [...list, newItem]; // ✅ 신규 추가
       }
+
       newList = newList.map((itm, i) => ({
         ...itm,
         CNT: String(i + 1),
@@ -130,10 +148,12 @@ const PersonalExpense: React.FC = () => {
 
       return { ...prev, FLOW_DOCITEM: newList };
     });
+
     goStep(0);
+
     new Notify({
-      title: '저장되었습니다.',
-      text: `${newItem.ACCOUNT_CODE_T} ${Number(newItem.WRBTR).toLocaleString("ko-KR")}원`,
+      title: isEdit ? '수정되었습니다.' : '저장되었습니다.',
+      text: `${newItem.ACCOUNT_CODE_T} ${Number(newItem.WRBTR).toLocaleString('ko-KR')}원`,
       position: 'x-center bottom',
       autotimeout: 2000,
     });
@@ -181,10 +201,10 @@ const PersonalExpense: React.FC = () => {
       default:
         title = 'test';
     }
-    return <AnimatePresence mode='wait'>
+    return <AnimatePresence mode='sync'>
       <motion.span
-        key={title} // key가 바뀌면 AnimatePresence가 새 요소로 인식
-        variants={titleVariants}
+        key={title}
+        // variants={titleVariants}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -334,7 +354,9 @@ const PersonalExpense: React.FC = () => {
                       borderRadius: '12px'
                     }}
                     onClick={() => {
-                      setDocItem(item);
+                      const cloneItem = _.cloneDeep<any>(item);
+                      setDocItem(cloneItem);
+                      setIsSaveEnabled(true);
                       goStep(99);
                     }}>
                     <div style={{
@@ -347,7 +369,7 @@ const PersonalExpense: React.FC = () => {
                         mode='md'
                         color='danger'
                         fill='clear'
-                        style={{ position: 'absolute', right: 6, top: 14, '--ripple-color': 'transparent' }}
+                        style={{ position: 'absolute', right: 8, top: 21, '--ripple-color': 'transparent' }}
                         onClick={(e) => {
                           e.stopPropagation();   // ⭐ 핵심
                           handleDeleteItem(index);
@@ -375,8 +397,12 @@ const PersonalExpense: React.FC = () => {
                         display: 'block'
                       }}></span>
                       <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                        <span>항목텍스트</span>
-                        <span>{item.SGTXT || '-'}</span>
+                        <span>GL계정</span>
+                        <span>{item.SAKNR || '-'}</span>
+                      </div>
+                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                        <span>GL계정명</span>
+                        <span>{item.SAKNR_T || '-'}</span>
                       </div>
                       <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
                         <span>코스트센터</span>
@@ -386,13 +412,9 @@ const PersonalExpense: React.FC = () => {
                         <span>코스트센터명</span>
                         <span>{item.KOSTL_T || '-'}</span>
                       </div>
-                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                        <span>오더번호</span>
-                        <span>{item.AUFNR || '-'}</span>
-                      </div>
                       <div className="custom-item-body-line">
-                        <span>오더명</span>
-                        <span>{item.AUFNR_T || '-'}</span>
+                        <span>항목텍스트</span>
+                        <span>{item.SGTXT || '-'}</span>
                       </div>
                     </div>
                   </IonItem>
@@ -439,7 +461,7 @@ const PersonalExpense: React.FC = () => {
                 {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
               </IonButton>
             </div>
-            <div
+            {/* <div
               style={{
                 position: 'absolute',
                 bottom: 0,
@@ -479,13 +501,17 @@ const PersonalExpense: React.FC = () => {
               >
                 <span>다음 단계</span>
               </IonButton>
-            </div>
+            </div> */}
           </motion.div>}
 
           {/* 항목 추가 페이지 */}
           {step === 99 && <AddItem
             docItem={docItem}
-            onSave={handleSaveItem}
+            onSaveEnabledChange={enabled => {
+              if (isSaveEnabled !== enabled) {
+                setIsSaveEnabled(enabled);
+              }
+            }}
           />}
 
           {/* 헤더 페이지 */}
@@ -535,6 +561,100 @@ const PersonalExpense: React.FC = () => {
         <DatePickerModal />
 
       </IonContent >
+      <IonFooter style={{
+        boxShadow: 'none',
+      }}>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            padding: "12px 21px",
+            zIndex: '2',
+            paddingTop: '32px',
+            background:
+              'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
+            paddingBottom:
+              'calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))',
+            transform: 'translateZ(0)',
+          }}
+        >
+          <AnimatePresence mode="wait">
+            {step === 0 && (
+              <motion.div key="step0" {...buttonMotion} style={{ flex: 1 }}>
+                <IonButton
+                  mode="md"
+                  color="primary"
+                  disabled={!approval?.FLOW_DOCITEM?.length}
+                  style={{
+                    width: "100%",
+                    height: "58px",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                  }}
+                  onClick={() => {
+                    let totalWRBTR = 0;
+                    let totalDMBTR = 0;
+                    approval.FLOW_DOCITEM.forEach((item: any) => {
+                      totalWRBTR += Number(item.WRBTR);
+                      totalDMBTR += Number(item.DMBTR);
+                    });
+
+                    approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
+                    approval.FLOWHD_DOCHD.SUM_DMBTR = totalDMBTR.toString();
+                    webviewHaptic('mediumImpact');
+                    goStep(1);
+                  }}
+                >
+                  다음 단계
+                </IonButton>
+              </motion.div>
+            )}
+
+            {step === 99 && (
+              <motion.div key="step99" {...buttonMotion} style={{ flex: 1 }}>
+                <IonButton
+                  mode="md"
+                  color="primary"
+                  disabled={!isSaveEnabled}
+                  style={{
+                    width: "100%",
+                    height: "58px",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                  }}
+                  onClick={() => {
+                    webviewHaptic('mediumImpact');
+                    handleSaveItem(docItem);
+                  }}
+                >
+                  저장
+                </IonButton>
+              </motion.div>
+            )}
+
+            {step === 1 && (
+              <motion.div key="step1" {...buttonMotion} style={{ flex: 1 }}>
+                <IonButton
+                  mode="md"
+                  color="primary"
+                  style={{
+                    width: "100%",
+                    height: "58px",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                  }}
+                  onClick={() => {
+                    webviewHaptic('mediumImpact');
+                    goStep(2);
+                  }}
+                >
+                  다음 단계
+                </IonButton>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </IonFooter>
     </IonPage >
   );
 };
@@ -543,32 +663,32 @@ export default PersonalExpense;
 
 interface AddItemProps {
   docItem?: any;
-  onSave?: (item: any) => void;
+  onSaveEnabledChange: (enabled: boolean) => void;
 }
 
 const AddItem: React.FC<AddItemProps> = ({
   docItem,
-  onSave,
+  onSaveEnabledChange
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
+  // const [isSaveEnabled, setIsSaveEnabled] = useState(false);
   const formRef = useRef<FormRef>({});
   const [, forceRender] = useState(0);
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
     formRef.current = docItem || {};
-    forceRender(prev => prev + 1);
     checkRequired();
+    forceRender(prev => prev + 1);
   }, [docItem]);
 
   const checkRequired = useCallback(() => {
     if (formRef.current.ACCOUNT_CODE_T
       && formRef.current.WRBTR
       && formRef.current.SGTXT) {
-      setIsSaveEnabled(true);
+      onSaveEnabledChange(true);
     } else {
-      setIsSaveEnabled(false);
+      onSaveEnabledChange(false);
     }
   }, []);
 
@@ -813,7 +933,7 @@ const AddItem: React.FC<AddItemProps> = ({
           style={{ marginBottom: '28px' }}
         />
       </div>
-      <div
+      {/* <div
         style={{
           position: 'absolute',
           left: 0,
@@ -845,7 +965,7 @@ const AddItem: React.FC<AddItemProps> = ({
         >
           <span>저장</span>
         </IonButton>
-      </div>
+      </div> */}
     </motion.div>
   );
 };
@@ -1019,10 +1139,8 @@ const Header: React.FC<HeaderProps> = ({
             fontSize: "18px",
             fontWeight: "600",
           }}
-          // disabled={!isSaveEnabled}
           onClick={() => {
             onSave?.(docHeader);
-            // dismiss();
           }}
         >
           <span>다음 단계</span>

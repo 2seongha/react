@@ -196,19 +196,13 @@ ion-button[color="light"]:not([fill="clear"]):not([fill="outline"]) * {
 ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]),
 ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]) {
   --ion-color-base: var(--disabled-bg-color) !important;
+  --ion-color-contrast: var(--disabled-fg-color) !important;
   opacity: 1;
 }
 
 ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]) *,
 ion-button.button-disabled:not([fill="clear"]):not([fill="outline"]) * {
   color: var(--disabled-fg-color);
-}
-
-ion-list.list-md {
-  padding-top: 0;
-  padding-bottom: 0;
-  /* -webkit-padding-start: 22px;
-  -webkit-padding-end: 22px; */
 }
 
 .sc-ion-buttons-ios-s ion-button {
