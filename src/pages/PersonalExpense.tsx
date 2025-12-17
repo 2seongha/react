@@ -73,7 +73,7 @@ const PersonalExpense: React.FC = () => {
   };
 
   const buttonMotion = {
-    initial: { opacity: 1, y: 82 },
+    initial: { opacity: 1, y: 'calc(82px + var(--ion-safe-area-bottom))' },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 1, y: 'calc(82px + var(--ion-safe-area-bottom))' },
     transition: { duration: 0.3 },
