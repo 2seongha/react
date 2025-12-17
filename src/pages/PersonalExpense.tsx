@@ -76,7 +76,7 @@ const PersonalExpense: React.FC = () => {
     initial: { opacity: 1, y: 82 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 1, y: 'calc(82px + var(--ion-safe-area-bottom))' },
-    transition: { duration: 0.2 },
+    transition: { duration: 0.3 },
   };
 
   useIonViewWillEnter(() => {
@@ -328,80 +328,75 @@ const PersonalExpense: React.FC = () => {
               {approval?.FLOW_DOCITEM?.length > 0
                 ?
                 approval?.FLOW_DOCITEM.map((item: any, index: number) => {
-                  return <IonItem
-                    button
-                    mode='md'
+                  return <div
+                  className='ion-activatable'
                     key={'doc-item-' + item.CNT}
-                    style={{
-                      marginBottom: '12px',
-                      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
-                      borderRadius: '12px'
-                    }}
                     onClick={() => {
                       const cloneItem = _.cloneDeep<any>(item);
                       setDocItem(cloneItem);
                       setIsSaveEnabled(true);
                       goStep(99);
-                    }}>
-                    <div style={{
+                    }}
+                    style={{
+                      marginBottom: '12px',
+                      boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                      borderRadius: '12px',
                       width: '100%',
                       padding: '21px',
-                      borderRadius: '12px',
                       position: 'relative',
                     }}>
-                      <IonButton
-                        mode='md'
-                        color='danger'
-                        fill='clear'
-                        style={{ position: 'absolute', right: 8, top: 21, '--ripple-color': 'transparent' }}
-                        onClick={(e) => {
-                          e.stopPropagation();   // ⭐ 핵심
-                          handleDeleteItem(index);
-                        }}>삭제</IonButton>
-                      <span style={{
-                        display: 'block',
-                        color: 'var(--ion-color-step-500)',
-                        fontSize: '13px',
-                        marginBottom: '15px'
-                      }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
-                      <span style={{
-                        display: 'block',
-                        marginBottom: '4px',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}>{item.ACCOUNT_CODE_T}</span>
-                      <span style={{
-                        fontSize: '17px',
-                        fontWeight: '700'
-                      }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
-                      <span style={{
-                        height: '1px',
-                        backgroundColor: 'var(--custom-border-color-50)',
-                        margin: '12px 0',
-                        display: 'block'
-                      }}></span>
-                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                        <span>GL계정</span>
-                        <span>{item.SAKNR || '-'}</span>
-                      </div>
-                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                        <span>GL계정명</span>
-                        <span>{item.SAKNR_T || '-'}</span>
-                      </div>
-                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                        <span>코스트센터</span>
-                        <span>{item.KOSTL || '-'}</span>
-                      </div>
-                      <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                        <span>코스트센터명</span>
-                        <span>{item.KOSTL_T || '-'}</span>
-                      </div>
-                      <div className="custom-item-body-line">
-                        <span>항목텍스트</span>
-                        <span>{item.SGTXT || '-'}</span>
-                      </div>
+                    <IonButton
+                      mode='md'
+                      color='danger'
+                      fill='clear'
+                      style={{ position: 'absolute', right: 8, top: 21, '--ripple-color': 'transparent' }}
+                      onClick={(e) => {
+                        e.stopPropagation();   // ⭐ 핵심
+                        handleDeleteItem(index);
+                      }}>삭제</IonButton>
+                    <span style={{
+                      display: 'block',
+                      color: 'var(--ion-color-step-500)',
+                      fontSize: '13px',
+                      marginBottom: '15px'
+                    }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
+                    <span style={{
+                      display: 'block',
+                      marginBottom: '4px',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}>{item.ACCOUNT_CODE_T}</span>
+                    <span style={{
+                      fontSize: '17px',
+                      fontWeight: '700'
+                    }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
+                    <span style={{
+                      height: '1px',
+                      backgroundColor: 'var(--custom-border-color-50)',
+                      margin: '12px 0',
+                      display: 'block'
+                    }}></span>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>GL계정</span>
+                      <span>{item.SAKNR || '-'}</span>
                     </div>
-                  </IonItem>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>GL계정명</span>
+                      <span>{item.SAKNR_T || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>코스트센터</span>
+                      <span>{item.KOSTL || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                      <span>코스트센터명</span>
+                      <span>{item.KOSTL_T || '-'}</span>
+                    </div>
+                    <div className="custom-item-body-line">
+                      <span>항목텍스트</span>
+                      <span>{item.SGTXT || '-'}</span>
+                    </div>
+                  </div>
                 })
                 :
                 <div style={{

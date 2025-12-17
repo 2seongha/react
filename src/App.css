@@ -328,3 +328,12 @@ ion-input {
 .personal-expense-header .input-wrapper.sc-ion-input-md input.sc-ion-input-md {
   font-size: 14px;
 }
+
+.ion-activatable {
+  transition: transform 0.15s;
+}
+
+.ion-activatable:active,
+.ion-activated {
+  transform: scale(.98);
+}
