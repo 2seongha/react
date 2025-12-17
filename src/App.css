@@ -16,7 +16,7 @@ ion-content::part(scroll) {
 }
 
 ion-modal ion-content::part(scroll) {
-  overscroll-behavior: none;
+  /* overscroll-behavior: none; */
 }
 
 ion-content::part(scroll)::-webkit-scrollbar {
