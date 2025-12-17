@@ -97,13 +97,8 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
     []
   );
 
-  async function canDismiss(data?: any, role?: string) {
-    return role !== 'gesture';
-  }
-
   return (
     <IonModal
-      canDismiss={canDismiss}
       isOpen={searchHelp?.isOpen}
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
@@ -119,7 +114,25 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
     >
       <AppBar title={<span>{searchHelp?.title}</span>} customEndButtons={closeButton} />
       <IonContent
+        onIonScroll={async (e: Event) => {
+          // @ts-ignore
+          const target = await e.target.getScrollElement();
+          const scrollTop = target.scrollTop;
+          const modalEl = modalRef.current;
+          if (!modalEl) return;
+          // @ts-ignore
+          const gesture = modalEl.gesture; // internal API
+          if (scrollTop > 0) gesture.enable(false);
+        }}
+        onIonScrollEnd={() => {
+          const modalEl = modalRef.current;
+          if (!modalEl) return;
+          // @ts-ignore
+          const gesture = modalEl.gesture; // internal API
+          gesture.enable(true); // 스크롤 내려가면 스와이프 금지
+        }}
         forceOverscroll={false}
+        scrollEvents
       >
         {list === null
           ? <LoadingIndicator
