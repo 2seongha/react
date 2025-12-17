@@ -367,11 +367,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               exit={{ opacity: 0, y: 50 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               style={{
-                padding: "28px 21px calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px",
+                padding: "28px 21px 500px 21px",
                 position: "fixed",
-                top: `calc(${modalRef.current?.offsetHeight! - 193 - 48}px - var(--ion-safe-area-bottom))`,
+                top: `calc(${modalRef.current?.offsetHeight! - 193 - 48}px - var(--ion-safe-area-top) - max(var(--ion-safe-area-bottom), var(--keyboard-height)))`,
                 width: "100%",
-                zIndex: 2,
                 background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
               }}
             >
