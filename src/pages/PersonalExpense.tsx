@@ -73,9 +73,9 @@ const PersonalExpense: React.FC = () => {
   };
 
   const buttonMotion = {
-    initial: { opacity: 1, y: 'calc(82px + var(--ion-safe-area-bottom))' },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 1, y: 'calc(82px + var(--ion-safe-area-bottom))' },
+    initial: { y: 'calc(82px + var(--ion-safe-area-bottom))' },
+    animate: { y: 'var(--ion-safe-area-bottom)' },
+    exit: { y: 'calc(82px + var(--ion-safe-area-bottom))' },
     transition: { duration: 0.3 },
   };
 
@@ -329,7 +329,7 @@ const PersonalExpense: React.FC = () => {
                 ?
                 approval?.FLOW_DOCITEM.map((item: any, index: number) => {
                   return <div
-                  className='ion-activatable'
+                    className='ion-activatable'
                     key={'doc-item-' + item.CNT}
                     onClick={() => {
                       const cloneItem = _.cloneDeep<any>(item);
