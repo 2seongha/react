@@ -224,9 +224,10 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       initialBreakpoint={1}
       breakpoints={[0, 1]}
       style={{
-        "--max-height": "calc(100% - 48px - var(--ion-safe-area-top))",
-        '--ion-safe-area-top': 'var(--root-safe-area-top) !important',
-        '--ion-safe-area-bottom': 'var(--root-safe-area-bottom) !important',
+        '--max-height': '900px',
+        // "--max-height": "calc(100% - 48px - var(--ion-safe-area-top))",
+        // '--ion-safe-area-top': 'var(--root-safe-area-top) !important',
+        // '--ion-safe-area-bottom': 'var(--root-safe-area-bottom) !important',
       }}
     >
       <AppBar title={<></>} customEndButtons={closeButton} />
