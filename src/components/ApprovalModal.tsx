@@ -49,7 +49,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   separate,
   isNotification,
 }) => {
-  const modal = useRef<HTMLIonModalElement>(null);
+  const modalRef = useRef<HTMLIonModalElement>(null);
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
@@ -79,7 +79,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   }, [selectedApprovals]);
 
   async function dismiss() {
-    modal.current?.dismiss();
+    modalRef.current?.dismiss();
   }
 
   const handleTextChange = (e: any) => {
@@ -218,7 +218,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       onIonModalDidDismiss={handleModalDidDismiss}
       className="approval-modal"
       mode="ios"
-      ref={modal}
+      ref={modalRef}
       trigger={trigger}
       canDismiss={step !== 1}
       initialBreakpoint={1}
@@ -232,6 +232,23 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent
         scrollEvents
+        onIonScroll={async (e: Event) => {
+          // @ts-ignore
+          const target = await e.target.getScrollElement();
+          const scrollTop = target.scrollTop;
+          const modalEl = modalRef.current;
+          if (!modalEl) return;
+          // @ts-ignore
+          const gesture = modalEl.gesture; // internal API
+          if (scrollTop > 0) gesture.enable(false);
+        }}
+        onIonScrollEnd={() => {
+          const modalEl = modalRef.current;
+          if (!modalEl) return;
+          // @ts-ignore
+          const gesture = modalEl.gesture;
+          gesture.enable(true);
+        }}
         forceOverscroll={false}
         className="approval-modal-ion-content">
         <div style={{

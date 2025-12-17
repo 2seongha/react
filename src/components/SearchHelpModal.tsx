@@ -128,8 +128,8 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
           const modalEl = modalRef.current;
           if (!modalEl) return;
           // @ts-ignore
-          const gesture = modalEl.gesture; // internal API
-          gesture.enable(true); // 스크롤 내려가면 스와이프 금지
+          const gesture = modalEl.gesture;
+          gesture.enable(true); 
         }}
         forceOverscroll={false}
         scrollEvents
