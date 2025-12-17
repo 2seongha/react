@@ -369,7 +369,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               style={{
                 padding: "28px 21px calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px",
                 position: "fixed",
-                bottom: 0,
+                top: modalRef.current?.offsetHeight! - 193 - 48,
                 width: "100%",
                 zIndex: 2,
                 background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
