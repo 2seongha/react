@@ -114,15 +114,16 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
     >
       <AppBar title={<span>{searchHelp?.title}</span>} customEndButtons={closeButton} />
       <IonContent
-        onIonScroll={async (e: Event) => {
+        onIonScrollStart={async (e: Event) => {
           // @ts-ignore
-          const target = await e.target.getScrollElement();
-          const scrollTop = target.scrollTop;
+          // const target = await e.target.getScrollElement();
+          // const scrollTop = target.scrollTop;
           const modalEl = modalRef.current;
           if (!modalEl) return;
           // @ts-ignore
           const gesture = modalEl.gesture; // internal API
-          if (scrollTop > 0) gesture.enable(false);
+          // if (scrollTop > 0) gesture.enable(false);
+          gesture.enable(false);
         }}
         onIonScrollEnd={() => {
           const modalEl = modalRef.current;

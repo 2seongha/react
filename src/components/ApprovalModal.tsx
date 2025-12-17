@@ -232,15 +232,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       <AppBar title={<></>} customEndButtons={closeButton} />
       <IonContent
         scrollEvents
-        onIonScroll={async (e: Event) => {
-          // @ts-ignore
-          const target = await e.target.getScrollElement();
-          const scrollTop = target.scrollTop;
+        onIonScrollStart={async (e: Event) => {
           const modalEl = modalRef.current;
           if (!modalEl) return;
           // @ts-ignore
           const gesture = modalEl.gesture; // internal API
-          if (scrollTop > 0) gesture.enable(false);
+          gesture.enable(false);
         }}
         onIonScrollEnd={() => {
           const modalEl = modalRef.current;

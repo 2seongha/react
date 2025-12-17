@@ -117,15 +117,12 @@ const SubModal: React.FC<SubModalProps> = ({
         className="sub-modal"
         forceOverscroll={false}
         scrollEvents
-        onIonScroll={async (e: Event) => {
-          // @ts-ignore
-          const target = await e.target.getScrollElement();
-          const scrollTop = target.scrollTop;
+        onIonScrollStart={async (e: Event) => {
           const modalEl = modalRef.current;
           if (!modalEl) return;
           // @ts-ignore
           const gesture = modalEl.gesture; // internal API
-          if (scrollTop > 0) gesture.enable(false);
+          gesture.enable(false);
         }}
         onIonScrollEnd={() => {
           const modalEl = modalRef.current;
