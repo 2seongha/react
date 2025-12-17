@@ -73,11 +73,17 @@ const PersonalExpense: React.FC = () => {
   };
 
   const safeAreaBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ion-safe-area-bottom')) || 0;
+  // const buttonMotion = {
+  //   initial: { y: 82 + safeAreaBottom },
+  //   animate: { y: 0 },
+  //   exit: { y: 82 + safeAreaBottom },
+  //   transition: { duration: 0.3 },
+  // };
   const buttonMotion = {
     initial: { y: 82 + safeAreaBottom },
     animate: { y: 0 },
     exit: { y: 82 + safeAreaBottom },
-    transition: { duration: 0.3 },
+    transition: { duration: 0.25 },
   };
 
   useIonViewWillEnter(() => {
