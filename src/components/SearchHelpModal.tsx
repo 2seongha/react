@@ -97,8 +97,13 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
     []
   );
 
+  async function canDismiss(data?: any, role?: string) {
+    return role !== 'gesture';
+  }
+
   return (
     <IonModal
+      canDismiss={canDismiss}
       isOpen={searchHelp?.isOpen}
       onIonModalWillPresent={handleModalWillPresent}
       onIonModalDidDismiss={handleModalDidDismiss}
