@@ -72,16 +72,10 @@ const PersonalExpense: React.FC = () => {
     }),
   };
 
-  const titleVariants = {
-    enter: { opacity: 0, y: 5 },
-    center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -5 },
-  };
-
   const buttonMotion = {
     initial: { opacity: 1, y: 82 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 1, y: 82 },
+    exit: { opacity: 1, y: 'calc(82px + var(--ion-safe-area-bottom))' },
     transition: { duration: 0.2 },
   };
 
@@ -204,7 +198,6 @@ const PersonalExpense: React.FC = () => {
     return <AnimatePresence mode='sync'>
       <motion.span
         key={title}
-        // variants={titleVariants}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -255,18 +248,8 @@ const PersonalExpense: React.FC = () => {
 
   return (
     <IonPage className='personal-expense'>
-      <AppBar title={title} customStartButtons={<AnimatePresence mode='wait'>
-        <motion.div
-          key={'start-button' + step}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            duration: 0.2,
-            ease: 'easeOut',
-          }}
-          style={{ display: 'flex', alignItems: 'center' }}
-        >
+      <AppBar title={title} customStartButtons={
+        <>
           {step === 0 && (
             <IonBackButton
               defaultHref="/app/home"
@@ -306,13 +289,14 @@ const PersonalExpense: React.FC = () => {
               <span style={{ fontSize: '16px', fontWeight: '600' }}>취소</span>
             </IonButton>
           )}
-        </motion.div>
-      </AnimatePresence>} />
+        </>
+      } />
       < IonContent
         fullscreen
         scrollX={false}
         scrollY={false}
         scrollEvents={false}
+        forceOverscroll={false}
       >
         {approval === null && <div style={{
           // background: 'rgba(var(--ion-background-color-rgb), .95)',

@@ -71,7 +71,7 @@ const Menu: React.FC = () => {
         customEndButtons={closeButton}
       />
 
-      <IonContent className="menu-content" scrollY={true} scrollX={false}>
+      <IonContent className="menu-content" scrollY={true} scrollX={false} forceOverscroll={false}>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           {isPlatform('android') ? <IonRefresherContent /> : <IonRefresherContent pullingIcon={refreshOutline} />}
         </IonRefresher>

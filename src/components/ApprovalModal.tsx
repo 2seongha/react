@@ -292,7 +292,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               transition={{ duration: 0.5, ease: "easeInOut" }}
               style={{
                 width: '100%',
-                padding: '16px 21px 24px 21px',
+                padding: '16px 21px 32px 21px',
                 marginTop: '124px',
                 marginBottom: 'calc(154px + var(--ion-safe-area-bottom))',
               }}>
