@@ -442,7 +442,8 @@ const PersonalExpense: React.FC = () => {
                   '--color': 'var(--ion-color-step-900)',
                   borderRadius: '17px',
                   border: '1px dashed var(--custom-border-color-100)',
-                  fontSize: '16px'
+                  fontSize: '16px',
+                  marginBottom: '20px'
                 }}>
                 {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
               </IonButton>
