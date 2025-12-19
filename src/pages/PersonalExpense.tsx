@@ -39,6 +39,9 @@ const PersonalExpense: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevStepRef = useRef(0);
   const currStepRef = useRef(0);
+  const shouldAnimateEdge =
+    (step === 0) ||
+    (prevStepRef.current === 99 && step === 0);
 
   //* 항목 추가
   const oriItem = useRef(null); // 항목 템플릿
@@ -111,9 +114,9 @@ const PersonalExpense: React.FC = () => {
       cloneItem.DMBTR = '';
     }
 
+    goStep(99);
     setDocItem(cloneItem);
     setIsSaveEnabled(false);
-    goStep(99);
   }, [approval]);
 
   // 항목 저장
@@ -191,10 +194,16 @@ const PersonalExpense: React.FC = () => {
         title = '임직원 개인경비';
         break;
       case 1:
-        title = '헤더 설정';
+        title = '전표 헤더';
         break;
       case 2:
         title = '첨부 파일';
+        break;
+      case 3:
+        title = '결재선';
+        break;
+      case 4:
+        title = '결재 정보';
         break;
       case 99:
         title = '항목 추가';
@@ -517,7 +526,7 @@ const PersonalExpense: React.FC = () => {
             </motion.div>
           }
 
-          {/* 헤더 페이지 */}
+          {/* 첨부 파일 페이지 */}
           {step === 2 && <motion.div
             key="step2"
             custom={step - prevStepRef.current}
@@ -529,10 +538,43 @@ const PersonalExpense: React.FC = () => {
             style={{
               width: '100%',
               height: '100%',
-              backgroundColor: 'green'
             }}
           >
-            <>ㅁㄴㅇㄹ</>
+            <>첨부 파일</>
+          </motion.div>}
+
+          {/* 결재선 페이지 */}
+          {step === 3 && <motion.div
+            key="step3"
+            custom={step - prevStepRef.current}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.2 }}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          >
+            <>결재선</>
+          </motion.div>}
+
+          {/* 결재정보 페이지 */}
+          {step === 4 && <motion.div
+            key="step4"
+            custom={step - prevStepRef.current}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.2 }}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          >
+            <>결재 정보</>
           </motion.div>}
         </AnimatePresence>
 
@@ -566,12 +608,15 @@ const PersonalExpense: React.FC = () => {
           }}
         >
           <AnimatePresence mode="wait">
-            {step === 0 && (
-              <motion.div key="step0" {...buttonMotion} style={{ flex: 1 }}>
+            {step !== 99 && (
+              <motion.div
+                style={{ flex: 1 }}
+                {...(shouldAnimateEdge ? buttonMotion : {})}
+              >
                 <IonButton
                   mode="md"
                   color="primary"
-                  disabled={!approval?.FLOW_DOCITEM?.length}
+                  // disabled={!approval?.FLOW_DOCITEM?.length}
                   style={{
                     width: "100%",
                     height: "58px",
@@ -589,7 +634,7 @@ const PersonalExpense: React.FC = () => {
                     approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
                     approval.FLOWHD_DOCHD.SUM_DMBTR = totalDMBTR.toString();
                     webviewHaptic('mediumImpact');
-                    goStep(1);
+                    goStep(step + 1);
                   }}
                 >
                   다음 단계
@@ -615,27 +660,6 @@ const PersonalExpense: React.FC = () => {
                   }}
                 >
                   저장
-                </IonButton>
-              </motion.div>
-            )}
-
-            {step === 1 && (
-              <motion.div key="step1" {...buttonMotion} style={{ flex: 1 }}>
-                <IonButton
-                  mode="md"
-                  color="primary"
-                  style={{
-                    width: "100%",
-                    height: "58px",
-                    fontSize: "18px",
-                    fontWeight: "600",
-                  }}
-                  onClick={() => {
-                    webviewHaptic('mediumImpact');
-                    goStep(2);
-                  }}
-                >
-                  다음 단계
                 </IonButton>
               </motion.div>
             )}
@@ -1101,37 +1125,6 @@ const Header: React.FC<HeaderProps> = ({
         />
         {/* <span style={{ paddingBottom: '10px' }}>{docHeader?.WAERS}</span>
         </div> */}
-      </div>
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          bottom: 0,
-          width: "100%",
-          display: "flex",
-          padding: "12px 21px",
-          zIndex: '2',
-          paddingTop: '32px',
-          background: 'linear-gradient(to top, var(--ion-background-color) 0%, var(--ion-background-color) calc(100% - 20px), transparent 100%)',
-          paddingBottom: 'calc(12px + max(var(--ion-safe-area-bottom), var(--keyboard-height)))',
-          transform: 'translateZ(0)'
-        }}
-      >
-        <IonButton
-          mode="md"
-          color="primary"
-          style={{
-            flex: 1,
-            height: "58px",
-            fontSize: "18px",
-            fontWeight: "600",
-          }}
-          onClick={() => {
-            onSave?.(docHeader);
-          }}
-        >
-          <span>다음 단계</span>
-        </IonButton>
       </div>
     </>
   );
