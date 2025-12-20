@@ -96,13 +96,15 @@ const PersonalExpense: React.FC = () => {
 
   const variants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 40 : -40,
+      x: dir > 0 ? 30 : -30,
       opacity: [0.5, 1],
+      transition: 1.5
     }),
-    center: { x: 0, opacity: 1 },
+    center: { x: 0, opacity: 1},
     exit: (dir: number) => ({
       // x: dir > 0 ? 400 : -400,
       opacity: [1, 0],
+      transition: { duration: 0.05 }
     }),
   };
 
@@ -333,7 +335,6 @@ const PersonalExpense: React.FC = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.15 }}
             style={{ height: '100%', padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
           >
             <Item
@@ -368,7 +369,6 @@ const PersonalExpense: React.FC = () => {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.15 }}
               style={{ height: '100%', padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
             >
               <Header docHeader={approval.FLOWHD_DOCHD} />
@@ -383,7 +383,6 @@ const PersonalExpense: React.FC = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.15 }}
             style={{
               width: '100%',
               height: '100%',
@@ -403,7 +402,6 @@ const PersonalExpense: React.FC = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.15 }}
             style={{
               width: '100%',
               height: '100%',
