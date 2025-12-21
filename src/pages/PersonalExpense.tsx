@@ -34,6 +34,7 @@ const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
   //* 전체
   const [step, setStep] = useState(0);
+  const [enabledStep3, setEnabledStep3] = useState(true);
   const [approval, setApproval] = useState<any>(null);
   const ignorePopRef = useRef(false);
   const interactPopRef = useRef(false);
@@ -98,9 +99,9 @@ const PersonalExpense: React.FC = () => {
     enter: (dir: number) => ({
       x: dir > 0 ? 30 : -30,
       opacity: [0.5, 1],
-      transition: 1.5
+      transition: { duration: 1.5 }
     }),
-    center: { x: 0, opacity: 1},
+    center: { x: 0, opacity: 1 },
     exit: (dir: number) => ({
       // x: dir > 0 ? 400 : -400,
       opacity: [1, 0],
@@ -408,7 +409,12 @@ const PersonalExpense: React.FC = () => {
               padding: '21px 21px 0 21px',
             }}
           >
-            <FlowHd approval={approval} />
+            <FlowHd
+              approval={approval}
+              onChangeTitle={(value) => {
+                setEnabledStep3(!value);
+              }}
+            />
           </motion.div>}
         </AnimatePresence>
 
@@ -457,17 +463,23 @@ const PersonalExpense: React.FC = () => {
               </motion.div>
             }
           </AnimatePresence>
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
 
             {step !== 99 && (
               <motion.div
                 style={{ flex: 1 }}
-                {...(shouldAnimateEdge ? buttonMotion : {})}
+                initial={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
+                animate={shouldAnimateEdge ? { y: 0 } : undefined}
+                exit={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
+                transition={{ duration: shouldAnimateEdge ? 0.25 : 0 }}
               >
                 <IonButton
                   mode="md"
                   color="primary"
-                  disabled={step === 0 ? !approval?.FLOW_DOCITEM?.length : false}
+                  disabled={
+                    step === 0 ? !approval?.FLOW_DOCITEM?.length :
+                      step === 3 ? enabledStep3 :
+                        false}
                   style={{
                     width: "100%",
                     height: "58px",
@@ -1110,27 +1122,97 @@ const Attach: React.FC<AttachProps> = ({
 //* ========== Step 4. 결재 정보 ==========
 interface FlowHdProps {
   approval: any;
+  onChangeTitle: (value: string) => void;
 }
 
 const FlowHd: React.FC<FlowHdProps> = ({
   approval,
+  onChangeTitle,
 }) => {
+  const formRef = useRef<FormRef>({});
+  const [, forceRender] = useState(0);
+  let titleRef = useRef<HTMLIonInputElement>(null);
+
+  useEffect(() => {
+    formRef.current = approval || {};
+    forceRender(prev => prev + 1);
+    // 화면 진입 시
+    if (!formRef.current?.TITLE) {
+      setTimeout(() => {
+        titleRef.current?.setFocus();
+      }, 10);
+    }
+  }, [approval]);
 
   return (
     <>
-      <span style={{ fontSize: '16px', fontWeight: '500' }}>결재 제목<span style={{ color: 'var(--red)' }}> *</span></span>
-      <CustomInput label={''} style={{ height: '42px', minHeight: '42px', marginBottom: '42px' }} placeholder='결재 제목을 입력하세요.' />
-      <span style={{ fontSize: '16px', fontWeight: '500' }}>결재선</span>
-      <div style={{ marginTop: '12px', marginBottom: '42px' }}>
+      <span style={{ fontSize: '18px', fontWeight: '500' }}>결재 제목을 입력해 주세요</span>
+      <CustomInput
+        ref={(ref: any) => titleRef = ref}
+        label={''}
+        formRef={formRef}
+        style={{ height: '48px', minHeight: '48px', marginTop: '8px', marginBottom: '64px' }}
+        placeholder='결재 제목 (필수)'
+        value='$TITLE'
+        clearInput
+        onChange={(value) => {
+          formRef.current.TITLE = value;
+          onChangeTitle(value);
+        }}
+      />
+      <span style={{ fontSize: '18px', fontWeight: '500' }}>결재선</span>
+      <div style={{ marginTop: '24px', marginBottom: '42px' }}>
         {
           approval?.FLOWHD_APPRLINE.map((apprLine: any, index: number) => <div style={{
-
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '32px'
           }}>
-            <span>{apprLine.NAME}</span>
-            <div>
-
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', width: '76px' }}>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    backgroundColor: '#33ccbdff',
+                    padding: "1px 8px",
+                    borderRadius: "4px",
+                    fontWeight: "500",
+                    color: '#fff',
+                  }}
+                >
+                  {apprLine.APPR_CNT} {apprLine.WFIT_TYPE_TEXT}
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <span style={{
+                  fontSize: '14px'
+                }}>{apprLine.NAME + ' '}
+                  <span
+                    style={{ color: 'var(--ion-color-secondary)' }}>
+                    ({apprLine.ORGTX} {apprLine.POSITION_NAME})
+                  </span>
+                </span>
+                <span></span>
+              </div>
             </div>
-          </div>)
+            <span
+              style={{
+                fontSize: "12px",
+                backgroundColor: "var(--custom-border-color-50)",
+                border: "1px solid var(--custom-border-color-100)",
+                padding: "1px 8px",
+                borderRadius: "8px",
+                fontWeight: "400",
+              }}
+            >
+              {apprLine.WFIT_SUB_TEXT}
+            </span>
+          </div>
+          )
         }
       </div>
     </>

@@ -11,6 +11,7 @@ import useAppStore from '../stores/appStore';
 import { FormRef } from '../stores/types';
 
 export interface CustomInputProps {
+  ref?: any;
   disabled?: boolean;
   formRef?: RefObject<FormRef>;
   label: string;
@@ -36,6 +37,7 @@ export interface CustomInputProps {
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
+  ref,
   disabled,
   formRef,
   label,
@@ -64,6 +66,10 @@ const CustomInput: React.FC<CustomInputProps> = ({
   const inputRef = useRef<HTMLIonInputElement>(null);
   const [localValue, setLocalValue] = useState('');
   const [localHelper, setLocalHelper] = useState('');
+
+  useEffect(() => {
+    if(ref) ref(inputRef);
+  })
 
   useEffect(() => {
     setLocalValue(resolveTemplate(value ?? ''));

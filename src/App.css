@@ -285,7 +285,7 @@ ion-input {
 }
 
 .label-text-wrapper.sc-ion-input-md {
-  min-width: 20%;
+  min-width: 25%;
 }
 
 .input-disabled.sc-ion-input-md-h {
@@ -318,7 +318,7 @@ ion-input {
 .sc-ion-input-md-s>[slot=label] {
   color: var(--ion-color-step-700);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .sn-notifications-container {
@@ -326,7 +326,7 @@ ion-input {
 }
 
 .personal-expense-header .input-wrapper.sc-ion-input-md input.sc-ion-input-md {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .ion-activatable {
