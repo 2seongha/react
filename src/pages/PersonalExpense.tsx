@@ -125,7 +125,7 @@ const PersonalExpense: React.FC = () => {
 
   useIonViewWillEnter(() => {
     const initApproval = async () => {
-      const approval = await getStart('IA103');
+      const approval = await getStart('DM103');
       if (approval instanceof Error) {
         router.goBack();
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
@@ -336,7 +336,7 @@ const PersonalExpense: React.FC = () => {
             initial="enter"
             animate="center"
             exit="exit"
-            style={{ height: '100%', padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
+            style={{ height: '100%', padding: '12px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
           >
             <Item
               setScrollRef={setScrollRef}
@@ -387,7 +387,7 @@ const PersonalExpense: React.FC = () => {
             style={{
               width: '100%',
               height: '100%',
-              padding: '12px 21px 0 21px'
+              padding: '21px 21px 0 21px'
             }}
           >
             <Attach
@@ -447,15 +447,14 @@ const PersonalExpense: React.FC = () => {
             {step === 3 &&
               <motion.div key="step3input" {...textAreaMotion} style={{ flex: 1 }}>
                 <IonTextarea
-                  // ref={textareaRef}
                   mode="md"
                   style={{
                     marginBottom: "12px",
                     "--border-radius": "16px",
                   }}
                   rows={3}
-                  // value={textValue}
-                  // onInput={handleTextChange}
+                  value={approval?.LTEXT}
+                  onInput={(e) => approval.LTEXT = (e.target as HTMLTextAreaElement).value}
                   labelPlacement="start"
                   fill="outline"
                   placeholder="결재 의견을 입력해 주세요."
@@ -470,7 +469,8 @@ const PersonalExpense: React.FC = () => {
                 style={{ flex: 1 }}
                 initial={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
                 animate={shouldAnimateEdge ? { y: 0 } : undefined}
-                exit={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
+                // exit={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
+                // exit={shouldAnimateEdge ? { y: 0 } : undefined}
                 transition={{ duration: shouldAnimateEdge ? 0.25 : 0 }}
               >
                 <IonButton
@@ -1099,21 +1099,62 @@ const Attach: React.FC<AttachProps> = ({
   attach,
 }) => {
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      console.log('선택된 파일:', files);
+      // 여기서 서버 업로드 혹은 WebView 전달 로직
+    }
+  };
+
   return (
     <>
       {
-        attach.map((attach: any, index: number) => <div style={{
-          border: '1px solid var(--custom-border-color-100)',
-          padding: '21px',
-          marginBottom: '21px',
-          borderRadius: '12px'
-        }}>
-          <span>{attach.FILE_TYPE_TEXT}</span>
+        attach.map((attach: any, index: number) => <div
+          key={'attach' + index}
+          style={{
+            border: '1px solid var(--custom-border-color-100)',
+            marginBottom: '21px',
+            borderRadius: '12px'
+          }}>
+          <div style={{ padding: '21px' }}>
+            <span style={{ fontSize: '16px', fontWeight: '500' }}>{attach.FILE_TYPE_TEXT}</span>
+
+          </div>
           <div>
 
           </div>
+          <IonButton
+            type='button'
+            mode='md'
+            onClick={handleButtonClick}
+            style={{
+              width: '100%',
+              height: '58px',
+              '--background': 'transparent',
+              '--color': 'var(--ion-color-step-900)',
+              borderRadius: '0px',
+              borderTop: '1px solid var(--custom-border-color-50)',
+              fontSize: '16px',
+            }}>
+            {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}파일 업로드
+          </IonButton>
         </div>)
       }
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }} // 숨김
+        multiple // 여러 파일 선택 가능
+        accept="*/*"
+        onChange={handleFileChange}
+      />
     </>
   );
 };
@@ -1147,7 +1188,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
 
   return (
     <>
-      <span style={{ fontSize: '18px', fontWeight: '500' }}>결재 제목을 입력해 주세요</span>
+      <span style={{ fontSize: '18px', fontWeight: '500' }}>결재 제목을 입력해 주세요.</span>
       <CustomInput
         ref={(ref: any) => titleRef = ref}
         label={''}
