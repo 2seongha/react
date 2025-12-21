@@ -29,6 +29,7 @@ import CustomInput from '../components/CustomInput';
 import dayjs from 'dayjs';
 import { getTopModalId, popModal } from '../App';
 import Notify from 'simple-notify';
+import { getFileTypeIcon } from '../utils';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -231,7 +232,6 @@ const PersonalExpense: React.FC = () => {
 
     new Notify({
       title: isEdit ? '수정되었습니다.' : '저장되었습니다.',
-      text: `${newItem.ACCOUNT_CODE_T} ${Number(newItem.WRBTR).toLocaleString('ko-KR')}원`,
       position: 'x-center bottom',
       autotimeout: 2000,
     });
@@ -244,7 +244,6 @@ const PersonalExpense: React.FC = () => {
       new Notify({
         status: 'error',
         title: '삭제되었습니다.',
-        text: `${prev.FLOW_DOCITEM[deleteIndex].ACCOUNT_CODE_T} ${Number(prev.FLOW_DOCITEM[deleteIndex].WRBTR).toLocaleString("ko-KR")}원`,
         position: 'x-center bottom',
         autotimeout: 2000
       });
@@ -387,11 +386,13 @@ const PersonalExpense: React.FC = () => {
             style={{
               width: '100%',
               height: '100%',
-              padding: '21px 21px 0 21px'
+              overflow: 'auto',
+              overflowX: 'hidden',
+              padding: '21px 21px calc(102px + max(var(--ion-safe-area-bottom))) 21px'
             }}
           >
             <Attach
-              attach={approval?.FLOWHD_ATTACH}
+              approval={approval}
             />
           </motion.div>}
 
@@ -1092,48 +1093,139 @@ const Header: React.FC<HeaderProps> = ({
 
 //* ========== Step 3. 첨부 파일 ==========
 interface AttachProps {
-  attach: any;
+  approval: any;
 }
 
 const Attach: React.FC<AttachProps> = ({
-  attach,
+  approval,
 }) => {
+  const [files, setFiles] = useState(approval.FILES ?? []);
+  const fileTypeRef = useRef('');
+
+  useEffect(() => {
+    if (!approval.FILES) {
+      approval.FILES = [];
+    } else {
+      setFiles(approval.FILES.map((file: any) => file.file));
+    }
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = (fileType: string) => {
+    fileTypeRef.current = fileType;
     fileInputRef.current?.click();
+  };
+
+  const handleDeleteAttach = (index: number) => {
+    const removed = approval.FILES.splice(index, 1);
+
+    approval.FILES.forEach((item: any, idx: number) => {
+      item.file.FILE_NO = String(idx + 1).padStart(5, '0');
+      item.payload.fileno = String(idx + 1);
+    });
+
+    setFiles(_.map(approval.FILES, 'file'));
+    new Notify({
+      status: 'error',
+      title: '삭제되었습니다.',
+      position: 'x-center bottom',
+      autotimeout: 2000
+    });
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      console.log('선택된 파일:', files);
-      // 여기서 서버 업로드 혹은 WebView 전달 로직
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileObject = {
+          file: {
+            ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
+            ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_NAME,
+            FILE_DESCRIPTION: file.name.toUpperCase(),
+            FILE_EXTENTION: file.name.split('.').pop()?.toUpperCase(),
+            FILE_LEN: file.size,
+            FILE_NAME: file.name.toUpperCase(),
+            FILE_NO: "00000",
+            FILE_TYPE: fileTypeRef.current
+          },
+          payload: {
+            ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_LOGIN_ID,
+            'fileno': "0",
+            'filetype': fileTypeRef.current,
+            'slug': file.name.toUpperCase(),
+            'guid': approval.GUID,
+            'accept-encoding': "gzip, deflate, br, zstd"
+          }
+        }
+        approval.FILES.push(fileObject);
+      }
+
+      approval.FILES.forEach((item: any, index: number) => {
+        item.file.FILE_NO = String(index + 1).padStart(5, '0');
+        item.payload.fileno = String(index + 1);
+      });
+
+      setFiles(_.map(approval.FILES, 'file'));
+      new Notify({
+        status: 'success',
+        title: '업로드되었습니다.',
+        position: 'x-center bottom',
+        autotimeout: 2000,
+      });
     }
   };
 
   return (
     <>
       {
-        attach.map((attach: any, index: number) => <div
+        approval.FLOWHD_ATTACH.map((attach: any, index: number) => <div
           key={'attach' + index}
           style={{
             border: '1px solid var(--custom-border-color-100)',
             marginBottom: '21px',
             borderRadius: '12px'
           }}>
-          <div style={{ padding: '21px' }}>
+          <div style={{ padding: '21px 12px 21px 21px' }}>
             <span style={{ fontSize: '16px', fontWeight: '500' }}>{attach.FILE_TYPE_TEXT}</span>
-
-          </div>
-          <div>
-
+            {
+              files.filter((file: any) => file.FILE_TYPE === attach.FILE_TYPE).map((file: any, index: number) => <div
+                key={'attach-file' + index}
+                style={{
+                  paddingTop: '21px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                <CachedImage src={getFileTypeIcon(file.FILE_EXTENTION).image} width={28} height={28}></CachedImage>
+                <span
+                  style={{
+                    flex: 1,
+                    marginLeft: '12px',
+                    fontSize: '14px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {file.FILE_DESCRIPTION}
+                </span>
+                <IonButton
+                  mode='md'
+                  fill='clear'
+                  color='danger'
+                  style={{ fontSize: '14px' }}
+                  onClick={() => handleDeleteAttach(index)}>
+                  삭제
+                </IonButton>
+              </div>
+              )
+            }
           </div>
           <IonButton
             type='button'
             mode='md'
-            onClick={handleButtonClick}
+            onClick={() => handleButtonClick(attach.FILE_TYPE)}
             style={{
               width: '100%',
               height: '58px',
@@ -1205,12 +1297,14 @@ const FlowHd: React.FC<FlowHdProps> = ({
       <span style={{ fontSize: '18px', fontWeight: '500' }}>결재선</span>
       <div style={{ marginTop: '24px', marginBottom: '42px' }}>
         {
-          approval?.FLOWHD_APPRLINE.map((apprLine: any, index: number) => <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '32px'
-          }}>
+          approval?.FLOWHD_APPRLINE.map((apprLine: any, index: number) => <div
+            key={'apprline' + index}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '32px'
+            }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{ display: 'flex', width: '76px' }}>
                 <span

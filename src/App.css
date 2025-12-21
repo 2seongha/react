@@ -337,3 +337,11 @@ ion-input {
 .ion-activated {
   transform: scale(.98);
 }
+
+.sn-notify-outline {
+  --sn-notify-background-color: var(--ion-background-color1);
+}
+
+.sn-notify-outline .sn-notify-title {
+  --sn-notify-title-color: var(--ion-text-color);
+}
