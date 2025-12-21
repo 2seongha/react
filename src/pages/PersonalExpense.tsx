@@ -406,7 +406,7 @@ const PersonalExpense: React.FC = () => {
             style={{
               width: '100%',
               height: '100%',
-              padding: '21px 21px 0 21px',
+              padding: '42px 21px 0 21px',
             }}
           >
             <FlowHd
@@ -744,7 +744,8 @@ const AddItem: React.FC<AddItemProps> = ({
           height: '100%',
           overflow: 'auto',
           overflowX: 'hidden',
-          padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
+          padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom))) 21px'
+          // padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
         }}>
         <CustomInput
           formRef={formRef}
@@ -1137,11 +1138,11 @@ const FlowHd: React.FC<FlowHdProps> = ({
     formRef.current = approval || {};
     forceRender(prev => prev + 1);
     // 화면 진입 시
-    if (!formRef.current?.TITLE) {
-      setTimeout(() => {
-        titleRef.current?.setFocus();
-      }, 10);
-    }
+    // if (!formRef.current?.TITLE) {
+    //   setTimeout(() => {
+    //     titleRef.current?.setFocus();
+    //   }, 10);
+    // }
   }, [approval]);
 
   return (
