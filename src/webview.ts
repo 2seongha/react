@@ -149,8 +149,8 @@ const _initWebview = async (): Promise<void> => {
       CORP_NM: "블루어드",
       SYSTEM: {
         webviewLink: '',
-        apiEndpoint: 'https://iflow-api-dev2.cfapps.ap12.hana.ondemand.com',
-        // apiEndpoint: 'http://localhost:4201',
+        // apiEndpoint: 'https://iflow-api-dev2.cfapps.ap12.hana.ondemand.com',
+        apiEndpoint: 'http://localhost:4201',
         apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
     });

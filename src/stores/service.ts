@@ -135,7 +135,7 @@ export async function getStart(FLOWCODE: string): Promise<any> {
   }
 }
 
-export async function getSearchHelp(ENTITYSET: string, FLOWCODE?: string, INPUT1?: string, INPUT2?: string ): Promise<any> {
+export async function getSearchHelp(ENTITYSET: string, FLOWCODE?: string, INPUT1?: string, INPUT2?: string): Promise<any> {
   try {
     const user = useAppStore.getState().user;
     const LOGIN_ID = user?.LOGIN_ID;
@@ -150,6 +150,27 @@ export async function getSearchHelp(ENTITYSET: string, FLOWCODE?: string, INPUT1
     return error;
   }
 }
+
+export async function postStart(APPROVAL: any): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    const BUKRS = user?.BUKRS;
+
+    const api = createApiInstance();
+    const payload = APPROVAL;
+    payload.LOGIN_ID = LOGIN_ID;
+    payload.BUKRS = BUKRS;
+
+    const res = await api.post(`/v1/api/start`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 
 export async function getNotices(): Promise<NoticeModel[]> {
   try {

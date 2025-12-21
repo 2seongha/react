@@ -18,7 +18,7 @@ import { addOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { getSearchHelp, getStart } from '../stores/service';
+import { getSearchHelp, getStart, postStart } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,6 +30,8 @@ import dayjs from 'dayjs';
 import { getTopModalId, popModal } from '../App';
 import Notify from 'simple-notify';
 import { getFileTypeIcon } from '../utils';
+import AnimatedIcon from '../components/AnimatedIcon';
+import { FlipWords } from '../components/FlipWords';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -37,6 +39,7 @@ const PersonalExpense: React.FC = () => {
   const [step, setStep] = useState(0);
   const [enabledStep3, setEnabledStep3] = useState(true);
   const [approval, setApproval] = useState<any>(null);
+  const [result, setResult] = useState<any>(null);
   const ignorePopRef = useRef(false);
   const interactPopRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -61,8 +64,6 @@ const PersonalExpense: React.FC = () => {
       case 99:
         title = '항목 추가';
         break;
-      default:
-        title = 'test';
     }
     return <AnimatePresence mode='sync'>
       <motion.span
@@ -133,7 +134,10 @@ const PersonalExpense: React.FC = () => {
       }
       console.log(approval);
       oriItem.current = approval.FLOWHD_DOCITEM[0];
-      approval.FLOW_DOCITEM = [];
+      approval.FLOWHD_DOCITEM = [];
+      approval.FLOWCODE = 'DM103';
+      approval.WFIT_TYPE = 'ST';
+      approval.ACTIVITY = 'START';
       setApproval(approval);
     }
     initApproval();
@@ -154,6 +158,16 @@ const PersonalExpense: React.FC = () => {
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
+      if (currStepRef.current === 4) {
+        // history를 한 번 더 밀어서 실제 뒤로 안 가게 함
+        window.history.pushState(
+          { step: 4 },
+          '',
+          window.location.href
+        );
+        return;
+      }
+
       if (['searchHelp', 'datePicker'].includes(getTopModalId() ?? '')) {
         return popModal();
       }
@@ -200,11 +214,11 @@ const PersonalExpense: React.FC = () => {
     let isEdit = false; // ✅ 수정 여부 플래그
 
     setApproval((prev: any) => {
-      if (!prev || !prev.FLOW_DOCITEM) {
-        return { ...prev, FLOW_DOCITEM: [{ ...newItem, CNT: '1', ITEMNO: '1' }] };
+      if (!prev || !prev.FLOWHD_DOCITEM) {
+        return { ...prev, FLOWHD_DOCITEM: [{ ...newItem, CNT: '1', ITEMNO: '1' }] };
       }
 
-      const list = [...prev.FLOW_DOCITEM];
+      const list = [...prev.FLOWHD_DOCITEM];
       const index = list.findIndex(
         (itm) => String(itm.CNT) === String(newItem.CNT)
       );
@@ -225,7 +239,7 @@ const PersonalExpense: React.FC = () => {
         ITEMNO: String(i + 1),
       }));
 
-      return { ...prev, FLOW_DOCITEM: newList };
+      return { ...prev, FLOWHD_DOCITEM: newList };
     });
 
     goStep(0);
@@ -240,7 +254,7 @@ const PersonalExpense: React.FC = () => {
   // 항목 삭제
   const handleDeleteItem = useCallback((deleteIndex: number) => {
     setApproval((prev: any) => {
-      if (!prev || !prev.FLOW_DOCITEM) return { FLOW_DOCITEM: [] };
+      if (!prev || !prev.FLOWHD_DOCITEM) return { FLOWHD_DOCITEM: [] };
       new Notify({
         status: 'error',
         title: '삭제되었습니다.',
@@ -248,13 +262,13 @@ const PersonalExpense: React.FC = () => {
         autotimeout: 2000
       });
       // deleteIndex 기준으로 필터링 + 재정렬
-      const newList = prev.FLOW_DOCITEM
+      const newList = prev.FLOWHD_DOCITEM
         .filter((_: any, i: number) => i !== deleteIndex)
         .map((item: any, i: number) => ({ ...item, CNT: i + 1, ITEMNO: i + 1 }));
 
       return {
         ...prev,
-        FLOW_DOCITEM: newList,
+        FLOWHD_DOCITEM: newList,
       };
     });
 
@@ -273,7 +287,7 @@ const PersonalExpense: React.FC = () => {
             />
           )}
 
-          {step !== 0 && step !== 99 && (
+          {step !== 0 && step !== 99 /*&& step !== 4*/ && (
             <IonButton
               mode="md"
               fill="clear"
@@ -339,7 +353,7 @@ const PersonalExpense: React.FC = () => {
           >
             <Item
               setScrollRef={setScrollRef}
-              docItems={approval?.FLOW_DOCITEM}
+              docItems={approval?.FLOWHD_DOCITEM}
               onAddItem={handleAddItem}
               onDeleteItem={handleDeleteItem}
               onItemClick={(item) => {
@@ -398,7 +412,7 @@ const PersonalExpense: React.FC = () => {
 
           {/* 결재정보 페이지 */}
           {step === 3 && <motion.div
-            key="step4"
+            key="step3"
             custom={step - prevStepRef.current}
             variants={variants}
             initial="enter"
@@ -416,6 +430,27 @@ const PersonalExpense: React.FC = () => {
                 setEnabledStep3(!value);
               }}
             />
+          </motion.div>}
+
+          {/* ㅓ결과 페이지 */}
+          {step === 4 && <motion.div
+            key="step4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeIn' }}
+            style={{
+              position: 'fixed',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingBottom: '150px',
+              flexDirection: 'column'
+            }}
+          >
+            <Result result={result} />
           </motion.div>}
         </AnimatePresence>
 
@@ -465,7 +500,7 @@ const PersonalExpense: React.FC = () => {
           </AnimatePresence>
           <AnimatePresence mode="wait" initial={false}>
 
-            {step !== 99 && (
+            {step !== 99 && step !== 4 && (
               <motion.div
                 style={{ flex: 1 }}
                 initial={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
@@ -478,7 +513,7 @@ const PersonalExpense: React.FC = () => {
                   mode="md"
                   color="primary"
                   disabled={
-                    step === 0 ? !approval?.FLOW_DOCITEM?.length :
+                    step === 0 ? !approval?.FLOWHD_DOCITEM?.length :
                       step === 3 ? enabledStep3 :
                         false}
                   style={{
@@ -487,19 +522,25 @@ const PersonalExpense: React.FC = () => {
                     fontSize: "18px",
                     fontWeight: "600",
                   }}
-                  onClick={() => {
-                    let totalWRBTR = 0;
-                    let totalDMBTR = 0;
-                    approval.FLOW_DOCITEM.forEach((item: any) => {
-                      totalWRBTR += Number(item.WRBTR);
-                      totalDMBTR += Number(item.DMBTR);
-                    });
+                  onClick={step === 3
+                    ? async () => {
+                      goStep(step + 1);
+                      // const result = await postStart(approval);
+                      // setResult(result);
+                    }
+                    : () => {
+                      let totalWRBTR = 0;
+                      let totalDMBTR = 0;
+                      approval.FLOWHD_DOCITEM.forEach((item: any) => {
+                        totalWRBTR += Number(item.WRBTR);
+                        totalDMBTR += Number(item.DMBTR);
+                      });
 
-                    approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
-                    approval.FLOWHD_DOCHD.SUM_DMBTR = totalDMBTR.toString();
-                    webviewHaptic('mediumImpact');
-                    goStep(step + 1);
-                  }}
+                      approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
+                      approval.FLOWHD_DOCHD.SUM_DMBTR = totalDMBTR.toString();
+                      webviewHaptic('mediumImpact');
+                      goStep(step + 1);
+                    }}
                 >
                   {step === 3 ? '결재 상신' : '다음 단계'}
                 </IonButton>
@@ -507,6 +548,27 @@ const PersonalExpense: React.FC = () => {
             )}
 
             {step === 99 && (
+              <motion.div key="step99" {...buttonMotion} style={{ flex: 1 }}>
+                <IonButton
+                  mode="md"
+                  color="primary"
+                  style={{
+                    width: "100%",
+                    height: "58px",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                  }}
+                  onClick={() => {
+                    webviewHaptic('mediumImpact');
+                    handleSaveItem(docItem);
+                  }}
+                >
+                  저장
+                </IonButton>
+              </motion.div>
+            )}
+
+            {step === 4 && result && (
               <motion.div key="step99" {...buttonMotion} style={{ flex: 1 }}>
                 <IonButton
                   mode="md"
@@ -520,10 +582,9 @@ const PersonalExpense: React.FC = () => {
                   }}
                   onClick={() => {
                     webviewHaptic('mediumImpact');
-                    handleSaveItem(docItem);
                   }}
                 >
-                  저장
+                  닫기
                 </IonButton>
               </motion.div>
             )}
@@ -1118,7 +1179,7 @@ const Attach: React.FC<AttachProps> = ({
   };
 
   const handleDeleteAttach = (index: number) => {
-    const removed = approval.FILES.splice(index, 1);
+    approval.FILES.splice(index, 1);
 
     approval.FILES.forEach((item: any, idx: number) => {
       item.file.FILE_NO = String(idx + 1).padStart(5, '0');
@@ -1136,6 +1197,7 @@ const Attach: React.FC<AttachProps> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
+    console.log('[업로드]' + files);
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -1351,6 +1413,37 @@ const FlowHd: React.FC<FlowHdProps> = ({
           )
         }
       </div>
+    </>
+  );
+};
+
+//* ========== Step 5. 결과 ==========
+interface ResultProps {
+  result: any;
+}
+
+const Result: React.FC<ResultProps> = ({
+  result,
+}) => {
+  const [status, setStatus] = useState<string | null>(null);
+  const [stepText, setStepText] = useState("할게요");
+
+  return (
+    <>
+      <AnimatedIcon
+        status={status}
+        onAnimationComplete={() => {
+          webviewHaptic("mediumImpact");
+        }}
+      />
+      <span style={{ fontSize: '21px', fontWeight: '600' }}>
+        임직원개인경비
+        <span style={{ color: `var(--ion-color-primary` }}> 1건</span>을
+      </span>
+      <span style={{ fontSize: '21px', fontWeight: '600' }}>
+        <span style={{ color: `var(--ion-color-primary` }}>상신</span>{" "}
+        <FlipWords animation={stepText === '했어요'} words={[stepText]} />
+      </span>
     </>
   );
 };
