@@ -116,13 +116,10 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
       <IonContent
         onIonScrollStart={async (e: Event) => {
           // @ts-ignore
-          // const target = await e.target.getScrollElement();
-          // const scrollTop = target.scrollTop;
           const modalEl = modalRef.current;
           if (!modalEl) return;
           // @ts-ignore
           const gesture = modalEl.gesture; // internal API
-          // if (scrollTop > 0) gesture.enable(false);
           gesture.enable(false);
         }}
         onIonScrollEnd={() => {

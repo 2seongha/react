@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   IonBackButton,
   IonButton,
@@ -16,10 +16,10 @@ import { addOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { getSearchHelp, getStart, postStart } from '../stores/service';
+import { getSearchHelp, getStart, postAttach, postStart } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
 import LoadingIndicator from '../components/LoadingIndicator';
 import DatePickerModal from '../components/DatePicker';
 import { FormRef } from '../stores/types';
@@ -48,6 +48,7 @@ const PersonalExpense: React.FC = () => {
   const animationRef = useRef(false); // 애니메이션 중 뒤로가기 막음
   const isCloseButtonRef = useRef(false); // 닫기 버튼을 누른건지 판별용
   const successRef = useRef(false); // 성공시 뒤로가기하면 홈으로
+  const fileNoRef = useRef(0); // 첨부 파일 넘버는 상태 유지
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
   const title = useMemo(() => {
     let title;
@@ -89,11 +90,11 @@ const PersonalExpense: React.FC = () => {
     setStep(newStep);
   }, []);
 
-  const variants = {
+  const variants: Variants = {
     enter: (dir: number) => ({
       x: dir > 0 ? 10 : -10,
     }),
-    center: { x: 0, transition: { type: "tween", duration: 0.25 } },
+    center: { x: 0, opacity: 1, transition: { type: "tween", duration: 0.25 } },
     exit: (dir: number) => ({
       opacity: [1, 0],
       transition: { duration: currStepRef.current === 4 ? 0.25 : 0 }
@@ -435,6 +436,7 @@ const PersonalExpense: React.FC = () => {
             }}
           >
             <Attach
+              fileNo={fileNoRef}
               approval={approval}
             />
           </motion.div>}
@@ -1209,10 +1211,12 @@ const Header: React.FC<HeaderProps> = ({
 //* ========== Step 2. 첨부 파일 ==========
 interface AttachProps {
   approval: any;
+  fileNo: RefObject<number>;
 }
 
 const Attach: React.FC<AttachProps> = ({
   approval,
+  fileNo
 }) => {
   const [files, setFiles] = useState(approval.FILES ?? []);
   const fileTypeRef = useRef('');
@@ -1221,7 +1225,7 @@ const Attach: React.FC<AttachProps> = ({
     if (!approval.FILES) {
       approval.FILES = [];
     } else {
-      setFiles(approval.FILES.map((file: any) => file.file));
+      setFiles(approval.FILES);
     }
   }, []);
 
@@ -1232,15 +1236,10 @@ const Attach: React.FC<AttachProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleDeleteAttach = (index: number) => {
-    approval.FILES.splice(index, 1);
+  const handleDeleteAttach = (fileNo: string) => {
+    approval.FILES = approval.FILES.filter((file: any) => file.FILE_NO !== fileNo);
 
-    approval.FILES.forEach((item: any, idx: number) => {
-      item.file.FILE_NO = String(idx + 1).padStart(5, '0');
-      item.payload.fileno = String(idx + 1);
-    });
-
-    setFiles(_.map(approval.FILES, 'file'));
+    setFiles(approval.FILES);
     new Notify({
       status: 'error',
       title: '삭제되었습니다.',
@@ -1249,40 +1248,69 @@ const Attach: React.FC<AttachProps> = ({
     });
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
+    const payloads = [];
+
+    // const arrayBufferToHex = (buffer: ArrayBuffer): string => {
+    //   const bytes = new Uint8Array(buffer);
+    //   let hex = "";
+
+    //   for (let i = 0; i < bytes.length; i++) {
+    //     hex += bytes[i].toString(16).padStart(2, "0");
+    //   }
+
+    //   return hex;
+    // }
+
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        const FILE_NO = String(fileNo.current).padStart(5, '0');
+
+        // const buffer = await file.arrayBuffer();
+
         const fileObject = {
-          file: {
-            ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
-            ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_NAME,
-            FILE_DESCRIPTION: file.name.toUpperCase(),
-            FILE_EXTENTION: file.name.split('.').pop()?.toUpperCase(),
-            FILE_LEN: file.size,
-            FILE_NAME: file.name.toUpperCase(),
-            FILE_NO: "00000",
-            FILE_TYPE: fileTypeRef.current
-          },
-          payload: {
-            ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_LOGIN_ID,
-            'fileno': "0",
-            'filetype': fileTypeRef.current,
-            'slug': file.name.toUpperCase(),
-            'guid': approval.GUID,
-            'accept-encoding': "gzip, deflate, br, zstd"
-          }
-        }
+          ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
+          ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_NAME,
+          FILE_DESCRIPTION: file.name,
+          FILE_EXTENTION: file.name.split('.').pop(),
+          FILE_LEN: file.size,
+          FILE_NAME: file.name,
+          FILE_NO: FILE_NO,
+          FILE_TYPE: fileTypeRef.current
+        };
+
+        // const payload = {
+        //   header: {
+        //     'loginid': approval.LOGIN_ID,
+        //     'fileno': FILE_NO,
+        //     'filetype': fileTypeRef.current,
+        //     'slug': encodeURIComponent(file.name),
+        //     'guid': approval.GUID,
+        //     'accept-encoding': "gzip, deflate, br, zstd"
+        //   },
+        //   body: buffer
+        // }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('slug', file.name);
+        formData.append('fileno', FILE_NO);
+        formData.append('filetype', fileTypeRef.current);
+        formData.append('loginid', approval.LOGIN_ID);
+        formData.append('guid', approval.GUID);
+
         approval.FILES.push(fileObject);
+        payloads.push(formData);
+        fileNo.current += 1;
       }
 
-      approval.FILES.forEach((item: any, index: number) => {
-        item.file.FILE_NO = String(index + 1).padStart(5, '0');
-        item.payload.fileno = String(index + 1);
-      });
+      await Promise.all(payloads.map(payload => postAttach(payload)));
+      console.log(fileNo.current);
+      const nextFiles = [...approval.FILES];
+      setFiles(nextFiles);
 
-      setFiles(_.map(approval.FILES, 'file'));
       new Notify({
         status: 'success',
         title: '업로드되었습니다.',
@@ -1330,7 +1358,7 @@ const Attach: React.FC<AttachProps> = ({
                   fill='clear'
                   color='danger'
                   style={{ fontSize: '14px' }}
-                  onClick={() => handleDeleteAttach(index)}>
+                  onClick={() => handleDeleteAttach(file.FILE_NO)}>
                   삭제
                 </IonButton>
               </div>
@@ -1421,11 +1449,11 @@ const FlowHd: React.FC<FlowHdProps> = ({
               marginBottom: '32px'
             }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ display: 'flex', width: '76px' }}>
+              <div style={{ display: 'flex', width: '52px' }}>
                 <span
                   style={{
                     fontSize: "12px",
-                    backgroundColor: '#00c1b7ff',
+                    backgroundColor: '#00c8ffce',
                     padding: "1px 8px",
                     borderRadius: "4px",
                     fontWeight: "500",
@@ -1563,9 +1591,9 @@ const Result: React.FC<ResultProps> = ({
                 bottom: 0,
                 height: '2px', // 최대 border 두께
                 background: `linear-gradient(to right, transparent,
-                 ${res?.Type === 'E' ? '#af53f641' : '#20cf7441'} 25%,
+                 ${res?.Type === 'E' ? '#af53f641' : '#00bc5b41'} 25%,
                  ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%,
-                 ${res?.Type === 'E' ? '#af53f641' : '#20cf7441'} 75%,
+                 ${res?.Type === 'E' ? '#af53f641' : '#00bc5b41'} 75%,
                   transparent)`,
                 pointerEvents: 'none',
                 marginBottom: '12px'

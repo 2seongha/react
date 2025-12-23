@@ -1,8 +1,12 @@
-body,
-html {
-  overscroll-behavior: none;
+body{
+  position: relative;
+  overflow: auto;
 }
 
+#root {
+  position: relative;
+  overflow: auto;
+}
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;

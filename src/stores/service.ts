@@ -165,6 +165,20 @@ export async function postStart(APPROVAL: any): Promise<any> {
   }
 }
 
+export async function postAttach(ATTACH: any): Promise<any> {
+  try {
+    const api = createApiInstance();
+    const payload = ATTACH;
+
+    const res = await api.post(`/v1/api/attach`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 
 export async function getNotices(): Promise<NoticeModel[]> {
   try {

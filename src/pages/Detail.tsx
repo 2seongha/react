@@ -652,7 +652,7 @@ const Detail: React.FC = () => {
                     const isRef = apprLine.WFIT_TYPE === "D"; //참조
                     const isLast = index === approval.APPRLINE.length - 1;
                     const text = approval.TEXT.find(
-                      (text: any) => text.FLOWIT === apprLine.APPR_CNT
+                      (text: any) => text.FLOWIT_NO === apprLine.APPR_CNT
                     )?.LTEXT;
 
                     let MuiIcon, color, borderColor, connectorColor;
