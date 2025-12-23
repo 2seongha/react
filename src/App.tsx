@@ -107,30 +107,19 @@ const App: React.FC = () => {
   // 4) 초기화 로딩 화면
   if (!fixedHeight) return (
     <>
-      <div style={{
-        width: '100px',
-        height: '100px',
-        backgroundColor: 'red',
-        position:'fixed'
-      }}></div>
-      <div style={{
-        overflow:'auto',
-      }}>
-        <div
-          style={{
-            width: "100%",
-            height: "1200px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "var(--ion-background-color)",
-          }}
-        >
-
-          <LoadingIndicator color="var(--ion-text-color)" />
-        </div>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--ion-background-color)",
+        }}
+      >
+        <LoadingIndicator color="var(--ion-text-color)" />
       </div>
-</>
+    </>
   );
 
   return (
