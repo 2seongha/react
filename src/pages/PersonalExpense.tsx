@@ -473,7 +473,7 @@ const PersonalExpense: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingBottom: 'calc(200px + var(--ion-safe-area-bottom))',
+              paddingBottom: 'calc(150px + var(--ion-safe-area-bottom))',
               flexDirection: 'column'
             }}
           >
@@ -1397,7 +1397,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
         ref={(ref: any) => titleRef = ref}
         label={''}
         formRef={formRef}
-        style={{ height: '48px', minHeight: '48px', marginTop: '8px', marginBottom: '84px' }}
+        style={{ height: '48px', minHeight: '48px', marginTop: '8px', marginBottom: '48px' }}
         placeholder='결재 제목 (필수)'
         value='$TITLE'
         clearInput
@@ -1479,6 +1479,7 @@ const Result: React.FC<ResultProps> = ({
 }) => {
   const [res, setRes] = useState<any | null>(null);
   const [textAnimation, setTextAnimation] = useState<boolean>(false);
+  const [translate, setTranslate] = useState<number>(0);
 
   useEffect(() => {
     if (!result) return;
@@ -1486,21 +1487,32 @@ const Result: React.FC<ResultProps> = ({
   }, [result]);
 
   return (
-    <>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        alignItems: 'center',
+        transform: `translateY(${translate}px)`,
+        transition: 'transform 0.3s ease-out',
+        position: 'relative'
+      }}
+    >
       <AnimatedIcon
         status={res?.Type}
         onAnimationComplete={() => {
           webviewHaptic("mediumImpact");
           onAnimationFinished?.(true);
           setTextAnimation(true);
+          setTimeout(() => setTranslate(-82), 1000);
         }}
       />
 
-      <span style={{ fontSize: '21px', fontWeight: '600' }}>
+      <span style={{ fontSize: '19px', fontWeight: '600' }}>
         {'임직원개인경비 상신을'}
       </span>
 
-      <span style={{ fontSize: '21px', fontWeight: '600' }}>
+      <span style={{ fontSize: '19px', fontWeight: '600' }}>
         <FlipWords
           style={{
             color:
@@ -1524,36 +1536,42 @@ const Result: React.FC<ResultProps> = ({
       </span>
 
       <AnimatePresence>
-        {textAnimation && res && (
+        {translate !== 0 && res && (
           <motion.div
             layout
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ type: "tween", duration: 0.3 }}
+            initial={{ opacity: 0, }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ type: "tween", duration: 1 }}
             style={{
               position: 'absolute',
-              translateY: '100px',
+              translateY: '146px',
               padding: '12px 21px',
+              width: '90%',
+              textAlign: 'center',
             }}
           >
-            {/* pseudo-element 대체용 inner div */}
             <div
               style={{
                 content: '""',
-                position: 'absolute',
+                width: '100%',
                 left: 0,
                 right: 0,
                 bottom: 0,
                 height: '2px', // 최대 border 두께
-                background: `linear-gradient(to right, transparent, ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%, transparent)`,
+                background: `linear-gradient(to right, transparent,
+                 ${res?.Type === 'E' ? '#c053f641' : '#53f6a241'} 25%,
+                 ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%,
+                 ${res?.Type === 'E' ? '#c053f641' : '#53f6a241'} 75%,
+                  transparent)`,
                 pointerEvents: 'none',
+                marginBottom: '12px'
               }}
             />
             <span style={{ fontSize: '14px', fontWeight: '500' }}>{res?.Message}</span>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
