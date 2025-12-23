@@ -47,6 +47,7 @@ const PersonalExpense: React.FC = () => {
   const currStepRef = useRef(0);
   const animationRef = useRef(false); // 애니메이션 중 뒤로가기 막음
   const isCloseButtonRef = useRef(false); // 닫기 버튼을 누른건지 판별용
+  const successRef = useRef(false); // 성공시 뒤로가기하면 홈으로
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
   const title = useMemo(() => {
     let title;
@@ -92,10 +93,10 @@ const PersonalExpense: React.FC = () => {
     enter: (dir: number) => ({
       x: dir > 0 ? 10 : -10,
     }),
-    center: { x: 0, transition: { type: "tween", duration: 0.3 } },
+    center: { x: 0, transition: { type: "tween", duration: 0.25 } },
     exit: (dir: number) => ({
       opacity: [1, 0],
-      transition: { duration: currStepRef.current === 4 ? 0.3 : 0 }
+      transition: { duration: currStepRef.current === 4 ? 0.25 : 0 }
     }),
   };
 
@@ -162,7 +163,7 @@ const PersonalExpense: React.FC = () => {
         return;
       }
 
-      if (currStepRef.current > 0 && !isCloseButtonRef.current) {
+      if (currStepRef.current > 0 && !isCloseButtonRef.current && !successRef.current) {
         interactPopRef.current = true;
         setAnimationFinished(false);
         return goStep((currStepRef.current === 99 ? 0 : currStepRef.current - 1));
@@ -562,6 +563,7 @@ const PersonalExpense: React.FC = () => {
                       animationRef.current = true;
                       const result = await postStart(approval);
                       setResult(result);
+                      if (result?.Type === 'S') successRef.current = true;
                     }
                     : () => {
                       webviewHaptic('mediumImpact');
@@ -1561,9 +1563,9 @@ const Result: React.FC<ResultProps> = ({
                 bottom: 0,
                 height: '2px', // 최대 border 두께
                 background: `linear-gradient(to right, transparent,
-                 ${res?.Type === 'E' ? '#af53f641' : '#53f6a241'} 25%,
+                 ${res?.Type === 'E' ? '#af53f641' : '#20cf7441'} 25%,
                  ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%,
-                 ${res?.Type === 'E' ? '#af53f641' : '#53f6a241'} 75%,
+                 ${res?.Type === 'E' ? '#af53f641' : '#20cf7441'} 75%,
                   transparent)`,
                 pointerEvents: 'none',
                 marginBottom: '12px'
