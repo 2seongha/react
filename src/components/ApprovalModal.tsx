@@ -206,7 +206,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       if (!isNotification) {
         await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");
       }
-      setStatus(RETTYPE === "S" ? "success" : RETTYPE === "E" ? "error" : "warning");
+      setStatus(RETTYPE);
     } else if (step === 2) {
       dismiss();
     }

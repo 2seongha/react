@@ -153,14 +153,8 @@ export async function getSearchHelp(ENTITYSET: string, FLOWCODE?: string, INPUT1
 
 export async function postStart(APPROVAL: any): Promise<any> {
   try {
-    const user = useAppStore.getState().user;
-    const LOGIN_ID = user?.LOGIN_ID;
-    const BUKRS = user?.BUKRS;
-
     const api = createApiInstance();
     const payload = APPROVAL;
-    payload.LOGIN_ID = LOGIN_ID;
-    payload.BUKRS = BUKRS;
 
     const res = await api.post(`/v1/api/start`, payload);
 

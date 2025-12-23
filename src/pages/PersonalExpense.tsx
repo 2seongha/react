@@ -1,13 +1,11 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   IonBackButton,
   IonButton,
   IonContent,
   IonFooter,
   IonIcon,
-  IonItem,
   IonPage,
-  IonRippleEffect,
   IonTextarea,
   useIonRouter,
   useIonViewWillEnter,
@@ -32,6 +30,7 @@ import Notify from 'simple-notify';
 import { getFileTypeIcon } from '../utils';
 import AnimatedIcon from '../components/AnimatedIcon';
 import { FlipWords } from '../components/FlipWords';
+import useAppStore from '../stores/appStore';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -40,11 +39,14 @@ const PersonalExpense: React.FC = () => {
   const [enabledStep3, setEnabledStep3] = useState(true);
   const [approval, setApproval] = useState<any>(null);
   const [result, setResult] = useState<any>(null);
+  const [animationFinished, setAnimationFinished] = useState<any>(null); // 결과 애니메이션 종료
   const ignorePopRef = useRef(false);
   const interactPopRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevStepRef = useRef(0);
   const currStepRef = useRef(0);
+  const animationRef = useRef(false); // 애니메이션 중 뒤로가기 막음
+  const isCloseButtonRef = useRef(false); // 닫기 버튼을 누른건지 판별용
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
   const title = useMemo(() => {
     let title;
@@ -65,21 +67,10 @@ const PersonalExpense: React.FC = () => {
         title = '항목 추가';
         break;
     }
-    return <AnimatePresence mode='sync'>
-      <motion.span
-        key={title}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{
-          duration: 0.2,
-          ease: 'easeOut',
-        }}
-        style={{ display: "inline-block", position: 'absolute' }}
-      >
-        {title}
-      </motion.span>
-    </AnimatePresence>;
+    return <span
+    >
+      {title}
+    </span>
   }, [step]);
 
   const setScrollRef = (node: HTMLDivElement) => {
@@ -99,15 +90,12 @@ const PersonalExpense: React.FC = () => {
 
   const variants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 30 : -30,
-      opacity: [0.5, 1],
-      transition: { duration: 1.5 }
+      x: dir > 0 ? 10 : -10,
     }),
-    center: { x: 0, opacity: 1 },
+    center: { x: 0, transition: { type: "tween", duration: 0.3 } },
     exit: (dir: number) => ({
-      // x: dir > 0 ? 400 : -400,
-      opacity: [1, 0],
-      transition: { duration: 0.05 }
+      // opacity: [1, 0.5],
+      // transition: { duration: 0.3 }
     }),
   };
 
@@ -135,9 +123,6 @@ const PersonalExpense: React.FC = () => {
       console.log(approval);
       oriItem.current = approval.FLOWHD_DOCITEM[0];
       approval.FLOWHD_DOCITEM = [];
-      approval.FLOWCODE = 'DM103';
-      approval.WFIT_TYPE = 'ST';
-      approval.ACTIVITY = 'START';
       setApproval(approval);
     }
     initApproval();
@@ -158,7 +143,7 @@ const PersonalExpense: React.FC = () => {
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
-      if (currStepRef.current === 4) {
+      if (currStepRef.current === 4 && animationRef.current) {
         // history를 한 번 더 밀어서 실제 뒤로 안 가게 함
         window.history.pushState(
           { step: 4 },
@@ -177,10 +162,13 @@ const PersonalExpense: React.FC = () => {
         return;
       }
 
-      if (currStepRef.current > 0) {
+      if (currStepRef.current > 0 && !isCloseButtonRef.current) {
         interactPopRef.current = true;
-        goStep((currStepRef.current === 99 ? 0 : currStepRef.current - 1));
+        return goStep((currStepRef.current === 99 ? 0 : currStepRef.current - 1));
       }
+
+      window.removeEventListener('popstate', handlePopState);
+      window.history.go(-4);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -287,11 +275,31 @@ const PersonalExpense: React.FC = () => {
             />
           )}
 
-          {step !== 0 && step !== 99 /*&& step !== 4*/ && (
+          {step !== 0 && step !== 99 && step !== 4 && (
             <IonButton
               mode="md"
               fill="clear"
               onClick={() => goStep(step - 1)}
+              style={{
+                '--border-radius': '24px',
+                marginLeft: '8px',
+                width: '64px',
+                height: '48px',
+              }}
+            >
+              <span style={{ fontSize: '16px', fontWeight: '600' }}>이전</span>
+            </IonButton>
+          )}
+
+          {step === 4 && animationFinished && result.Type !== 'S' && (
+            <IonButton
+              mode="md"
+              fill="clear"
+              onClick={() => {
+                goStep(step - 1);
+                setResult(null);
+                setAnimationFinished(false);
+              }}
               style={{
                 '--border-radius': '24px',
                 marginLeft: '8px',
@@ -319,7 +327,26 @@ const PersonalExpense: React.FC = () => {
             </IonButton>
           )}
         </>
-      } />
+      }
+        customEndButtons={step === 4 && animationFinished && result.Type !== 'S' && (
+          <IonButton
+            mode="md"
+            fill="clear"
+            onClick={() => {
+              isCloseButtonRef.current = true;
+              router.goBack();
+            }}
+            style={{
+              '--border-radius': '24px',
+              marginLeft: '8px',
+              width: '64px',
+              height: '48px',
+            }}
+          >
+            <span style={{ fontSize: '16px', fontWeight: '600' }}>닫기</span>
+          </IonButton>
+        )}
+      />
       < IonContent
         fullscreen
         scrollX={false}
@@ -442,15 +469,20 @@ const PersonalExpense: React.FC = () => {
             style={{
               position: 'fixed',
               width: '100%',
-              height: '100%',
+              height: '100vh',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              paddingBottom: '150px',
+              paddingBottom: 'calc(200px + var(--ion-safe-area-bottom))',
               flexDirection: 'column'
             }}
           >
-            <Result result={result} />
+            <Result
+              result={result}
+              onAnimationFinished={(bool) => setTimeout(() => {
+                setAnimationFinished(bool);
+                animationRef.current = false;
+              }, 1000)} />
           </motion.div>}
         </AnimatePresence>
 
@@ -524,21 +556,23 @@ const PersonalExpense: React.FC = () => {
                   }}
                   onClick={step === 3
                     ? async () => {
+                      webviewHaptic('mediumImpact');
                       goStep(step + 1);
-                      // const result = await postStart(approval);
-                      // setResult(result);
+                      animationRef.current = true;
+                      const result = await postStart(approval);
+                      setResult(result);
                     }
                     : () => {
+                      webviewHaptic('mediumImpact');
                       let totalWRBTR = 0;
-                      let totalDMBTR = 0;
+                      // let totalDMBTR = 0;
                       approval.FLOWHD_DOCITEM.forEach((item: any) => {
                         totalWRBTR += Number(item.WRBTR);
-                        totalDMBTR += Number(item.DMBTR);
+                        // totalDMBTR += Number(item.DMBTR);
                       });
 
                       approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
-                      approval.FLOWHD_DOCHD.SUM_DMBTR = totalDMBTR.toString();
-                      webviewHaptic('mediumImpact');
+                      approval.FLOWHD_DOCHD.SUM_DMBTR = totalWRBTR.toString();
                       goStep(step + 1);
                     }}
                 >
@@ -552,6 +586,7 @@ const PersonalExpense: React.FC = () => {
                 <IonButton
                   mode="md"
                   color="primary"
+                  disabled={!isSaveEnabled}
                   style={{
                     width: "100%",
                     height: "58px",
@@ -568,23 +603,37 @@ const PersonalExpense: React.FC = () => {
               </motion.div>
             )}
 
-            {step === 4 && result && (
-              <motion.div key="step99" {...buttonMotion} style={{ flex: 1 }}>
+            {step === 4 && animationFinished && (
+              <motion.div
+                key="step4"
+                style={{ flex: 1 }}
+                initial={{ y: 82 + safeAreaBottom }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.3 }}>
                 <IonButton
                   mode="md"
                   color="primary"
-                  disabled={!isSaveEnabled}
                   style={{
                     width: "100%",
                     height: "58px",
                     fontSize: "18px",
                     fontWeight: "600",
                   }}
-                  onClick={() => {
-                    webviewHaptic('mediumImpact');
-                  }}
+                  onClick={result.Type === 'S'
+                    ? () => {
+                      webviewHaptic('mediumImpact');
+                      isCloseButtonRef.current = true;
+                      router.goBack();
+                    }
+                    : () => {
+                      webviewHaptic('mediumImpact');
+                      goStep(step - 1);
+                      setResult(null);
+                      setAnimationFinished(false);
+                    }
+                  }
                 >
-                  닫기
+                  {result.Type === 'S' ? '닫기' : '이전 단계'}
                 </IonButton>
               </motion.div>
             )}
@@ -615,6 +664,7 @@ const Item: React.FC<ItemProps> = ({
   onAddItem,
   setScrollRef
 }) => {
+  const themeMode = useAppStore(state => state.themeMode);
 
   return (
     <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
@@ -632,6 +682,7 @@ const Item: React.FC<ItemProps> = ({
               width: '100%',
               padding: '21px',
               position: 'relative',
+              border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
             }}>
             <IonButton
               mode='md'
@@ -925,7 +976,7 @@ const AddItem: React.FC<AddItemProps> = ({
           <span style={{ paddingBottom: '10px' }}>{docItem?.WAERS}</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+        {/* <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
           <CustomInput
             currency
             formRef={formRef}
@@ -950,7 +1001,7 @@ const AddItem: React.FC<AddItemProps> = ({
             inputMode='numeric'
           />
           <span style={{ paddingBottom: '10px' }}>{docItem?.HWAER}</span>
-        </div>
+        </div> */}
 
         <CustomInput
           formRef={formRef}
@@ -1197,7 +1248,6 @@ const Attach: React.FC<AttachProps> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log('[업로드]' + files);
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -1347,7 +1397,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
         ref={(ref: any) => titleRef = ref}
         label={''}
         formRef={formRef}
-        style={{ height: '48px', minHeight: '48px', marginTop: '8px', marginBottom: '64px' }}
+        style={{ height: '48px', minHeight: '48px', marginTop: '8px', marginBottom: '84px' }}
         placeholder='결재 제목 (필수)'
         value='$TITLE'
         clearInput
@@ -1372,7 +1422,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
                 <span
                   style={{
                     fontSize: "12px",
-                    backgroundColor: '#33ccbdff',
+                    backgroundColor: '#009eb0ff',
                     padding: "1px 8px",
                     borderRadius: "4px",
                     fontWeight: "500",
@@ -1420,30 +1470,90 @@ const FlowHd: React.FC<FlowHdProps> = ({
 //* ========== Step 5. 결과 ==========
 interface ResultProps {
   result: any;
+  onAnimationFinished: (bool: boolean) => void;
 }
 
 const Result: React.FC<ResultProps> = ({
   result,
+  onAnimationFinished
 }) => {
-  const [status, setStatus] = useState<string | null>(null);
-  const [stepText, setStepText] = useState("할게요");
+  const [res, setRes] = useState<any | null>(null);
+  const [textAnimation, setTextAnimation] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!result) return;
+    setRes(result);
+  }, [result]);
 
   return (
     <>
       <AnimatedIcon
-        status={status}
+        status={res?.Type}
         onAnimationComplete={() => {
           webviewHaptic("mediumImpact");
+          onAnimationFinished?.(true);
+          setTextAnimation(true);
         }}
       />
+
       <span style={{ fontSize: '21px', fontWeight: '600' }}>
-        임직원개인경비
-        <span style={{ color: `var(--ion-color-primary` }}> 1건</span>을
+        {'임직원개인경비 상신을'}
       </span>
+
       <span style={{ fontSize: '21px', fontWeight: '600' }}>
-        <span style={{ color: `var(--ion-color-primary` }}>상신</span>{" "}
-        <FlipWords animation={stepText === '했어요'} words={[stepText]} />
+        <FlipWords
+          style={{
+            color:
+              textAnimation && res
+                ? res?.Type === 'E'
+                  ? 'var(--red)'
+                  : 'var(--ion-color-primary)'
+                : 'inherit'
+          }}
+          animation={textAnimation}
+          words={[
+            textAnimation && res
+              ? res?.Type === 'E'
+                ? '실패'
+                : '성공'
+              : '진행'
+          ]}
+        />
+        {" "}
+        <span>{textAnimation && res ? '했어요' : '할게요'}</span>
       </span>
+
+      <AnimatePresence>
+        {textAnimation && res && (
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "tween", duration: 0.3 }}
+            style={{
+              position: 'absolute',
+              translateY: '100px',
+              padding: '12px 21px',
+            }}
+          >
+            {/* pseudo-element 대체용 inner div */}
+            <div
+              style={{
+                content: '""',
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: '2px', // 최대 border 두께
+                background: `linear-gradient(to right, transparent, ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%, transparent)`,
+                pointerEvents: 'none',
+              }}
+            />
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>{res?.Message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

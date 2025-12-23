@@ -339,7 +339,7 @@ ion-input {
 }
 
 .sn-notify-outline {
-  --sn-notify-background-color: var(--ion-background-color1);
+  --sn-notify-background-color: var(--ion-background-color);
 }
 
 .sn-notify-outline .sn-notify-title {

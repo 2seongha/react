@@ -34,11 +34,11 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ status, style, onAnimationC
 
   const getStatusIcon = () => {
     switch (status) {
-      case 'success':
+      case 'S':
         return lottieSuccessData;
-      case 'error':
+      case 'E':
         return lottieErrorData;
-      case 'warning':
+      case 'W':
         return lottieWarningData;
       default:
         return lottieLoadingData;
