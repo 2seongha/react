@@ -106,24 +106,20 @@ const App: React.FC = () => {
 
   // 4) 초기화 로딩 화면
   if (!fixedHeight) return (
-    <div style={{
-      height:'100%',
-      display:'flex',
-      flexDirection:'column'
-    }}>
+    <>
       <div style={{
         width: '100px',
-        height: '500px',
-        backgroundColor: 'red'
+        height: '100px',
+        backgroundColor: 'red',
+        position:'fixed'
       }}></div>
       <div style={{
         overflow:'auto',
-        flex:'1'
       }}>
         <div
           style={{
             width: "100%",
-            height: "600px",
+            height: "1200px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -134,8 +130,7 @@ const App: React.FC = () => {
           <LoadingIndicator color="var(--ion-text-color)" />
         </div>
       </div>
-
-    </div>
+</>
   );
 
   return (
