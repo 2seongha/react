@@ -94,8 +94,8 @@ const PersonalExpense: React.FC = () => {
     }),
     center: { x: 0, transition: { type: "tween", duration: 0.3 } },
     exit: (dir: number) => ({
-      // opacity: [1, 0.5],
-      // transition: { duration: 0.3 }
+      opacity: [1, 0],
+      transition: { duration: currStepRef.current === 4 ? 0.3 : 0 }
     }),
   };
 
@@ -164,6 +164,7 @@ const PersonalExpense: React.FC = () => {
 
       if (currStepRef.current > 0 && !isCloseButtonRef.current) {
         interactPopRef.current = true;
+        setAnimationFinished(false);
         return goStep((currStepRef.current === 99 ? 0 : currStepRef.current - 1));
       }
 
@@ -1203,7 +1204,7 @@ const Header: React.FC<HeaderProps> = ({
 
 
 
-//* ========== Step 3. 첨부 파일 ==========
+//* ========== Step 2. 첨부 파일 ==========
 interface AttachProps {
   approval: any;
 }
@@ -1365,7 +1366,7 @@ const Attach: React.FC<AttachProps> = ({
 
 
 
-//* ========== Step 4. 결재 정보 ==========
+//* ========== Step 3. 결재 정보 ==========
 interface FlowHdProps {
   approval: any;
   onChangeTitle: (value: string) => void;
@@ -1422,7 +1423,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
                 <span
                   style={{
                     fontSize: "12px",
-                    backgroundColor: '#009eb0ff',
+                    backgroundColor: '#00c1b7ff',
                     padding: "1px 8px",
                     borderRadius: "4px",
                     fontWeight: "500",
@@ -1467,7 +1468,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
   );
 };
 
-//* ========== Step 5. 결과 ==========
+//* ========== Step 4. 결과 ==========
 interface ResultProps {
   result: any;
   onAnimationFinished: (bool: boolean) => void;
@@ -1560,9 +1561,9 @@ const Result: React.FC<ResultProps> = ({
                 bottom: 0,
                 height: '2px', // 최대 border 두께
                 background: `linear-gradient(to right, transparent,
-                 ${res?.Type === 'E' ? '#c053f641' : '#53f6a241'} 25%,
+                 ${res?.Type === 'E' ? '#af53f641' : '#53f6a241'} 25%,
                  ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%,
-                 ${res?.Type === 'E' ? '#c053f641' : '#53f6a241'} 75%,
+                 ${res?.Type === 'E' ? '#af53f641' : '#53f6a241'} 75%,
                   transparent)`,
                 pointerEvents: 'none',
                 marginBottom: '12px'
