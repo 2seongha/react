@@ -6,6 +6,7 @@ body{
 #root {
   position: relative;
   overflow: auto;
+  height: 100%;
 }
 /* 스크롤 관련 */
 ion-content {
