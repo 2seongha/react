@@ -1306,7 +1306,7 @@ const Attach: React.FC<AttachProps> = ({
         fileNo.current += 1;
       }
 
-      await Promise.all(payloads.map(payload => postAttach(payload)));
+      // await Promise.all(payloads.map(payload => postAttach(payload)));
       console.log(fileNo.current);
       const nextFiles = [...approval.FILES];
       setFiles(nextFiles);
