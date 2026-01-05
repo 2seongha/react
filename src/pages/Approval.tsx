@@ -13,6 +13,7 @@ import _ from 'lodash';
 import { webviewHaptic } from '../webview';
 import ApprovalModal from '../components/ApprovalModal';
 import { Virtuoso } from 'react-virtuoso';
+import dayjs from 'dayjs';
 
 const Approval: React.FC = () => {
   let { P_AREA_CODE, AREA_CODE, P_AREA_CODE_TXT, AREA_CODE_TXT } = useParams<{ P_AREA_CODE: string, AREA_CODE: string, P_AREA_CODE_TXT: string, AREA_CODE_TXT: string }>();
@@ -66,13 +67,9 @@ const Approval: React.FC = () => {
 
   //* 날짜 관련
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
-    const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setMonth(today.getMonth() - 12);
-
     return {
-      defaultStartDate: oneYearAgo.toISOString().split('T')[0], // YYYY-MM-DD 형식
-      defaultEndDate: today.toISOString().split('T')[0]
+      defaultStartDate: dayjs().subtract(1, 'year').format('YYYY-MM-DD'),
+      defaultEndDate: dayjs().format('YYYY-MM-DD')
     };
   }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
 
