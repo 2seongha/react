@@ -1,0 +1,3 @@
+ion-button.upload-button.button-disabled:not([fill="clear"]):not([fill="outline"]) > *:not(.loader) {
+  opacity: .3;
+}

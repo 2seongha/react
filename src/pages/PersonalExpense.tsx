@@ -295,23 +295,24 @@ const PersonalExpense: React.FC = () => {
           )}
 
           {step === 4 && animationFinished && result.Type !== 'S' && (
-            <IonButton
-              mode="md"
-              fill="clear"
-              onClick={() => {
-                goStep(step - 1);
-                setResult(null);
-                setAnimationFinished(false);
-              }}
-              style={{
-                '--border-radius': '24px',
-                marginLeft: '8px',
-                width: '64px',
-                height: '48px',
-              }}
-            >
-              <span style={{ fontSize: '16px', fontWeight: '600' }}>이전</span>
-            </IonButton>
+            // <IonButton
+            //   mode="md"
+            //   fill="clear"
+            //   onClick={() => {
+            //     goStep(step - 1);
+            //     setResult(null);
+            //     setAnimationFinished(false);
+            //   }}
+            //   style={{
+            //     '--border-radius': '24px',
+            //     marginLeft: '8px',
+            //     width: '64px',
+            //     height: '48px',
+            //   }}
+            // >
+            //   <span style={{ fontSize: '16px', fontWeight: '600' }}>이전</span>
+            // </IonButton>
+            <p></p>
           )}
 
           {step === 99 && (
@@ -335,6 +336,7 @@ const PersonalExpense: React.FC = () => {
           <IonButton
             mode="md"
             fill="clear"
+            color='medium'
             onClick={() => {
               isCloseButtonRef.current = true;
               router.goBack();
@@ -563,8 +565,13 @@ const PersonalExpense: React.FC = () => {
                       webviewHaptic('mediumImpact');
                       goStep(step + 1);
                       animationRef.current = true;
-                      debugger;
-                      const result = await postStart(approval);
+                      let result = await postStart(approval);
+                      if (result instanceof Error) {
+                        result = {
+                          Type: 'E',
+                          Message: '예상치 못한 오류가 발생했습니다.'
+                        }
+                      }
                       setResult(result);
                       if (result?.Type === 'S') successRef.current = true;
                     }
@@ -1220,6 +1227,7 @@ const Attach: React.FC<AttachProps> = ({
   fileNo
 }) => {
   const [files, setFiles] = useState(approval.FILES ?? []);
+  const [isLoading, setIsLoading] = useState<string[]>([]);
   const fileTypeRef = useRef('');
 
   useEffect(() => {
@@ -1252,7 +1260,7 @@ const Attach: React.FC<AttachProps> = ({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     const payloads = [];
-
+    setIsLoading([...isLoading, fileTypeRef.current]);
     // const arrayBufferToHex = (buffer: ArrayBuffer): string => {
     //   const bytes = new Uint8Array(buffer);
     //   let hex = "";
@@ -1309,9 +1317,9 @@ const Attach: React.FC<AttachProps> = ({
       }
 
       await Promise.all(payloads.map(payload => postAttach(payload)));
-      console.log(fileNo.current);
       const nextFiles = [...approval.FILES];
       setFiles(nextFiles);
+      setIsLoading(isLoading.filter((load: string) => load != fileTypeRef.current));
 
       new Notify({
         status: 'success',
@@ -1368,9 +1376,12 @@ const Attach: React.FC<AttachProps> = ({
             }
           </div>
           <IonButton
+            className='upload-button'
             type='button'
             mode='md'
             onClick={() => handleButtonClick(attach.FILE_TYPE)}
+            disabled={isLoading.includes(attach.FILE_TYPE)}
+            // disabled={true}
             style={{
               width: '100%',
               height: '58px',
@@ -1380,7 +1391,8 @@ const Attach: React.FC<AttachProps> = ({
               borderTop: '1px solid var(--custom-border-color-50)',
               fontSize: '16px',
             }}>
-            {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}파일 업로드
+            {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}<span>파일 업로드</span>
+            {isLoading.includes(attach.FILE_TYPE) && <LoadingIndicator style={{ width: '24px', position: 'absolute' }} />}
           </IonButton>
         </div>)
       }
