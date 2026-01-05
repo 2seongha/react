@@ -563,6 +563,7 @@ const PersonalExpense: React.FC = () => {
                       webviewHaptic('mediumImpact');
                       goStep(step + 1);
                       animationRef.current = true;
+                      debugger;
                       const result = await postStart(approval);
                       setResult(result);
                       if (result?.Type === 'S') successRef.current = true;
@@ -1294,6 +1295,7 @@ const Attach: React.FC<AttachProps> = ({
         // }
 
         const formData = new FormData();
+        formData.append('Content-type', file.type);
         formData.append('file', file);
         formData.append('slug', file.name);
         formData.append('fileno', FILE_NO);
@@ -1306,7 +1308,7 @@ const Attach: React.FC<AttachProps> = ({
         fileNo.current += 1;
       }
 
-      // await Promise.all(payloads.map(payload => postAttach(payload)));
+      await Promise.all(payloads.map(payload => postAttach(payload)));
       console.log(fileNo.current);
       const nextFiles = [...approval.FILES];
       setFiles(nextFiles);

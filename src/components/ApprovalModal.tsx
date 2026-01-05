@@ -325,9 +325,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     position: 'relative'
                   }}>
                   {step === 2 && <IonIcon
-                    icon={status === 'error' ? alertCircle : status === 'success' ? checkmarkCircle : warning}
+                    icon={status === 'E' ? alertCircle : status === 'S' ? checkmarkCircle : warning}
                     style={{ fontSize: '24px' }}
-                    color={status === 'error' ? 'danger' : `${status}`}
+                    color={status === 'E' ? 'danger' : status === 'S' ? 'primary' : 'warning'}
                   />}
                   <div style={{
                     display: 'flex',
