@@ -1,4 +1,4 @@
-body{
+body {
   position: relative;
   overflow: auto;
 }
@@ -8,6 +8,7 @@ body{
   overflow: auto;
   height: 100%;
 }
+
 /* 스크롤 관련 */
 ion-content {
   --offset-bottom: 1px;
@@ -283,6 +284,10 @@ ion-modal.auto-height .inner-content {
 
 ion-input {
   /* --border-radius: 12px !important; */
+}
+
+ion-select {
+  border-bottom: 1px solid var(--input-color);
 }
 
 .input-wrapper.sc-ion-input-md {

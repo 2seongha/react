@@ -50,6 +50,7 @@ const Home: React.FC = () => {
     async function setNotiPopup() {
       setNotificationPopupShown(true);
       const notifications = await getNotifications();
+      if (notifications instanceof Error) return console.log(notifications);
       const notReadNotis = notifications?.filter(noti => noti.READ_YN === 'N');
       if (_.isEmpty(notReadNotis)) return;
       document.getElementById("noti-popup-modal-trigger")?.click();
@@ -152,7 +153,9 @@ const WelcomeCard: React.FC = () => {
 
 
 const MenuCard: React.FC = () => {
-  const menuAreas = useAppStore(state => state.areas);
+  const menuAreas = useAppStore(state => {
+    return state.areas instanceof Error ? [] : state.areas
+  });
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
 
   // 메모이제이션된 계산값들
@@ -279,7 +282,13 @@ const MenuItem: React.FC<MenuItemProps> = ({ menuItem, isLoading = false }) => {
 };
 
 const TodoSummaryCard: React.FC = () => {
-  const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
+  const todoSummary = useAppStore(useShallow(state => {
+    if (state.areas instanceof Error) {
+      console.log(state.areas);
+      return [];
+    }
+    return state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null
+  }));
   const approvals = useAppStore(state => state.approvals);
   const router = useIonRouter();
   const [selectedArea, setSelectedArea] = useState<AreaModel | null>(null);

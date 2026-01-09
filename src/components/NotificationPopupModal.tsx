@@ -19,7 +19,13 @@ interface NotificationPopupProps {
 const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
   trigger,
 }) => {
-  const notifications = useAppStore((state) => state.notifications?.filter(notification => notification.READ_YN === 'N'));
+  const notifications = useAppStore((state) => {
+    if (state.notifications instanceof Error) {
+      console.log(state.notifications);
+      return [];
+    }
+    return state?.notifications?.filter(notification => notification.READ_YN === 'N')
+  });
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
   const modalRef = useRef<HTMLIonModalElement>(null);

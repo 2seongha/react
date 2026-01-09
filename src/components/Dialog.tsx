@@ -3,6 +3,7 @@ import { close } from 'ionicons/icons';
 import AppBar from './AppBar';
 import React, { ReactNode, useEffect, useRef, useMemo, useState } from 'react';
 import CustomInput from './CustomInput';
+import { pushModal } from '../App';
 
 
 interface CustomDialogProps {
@@ -77,6 +78,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const historyPushedRef = useRef(false);
   const closedByBackButtonRef = useRef(false);
+  const modalId = 'dialog';
 
   function dismiss() {
     modal.current?.dismiss();
@@ -84,6 +86,8 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
 
   const handleModalWillPresent = () => {
     setIsModalOpen(true);
+
+    pushModal(modalId);
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
     window.history.pushState({ ...currentState, modalOpen: true }, '');

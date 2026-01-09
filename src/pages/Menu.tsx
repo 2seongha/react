@@ -34,7 +34,13 @@ import LoadingIndicator from '../components/LoadingIndicator';
 
 const Menu: React.FC = () => {
   const location = useLocation();
-  const areas = useAppStore(state => state.areas);
+  const areas = useAppStore(state => {
+    if (state.areas instanceof Error) {
+      console.log(state.areas);
+      return [];
+    }
+    return state.areas;
+  });
   const setAreas = useAppStore(state => state.setAreas);
   const getAreas = useAppStore(state => state.getAreas);
 

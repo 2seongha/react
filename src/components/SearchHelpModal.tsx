@@ -36,6 +36,10 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   const handleModalWillPresent = () => {
     const initList = async () => {
       const list = await searchHelp?.onValueHelp();
+      if (list instanceof Error) {
+        console.log(list);
+        return setList([]);
+      }
       setList(list);
     };
     initList();
@@ -178,7 +182,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
                     </>
                     :
                     <>
-                      {item.Favorite && <IonIcon src={star} color="primary" size="small" style={{ marginRight: '8px' }}></IonIcon>}
+                      {item.Favorite && <IonIcon src={star} color="primary" size="small" style={{ marginRight: '12px' }}></IonIcon>}
                       <span
                         style={{
                           fontSize: '13px',

@@ -62,6 +62,11 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
     const currentRequestId = ++requestIds.areas;
     const user = await getUser(LOGIN_ID);
 
+    if (user instanceof Error) {
+      console.log(user);
+      set({ user: {} });
+    }
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.areas) {
       set({ user: user });
@@ -71,6 +76,11 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
     const currentRequestId = ++requestIds.areas;
     const areas = await getAreas(P_AREA_CODE);
 
+    if (areas instanceof Error) {
+      console.log(areas);
+      set({ areas: [] });
+    }
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.areas) {
       set({ areas: areas });
@@ -79,6 +89,28 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   getApprovals: async (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => {
     const currentRequestId = ++requestIds.approvals;
     const approvals = await getApprovals(P_AREA_CODE, AREA_CODE, FLOWCODE, FLOWNO);
+
+    if (approvals instanceof Error) {
+      console.log(approvals);
+      set({
+        approvals: {
+          LOGIN_ID: '',
+          FLOWCODE: '',
+          FLOWCODE_TXT: '',
+          P_AREA_CODE: '',
+          P_AREA_CODE_TXT: '',
+          AREA_CODE: '',
+          AREA_CODE_TXT: '',
+          LIST: '',
+          TITLE: {
+            TITLE_H: [],
+            TITLE_I: [],
+            TITLE_S: [],
+          }
+        }
+      });
+    }
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.approvals) {
       set({ approvals: approvals });
@@ -88,6 +120,11 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
     const currentRequestId = ++requestIds.notices;
     const notices = await getNotices();
 
+    if (notices instanceof Error) {
+      console.log(notices);
+      set({ notices: [] });
+    }
+
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.notices) {
       set({ notices });
@@ -96,6 +133,12 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   getNotifications: async () => {
     const currentRequestId = ++requestIds.notifications;
     const notifications = await getNotifications();
+
+    if (notifications instanceof Error) {
+      console.log(notifications);
+      set({ notifications: [] });
+    }
+
     if (_.isEqual(notifications, get().notifications)) return;
     // 마지막 요청인지 확인
     if (currentRequestId === requestIds.notifications) {

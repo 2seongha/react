@@ -16,7 +16,13 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const prevTodoSummary = useRef<any>(null);
-  const todoSummary = useAppStore(useShallow(state => state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null));
+  const todoSummary = useAppStore(useShallow(state => {
+    if (state.areas instanceof Error) {
+      console.log(state.areas);
+      return [];
+    }
+    return state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null
+  }));
 
   const getApprovals = useAppStore(state => state.getApprovals);
   const setApprovals = useAppStore(state => state.setApprovals);

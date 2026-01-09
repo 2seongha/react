@@ -6,13 +6,15 @@ import {
   IonFooter,
   IonIcon,
   IonPage,
+  IonSelect,
+  IonSelectOption,
   IonTextarea,
   useIonRouter,
   useIonViewWillEnter,
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { add, addOutline } from 'ionicons/icons';
+import { add, addOutline, person } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
@@ -31,6 +33,7 @@ import { getFileTypeIcon } from '../utils';
 import AnimatedIcon from '../components/AnimatedIcon';
 import { FlipWords } from '../components/FlipWords';
 import useAppStore from '../stores/appStore';
+import CustomDialog from '../components/Dialog';
 
 const PersonalExpense: React.FC = () => {
   const router = useIonRouter();
@@ -119,8 +122,8 @@ const PersonalExpense: React.FC = () => {
     const initApproval = async () => {
       const approval = await getStart('IA103');
       if (approval instanceof Error) {
-        router.goBack();
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
+        return router.goBack(); //TODO 임시 주석
       }
       console.log(approval);
       oriItem.current = approval.FLOWHD_DOCITEM[0];
@@ -144,6 +147,7 @@ const PersonalExpense: React.FC = () => {
   }, [step]);
 
   useEffect(() => {
+    if (!approval) return;
     const handlePopState = (e: PopStateEvent) => {
       if (currStepRef.current === 4 && animationRef.current) {
         // history를 한 번 더 밀어서 실제 뒤로 안 가게 함
@@ -155,7 +159,7 @@ const PersonalExpense: React.FC = () => {
         return;
       }
 
-      if (['searchHelp', 'datePicker'].includes(getTopModalId() ?? '')) {
+      if (['dialog', 'searchHelp', 'datePicker'].includes(getTopModalId() ?? '')) {
         return popModal();
       }
 
@@ -812,6 +816,7 @@ const AddItem: React.FC<AddItemProps> = ({
   const formRef = useRef<FormRef>({});
   const [, forceRender] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
+  const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
@@ -1046,36 +1051,56 @@ const AddItem: React.FC<AddItemProps> = ({
             style={{ marginBottom: '28px' }}
           />
         </div>
-        {/* <div style={{
-          borderTop: '21px solid var(--custom-border-color-50)',
-        }}>
-          <div style={{
-            padding: '21px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-            <span style={{ fontWeight: '500' }}>참석자</span>
-            <IonButton fill='clear'><IonIcon src={add}></IonIcon>추가</IonButton>
-          </div>
-        </div>
-        <div style={{ padding: '0 21px' }}>
 
-
-        </div> */}
+        {/* 참석자 */}
         <div style={{
           borderTop: '21px solid var(--custom-border-color-50)',
-          // borderBottom: '21px solid var(--custom-border-color-50)',
-          // marginBottom: '21px',
         }}>
           <div style={{
-            padding: '28px 21px',
-            // display: 'flex',
-            // alignItems: 'center',
-            // justifyContent: 'space-between',
-            // flexDirection: 'column'
+            padding: '32px 21px',
+            position: 'relative'
           }}>
-            <span style={{ fontSize: '17px', fontWeight: '500', display: 'block', marginBottom: '28px' }}>수익성 세그먼트</span>
+            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '21px' }}>참석자</span>
+            <IonButton id='attendee-dialog-trigger' mode='md' fill='clear' style={{ top: 24, right: 8, position: 'absolute' }} onClick={() => {
+              setAttendeeType('A');
+            }}>
+              <IonIcon src={add} style={{ marginRight: '4px' }} />추가
+            </IonButton>
+            <span style={{ color: 'var(--ion-color-secondary)' }}>참석자를 추가해주세요.</span>
+          </div>
+        </div>
+
+        <CustomDialog
+          trigger="attendee-dialog-trigger"
+          dialogStyle={{
+            width: '100%'
+          }}
+          onDidDismiss={() => {
+          }}
+          title="참석자 추가"
+          body={
+            <div style={{ padding: '0 8px 8px 8px' }}>
+              <IonSelect label='구분' interface="popover" mode='ios' style={{ marginBottom: '12px' }} value={attendeeType}>
+                <IonSelectOption value="A">내부</IonSelectOption>
+                <IonSelectOption value="B">외부</IonSelectOption>
+              </IonSelect>
+              <CustomInput label={'이름'} labelPlacement='fixed' style={{ marginBottom: '12px' }}></CustomInput>
+              <CustomInput label={'조직'} labelPlacement='fixed' disabled style={{ marginBottom: '12px' }}></CustomInput>
+              <CustomInput label={'목적'} labelPlacement='fixed' style={{ marginBottom: '12px' }}></CustomInput>
+            </div>
+          }
+          firstButtonText="닫기"
+          secondButtonText='추가'
+        />
+
+        {/* 수익성 */}
+        <div style={{
+          borderTop: '21px solid var(--custom-border-color-50)',
+        }}>
+          <div style={{
+            padding: '32px 21px',
+          }}>
+            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '21px' }}>수익성 세그먼트</span>
             <CustomInput
               formRef={formRef}
               value="$RKE_KNDNR"
@@ -1582,7 +1607,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
                 <span
                   style={{
                     fontSize: "12px",
-                    backgroundColor: '#00c8ffce',
+                    backgroundColor: '#0abbecd6',
                     padding: "1px 8px",
                     borderRadius: "4px",
                     fontWeight: "500",

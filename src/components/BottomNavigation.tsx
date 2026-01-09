@@ -12,7 +12,10 @@ const BottomNavigation: React.FC = () => {
   const setSelectedTab = useAppStore(state => state.setSelectedTab);
   const router = useIonRouter();
 
-  const notifications = useAppStore((state) => state.notifications);
+  const notifications = useAppStore((state) => {
+    if (state.notifications instanceof Error) return console.log(state.notifications);
+    return state.notifications;
+  });
 
   return (
     <IonFooter className='bottom-navigation-wrapper'>
