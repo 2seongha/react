@@ -1059,7 +1059,7 @@ const AddItem: React.FC<AddItemProps> = ({
             padding: '32px 21px',
             position: 'relative'
           }}>
-            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '21px' }}>참석자</span>
+            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '18px' }}>참석자</span>
             <IonButton id='attendee-dialog-trigger' mode='md' fill='clear' style={{ top: 24, right: 8, position: 'absolute' }} onClick={() => {
               setAttendeeType('A');
             }}>
@@ -1099,7 +1099,7 @@ const AddItem: React.FC<AddItemProps> = ({
           <div style={{
             padding: '32px 21px',
           }}>
-            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '21px' }}>수익성 세그먼트</span>
+            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '18px' }}>수익성 세그먼트</span>
             <CustomInput
               formRef={formRef}
               value="$RKE_KNDNR"
