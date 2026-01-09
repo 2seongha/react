@@ -7,7 +7,7 @@ import {
 } from "@ionic/react";
 import { IonButton } from "@ionic/react";
 import AppBar from "./AppBar";
-import { close } from "ionicons/icons";
+import { close, star } from "ionicons/icons";
 import "./ApprovalModal.css";
 import _ from "lodash";
 import useAppStore from "../stores/appStore";
@@ -178,6 +178,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
                     </>
                     :
                     <>
+                      {item.Favorite && <IonIcon src={star} color="primary" size="small" style={{ marginRight: '8px' }}></IonIcon>}
                       <span
                         style={{
                           fontSize: '13px',
