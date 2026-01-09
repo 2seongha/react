@@ -147,7 +147,6 @@ const PersonalExpense: React.FC = () => {
   }, [step]);
 
   useEffect(() => {
-    if (!approval) return;
     const handlePopState = (e: PopStateEvent) => {
       if (currStepRef.current === 4 && animationRef.current) {
         // history를 한 번 더 밀어서 실제 뒤로 안 가게 함
