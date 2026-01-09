@@ -25,6 +25,7 @@ export interface CustomInputProps {
   formatter?: (value: any) => string;
   onBlur?: (e: Event) => void;
   onValueHelp?: () => void | Promise<void>;
+  beforeOpenValueHelp?: () => boolean;
   onChangeValueHelp?: (value: any) => void;
   placeholder?: string;
   readOnly?: boolean;
@@ -50,6 +51,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   formatter,
   onBlur,
   onValueHelp,
+  beforeOpenValueHelp,
   onChangeValueHelp,
   placeholder = '',
   readOnly = false,
@@ -68,15 +70,15 @@ const CustomInput: React.FC<CustomInputProps> = ({
   const [localHelper, setLocalHelper] = useState('');
 
   useEffect(() => {
-    if(ref) ref(inputRef);
+    if (ref) ref(inputRef);
   })
 
   useEffect(() => {
-    setLocalValue(resolveTemplate(value ?? ''));
+    setLocalValue(resolveTemplate(value ?? '', false));
     setLocalHelper(resolveTemplate(helperText ?? ''));
   }, [formRef?.current])
 
-  const resolveTemplate = (template: string) => {
+  const resolveTemplate = (template: string, userInteraction: boolean = true) => {
     if (!template) return "";
 
     // 템플릿에 사용된 모든 key 추출
@@ -98,7 +100,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
       return formRef?.current?.[key] ?? "";
     });
 
-    return formatter && !currency ? formatter(result) : result;
+    return formatter && (!currency || !userInteraction) ? formatter(result) : result;
   };
 
   const handleBlur = (e: any) => {
@@ -114,11 +116,12 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   const handleInput = (val: string) => {
     onChange?.(val);
-    setLocalValue(resolveTemplate(value ?? ''));
+    setLocalValue(resolveTemplate(value ?? '', true));
     setLocalHelper(resolveTemplate(helperText ?? ''));
   };
 
   const handleOpenValueHelp = async () => {
+    if (beforeOpenValueHelp && !beforeOpenValueHelp()) return;
     setTimeout(() => {
       if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
         inputRef.current.classList.add("has-focus");
@@ -150,82 +153,80 @@ const CustomInput: React.FC<CustomInputProps> = ({
   };
 
   return (
-    <>
-      <IonInput
-        disabled={disabled}
-        mode="md"
-        required={required}
-        labelPlacement={labelPlacement}
-        placeholder={placeholder}
-        value={localValue}
-        helperText={localHelper}
-        readonly={readOnly}
-        clearInput={clearInput}
-        onClick={readOnly && !date ? handleOpenValueHelp : date ? handleOpenDatePicker : onClick}
-        onIonFocus={onFocus}
-        onIonBlur={handleBlur}
-        onIonInput={(e) => handleInput(e.detail.value!)}
-        style={style}
-        ref={inputRef}
-        inputMode={inputMode}
-      >
-        <div slot="label">
-          <span>
-            {label}
-            {required && <span style={{ color: 'var(--red)', marginLeft: '4px' }}>*</span>}
-          </span>
+    <IonInput
+      disabled={disabled}
+      mode="md"
+      required={required}
+      labelPlacement={labelPlacement}
+      placeholder={placeholder}
+      value={localValue}
+      helperText={localHelper}
+      readonly={readOnly}
+      clearInput={clearInput}
+      onClick={readOnly && !date ? handleOpenValueHelp : date ? handleOpenDatePicker : onClick}
+      onIonFocus={onFocus}
+      onIonBlur={handleBlur}
+      onIonInput={(e) => handleInput(e.detail.value!)}
+      style={style}
+      ref={inputRef}
+      inputMode={inputMode}
+    >
+      <div slot="label">
+        <span>
+          {label}
+          {required && <span style={{ color: 'var(--red)', marginLeft: '4px' }}>*</span>}
+        </span>
+      </div>
+      {onValueHelp &&
+        <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
+          <IonButton
+            id="search-help-modal-trigger"
+            fill="clear"
+            slot="end"
+            color="medium"
+            onClick={handleOpenValueHelp}
+            style={{
+              width: '42px',
+              height: '42px',
+              '--border-radius': '24px',
+              '--padding-start': '0',
+              '--padding-end': '0',
+              '--padding-top': '0',
+              '--padding-bottom': '0',
+              'position': 'absolute',
+              'right': '-8px',
+              'top': '-6px'
+            }}
+          >
+            <ValueHelp color="var(--ion-color-step-600)" size={16} />
+          </IonButton>
         </div>
-        {onValueHelp &&
-          <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
-            <IonButton
-              id="search-help-modal-trigger"
-              fill="clear"
-              slot="end"
-              color="medium"
-              onClick={handleOpenValueHelp}
-              style={{
-                width: '42px',
-                height: '42px',
-                '--border-radius': '24px',
-                '--padding-start': '0',
-                '--padding-end': '0',
-                '--padding-top': '0',
-                '--padding-bottom': '0',
-                'position': 'absolute',
-                'right': '-8px',
-                'top': '-6px'
-              }}
-            >
-              <ValueHelp color="var(--ion-color-step-600)" size={16} />
-            </IonButton>
-          </div>
-        }
-        {date &&
-          <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
-            <IonButton
-              fill="clear"
-              slot="end"
-              color="medium"
-              onClick={handleOpenDatePicker}
-              style={{
-                width: '42px',
-                height: '42px',
-                '--border-radius': '24px',
-                '--padding-start': '0',
-                '--padding-end': '0',
-                '--padding-top': '0',
-                '--padding-bottom': '0',
-                'position': 'absolute',
-                'right': '-6px',
-                'top': '-6px'
-              }}
-            >
-              <IonIcon src={calendarOutline} />
-            </IonButton>
-          </div>
-        }
-      </IonInput>
-    </>
+      }
+      {date &&
+        <div slot='end' style={{ width: '30px', height: '30px', position: 'relative' }}>
+          <IonButton
+            fill="clear"
+            slot="end"
+            color="medium"
+            onClick={handleOpenDatePicker}
+            style={{
+              width: '42px',
+              height: '42px',
+              '--border-radius': '24px',
+              '--padding-start': '0',
+              '--padding-end': '0',
+              '--padding-top': '0',
+              '--padding-bottom': '0',
+              'position': 'absolute',
+              'right': '-6px',
+              'top': '-6px'
+            }}
+          >
+            <IonIcon src={calendarOutline} />
+          </IonButton>
+        </div>
+      }
+    </IonInput>
   );
 };
 

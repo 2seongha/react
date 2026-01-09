@@ -12,11 +12,11 @@ import {
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { addOutline } from 'ionicons/icons';
+import { add, addOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { getSearchHelp, getStart, postAttach, postStart } from '../stores/service';
+import { deleteAttach, getSearchHelp, getStart, postAttach, postStart } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
@@ -117,7 +117,7 @@ const PersonalExpense: React.FC = () => {
 
   useIonViewWillEnter(() => {
     const initApproval = async () => {
-      const approval = await getStart('DM103');
+      const approval = await getStart('IA103');
       if (approval instanceof Error) {
         router.goBack();
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
@@ -236,7 +236,7 @@ const PersonalExpense: React.FC = () => {
     goStep(0);
 
     new Notify({
-      title: isEdit ? '수정되었습니다.' : '저장되었습니다.',
+      title: isEdit ? '수정되었습니다.' : '추가되었습니다.',
       position: 'x-center bottom',
       autotimeout: 2000,
     });
@@ -400,9 +400,9 @@ const PersonalExpense: React.FC = () => {
           {step === 99 && <AddItem
             docItem={docItem}
             onSaveEnabledChange={enabled => {
-              if (isSaveEnabled !== enabled) {
-                setIsSaveEnabled(enabled);
-              }
+              // if (isSaveEnabled !== enabled) {
+              setIsSaveEnabled(enabled);
+              // }
             }}
           />}
 
@@ -611,7 +611,7 @@ const PersonalExpense: React.FC = () => {
                     handleSaveItem(docItem);
                   }}
                 >
-                  저장
+                  입력 완료
                 </IonButton>
               </motion.div>
             )}
@@ -811,6 +811,7 @@ const AddItem: React.FC<AddItemProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<FormRef>({});
   const [, forceRender] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
@@ -870,206 +871,333 @@ const AddItem: React.FC<AddItemProps> = ({
           height: '100%',
           overflow: 'auto',
           overflowX: 'hidden',
-          padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom))) 21px'
+          padding: '12px 0px calc(102px + max(var(--ion-safe-area-bottom))) 0px'
           // padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
         }}>
-        <CustomInput
-          formRef={formRef}
-          value="$ACCOUNT_CODE_T"
-          helperText="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
-          label="계정그룹명"
-          required
-          onFocus={handleFocus}
-          onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
-          onChange={(value) => {
-            formRef.current.ACCOUNT_CODE_T = value;
-            if (!value) {
-              formRef.current.ACCOUNT_CODE = '';
-              formRef.current.SAKNR = '';
-              formRef.current.SAKNR_T = '';
-            }
-            checkRequired();
-          }}
-          onChangeValueHelp={(value) => {
-            formRef.current.ACCOUNT_CODE = value.Key;
-            formRef.current.ACCOUNT_CODE_T = value.Name;
-            formRef.current.SAKNR = value.Add1;
-            formRef.current.SAKNR_T = value.KeyName;
-            checkRequired();
-          }}
-          readOnly
-          clearInput
-          style={{ marginBottom: '28px' }}
-        />
-        <CustomInput
-          formRef={formRef}
-          value="$KOSTL"
-          helperText="코스트센터명 : $KOSTL_T"
-          label="코스트센터"
-          onFocus={handleFocus}
-          onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
-          onChange={(value) => {
-            formRef.current.KOSTL = value;
-            if (!value) {
-              formRef.current.KOSTL_T = '';
-            }
-          }}
-          onChangeValueHelp={(value) => {
-            formRef.current.KOSTL = value.Key;
-            formRef.current.KOSTL_T = value.Name;
-          }}
-          style={{ marginBottom: '28px' }}
-          clearInput
-        />
-        <CustomInput
-          formRef={formRef}
-          value="$AUFNR"
-          helperText="오더명 : $AUFNR_T"
-          label="오더번호"
-          onFocus={handleFocus}
-          onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
-          onChange={(value) => {
-            formRef.current.AUFNR = value;
-            if (!value) {
-              formRef.current.AUFNR_T = '';
-            }
-          }}
-          onChangeValueHelp={(value) => {
-            formRef.current.AUFNR = value.Key;
-            formRef.current.AUFNR_T = value.Name;
-          }}
-          style={{ marginBottom: '28px' }}
-          clearInput
-        />
-        <CustomInput
-          formRef={formRef}
-          value="$PROJK"
-          helperText="WBS요소명 : $PROJK_T"
-          label="WBS요소"
-          onFocus={handleFocus}
-          onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
-          onChange={(value) => {
-            formRef.current.PROJK = value;
-            if (!value) {
-              formRef.current.PROJK_T = '';
-            }
-          }}
-          onChangeValueHelp={(value) => {
-            formRef.current.PROJK = value.Key;
-            formRef.current.PROJK_T = value.Name;
-          }}
-          style={{ marginBottom: '28px' }}
-          clearInput
-        />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+        <div style={{ padding: '0 21px' }}>
           <CustomInput
-            currency
             formRef={formRef}
-            value="$WRBTR"
-            label="전표통화금액"
+            value="$ACCOUNT_CODE_T"
+            helperText="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
+            label="계정그룹명"
             required
-            formatter={(value) => {
-              if (!value) return "";
-              const raw = value
-                .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
-                .replace(/(?!^)-/g, "");  // - 는 맨 앞만
-
-              if (raw === "" || raw === "-") return raw;
-
-              return Number(raw).toLocaleString("ko-KR");
-            }}
             onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
             onChange={(value) => {
-              formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
+              formRef.current.ACCOUNT_CODE_T = value;
+              if (!value) {
+                formRef.current.ACCOUNT_CODE = '';
+                formRef.current.SAKNR = '';
+                formRef.current.SAKNR_T = '';
+              }
               checkRequired();
             }}
-            style={{ marginBottom: '28px', textAlign: 'right' }}
-            inputMode='numeric'
+            onChangeValueHelp={(value) => {
+              formRef.current.ACCOUNT_CODE = value.Key;
+              formRef.current.ACCOUNT_CODE_T = value.Name;
+              formRef.current.SAKNR = value.Add1;
+              formRef.current.SAKNR_T = value.KeyName;
+              checkRequired();
+            }}
+            readOnly
+            clearInput
+            style={{ marginBottom: '28px' }}
           />
-          <span style={{ paddingBottom: '10px' }}>{docItem?.WAERS}</span>
-        </div>
-
-        {/* <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
           <CustomInput
-            currency
             formRef={formRef}
-            value="$DMBTR"
-            label="현지통화금액"
+            value="$KOSTL"
+            helperText="코스트센터명 : $KOSTL_T"
+            label="코스트센터"
+            onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
+            onChange={(value) => {
+              formRef.current.KOSTL = value;
+              if (!value) {
+                formRef.current.KOSTL_T = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.KOSTL = value.Key;
+              formRef.current.KOSTL_T = value.Name;
+            }}
+            style={{ marginBottom: '28px' }}
+            clearInput
+          />
+          <CustomInput
+            formRef={formRef}
+            value="$AUFNR"
+            helperText="오더명 : $AUFNR_T"
+            label="오더번호"
+            onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
+            onChange={(value) => {
+              formRef.current.AUFNR = value;
+              if (!value) {
+                formRef.current.AUFNR_T = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.AUFNR = value.Key;
+              formRef.current.AUFNR_T = value.Name;
+            }}
+            style={{ marginBottom: '28px' }}
+            clearInput
+          />
+          <CustomInput
+            formRef={formRef}
+            value="$PROJK"
+            helperText="WBS요소명 : $PROJK_T"
+            label="WBS요소"
+            onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
+            onChange={(value) => {
+              formRef.current.PROJK = value;
+              if (!value) {
+                formRef.current.PROJK_T = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.PROJK = value.Key;
+              formRef.current.PROJK_T = value.Name;
+            }}
+            style={{ marginBottom: '28px' }}
+            clearInput
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CustomInput
+              currency
+              formRef={formRef}
+              value="$WRBTR"
+              label="전표통화금액"
+              required
+              formatter={(value) => {
+                if (!value) return "";
+                const raw = value
+                  .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
+                  .replace(/(?!^)-/g, "");  // - 는 맨 앞만
+
+                if (raw === "" || raw === "-") return raw;
+
+                return Number(raw).toLocaleString("ko-KR");
+              }}
+              onFocus={handleFocus}
+              onChange={(value) => {
+                formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
+                checkRequired();
+              }}
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
+            />
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.WAERS}</span>
+          </div>
+
+          <CustomInput
+            formRef={formRef}
+            value="$SGTXT"
+            label="항목텍스트"
+            required
+            onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.SGTXT = value;
+              checkRequired();
+            }}
+            style={{ marginBottom: '28px' }}
+            clearInput
+          />
+          <CustomInput
+            formRef={formRef}
+            value="$ZUONR"
+            label="지정"
+            onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.ZUONR = value;
+            }}
+            style={{ marginBottom: '28px' }}
+            clearInput
+          />
+          <CustomInput
+            formRef={formRef}
+            value="$VALUT"
+            label="기준일자"
+            readOnly
+            date
             formatter={(value) => {
-              if (!value) return "";
-
-              const raw = value
-                .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
-                .replace(/(?!^)-/g, "");  // - 는 맨 앞만
-
-              if (raw === "" || raw === "-") return raw;
-
-              return Number(raw).toLocaleString("ko-KR");
+              return dayjs(value).format('YYYY-MM-DD');
             }}
             onFocus={handleFocus}
             onChange={(value) => {
-              formRef.current.DMBTR = value.replace(/[^0-9.-]/g, '');
+              formRef.current.VALUT = value;
             }}
-            style={{ marginBottom: '28px', textAlign: 'right' }}
-            inputMode='numeric'
+            style={{ marginBottom: '28px' }}
           />
-          <span style={{ paddingBottom: '10px' }}>{docItem?.HWAER}</span>
-        </div> */}
+          <CustomInput
+            formRef={formRef}
+            value="$ZFBDT"
+            label="만기계산일"
+            readOnly
+            date
+            formatter={(value) => {
+              return dayjs(value).format('YYYY-MM-DD');
+            }}
+            onFocus={handleFocus}
+            onChange={(value) => {
+              formRef.current.ZFBDT = value;
+            }}
+            style={{ marginBottom: '28px' }}
+          />
+        </div>
+        {/* <div style={{
+          borderTop: '21px solid var(--custom-border-color-50)',
+        }}>
+          <div style={{
+            padding: '21px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <span style={{ fontWeight: '500' }}>참석자</span>
+            <IonButton fill='clear'><IonIcon src={add}></IonIcon>추가</IonButton>
+          </div>
+        </div>
+        <div style={{ padding: '0 21px' }}>
 
-        <CustomInput
-          formRef={formRef}
-          value="$SGTXT"
-          label="항목텍스트"
-          required
-          onFocus={handleFocus}
-          onChange={(value) => {
-            formRef.current.SGTXT = value;
-            checkRequired();
-          }}
-          style={{ marginBottom: '28px' }}
-          clearInput
-        />
-        <CustomInput
-          formRef={formRef}
-          value="$ZUONR"
-          label="지정"
-          onFocus={handleFocus}
-          onChange={(value) => {
-            formRef.current.ZUONR = value;
-          }}
-          style={{ marginBottom: '28px' }}
-          clearInput
-        />
-        <CustomInput
-          formRef={formRef}
-          value="$VALUT"
-          label="기준일자"
-          readOnly
-          date
-          formatter={(value) => {
-            return dayjs(value).format('YYYY-MM-DD');
-          }}
-          onFocus={handleFocus}
-          onChange={(value) => {
-            formRef.current.VALUT = value;
-          }}
-          style={{ marginBottom: '28px' }}
-        />
-        <CustomInput
-          formRef={formRef}
-          value="$ZFBDT"
-          label="만기계산일"
-          readOnly
-          date
-          formatter={(value) => {
-            return dayjs(value).format('YYYY-MM-DD');
-          }}
-          onFocus={handleFocus}
-          onChange={(value) => {
-            formRef.current.ZFBDT = value;
-          }}
-          style={{ marginBottom: '28px' }}
-        />
+
+        </div> */}
+        <div style={{
+          borderTop: '21px solid var(--custom-border-color-50)',
+          // borderBottom: '21px solid var(--custom-border-color-50)',
+          // marginBottom: '21px',
+        }}>
+          <div style={{
+            padding: '28px 21px',
+            // display: 'flex',
+            // alignItems: 'center',
+            // justifyContent: 'space-between',
+            // flexDirection: 'column'
+          }}>
+            <span style={{ fontSize: '17px', fontWeight: '500', display: 'block', marginBottom: '28px' }}>수익성 세그먼트</span>
+            <CustomInput
+              formRef={formRef}
+              value="$RKE_KNDNR"
+              helperText='$RKE_KNDNR_T'
+              label="고객"
+              // labelPlacement='fixed'
+              onFocus={handleFocus}
+              onValueHelp={() => getSearchHelp('KUNNR', 'IA103')}
+              onChange={(value) => {
+                formRef.current.RKE_KNDNR = value;
+                if (!value) {
+                  formRef.current.RKE_KNDNR_T = '';
+                }
+              }}
+              onChangeValueHelp={(value) => {
+                formRef.current.RKE_KNDNR = value.Key;
+                formRef.current.RKE_KNDNR_T = value.Name;
+              }}
+              style={{ marginBottom: '28px' }}
+              clearInput
+            />
+            <CustomInput
+              formRef={formRef}
+              value="$RKE_VKORG"
+              helperText='$RKE_VKORG_T'
+              label="영업조직"
+              // labelPlacement='fixed'
+              onFocus={handleFocus}
+              onValueHelp={() => getSearchHelp('VKORG', 'IA103')}
+              onChange={(value) => {
+                formRef.current.RKE_VKORG = value;
+                if (!value) {
+                  formRef.current.RKE_VKORG_T = '';
+                  formRef.current.RKE_VTWEG = '';
+                  formRef.current.RKE_VTWEG_T = '';
+                  formRef.current.RKE_SPART = '';
+                  formRef.current.RKE_SPART_T = '';
+                  setRefreshKey(prev => prev + 1);
+                }
+              }}
+              onChangeValueHelp={(value) => {
+                formRef.current.RKE_VKORG = value.Key;
+                formRef.current.RKE_VKORG_T = value.Name;
+                formRef.current.RKE_VTWEG = value.Add1;
+                formRef.current.RKE_VTWEG_T = value.Add2;
+                formRef.current.RKE_SPART = value.Add3;
+                formRef.current.RKE_SPART_T = value.Add4;
+                setRefreshKey(prev => prev + 1);
+              }}
+              style={{ marginBottom: '28px' }}
+              clearInput
+            />
+            <CustomInput
+              formRef={formRef}
+              key={`vt-${refreshKey}`}
+              value="$RKE_VTWEG"
+              helperText='$RKE_VTWEG_T'
+              label="유통경로"
+              disabled
+              style={{ marginBottom: '28px' }}
+            />
+            <CustomInput
+              formRef={formRef}
+              key={`sp-${refreshKey}`}
+              value="$RKE_SPART"
+              helperText='$RKE_SPART_T'
+              label="제품군"
+              disabled
+              style={{ marginBottom: '28px' }}
+            />
+            <CustomInput
+              formRef={formRef}
+              value="$RKE_WERKS"
+              helperText='$RKE_WERKS_T'
+              label="플랜트"
+              onFocus={handleFocus}
+              onValueHelp={() => getSearchHelp('WERKS', 'IA103')}
+              onChange={(value) => {
+                formRef.current.RKE_WERKS = value;
+                if (!value) {
+                  formRef.current.RKE_WERKS_T = '';
+                }
+              }}
+              onChangeValueHelp={(value) => {
+                formRef.current.RKE_WERKS = value.Key;
+                formRef.current.RKE_WERKS_T = value.Name;
+              }}
+              style={{ marginBottom: '28px' }}
+              clearInput
+            />
+            <CustomInput
+              formRef={formRef}
+              value="$RKE_ARTNR"
+              helperText='$RKE_ARTNR_T'
+              label="자재"
+              onFocus={handleFocus}
+              beforeOpenValueHelp={() => {
+                if (!formRef.current.RKE_WERKS) {
+                  new Notify({
+                    status: 'error',
+                    title: '플랜트를 입력하세요.',
+                    position: 'x-center bottom',
+                    autotimeout: 2000
+                  });
+                  return false;
+                }
+                return true;
+              }}
+              onValueHelp={() => getSearchHelp('ARTNR', 'IA103', formRef.current.RKE_WERKS)}
+              onChange={(value) => {
+                formRef.current.RKE_ARTNR = value;
+                if (!value) {
+                  formRef.current.RKE_ARTNR_T = '';
+                }
+              }}
+              onChangeValueHelp={(value) => {
+                formRef.current.RKE_ARTNR = value.Key;
+                formRef.current.RKE_ARTNR_T = value.Name;
+              }}
+            />
+          </div>
+        </div>
       </div>
     </motion.div>
   );
@@ -1246,8 +1374,19 @@ const Attach: React.FC<AttachProps> = ({
   };
 
   const handleDeleteAttach = (fileNo: string) => {
-    approval.FILES = approval.FILES.filter((file: any) => file.FILE_NO !== fileNo);
+    const index = approval.FILES.findIndex(
+      (file: any) => file.FILE_NO === fileNo
+    );
 
+    let removedFiles: any[] = [];
+
+    if (index !== -1) {
+      removedFiles = approval.FILES.splice(index, 1);
+    }
+
+    const removedFile = removedFiles[0];
+
+    deleteAttach(approval.GUID, removedFile.FILE_NO, removedFile.FILE_TYPE);
     setFiles(approval.FILES);
     new Notify({
       status: 'error',
@@ -1261,23 +1400,11 @@ const Attach: React.FC<AttachProps> = ({
     const files = event.target.files;
     const payloads = [];
     setIsLoading([...isLoading, fileTypeRef.current]);
-    // const arrayBufferToHex = (buffer: ArrayBuffer): string => {
-    //   const bytes = new Uint8Array(buffer);
-    //   let hex = "";
-
-    //   for (let i = 0; i < bytes.length; i++) {
-    //     hex += bytes[i].toString(16).padStart(2, "0");
-    //   }
-
-    //   return hex;
-    // }
 
     if (files) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const FILE_NO = String(fileNo.current).padStart(5, '0');
-
-        // const buffer = await file.arrayBuffer();
 
         const fileObject = {
           ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
@@ -1290,22 +1417,10 @@ const Attach: React.FC<AttachProps> = ({
           FILE_TYPE: fileTypeRef.current
         };
 
-        // const payload = {
-        //   header: {
-        //     'loginid': approval.LOGIN_ID,
-        //     'fileno': FILE_NO,
-        //     'filetype': fileTypeRef.current,
-        //     'slug': encodeURIComponent(file.name),
-        //     'guid': approval.GUID,
-        //     'accept-encoding': "gzip, deflate, br, zstd"
-        //   },
-        //   body: buffer
-        // }
-
         const formData = new FormData();
         formData.append('Content-type', file.type);
         formData.append('file', file);
-        formData.append('slug', file.name);
+        formData.append('slug', encodeURIComponent(file.name));
         formData.append('fileno', FILE_NO);
         formData.append('filetype', fileTypeRef.current);
         formData.append('loginid', approval.LOGIN_ID);

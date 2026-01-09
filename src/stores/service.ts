@@ -179,6 +179,22 @@ export async function postAttach(ATTACH: any): Promise<any> {
   }
 }
 
+export async function deleteAttach(GUID: string, FILE_NO: string, FILE_TYPE: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    const BUKRS = user?.BUKRS;
+
+    const api = createApiInstance();
+
+    const res = await api.delete(`/v1/api/attach?GUID=${GUID}&FILE_NO=${FILE_NO}&FILE_TYPE=${FILE_TYPE}&BUKRS=${BUKRS}&LOGIN_ID=${LOGIN_ID}`);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
 
 export async function getNotices(): Promise<NoticeModel[]> {
   try {

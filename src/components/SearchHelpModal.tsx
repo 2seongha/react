@@ -13,6 +13,7 @@ import _ from "lodash";
 import useAppStore from "../stores/appStore";
 import { pushModal } from "../App";
 import LoadingIndicator from "./LoadingIndicator";
+import NoData from "./NoData";
 interface SearchHelpModalProps {
 }
 
@@ -127,7 +128,7 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
           if (!modalEl) return;
           // @ts-ignore
           const gesture = modalEl.gesture;
-          gesture.enable(true); 
+          gesture.enable(true);
         }}
         forceOverscroll={false}
         scrollEvents
@@ -139,47 +140,69 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
               margin: '0 auto',
               marginTop: '120px'
             }} />
-          : list.map((item, index) => {
-            return (
-              <IonItem
-                key={'search-help-item' + index}
-                mode="md"
-                button
-                style={{
-                  '--min-height': '52px',
-                  '--padding-start': '21px',
-                  '--padding-end': '21px',
-                  marginBottom: list.length - 1 === index ? 'var(--ion-safe-area-bottom)' : 0,
-                  borderBottom: '.5px solid var(--ion-color-step-100)',
-                }}
-                onClick={() => {
-                  searchHelp?.onChange(item);
-                  dismiss();
-                }}
-              >
-                <span
+          : _.isEmpty(list) ? <NoData />
+            : list.map((item, index) => {
+              return (
+                <IonItem
+                  key={'search-help-item' + index}
+                  mode="md"
+                  button
                   style={{
-                    fontSize: '13px',
-                    fontWeight: '500'
-                  }}>{item.Type === 'ACCOUNT_CODE_T' ? item.Name : item.Key}</span>
-                <div
-                  slot="end"
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    color: 'var(--ion-color-secondary)'
-                  }}>
-                  {item.Type === 'ACCOUNT_CODE_T'
-                    ? <>
-                      <span>{item.Add1}</span>
-                      <span> ({item.KeyName})</span>
+                    '--min-height': '52px',
+                    '--padding-start': '21px',
+                    '--padding-end': '21px',
+                    marginBottom: list.length - 1 === index ? 'var(--ion-safe-area-bottom)' : 0,
+                    borderBottom: '.5px solid var(--ion-color-step-100)',
+                  }}
+                  onClick={() => {
+                    searchHelp?.onChange(item);
+                    dismiss();
+                  }}
+                >
+                  {item.Type === 'VKORG' ?
+                    <>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: '500'
+                        }}>{item.Key}-{item.Add1}-{item.Add3}</span>
+                      <div
+                        slot="end"
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          color: 'var(--ion-color-secondary)'
+                        }}>
+                        <span>{item.Name}-{item.Add2}-{item.Add4}</span>
+                      </div>
                     </>
-                    : <span>{item.Name}</span>
+                    :
+                    <>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: '500'
+                        }}>{item.Type === 'ACCOUNT_CODE_T' ? item.Name : item.Key}</span>
+                      <div
+                        slot="end"
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          color: 'var(--ion-color-secondary)'
+                        }}>
+                        {item.Type === 'ACCOUNT_CODE_T'
+                          ? <>
+                            <span>{item.Add1}</span>
+                            <span> ({item.KeyName})</span>
+                          </>
+                          : <span>{item.Name}</span>
+                        }
+                      </div>
+                    </>
                   }
-                </div>
-              </IonItem>
-            );
-          })
+                </IonItem>
+              );
+            })
         }
       </IonContent>
     </IonModal>

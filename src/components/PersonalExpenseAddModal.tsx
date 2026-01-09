@@ -248,7 +248,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
             style={{ marginBottom: '28px' }}
             clearInput
           />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <CustomInput
               currency
               formRef={formRef}
@@ -274,7 +274,7 @@ const PersonalExpenseAddModal: React.FC<NotificationPopupProps> = ({
               style={{ marginBottom: '28px', textAlign: 'right' }}
               inputMode='numeric'
             />
-            <span style={{ paddingBottom: '10px' }}>{docItem?.WAERS}</span>
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.WAERS}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--ion-color-step-600)' }}>
