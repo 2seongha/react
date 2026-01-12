@@ -886,7 +886,7 @@ const AddItem: React.FC<AddItemProps> = ({
     if (docItem.ACCOUNT_CODE) {
       checkExtraFieldUse(false);
     } else {
-      if (oriAttendee.current) return;
+      if (oriAttendee.current || !docItem.DOCITEM_ATTENDEELIST[0]) return;
       oriAttendee.current = docItem.DOCITEM_ATTENDEELIST[0];
       docItem.DOCITEM_ATTENDEELIST = [];
     }
@@ -1728,7 +1728,7 @@ const FlowHd: React.FC<FlowHdProps> = ({
         formRef={formRef}
         style={{ height: '48px', minHeight: '48px', marginTop: '8px', marginBottom: '48px' }}
         placeholder='결재 제목 (필수)'
-        value='$TITLE'
+        valueTemplate='$TITLE'
         clearInput
         onChange={(value) => {
           formRef.current.TITLE = value;
