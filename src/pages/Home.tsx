@@ -290,6 +290,7 @@ const TodoSummaryCard: React.FC = () => {
     return state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null
   }));
   const approvals = useAppStore(state => state.todoSummary);
+  const setApprovals = useAppStore(state => state.setApprovals);
   const router = useIonRouter();
   const [selectedArea, setSelectedArea] = useState<AreaModel | null>(null);
 
@@ -332,6 +333,7 @@ const TodoSummaryCard: React.FC = () => {
               </div> :
               Array.from({ length: approvals?.LIST ? approvals?.LIST.length : 3 }).map((_, index) => (
                 <ApprovalItem key={index} approvalItem={approvals?.LIST?.[index]} isLoading={!approvals?.LIST} index={index} onClick={() => {
+                  setApprovals(approvals);
                   router.push(`/detail/${approvals?.LIST?.[index].FLOWNO}/TODO/${selectedArea?.AREA_CODE}/미결함/${encodeURIComponent(selectedArea?.O_LTEXT ?? '-')}`, 'forward', 'push');
                 }} />
               ))
