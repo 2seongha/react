@@ -24,8 +24,8 @@ const GroupButton: React.FC<GroupButtonProps> = ({ onSelectionChange }) => {
     return state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null
   }));
 
-  const getApprovals = useAppStore(state => state.getApprovals);
-  const setApprovals = useAppStore(state => state.setApprovals);
+  const getApprovals = useAppStore(state => state.getTodoSummary);
+  const setApprovals = useAppStore(state => state.setTodoSummary);
   const summaryForceRefresh = useAppStore(state => state.summaryForceRefresh);
   const setSummaryForceRefresh = useAppStore(state => state.setSummaryForceRefresh);
 

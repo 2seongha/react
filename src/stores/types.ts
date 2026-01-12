@@ -5,6 +5,7 @@ export interface AppState {
   corp: CorpModel | null;
   areas: AreaModel[] | null;
   approvals: ApprovalModel | null;
+  todoSummary: ApprovalModel | null;
   notices: NoticeModel[] | null;
   notifications: NotificationModel[] | null;
   selectedTab: number;
@@ -18,6 +19,7 @@ export interface AppState {
   setCorp: (user: CorpModel) => void;
   setAreas: (areas: AreaModel[] | null) => void;
   setApprovals: (approvals: ApprovalModel | null | undefined) => void;
+  setTodoSummary: (todoSummary: ApprovalModel | null | undefined) => void;
   setNotices: (notices: NoticeModel[] | null) => void;
   setNotifications: (notifications: NotificationModel[] | null) => void;
   setSelectedTab: (tab: number) => void;
@@ -29,6 +31,7 @@ export interface AppState {
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
   getApprovals: (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => Promise<void>;
+  getTodoSummary: (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => Promise<void>;
   getNotices: () => Promise<void>;
   getNotifications: () => Promise<NotificationModel[] | undefined>;
   patchNotifications: (NOTIFY_NO: string, READ_YN: string, DELETE_YN: string) => Promise<void>;

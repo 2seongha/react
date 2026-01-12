@@ -289,7 +289,7 @@ const TodoSummaryCard: React.FC = () => {
     }
     return state.areas?.find(area => area.AREA_CODE === 'TODO')?.CHILDREN || null
   }));
-  const approvals = useAppStore(state => state.approvals);
+  const approvals = useAppStore(state => state.todoSummary);
   const router = useIonRouter();
   const [selectedArea, setSelectedArea] = useState<AreaModel | null>(null);
 

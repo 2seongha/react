@@ -19,8 +19,8 @@ const requestIds = {
   areas: 0,
   flowList: 0,
   approvals: 0,
-  notices: 0,
   todoSummary: 0,
+  notices: 0,
   notifications: 0,
   searchHelp: 0,
 };
@@ -31,6 +31,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   corp: null,
   areas: null,
   approvals: null,
+  todoSummary: null,
   notices: null,
   notifications: null,
   selectedTab: 0,
@@ -50,6 +51,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setCorp: (corp) => set({ corp: corp }),
   setAreas: (areas) => set({ areas: areas }),
   setApprovals: (approvals) => set({ approvals: approvals }),
+  setTodoSummary: (todoSummary) => set({ todoSummary: todoSummary }),
   setNotices: (notices) => set({ notices }),
   setNotifications: (notifications) => set({ notifications }),
   setSelectedTab: (tab) => set({ selectedTab: tab }),
@@ -91,7 +93,6 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
     const approvals = await getApprovals(P_AREA_CODE, AREA_CODE, FLOWCODE, FLOWNO);
 
     if (approvals instanceof Error) {
-      console.log(approvals);
       set({
         approvals: {
           LOGIN_ID: '',
@@ -116,6 +117,38 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
       set({ approvals: approvals });
     }
   },
+
+  getTodoSummary: async (P_AREA_CODE: string, AREA_CODE: string, FLOWCODE: string, FLOWNO: string) => {
+    const currentRequestId = ++requestIds.todoSummary;
+    const approvals = await getApprovals(P_AREA_CODE, AREA_CODE, FLOWCODE, FLOWNO);
+
+    if (approvals instanceof Error) {
+      console.log(approvals);
+      set({
+        approvals: {
+          LOGIN_ID: '',
+          FLOWCODE: '',
+          FLOWCODE_TXT: '',
+          P_AREA_CODE: '',
+          P_AREA_CODE_TXT: '',
+          AREA_CODE: '',
+          AREA_CODE_TXT: '',
+          LIST: '',
+          TITLE: {
+            TITLE_H: [],
+            TITLE_I: [],
+            TITLE_S: [],
+          }
+        }
+      });
+    }
+
+    // 마지막 요청인지 확인
+    if (currentRequestId === requestIds.todoSummary) {
+      set({ todoSummary: approvals });
+    }
+  },
+
   getNotices: async () => {
     const currentRequestId = ++requestIds.notices;
     const notices = await getNotices();
