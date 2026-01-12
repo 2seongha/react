@@ -815,7 +815,6 @@ const AddItem: React.FC<AddItemProps> = ({
   const [, forceRender] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
-  const oriAttendee = useRef(null); // 참석자 템플릿
   const attendee = useRef<any>(null); // 참석자
   const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
@@ -856,7 +855,25 @@ const AddItem: React.FC<AddItemProps> = ({
   // 참석자 추가 팝업 오픈
   const openAddAttendee = useCallback(() => {
     setAttendeeType('A');
-    const cloneItem = _.cloneDeep<any>(oriAttendee.current);
+    const cloneItem = {
+      "FLOWCODE": "",
+      "FLOWNO": "",
+      "FLOWCNT": "",
+      "KEY_NUM": "",
+      "KEY_CNT": "",
+      "GUBUN": "",
+      "GUBUN_TX": "",
+      "ATTENDEE": "",
+      "LOGIN_ID": "",
+      "ORGEH": "",
+      "ORGTX": "",
+      "PURPOSE": "",
+      "BUKRS": "",
+      "BELNR": "",
+      "GJAHR": "",
+      "SEQNR": "1",
+      "ITEMNO": "1"
+    }
     cloneItem.GUBUN = 'A';
     cloneItem.GUBUN_TX = '내부';
     attendee.current = cloneItem;
@@ -886,8 +903,6 @@ const AddItem: React.FC<AddItemProps> = ({
     if (docItem.ACCOUNT_CODE) {
       checkExtraFieldUse(false);
     } else {
-      if (oriAttendee.current || !docItem.DOCITEM_ATTENDEELIST[0]) return;
-      oriAttendee.current = docItem.DOCITEM_ATTENDEELIST[0];
       docItem.DOCITEM_ATTENDEELIST = [];
     }
     formRef.current = docItem || {};
