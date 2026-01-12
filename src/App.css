@@ -290,6 +290,12 @@ ion-select {
   border-bottom: 1px solid var(--input-color);
 }
 
+ion-select::part(label) {
+  color: var(--ion-color-step-700);
+  font-weight: 500;
+  font-size: 15px;
+}
+
 .input-wrapper.sc-ion-input-md {
   border-bottom: 1px solid var(--input-color);
 }

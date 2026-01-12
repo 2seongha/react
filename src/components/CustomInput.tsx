@@ -18,6 +18,8 @@ export interface CustomInputProps {
   required?: boolean;
   value?: string;
   helperText?: string;
+  valueTemplate?: string;
+  helperTextTemplate?: string;
   clearInput?: boolean;
   onClick?: () => void;
   onChange?: (value: string) => void;
@@ -44,6 +46,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
   label,
   required = false,
   value,
+  helperText,
+  valueTemplate,
+  helperTextTemplate,
   clearInput = false,
   onClick,
   onChange,
@@ -57,7 +62,6 @@ const CustomInput: React.FC<CustomInputProps> = ({
   readOnly = false,
   style,
   inputMode,
-  helperText,
   currency,
   date,
   labelPlacement = 'stacked',
@@ -74,8 +78,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
   })
 
   useEffect(() => {
-    setLocalValue(resolveTemplate(value ?? '', false));
-    setLocalHelper(resolveTemplate(helperText ?? ''));
+    setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '', false) : value ?? '');
+    setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
   }, [formRef?.current])
 
   const resolveTemplate = (template: string, userInteraction: boolean = true) => {
@@ -110,14 +114,14 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   const handleValueHelp = (val: any) => {
     onChangeValueHelp?.(val);
-    setLocalValue(resolveTemplate(value ?? ''));
-    setLocalHelper(resolveTemplate(helperText ?? ''));
+    setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '', false) : value ?? '');
+    setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
   };
 
   const handleInput = (val: string) => {
     onChange?.(val);
-    setLocalValue(resolveTemplate(value ?? '', true));
-    setLocalHelper(resolveTemplate(helperText ?? ''));
+    setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '', false) : value ?? '');
+    setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
   };
 
   const handleOpenValueHelp = async () => {

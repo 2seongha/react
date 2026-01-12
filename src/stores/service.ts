@@ -196,6 +196,20 @@ export async function deleteAttach(GUID: string, FILE_NO: string, FILE_TYPE: str
   }
 }
 
+export async function postExtraFieldUse(APPROVAL: any): Promise<any> {
+  try {
+    const api = createApiInstance();
+    const payload = APPROVAL;
+
+    const res = await api.post(`/v1/api/extra`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 export async function getNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay

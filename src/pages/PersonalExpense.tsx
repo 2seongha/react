@@ -14,11 +14,11 @@ import {
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { add, addOutline, person } from 'ionicons/icons';
+import { add, addOutline, mailUnreadSharp, person, removeOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { deleteAttach, getSearchHelp, getStart, postAttach, postStart } from '../stores/service';
+import { deleteAttach, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStart } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
@@ -125,7 +125,6 @@ const PersonalExpense: React.FC = () => {
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
         return router.goBack(); //TODO 임시 주석
       }
-      console.log(approval);
       oriItem.current = approval.FLOWHD_DOCITEM[0];
       approval.FLOWHD_DOCITEM = [];
       setApproval(approval);
@@ -202,10 +201,24 @@ const PersonalExpense: React.FC = () => {
     setIsSaveEnabled(false);
   }, [approval]);
 
+  const reOrderItemNo = useCallback((list: any) => {
+    return list.map((itm: any, i: number) => {
+      itm.DOCITEM_ATTENDEELIST.forEach((attendee: any, idx: number) => {
+        attendee.ITEMNO = String(i + 1);
+        attendee.KEY_CNT = idx + 1;
+      });
+      return {
+        ...itm,
+        CNT: String(i + 1),
+        ITEMNO: String(i + 1),
+      };
+    });
+  }, []);
+
   // 항목 저장
   const handleSaveItem = useCallback((item: any) => {
     const newItem = { ...item };
-    let isEdit = false; // ✅ 수정 여부 플래그
+    let isEdit = false;
 
     setApproval((prev: any) => {
       if (!prev || !prev.FLOWHD_DOCITEM) {
@@ -219,21 +232,21 @@ const PersonalExpense: React.FC = () => {
 
       let newList;
       if (index > -1) {
-        isEdit = true; // ✅ 수정
+        isEdit = true;
         newList = list.map((itm, i) =>
           i === index ? { ...itm, ...newItem } : itm
         );
       } else {
-        newList = [...list, newItem]; // ✅ 신규 추가
+        newList = [...list, newItem];
       }
 
-      newList = newList.map((itm, i) => ({
-        ...itm,
-        CNT: String(i + 1),
-        ITEMNO: String(i + 1),
-      }));
+      // CNT, ITEMNO 재할당
+      newList = reOrderItemNo(newList);
 
-      return { ...prev, FLOWHD_DOCITEM: newList };
+      return {
+        ...prev,
+        FLOWHD_DOCITEM: newList,
+      };
     });
 
     goStep(0);
@@ -256,9 +269,11 @@ const PersonalExpense: React.FC = () => {
         autotimeout: 2000
       });
       // deleteIndex 기준으로 필터링 + 재정렬
-      const newList = prev.FLOWHD_DOCITEM
-        .filter((_: any, i: number) => i !== deleteIndex)
-        .map((item: any, i: number) => ({ ...item, CNT: i + 1, ITEMNO: i + 1 }));
+      let newList = prev.FLOWHD_DOCITEM
+        .filter((_: any, i: number) => i !== deleteIndex);
+
+      // CNT, ITEMNO 재할당
+      newList = reOrderItemNo(newList);
 
       return {
         ...prev,
@@ -298,23 +313,6 @@ const PersonalExpense: React.FC = () => {
           )}
 
           {step === 4 && animationFinished && result.Type !== 'S' && (
-            // <IonButton
-            //   mode="md"
-            //   fill="clear"
-            //   onClick={() => {
-            //     goStep(step - 1);
-            //     setResult(null);
-            //     setAnimationFinished(false);
-            //   }}
-            //   style={{
-            //     '--border-radius': '24px',
-            //     marginLeft: '8px',
-            //     width: '64px',
-            //     height: '48px',
-            //   }}
-            // >
-            //   <span style={{ fontSize: '16px', fontWeight: '600' }}>이전</span>
-            // </IonButton>
             <p></p>
           )}
 
@@ -401,6 +399,7 @@ const PersonalExpense: React.FC = () => {
 
           {/* 항목 추가 페이지 */}
           {step === 99 && <AddItem
+            approval={approval}
             docItem={docItem}
             onSaveEnabledChange={enabled => {
               // if (isSaveEnabled !== enabled) {
@@ -803,11 +802,13 @@ const Item: React.FC<ItemProps> = ({
 
 //* ========== Step 99. 항목 추가 ==========
 interface AddItemProps {
+  approval?: any;
   docItem?: any;
   onSaveEnabledChange: (enabled: boolean) => void;
 }
 
 const AddItem: React.FC<AddItemProps> = ({
+  approval,
   docItem,
   onSaveEnabledChange
 }) => {
@@ -816,9 +817,74 @@ const AddItem: React.FC<AddItemProps> = ({
   const [, forceRender] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
+  const oriAttendee = useRef(null); // 참석자 템플릿
+  const attendee = useRef<any>(null); // 참석자
+  const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
+
+  // 참석자, 수익성 사용여부 체크
+  const checkExtraFieldUse = useCallback(async () => {
+    const cloneApproval = _.cloneDeep(approval);
+    const cloneDocItem = _.cloneDeep(docItem);
+    cloneDocItem.WRBTR = '0';
+    cloneApproval.FLOWHD_DOCITEM = [cloneDocItem];
+    cloneApproval.ACTIVITY = 'ENTER';
+    cloneApproval.FIELD = 'ACCOUNT_CODE_T';
+    cloneApproval.GUBUN = 'I';
+    const res = await postExtraFieldUse(cloneApproval);
+    if (!res.ATTENDEE_EDIT) {
+      docItem.DOCITEM_ATTENDEELIST = [];
+    }
+    if (!res.PAOBJNR_EDIT) {
+      docItem.RKE_KNDNR = '';
+      docItem.RKE_KNDNR_T = '';
+      docItem.RKE_VKORG = '';
+      docItem.RKE_VKORG_T = '';
+      docItem.RKE_VTWEG = '';
+      docItem.RKE_VTWEG_T = '';
+      docItem.RKE_SPART = '';
+      docItem.RKE_SPART_T = '';
+      docItem.RKE_WERKS = '';
+      docItem.RKE_WERKS_T = '';
+      docItem.RKE_ARTNR = '';
+      docItem.RKE_ARTNR_T = '';
+    }
+    setExtraFieldUse(res);
+  }, []);
+
+  // 참석자 추가 팝업 오픈
+  const openAddAttendee = useCallback(() => {
+    setAttendeeType('A');
+    const cloneItem = _.cloneDeep<any>(oriAttendee.current);
+    cloneItem.GUBUN = 'A';
+    cloneItem.GUBUN_TX = '내부';
+    attendee.current = cloneItem;
+  }, []);
+
+  // 참석자 추가
+  const handleAddAttendee = useCallback(() => {
+    docItem.DOCITEM_ATTENDEELIST.push(attendee.current);
+    forceRender(prev => prev + 1);
+  }, [attendee]);
+
+  // 참석자 삭제
+  const handleDeleteAttendee = useCallback((index: number) => {
+    docItem.DOCITEM_ATTENDEELIST.splice(index, 1);
+    forceRender(prev => prev + 1);
+  }, [docItem]);
+
+  const handleAttendeeInputChange = useCallback((values: Record<string, any>) => {
+    attendee.current = {
+      ...attendee.current,
+      ...values
+    }
+  }, []);
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
+    if (oriAttendee.current) return;
+
+    oriAttendee.current = docItem.DOCITEM_ATTENDEELIST[0];
+    docItem.DOCITEM_ATTENDEELIST = [];
     formRef.current = docItem || {};
     checkRequired();
     forceRender(prev => prev + 1);
@@ -854,11 +920,13 @@ const AddItem: React.FC<AddItemProps> = ({
       });
     }, 150)
   };
+
   const variants = {
     enter: { y: "5%", opacity: 0.5 },   // 화면 밑에서 시작
     center: { y: 0, opacity: 1 },       // 원래 위치
     exit: { y: "5%", opacity: 0.5 }     // 다시 밑으로
   };
+
   return (
     <motion.div
       key={docItem + 'item'}
@@ -881,8 +949,8 @@ const AddItem: React.FC<AddItemProps> = ({
         <div style={{ padding: '0 21px' }}>
           <CustomInput
             formRef={formRef}
-            value="$ACCOUNT_CODE_T"
-            helperText="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
+            valueTemplate="$ACCOUNT_CODE_T"
+            helperTextTemplate="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
             label="계정그룹명"
             required
             onFocus={handleFocus}
@@ -902,6 +970,7 @@ const AddItem: React.FC<AddItemProps> = ({
               formRef.current.SAKNR = value.Add1;
               formRef.current.SAKNR_T = value.KeyName;
               checkRequired();
+              checkExtraFieldUse();
             }}
             readOnly
             clearInput
@@ -909,8 +978,8 @@ const AddItem: React.FC<AddItemProps> = ({
           />
           <CustomInput
             formRef={formRef}
-            value="$KOSTL"
-            helperText="코스트센터명 : $KOSTL_T"
+            valueTemplate="$KOSTL"
+            helperTextTemplate="코스트센터명 : $KOSTL_T"
             label="코스트센터"
             onFocus={handleFocus}
             onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
@@ -929,8 +998,8 @@ const AddItem: React.FC<AddItemProps> = ({
           />
           <CustomInput
             formRef={formRef}
-            value="$AUFNR"
-            helperText="오더명 : $AUFNR_T"
+            valueTemplate="$AUFNR"
+            helperTextTemplate="오더명 : $AUFNR_T"
             label="오더번호"
             onFocus={handleFocus}
             onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
@@ -949,8 +1018,8 @@ const AddItem: React.FC<AddItemProps> = ({
           />
           <CustomInput
             formRef={formRef}
-            value="$PROJK"
-            helperText="WBS요소명 : $PROJK_T"
+            valueTemplate="$PROJK"
+            helperTextTemplate="WBS요소명 : $PROJK_T"
             label="WBS요소"
             onFocus={handleFocus}
             onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
@@ -971,7 +1040,7 @@ const AddItem: React.FC<AddItemProps> = ({
             <CustomInput
               currency
               formRef={formRef}
-              value="$WRBTR"
+              valueTemplate="$WRBTR"
               label="전표통화금액"
               required
               formatter={(value) => {
@@ -997,7 +1066,7 @@ const AddItem: React.FC<AddItemProps> = ({
 
           <CustomInput
             formRef={formRef}
-            value="$SGTXT"
+            valueTemplate="$SGTXT"
             label="항목텍스트"
             required
             onFocus={handleFocus}
@@ -1010,7 +1079,7 @@ const AddItem: React.FC<AddItemProps> = ({
           />
           <CustomInput
             formRef={formRef}
-            value="$ZUONR"
+            valueTemplate="$ZUONR"
             label="지정"
             onFocus={handleFocus}
             onChange={(value) => {
@@ -1021,7 +1090,7 @@ const AddItem: React.FC<AddItemProps> = ({
           />
           <CustomInput
             formRef={formRef}
-            value="$VALUT"
+            valueTemplate="$VALUT"
             label="기준일자"
             readOnly
             date
@@ -1036,7 +1105,7 @@ const AddItem: React.FC<AddItemProps> = ({
           />
           <CustomInput
             formRef={formRef}
-            value="$ZFBDT"
+            valueTemplate="$ZFBDT"
             label="만기계산일"
             readOnly
             date
@@ -1050,24 +1119,66 @@ const AddItem: React.FC<AddItemProps> = ({
             style={{ marginBottom: '28px' }}
           />
         </div>
+        <IonButton id='attendee-dialog-trigger' style={{ display: 'none' }} onClick={openAddAttendee} />
 
         {/* 참석자 */}
-        <div style={{
-          borderTop: '21px solid var(--custom-border-color-50)',
-        }}>
+        {extraFieldUse?.ATTENDEE_EDIT &&
           <div style={{
-            padding: '32px 21px',
-            position: 'relative'
+            borderTop: '21px solid var(--custom-border-color-50)',
           }}>
-            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '18px' }}>참석자</span>
-            <IonButton id='attendee-dialog-trigger' mode='md' fill='clear' style={{ top: 24, right: 8, position: 'absolute' }} onClick={() => {
-              setAttendeeType('A');
+            <div style={{
+              padding: '32px 21px',
+              position: 'relative'
             }}>
-              <IonIcon src={add} style={{ marginRight: '4px' }} />추가
-            </IonButton>
-            <span style={{ color: 'var(--ion-color-secondary)' }}>참석자를 추가해주세요.</span>
+              <span style={{ fontSize: '16px', fontWeight: '500', display: 'block', marginBottom: '36px' }}>참석자</span>
+              <IonButton mode='md' fill='solid' style={{ top: 24, right: 16, position: 'absolute' }} onClick={() => {
+                document.getElementById("attendee-dialog-trigger")?.click();
+              }}>
+                <IonIcon src={add} />추가
+              </IonButton>
+              {_.isEmpty(docItem.DOCITEM_ATTENDEELIST)
+                ? <span style={{ color: 'var(--ion-color-secondary)' }}>참석자를 추가해주세요.</span>
+                : docItem.DOCITEM_ATTENDEELIST.map((attendee: any, index: number) => <div key={`attendee${index}`}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "4px",
+                      marginBottom: index === docItem.DOCITEM_ATTENDEELIST.length - 1 ? "" : "28px",
+                      alignItems: "center",
+                      justifyContent: "space-between"
+                    }}
+                  >
+                    <div>
+                      <span
+                        style={{
+                          padding: "4px 8px",
+                          borderRadius: "6px",
+                          backgroundColor:
+                            attendee.GUBUN === "A"
+                              ? "#ecd7ffff"
+                              : "#d2f3ffff",
+                          color: "var(--ion-color-warning-contrast)",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {attendee.GUBUN === "A" ? "내부" : "외부"}
+                      </span>
+                      <span style={{ fontSize: "14px", fontWeight: "500", marginLeft: '12px' }}>
+                        {attendee.ATTENDEE} ({attendee.ORGTX || '-'})
+                      </span>
+                      <span style={{ color: "var(--ion-color-secondary)", fontSize: '14px', marginLeft: '12px' }}>
+                        {attendee.PURPOSE || "-"}
+                      </span>
+                    </div>
+                    <IonButton mode='md' fill='clear' color={'medium'} style={{ position: 'absolute', right: 8 }} onClick={() => handleDeleteAttendee(index)}>
+                      삭제
+                    </IonButton>
+                  </div>
+                </div>
+                )}
+            </div>
           </div>
-        </div>
+        }
 
         <CustomDialog
           trigger="attendee-dialog-trigger"
@@ -1079,31 +1190,59 @@ const AddItem: React.FC<AddItemProps> = ({
           title="참석자 추가"
           body={
             <div style={{ padding: '0 8px 8px 8px' }}>
-              <IonSelect label='구분' interface="popover" mode='ios' style={{ marginBottom: '12px' }} value={attendeeType}>
+              <IonSelect
+                label='구분'
+                interface="popover"
+                mode='ios'
+                style={{ marginBottom: '12px' }}
+                value={attendeeType}
+                onIonChange={(e) => {
+                  handleAttendeeInputChange({
+                    'GUBUN': e.target.value,
+                    'GUBUN_TX': e.target.value === 'A' ? '내부' : '외부'
+                  });
+                }}>
                 <IonSelectOption value="A">내부</IonSelectOption>
                 <IonSelectOption value="B">외부</IonSelectOption>
               </IonSelect>
-              <CustomInput label={'이름'} labelPlacement='fixed' style={{ marginBottom: '12px' }}></CustomInput>
-              <CustomInput label={'조직'} labelPlacement='fixed' disabled style={{ marginBottom: '12px' }}></CustomInput>
-              <CustomInput label={'목적'} labelPlacement='fixed' style={{ marginBottom: '12px' }}></CustomInput>
+              <CustomInput
+                label={'이름'}
+                // value={attendee?.ATTENDEE}
+                labelPlacement='fixed'
+                style={{ marginBottom: '12px' }}
+                onChange={(value) => handleAttendeeInputChange({ 'ATTENDEE': value })} />
+              <CustomInput
+                label={'조직'}
+                // value={attendee?.ORGTX}
+                labelPlacement='fixed'
+                disabled
+                style={{ marginBottom: '12px' }}
+                onChange={(value) => handleAttendeeInputChange({ 'ORGTX': value })} />
+              <CustomInput
+                // value={attendee?.PURPOSE}
+                label={'목적'}
+                labelPlacement='fixed'
+                style={{ marginBottom: '12px' }}
+                onChange={(value) => handleAttendeeInputChange({ 'PURPOSE': value })} />
             </div>
           }
+          onSecondButtonClick={handleAddAttendee}
           firstButtonText="닫기"
           secondButtonText='추가'
         />
 
         {/* 수익성 */}
-        <div style={{
+        {extraFieldUse?.PAOBJNR_EDIT && <div style={{
           borderTop: '21px solid var(--custom-border-color-50)',
         }}>
           <div style={{
             padding: '32px 21px',
           }}>
-            <span style={{ fontSize: '17px', fontWeight: '600', display: 'block', marginBottom: '18px' }}>수익성 세그먼트</span>
+            <span style={{ fontSize: '16px', fontWeight: '500', display: 'block', marginBottom: '24px' }}>수익성 세그먼트</span>
             <CustomInput
               formRef={formRef}
-              value="$RKE_KNDNR"
-              helperText='$RKE_KNDNR_T'
+              valueTemplate="$RKE_KNDNR"
+              helperTextTemplate='$RKE_KNDNR_T'
               label="고객"
               // labelPlacement='fixed'
               onFocus={handleFocus}
@@ -1123,8 +1262,8 @@ const AddItem: React.FC<AddItemProps> = ({
             />
             <CustomInput
               formRef={formRef}
-              value="$RKE_VKORG"
-              helperText='$RKE_VKORG_T'
+              valueTemplate="$RKE_VKORG"
+              helperTextTemplate='$RKE_VKORG_T'
               label="영업조직"
               // labelPlacement='fixed'
               onFocus={handleFocus}
@@ -1155,8 +1294,8 @@ const AddItem: React.FC<AddItemProps> = ({
             <CustomInput
               formRef={formRef}
               key={`vt-${refreshKey}`}
-              value="$RKE_VTWEG"
-              helperText='$RKE_VTWEG_T'
+              valueTemplate="$RKE_VTWEG"
+              helperTextTemplate='$RKE_VTWEG_T'
               label="유통경로"
               disabled
               style={{ marginBottom: '28px' }}
@@ -1164,16 +1303,16 @@ const AddItem: React.FC<AddItemProps> = ({
             <CustomInput
               formRef={formRef}
               key={`sp-${refreshKey}`}
-              value="$RKE_SPART"
-              helperText='$RKE_SPART_T'
+              valueTemplate="$RKE_SPART"
+              helperTextTemplate='$RKE_SPART_T'
               label="제품군"
               disabled
               style={{ marginBottom: '28px' }}
             />
             <CustomInput
               formRef={formRef}
-              value="$RKE_WERKS"
-              helperText='$RKE_WERKS_T'
+              valueTemplate="$RKE_WERKS"
+              helperTextTemplate='$RKE_WERKS_T'
               label="플랜트"
               onFocus={handleFocus}
               onValueHelp={() => getSearchHelp('WERKS', 'IA103')}
@@ -1192,8 +1331,8 @@ const AddItem: React.FC<AddItemProps> = ({
             />
             <CustomInput
               formRef={formRef}
-              value="$RKE_ARTNR"
-              helperText='$RKE_ARTNR_T'
+              valueTemplate="$RKE_ARTNR"
+              helperTextTemplate='$RKE_ARTNR_T'
               label="자재"
               onFocus={handleFocus}
               beforeOpenValueHelp={() => {
@@ -1222,6 +1361,7 @@ const AddItem: React.FC<AddItemProps> = ({
             />
           </div>
         </div>
+        }
       </div>
     </motion.div>
   );
@@ -1283,7 +1423,7 @@ const Header: React.FC<HeaderProps> = ({
         <CustomInput
           disabled
           formRef={formRef}
-          value="$BUKRS_T($BUKRS)"
+          valueTemplate="$BUKRS_T($BUKRS)"
           label="회사코드"
           labelPlacement='fixed'
           style={{ marginBottom: '28px' }}
@@ -1291,7 +1431,7 @@ const Header: React.FC<HeaderProps> = ({
         <CustomInput
           disabled
           formRef={formRef}
-          value="$BLART_T($BLART)"
+          valueTemplate="$BLART_T($BLART)"
           label="전표유형"
           labelPlacement='fixed'
           style={{ marginBottom: '28px' }}
@@ -1299,7 +1439,7 @@ const Header: React.FC<HeaderProps> = ({
         <CustomInput
           disabled
           formRef={formRef}
-          value="$CREATOR_LOGIN_ID | $CREATOR_NAME | $CREATOR_ORGTX"
+          valueTemplate="$CREATOR_LOGIN_ID | $CREATOR_NAME | $CREATOR_ORGTX"
           label="생성인"
           labelPlacement='fixed'
           style={{ marginBottom: '28px' }}
@@ -1307,7 +1447,7 @@ const Header: React.FC<HeaderProps> = ({
         <CustomInput
           required
           formRef={formRef}
-          value="$BLDAT"
+          valueTemplate="$BLDAT"
           label="증빙일자"
           labelPlacement='fixed'
           readOnly
@@ -1326,7 +1466,7 @@ const Header: React.FC<HeaderProps> = ({
           required
           disabled
           formRef={formRef}
-          value="$BUDAT"
+          valueTemplate="$BUDAT"
           label="전기일자"
           labelPlacement='fixed'
           formatter={(value) => {
@@ -1338,7 +1478,7 @@ const Header: React.FC<HeaderProps> = ({
           required
           disabled
           formRef={formRef}
-          value="$WAERS"
+          valueTemplate="$WAERS"
           label="전표통화"
           labelPlacement='fixed'
           style={{ marginBottom: '28px' }}
@@ -1346,7 +1486,7 @@ const Header: React.FC<HeaderProps> = ({
         <CustomInput
           disabled
           formRef={formRef}
-          value="$SUM_WRBTR"
+          valueTemplate="$SUM_WRBTR"
           label="전표통화 계"
           labelPlacement='fixed'
           formatter={(value) => {
