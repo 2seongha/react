@@ -14,7 +14,7 @@ import {
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { add, addOutline, mailUnreadSharp, person, removeOutline } from 'ionicons/icons';
+import { add, addOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
@@ -123,7 +123,7 @@ const PersonalExpense: React.FC = () => {
       const approval = await getStart('IA103');
       if (approval instanceof Error) {
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
-        return router.goBack(); //TODO 임시 주석
+        return router.goBack();
       }
       oriItem.current = approval.FLOWHD_DOCITEM[0];
       approval.FLOWHD_DOCITEM = [];
@@ -205,7 +205,7 @@ const PersonalExpense: React.FC = () => {
     return list.map((itm: any, i: number) => {
       itm.DOCITEM_ATTENDEELIST.forEach((attendee: any, idx: number) => {
         attendee.ITEMNO = String(i + 1);
-        attendee.KEY_CNT = idx + 1;
+        attendee.KEY_CNT = String(idx + 1);
       });
       return {
         ...itm,
@@ -402,9 +402,7 @@ const PersonalExpense: React.FC = () => {
             approval={approval}
             docItem={docItem}
             onSaveEnabledChange={enabled => {
-              // if (isSaveEnabled !== enabled) {
               setIsSaveEnabled(enabled);
-              // }
             }}
           />}
 
@@ -822,7 +820,7 @@ const AddItem: React.FC<AddItemProps> = ({
   const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
   // 참석자, 수익성 사용여부 체크
-  const checkExtraFieldUse = useCallback(async () => {
+  const checkExtraFieldUse = useCallback(async (clear = true) => {
     const cloneApproval = _.cloneDeep(approval);
     const cloneDocItem = _.cloneDeep(docItem);
     cloneDocItem.WRBTR = '0';
@@ -831,23 +829,27 @@ const AddItem: React.FC<AddItemProps> = ({
     cloneApproval.FIELD = 'ACCOUNT_CODE_T';
     cloneApproval.GUBUN = 'I';
     const res = await postExtraFieldUse(cloneApproval);
-    if (!res.ATTENDEE_EDIT) {
-      docItem.DOCITEM_ATTENDEELIST = [];
+
+    if (clear) {
+      if (!res.ATTENDEE_EDIT) {
+        docItem.DOCITEM_ATTENDEELIST = [];
+      }
+      if (!res.PAOBJNR_EDIT) {
+        docItem.RKE_KNDNR = '';
+        docItem.RKE_KNDNR_T = '';
+        docItem.RKE_VKORG = '';
+        docItem.RKE_VKORG_T = '';
+        docItem.RKE_VTWEG = '';
+        docItem.RKE_VTWEG_T = '';
+        docItem.RKE_SPART = '';
+        docItem.RKE_SPART_T = '';
+        docItem.RKE_WERKS = '';
+        docItem.RKE_WERKS_T = '';
+        docItem.RKE_ARTNR = '';
+        docItem.RKE_ARTNR_T = '';
+      }
     }
-    if (!res.PAOBJNR_EDIT) {
-      docItem.RKE_KNDNR = '';
-      docItem.RKE_KNDNR_T = '';
-      docItem.RKE_VKORG = '';
-      docItem.RKE_VKORG_T = '';
-      docItem.RKE_VTWEG = '';
-      docItem.RKE_VTWEG_T = '';
-      docItem.RKE_SPART = '';
-      docItem.RKE_SPART_T = '';
-      docItem.RKE_WERKS = '';
-      docItem.RKE_WERKS_T = '';
-      docItem.RKE_ARTNR = '';
-      docItem.RKE_ARTNR_T = '';
-    }
+
     setExtraFieldUse(res);
   }, []);
 
@@ -881,10 +883,13 @@ const AddItem: React.FC<AddItemProps> = ({
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
-    if (oriAttendee.current) return;
-
-    oriAttendee.current = docItem.DOCITEM_ATTENDEELIST[0];
-    docItem.DOCITEM_ATTENDEELIST = [];
+    if (docItem.ACCOUNT_CODE) {
+      checkExtraFieldUse(false);
+    } else {
+      if (oriAttendee.current) return;
+      oriAttendee.current = docItem.DOCITEM_ATTENDEELIST[0];
+      docItem.DOCITEM_ATTENDEELIST = [];
+    }
     formRef.current = docItem || {};
     checkRequired();
     forceRender(prev => prev + 1);
