@@ -1126,6 +1126,10 @@ const AddItem: React.FC<AddItemProps> = ({
         </div>
         <IonButton id='attendee-dialog-trigger' style={{ display: 'none' }} onClick={openAddAttendee} />
 
+        {docItem.ACCOUNT_CODE && extraFieldUse === null && <div>
+          <LoadingIndicator style={{ margin: '0 auto', marginTop: '50px', marginBottom: '50px' }} />
+        </div>}
+
         {/* 참석자 */}
         {extraFieldUse?.ATTENDEE_EDIT &&
           <div style={{
@@ -1148,7 +1152,7 @@ const AddItem: React.FC<AddItemProps> = ({
                     style={{
                       display: "flex",
                       gap: "4px",
-                      marginBottom: index === docItem.DOCITEM_ATTENDEELIST.length - 1 ? "" : "28px",
+                      marginBottom: index === docItem.DOCITEM_ATTENDEELIST.length - 1 ? "" : "32px",
                       alignItems: "center",
                       justifyContent: "space-between"
                     }}
