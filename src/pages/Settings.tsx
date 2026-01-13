@@ -11,7 +11,7 @@ import {
 } from '@ionic/react';
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
-import { webviewLogout, webviewTheme } from '../webview';
+import { webviewLogout, webviewPushSetting, webviewTheme } from '../webview';
 import { chevronForward, contrastOutline, moonOutline, open, sunnyOutline } from 'ionicons/icons';
 import "./Settings.css";
 import CustomDialog from '../components/Dialog';
@@ -105,6 +105,7 @@ const Settings: React.FC = () => {
             }} />
           </div>
           <div className='settings-card-button' onClick={()=>{
+            webviewPushSetting();
             // ion
           }}>
             <span>디바이스 설정</span>
