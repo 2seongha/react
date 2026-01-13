@@ -6,6 +6,7 @@ import {
   KeyboardVisibility,
   ShellPadding,
 } from "./stores/types";
+import { postFcmToken } from "./stores/service";
 
 // 글로벌 웹뷰 함수들 선언
 declare global {
@@ -226,6 +227,9 @@ const _initWebview = async (): Promise<void> => {
       // localStorage에 저장
       localStorage.setItem("deviceToken", tokens.deviceToken);
       localStorage.setItem("deviceInfo", JSON.stringify(tokens.deviceInfo));
+
+      // sap 서버에 저장
+      postFcmToken([], [tokens.deviceToken], JSON.stringify(tokens.deviceInfo)); 
 
       // 토큰 정보 처리
       if (tokenResolver) {

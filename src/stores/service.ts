@@ -210,6 +210,28 @@ export async function postExtraFieldUse(APPROVAL: any): Promise<any> {
   }
 }
 
+export async function postFcmToken(DELETE_TOKENS: [], INSERT_TOKENS: [string], DEVICE_INFO: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+
+    const api = createApiInstance();
+    const payload = {
+      LOGIN_ID,
+      DELETE_TOKENS,
+      INSERT_TOKENS,
+      DEVICE_INFO
+    };
+
+    const res = await api.post(`/v1/api/token`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 export async function getNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay
