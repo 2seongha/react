@@ -13,6 +13,7 @@ export interface AppState {
   summaryForceRefresh: boolean;
   searchHelp: any;
   datePicker: any;
+  pushAllow: any;
 
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   setUser: (user: UserModel) => void;
@@ -27,6 +28,7 @@ export interface AppState {
   setSummaryForceRefresh: (force: boolean) => void;
   setSearchHelp: (searchHelp: any) => void;
   setDatePicker: (datePicker: any) => void;
+  setPushAllow: (pushAllow: any) => void;
 
   getUser: (LOGIN_ID: string) => Promise<void>;
   getAreas: (P_AREA_CODE: string) => Promise<void>;
@@ -38,6 +40,7 @@ export interface AppState {
   getNotificationPopupShown: () => boolean;
   getSummaryForceRefresh: () => boolean;
   getSearchHelp: () => boolean;
+  getPushAllow: () => Promise<void>;
 }
 
 export interface UserModel {

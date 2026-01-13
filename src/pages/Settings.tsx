@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   IonContent,
   IonPage,
@@ -15,10 +15,18 @@ import { webviewLogout, webviewTheme } from '../webview';
 import { chevronForward, contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
 import "./Settings.css";
 import CustomDialog from '../components/Dialog';
+import { postFcmToken } from '../stores/service';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
   const setThemeMode = useAppStore(state => state.setThemeMode);
+
+  const pushAllow = useAppStore(state => state.pushAllow);
+  const getPushAllow = useAppStore(state => state.getPushAllow);
+
+  useEffect(() => {
+    getPushAllow();
+  }, [])
 
   const handleThemeChange = (value: string) => {
     const newTheme = value as 'light' | 'dark' | 'system';
@@ -31,6 +39,7 @@ const Settings: React.FC = () => {
   };
 
   const handleLogout = () => {
+    postFcmToken([localStorage.getItem('deviceToken') || ''], [], null);
     webviewLogout();
     return true;
   };
@@ -85,11 +94,15 @@ const Settings: React.FC = () => {
           <span className='settings-card-title'>푸시 알림</span>
           <div className='settings-card-button'>
             <span>개인 알림</span>
-            <IonToggle />
+            <IonToggle checked={pushAllow?.PERSONAL_ALLOW === 'Y' ? true : false} onIonChange={(e) => {
+              debugger;
+            }} />
           </div>
           <div className='settings-card-button'>
             <span>공지 알림</span>
-            <IonToggle />
+            <IonToggle checked={pushAllow?.NOTICE_ALLOW === 'Y' ? true : false} onIonChange={(e) => {
+              debugger;
+            }} />
           </div>
         </IonCard>
         <IonItem

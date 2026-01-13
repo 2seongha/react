@@ -32,7 +32,7 @@ import NotificationPopupModal from '../components/NotificationPopupModal';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
-  const setApprovals = useAppStore(state => state.setApprovals);
+  const setApprovals = useAppStore(state => state.setTodoSummary);
   const notificationPopupShown = useAppStore(state => state.notificationPopupShown);
   const getNotifications = useAppStore(state => state.getNotifications);
   const setNotificationPopupShown = useAppStore(state => state.setNotificationPopupShown);

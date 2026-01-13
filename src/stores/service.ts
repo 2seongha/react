@@ -210,10 +210,11 @@ export async function postExtraFieldUse(APPROVAL: any): Promise<any> {
   }
 }
 
-export async function postFcmToken(DELETE_TOKENS: [], INSERT_TOKENS: [string], DEVICE_INFO: string): Promise<any> {
+export async function postFcmToken(DELETE_TOKENS: [string?], INSERT_TOKENS: [string?], DEVICE_INFO: string | null): Promise<any> {
   try {
     const user = useAppStore.getState().user;
     const LOGIN_ID = user?.LOGIN_ID;
+    if (!LOGIN_ID) return; // 토큰 리프레쉬일때만 여기 값이 있음
 
     const api = createApiInstance();
     const payload = {
@@ -224,6 +225,26 @@ export async function postFcmToken(DELETE_TOKENS: [], INSERT_TOKENS: [string], D
     };
 
     const res = await api.post(`/v1/api/token`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function getPsuhAllow(TOKEN: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+
+    const api = createApiInstance();
+    const payload = {
+      LOGIN_ID,
+      TOKEN,
+    };
+
+    const res = await api.post(`/v1/api/push_allow`, payload);
 
     return res.data;
   } catch (error: any) {

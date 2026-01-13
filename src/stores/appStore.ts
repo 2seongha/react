@@ -1,5 +1,5 @@
 import { AppState } from './types';
-import { getApprovals, getAreas, getNotices, getNotifications, getUser, patchNotifications } from './service';
+import { getApprovals, getAreas, getNotices, getNotifications, getPsuhAllow, getUser, patchNotifications } from './service';
 import { createWithEqualityFn } from 'zustand/traditional'
 import _ from 'lodash';
 
@@ -23,6 +23,7 @@ const requestIds = {
   notices: 0,
   notifications: 0,
   searchHelp: 0,
+  pushAllow: 0,
 };
 
 const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
@@ -39,6 +40,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   summaryForceRefresh: false,
   searchHelp: { isOpen: false },
   datePicker: { isOpen: false },
+  pushAllow: null,
 
   setThemeMode: (mode) => {
     // localStorage에 저장
@@ -50,15 +52,16 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   setUser: (user) => set({ user: user }),
   setCorp: (corp) => set({ corp: corp }),
   setAreas: (areas) => set({ areas: areas }),
-  setApprovals: (approvals) => set({ approvals: approvals }),
-  setTodoSummary: (todoSummary) => set({ todoSummary: todoSummary }),
+  setApprovals: (approvals) => set({ approvals }),
+  setTodoSummary: (todoSummary) => set({ todoSummary }),
   setNotices: (notices) => set({ notices }),
   setNotifications: (notifications) => set({ notifications }),
-  setSelectedTab: (tab) => set({ selectedTab: tab }),
-  setNotificationPopupShown: (shown) => set({ notificationPopupShown: shown }),
-  setSummaryForceRefresh: (force) => set({ summaryForceRefresh: force }),
-  setSearchHelp: (searchHelp) => set({ searchHelp: searchHelp }),
-  setDatePicker: (datePicker) => set({ datePicker: datePicker }),
+  setSelectedTab: (selectedTab) => set({ selectedTab }),
+  setNotificationPopupShown: (notificationPopupShown) => set({ notificationPopupShown }),
+  setSummaryForceRefresh: (summaryForceRefresh) => set({ summaryForceRefresh }),
+  setSearchHelp: (searchHelp) => set({ searchHelp }),
+  setDatePicker: (datePicker) => set({ datePicker }),
+  setPushAllow: (pushAllow) => set({ pushAllow }),
 
   getUser: async (LOGIN_ID: string) => {
     const currentRequestId = ++requestIds.areas;
@@ -195,6 +198,22 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
   getSearchHelp: () => {
     return true;
   },
+
+  getPushAllow: async () => {
+    const currentRequestId = ++requestIds.pushAllow;
+    const deviceToken = localStorage.getItem('deviceToken');
+    if (!deviceToken) return;
+    const pushAllow = await getPsuhAllow(deviceToken);
+
+    if (pushAllow instanceof Error) {
+      console.log(pushAllow);
+    }
+
+    // 마지막 요청인지 확인
+    if (currentRequestId === requestIds.pushAllow) {
+      set({ pushAllow });
+    }
+  }
 }));
 
 export default useAppStore;
