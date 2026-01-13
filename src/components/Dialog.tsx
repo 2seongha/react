@@ -23,7 +23,7 @@ interface CustomDialogProps {
   secondButtonText?: string;
   secondButtonColor?: 'primary' | 'secondary' | 'danger' | 'warning' | 'info' | 'success' | 'light' | 'medium' | 'dark';
   secondButtonStyle?: React.CSSProperties;
-  onSecondButtonClick?: () => void;
+  onSecondButtonClick?: () => boolean;
   showSecondButton?: boolean;
 
   // 단일 버튼 모드
@@ -138,8 +138,8 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
 
   const handleSecondButton = () => {
     if (onSecondButtonClick) {
-      onSecondButtonClick();
-      dismiss();
+      const res = onSecondButtonClick();
+      if (res) dismiss();
     } else {
       dismiss();
     }

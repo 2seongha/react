@@ -220,6 +220,25 @@ const PersonalExpense: React.FC = () => {
     const newItem = { ...item };
     let isEdit = false;
 
+    const attendeeList = newItem.DOCITEM_ATTENDEELIST;
+    if (!_.isEmpty(attendeeList)) {
+      const { hasA, hasB } = attendeeList.reduce((acc: any, item: any) => {
+        if (item.GUBUN === 'A') acc.hasA = true;
+        if (item.GUBUN === 'B') acc.hasB = true;
+        return acc;
+      }, { hasA: false, hasB: false });
+
+      if (!hasA || !hasB) {
+        new Notify({
+          status: 'error',
+          title: '접대자와 접대 받는 자를 모두 입력해야 합니다.',
+          position: 'x-center bottom',
+          autotimeout: 2000,
+        });
+        return;
+      }
+    }
+
     setApproval((prev: any) => {
       if (!prev || !prev.FLOWHD_DOCITEM) {
         return { ...prev, FLOWHD_DOCITEM: [{ ...newItem, CNT: '1', ITEMNO: '1' }] };
@@ -812,9 +831,11 @@ const AddItem: React.FC<AddItemProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<FormRef>({});
+  const attendeeFormRef = useRef<FormRef>({});
   const [, forceRender] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
+  const [errorList, setErrorList] = useState<any>(null); // 에러 목록
   const attendee = useRef<any>(null); // 참석자
   const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
@@ -854,6 +875,7 @@ const AddItem: React.FC<AddItemProps> = ({
 
   // 참석자 추가 팝업 오픈
   const openAddAttendee = useCallback(() => {
+    setErrorList(null);
     setAttendeeType('A');
     const cloneItem = {
       "FLOWCODE": "",
@@ -876,14 +898,31 @@ const AddItem: React.FC<AddItemProps> = ({
     }
     cloneItem.GUBUN = 'A';
     cloneItem.GUBUN_TX = '내부';
-    attendee.current = cloneItem;
+    attendeeFormRef.current = cloneItem;
   }, []);
 
   // 참석자 추가
   const handleAddAttendee = useCallback(() => {
-    docItem.DOCITEM_ATTENDEELIST.push(attendee.current);
+    if (attendeeFormRef.current.GUBUN === 'A' && (!attendeeFormRef.current.ATTENDEE /*|| !attendeeFormRef.current.ORGTX*/)) {
+      setErrorList({
+        ATTENDEE: !attendeeFormRef.current.ATTENDEE,
+        ORGTX: !attendeeFormRef.current.ORGTX,
+        PURPOSE: false,
+      });
+      return false;
+    } else if (attendeeFormRef.current.GUBUN === 'B' && (!attendeeFormRef.current.ATTENDEE || !attendeeFormRef.current.PURPOSE)) {
+      setErrorList({
+        ATTENDEE: !attendeeFormRef.current.ATTENDEE,
+        ORGTX: false,
+        PURPOSE: !attendeeFormRef.current.PURPOSE,
+      });
+      return false;
+    }
+
+    docItem.DOCITEM_ATTENDEELIST.push(attendeeFormRef.current);
     forceRender(prev => prev + 1);
-  }, [attendee]);
+    return true;
+  }, [attendeeFormRef]);
 
   // 참석자 삭제
   const handleDeleteAttendee = useCallback((index: number) => {
@@ -892,8 +931,8 @@ const AddItem: React.FC<AddItemProps> = ({
   }, [docItem]);
 
   const handleAttendeeInputChange = useCallback((values: Record<string, any>) => {
-    attendee.current = {
-      ...attendee.current,
+    attendeeFormRef.current = {
+      ...attendeeFormRef.current,
       ...values
     }
   }, []);
@@ -1218,35 +1257,49 @@ const AddItem: React.FC<AddItemProps> = ({
                 label='구분'
                 interface="popover"
                 mode='ios'
-                style={{ marginBottom: '12px' }}
+                style={{ marginBottom: '12px', height: 49 }}
                 value={attendeeType}
                 onIonChange={(e) => {
+                  setErrorList(null);
                   handleAttendeeInputChange({
+                    'ATTENDEE': '',
+                    'ORGTX': '',
+                    'PURPOSE': '',
                     'GUBUN': e.target.value,
                     'GUBUN_TX': e.target.value === 'A' ? '내부' : '외부'
                   });
+                  setAttendeeType(e.target.value);
                 }}>
                 <IonSelectOption value="A">내부</IonSelectOption>
                 <IonSelectOption value="B">외부</IonSelectOption>
               </IonSelect>
               <CustomInput
+                formRef={attendeeFormRef}
+                valueTemplate='$ATTENDEE'
+                error={errorList?.ATTENDEE}
+                errorText='참석자를 입력하세요.'
                 label={'이름'}
-                // value={attendee?.ATTENDEE}
                 labelPlacement='fixed'
-                style={{ marginBottom: '12px' }}
+                style={{ marginBottom: '12px', height: 49 }}
                 onChange={(value) => handleAttendeeInputChange({ 'ATTENDEE': value })} />
               <CustomInput
+                formRef={attendeeFormRef}
+                valueTemplate='$ORGTX'
+                error={errorList?.ORGTX}
                 label={'조직'}
-                // value={attendee?.ORGTX}
                 labelPlacement='fixed'
-                disabled
-                style={{ marginBottom: '12px' }}
+                disabled={attendeeType === 'A'}
+                style={{ marginBottom: '12px', height: 49 }}
                 onChange={(value) => handleAttendeeInputChange({ 'ORGTX': value })} />
               <CustomInput
-                // value={attendee?.PURPOSE}
+                formRef={attendeeFormRef}
+                valueTemplate='$PURPOSE'
+                error={errorList?.PURPOSE}
+                errorText='접대 목적을 입력하세요.'
+                disabled={attendeeType === 'A'}
                 label={'목적'}
                 labelPlacement='fixed'
-                style={{ marginBottom: '12px' }}
+                style={{ marginBottom: '12px', height: 49 }}
                 onChange={(value) => handleAttendeeInputChange({ 'PURPOSE': value })} />
             </div>
           }
@@ -1359,6 +1412,7 @@ const AddItem: React.FC<AddItemProps> = ({
               helperTextTemplate='$RKE_ARTNR_T'
               label="자재"
               onFocus={handleFocus}
+              clearInput
               beforeOpenValueHelp={() => {
                 if (!formRef.current.RKE_WERKS) {
                   new Notify({

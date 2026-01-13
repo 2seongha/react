@@ -95,6 +95,7 @@ const Notifications: React.FC = () => {
   const handleDeleteAll = useCallback(() => {
     setNotifications([]);
     patchNotifications('', 'Y', 'Y');
+    return true;
   }, [notifications]);
 
   return (

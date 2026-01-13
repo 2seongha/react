@@ -37,6 +37,8 @@ export interface CustomInputProps {
   date?: boolean;
   labelPlacement?: any;
   datePickerFixed?: boolean;
+  error?: boolean;
+  errorText?: string;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -66,6 +68,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
   date,
   labelPlacement = 'stacked',
   datePickerFixed = true,
+  error = false,
+  errorText,
 }) => {
   const setSearchHelp = useAppStore(state => state.setSearchHelp);
   const setDatePicker = useAppStore(state => state.setDatePicker);
@@ -158,6 +162,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   return (
     <IonInput
+      className={error ? 'ion-invalid ion-touched has-focus' : ''}
+      errorText={errorText}
       disabled={disabled}
       mode="md"
       required={required}

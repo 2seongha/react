@@ -32,6 +32,7 @@ const Settings: React.FC = () => {
 
   const handleLogout = () => {
     webviewLogout();
+    return true;
   };
 
   return (
