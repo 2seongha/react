@@ -104,7 +104,7 @@ const Settings: React.FC = () => {
               debugger;
             }} />
           </div>
-          <div className='settings-card-button' onClick={()=>{
+          <div className='settings-card-button ion-activatable' onClick={()=>{
             webviewPushSetting();
             // ion
           }}>
