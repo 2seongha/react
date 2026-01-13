@@ -133,6 +133,9 @@ export const initWebview = async (): Promise<boolean> => {
 
   await Promise.all([paddingPromise, tokenPromise, userInfoPromise]);
 
+  // SAP 서버에 토큰 저장
+  postFcmToken([], [localStorage.getItem('deviceToken') || ''], localStorage.getItem('deviceInfo') || '');
+
   return true;
 };
 
@@ -229,7 +232,7 @@ const _initWebview = async (): Promise<void> => {
       localStorage.setItem("deviceInfo", JSON.stringify(tokens.deviceInfo));
 
       // sap 서버에 저장
-      postFcmToken([], [tokens.deviceToken], JSON.stringify(tokens.deviceInfo)); 
+      // postFcmToken([], [tokens.deviceToken], JSON.stringify(tokens.deviceInfo)); 
 
       // 토큰 정보 처리
       if (tokenResolver) {
