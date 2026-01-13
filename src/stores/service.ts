@@ -245,7 +245,6 @@ export async function getPsuhAllow(TOKEN: string): Promise<any> {
     };
 
     const res = await api.post(`/v1/api/push_allow`, payload);
-
     return res.data;
   } catch (error: any) {
     console.error(error);

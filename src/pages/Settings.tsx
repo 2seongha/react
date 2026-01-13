@@ -12,7 +12,7 @@ import {
 import useAppStore from '../stores/appStore';
 import AppBar from '../components/AppBar';
 import { webviewLogout, webviewTheme } from '../webview';
-import { chevronForward, contrastOutline, moonOutline, sunnyOutline } from 'ionicons/icons';
+import { chevronForward, contrastOutline, moonOutline, open, sunnyOutline } from 'ionicons/icons';
 import "./Settings.css";
 import CustomDialog from '../components/Dialog';
 import { postFcmToken } from '../stores/service';
@@ -104,6 +104,12 @@ const Settings: React.FC = () => {
               debugger;
             }} />
           </div>
+          <div className='settings-card-button' onClick={()=>{
+            // ion
+          }}>
+            <span>디바이스 설정</span>
+            <IonIcon src={chevronForward} slot='end' style={{ margin: 0 }} size='small' />
+          </div>
         </IonCard>
         <IonItem
           className='settings-logout-button'
@@ -111,7 +117,7 @@ const Settings: React.FC = () => {
           mode='md'
           id='logout-trigger'>
           로그아웃
-          <IonIcon src={chevronForward} slot='end' style={{ margin: 0 }} size='small'></IonIcon>
+          <IonIcon src={chevronForward} slot='end' style={{ margin: 0 }} size='small' />
         </IonItem>
         <CustomDialog
           trigger="logout-trigger"
