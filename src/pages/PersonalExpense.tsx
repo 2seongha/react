@@ -1,4 +1,4 @@
-import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, RefObject, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
   IonBackButton,
   IonButton,
@@ -52,6 +52,7 @@ const PersonalExpense: React.FC = () => {
   const isCloseButtonRef = useRef(false); // 닫기 버튼을 누른건지 판별용
   const successRef = useRef(false); // 성공시 뒤로가기하면 홈으로
   const fileNoRef = useRef(0); // 첨부 파일 넘버는 상태 유지
+  const itemRef = useRef<AddItemHandle>(null);
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
   const title = useMemo(() => {
     let title;
@@ -220,6 +221,16 @@ const PersonalExpense: React.FC = () => {
     const newItem = { ...item };
     let isEdit = false;
 
+    const validate = itemRef.current?.validate();
+    if (!validate?.result) {
+      return new Notify({
+        status: 'error',
+        title: validate.message,
+        position: 'x-center bottom',
+        autotimeout: 2000,
+      });
+    }
+
     const attendeeList = newItem.DOCITEM_ATTENDEELIST;
     if (!_.isEmpty(attendeeList)) {
       const { hasA, hasB } = attendeeList.reduce((acc: any, item: any) => {
@@ -229,13 +240,12 @@ const PersonalExpense: React.FC = () => {
       }, { hasA: false, hasB: false });
 
       if (!hasA || !hasB) {
-        new Notify({
+        return new Notify({
           status: 'error',
           title: '접대자와 접대 받는 자를 모두 입력해야 합니다.',
           position: 'x-center bottom',
           autotimeout: 2000,
         });
-        return;
       }
     }
 
@@ -268,13 +278,13 @@ const PersonalExpense: React.FC = () => {
       };
     });
 
-    goStep(0);
-
     new Notify({
       title: isEdit ? '수정되었습니다.' : '추가되었습니다.',
       position: 'x-center bottom',
       autotimeout: 2000,
     });
+
+    goStep(0);
   }, [step]);
 
   // 항목 삭제
@@ -418,6 +428,7 @@ const PersonalExpense: React.FC = () => {
 
           {/* 항목 추가 페이지 */}
           {step === 99 && <AddItem
+            ref={itemRef}
             approval={approval}
             docItem={docItem}
             onSaveEnabledChange={enabled => {
@@ -818,17 +829,21 @@ const Item: React.FC<ItemProps> = ({
 
 
 //* ========== Step 99. 항목 추가 ==========
+interface AddItemHandle {
+  validate: () => any;
+}
+
 interface AddItemProps {
   approval?: any;
   docItem?: any;
   onSaveEnabledChange: (enabled: boolean) => void;
 }
 
-const AddItem: React.FC<AddItemProps> = ({
+const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   approval,
   docItem,
-  onSaveEnabledChange
-}) => {
+  onSaveEnabledChange,
+}, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<FormRef>({});
   const attendeeFormRef = useRef<FormRef>({});
@@ -836,7 +851,6 @@ const AddItem: React.FC<AddItemProps> = ({
   const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
   const [errorList, setErrorList] = useState<any>(null); // 에러 목록
-  const attendee = useRef<any>(null); // 참석자
   const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
   // 참석자, 수익성 사용여부 체크
@@ -952,7 +966,8 @@ const AddItem: React.FC<AddItemProps> = ({
   const checkRequired = useCallback(() => {
     if (formRef.current.ACCOUNT_CODE_T
       && formRef.current.WRBTR
-      && formRef.current.SGTXT) {
+      && formRef.current.SGTXT
+      && (!extraFieldUse?.ATTENDEE_EDIT || !_.isEmpty(docItem.DOCITEM_ATTENDEELIST))) {
       onSaveEnabledChange(true);
     } else {
       onSaveEnabledChange(false);
@@ -979,6 +994,20 @@ const AddItem: React.FC<AddItemProps> = ({
       });
     }, 150)
   };
+
+  // 유효성 체크
+  useImperativeHandle(ref, () => ({
+    validate() {
+      if (extraFieldUse?.ATTENDEE_EDIT && _.isEmpty(docItem.DOCITEM_ATTENDEELIST)) return {
+        result: false,
+        message: '참석자를 추가해주세요.'
+      };
+      return {
+        result: true,
+        message: ''
+      };
+    }
+  }));
 
   const variants = {
     enter: { y: "5%", opacity: 0.5 },   // 화면 밑에서 시작
@@ -1193,7 +1222,7 @@ const AddItem: React.FC<AddItemProps> = ({
               padding: '32px 21px',
               position: 'relative'
             }}>
-              <span style={{ fontSize: '16px', fontWeight: '500', display: 'block', marginBottom: '36px' }}>참석자</span>
+              <span style={{ fontSize: '16px', fontWeight: '500', display: 'block', marginBottom: '36px' }}>참석자 <span style={{ color: 'var(--red)' }}> (필수)</span></span>
               <IonButton mode='md' fill='solid' style={{ top: 24, right: 16, position: 'absolute' }} onClick={() => {
                 document.getElementById("attendee-dialog-trigger")?.click();
               }}>
@@ -1443,7 +1472,7 @@ const AddItem: React.FC<AddItemProps> = ({
       </div>
     </motion.div>
   );
-};
+});
 
 
 

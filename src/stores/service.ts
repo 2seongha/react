@@ -233,18 +233,45 @@ export async function postFcmToken(DELETE_TOKENS: [string?], INSERT_TOKENS: [str
   }
 }
 
-export async function getPsuhAllow(TOKEN: string): Promise<any> {
+export async function getPsuhAllow(): Promise<any> {
   try {
     const user = useAppStore.getState().user;
     const LOGIN_ID = user?.LOGIN_ID;
 
+    const deviceToken = localStorage.getItem('deviceToken');
+    if (!deviceToken) throw new Error('No device token~~~!');
+
     const api = createApiInstance();
     const payload = {
       LOGIN_ID,
-      TOKEN,
+      TOKEN: deviceToken,
     };
 
     const res = await api.post(`/v1/api/push_allow`, payload);
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function patchPsuhAllow(PERSONAL_ALLOW: string, NOTICE_ALLOW: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+
+    const deviceToken = localStorage.getItem('deviceToken');
+    if (!deviceToken) throw new Error('No device token~~~!');
+
+    const api = createApiInstance();
+    const payload = {
+      LOGIN_ID,
+      TOKEN: deviceToken,
+      PERSONAL_ALLOW,
+      NOTICE_ALLOW,
+    };
+
+    const res = await api.patch(`/v1/api/push_allow`, payload);
     return res.data;
   } catch (error: any) {
     console.error(error);

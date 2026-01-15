@@ -15,7 +15,7 @@ import { webviewLogout, webviewPushSetting, webviewTheme } from '../webview';
 import { chevronForward, contrastOutline, moonOutline, open, sunnyOutline } from 'ionicons/icons';
 import "./Settings.css";
 import CustomDialog from '../components/Dialog';
-import { postFcmToken } from '../stores/service';
+import { patchPsuhAllow, postFcmToken } from '../stores/service';
 
 const Settings: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -23,6 +23,7 @@ const Settings: React.FC = () => {
 
   const pushAllow = useAppStore(state => state.pushAllow);
   const getPushAllow = useAppStore(state => state.getPushAllow);
+  const setPushAllow = useAppStore(state => state.setPushAllow);
 
   useEffect(() => {
     getPushAllow();
@@ -95,16 +96,18 @@ const Settings: React.FC = () => {
           <div className='settings-card-button'>
             <span>개인 알림</span>
             <IonToggle checked={pushAllow?.PERSONAL_ALLOW === 'Y' ? true : false} onIonChange={(e) => {
-              debugger;
+              const checked = e.target.checked;
+              patchPsuhAllow(checked ? 'Y' : 'N', pushAllow?.NOTICE_ALLOW || 'Y');
             }} />
           </div>
           <div className='settings-card-button'>
             <span>공지 알림</span>
             <IonToggle checked={pushAllow?.NOTICE_ALLOW === 'Y' ? true : false} onIonChange={(e) => {
-              debugger;
+              const checked = e.target.checked;
+              patchPsuhAllow(pushAllow?.PERSONAL_ALLOW || 'Y', checked ? 'Y' : 'N');
             }} />
           </div>
-          <div className='settings-card-button ion-activatable' onClick={()=>{
+          <div className='settings-card-button ion-activatable' onClick={() => {
             webviewPushSetting();
             // ion
           }}>

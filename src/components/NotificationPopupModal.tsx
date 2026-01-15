@@ -156,7 +156,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
             padding: '28px 21px 28px 21px'
           }}>
             <div style={{
-              backgroundColor: 'var(--ion-color-light)',
+              // backgroundColor: 'var(--ion-color-light)',
               height: '100%',
               padding: '21px 0',
               display: 'flex',
@@ -170,16 +170,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 justifyContent: 'center',
                 gap: '4px',
               }}>
-                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>상신{typeCounts.START > 0 && <span
-                  style={{
-                    position: 'absolute',
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '3px',
-                    backgroundColor: 'var(--ion-color-primary)',
-                    top: '-4px',
-                    right: '-16px'
-                  }}></span>}</span>
+                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>상신</span>
                 <span style={{ color: 'var(--ion-color-secondary)', fontSize: '14px', fontWeight: '500' }}>{typeCounts.START}건</span>
               </div>
               <div style={{
@@ -192,16 +183,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 borderRight: '1px dotted var(--ion-color-step-200)',
                 gap: '4px'
               }}>
-                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>승인{typeCounts.APPROVE > 0 && <span
-                  style={{
-                    position: 'absolute',
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '3px',
-                    backgroundColor: 'var(--ion-color-success)',
-                    top: '-4px',
-                    right: '-16px'
-                  }}></span>}</span>
+                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>승인</span>
                 <span style={{ color: 'var(--ion-color-secondary)', fontSize: '14px', fontWeight: '500' }}>{typeCounts.APPROVE}건</span>
               </div>
               <div style={{
@@ -212,16 +194,7 @@ const NotificationPopupModal: React.FC<NotificationPopupProps> = ({
                 justifyContent: 'center',
                 gap: '4px'
               }}>
-                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>반려{typeCounts.REJECT > 0 && <span
-                  style={{
-                    position: 'absolute',
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '3px',
-                    backgroundColor: 'var(--ion-color-danger)',
-                    top: '-4px',
-                    right: '-16px'
-                  }}></span>}</span>
+                <span style={{ fontSize: '14px', fontWeight: '500', position: 'relative' }}>반려</span>
                 <span style={{ color: 'var(--ion-color-secondary)', fontSize: '14px', fontWeight: '500' }}>{typeCounts.REJECT}건</span>
               </div>
             </div>

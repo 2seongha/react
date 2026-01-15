@@ -201,10 +201,7 @@ const useAppStore = createWithEqualityFn<AppState>((set, get) => ({
 
   getPushAllow: async () => {
     const currentRequestId = ++requestIds.pushAllow;
-    const deviceToken = localStorage.getItem('deviceToken');
-    if (!deviceToken) return;
-
-    const pushAllow = await getPsuhAllow(deviceToken);
+    const pushAllow = await getPsuhAllow();
 
     if (pushAllow instanceof Error) {
       console.log(pushAllow);

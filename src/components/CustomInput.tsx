@@ -108,7 +108,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
       return formRef?.current?.[key] ?? "";
     });
 
-    return formatter && (!currency || !userInteraction) ? formatter(result) : result;
+    return formatter && (!currency && !userInteraction) ? formatter(result) : result;
   };
 
   const handleBlur = (e: any) => {
