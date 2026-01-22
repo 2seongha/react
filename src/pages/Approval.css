@@ -114,14 +114,14 @@
   margin-right: 12px;
 }
 
-.approval .date-toolbar-wrapper {
+.date-toolbar-wrapper {
   display: flex;
   padding: 8px 20px;
   align-items: center;
   gap: 8px;
 }
 
-.approval .date-toolbar-button-wrapper {
+.date-toolbar-button-wrapper {
   --min-height: 30px;
   --height: 30px;
   border: 1px solid var(--custom-border-color-50);
@@ -129,7 +129,7 @@
   box-sizing: border-box;
 }
 
-.approval .date-toolbar-button {
+.date-toolbar-button {
   width: 100%;
   height: 100%;
   display: flex;
@@ -137,12 +137,12 @@
   justify-content: center;
 }
 
-.approval .date-toolbar-button>ion-icon {
+.date-toolbar-button>ion-icon {
   width: 16px;
   color: var(--gray-color);
 }
 
-.approval .date-toolbar-button>span {
+.date-toolbar-button>span {
   margin-left: 6px;
   font-size: 13px;
 }

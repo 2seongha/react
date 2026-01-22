@@ -24,6 +24,7 @@ import Attach from './pages/Attach';
 import PersonalExpense from './pages/PersonalExpense';
 import LoadingIndicator from './components/LoadingIndicator';
 import 'simple-notify/dist/simple-notify.css'
+import CreditCard from './pages/CreditCard';
 
 const App: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -141,6 +142,7 @@ const App: React.FC = () => {
           <Route path="/termsOfUse" component={TermsOfUse} exact />
           <Route path="/attach/:FileName/:AttachUrl" component={Attach} exact />
           <Route path="/personalExpense" component={PersonalExpense} exact />
+          <Route path="/creditCard" component={CreditCard} exact />
           <Redirect exact from="/" to="/app/home" />
         </IonRouterOutlet>
       </IonReactRouter>

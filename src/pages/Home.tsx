@@ -409,7 +409,7 @@ const StartButtons: React.FC = () => {
           button
           mode='md'
           style={{ flex: 1, '--border-radius': '12px' }}
-          onClick={() => { console.log('adsf') }}
+          onClick={() => { router.push('/creditCard', 'forward', 'push') }}
         >
           <div style={{
             padding: '12px',

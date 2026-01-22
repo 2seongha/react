@@ -107,25 +107,26 @@ const CustomInput: React.FC<CustomInputProps> = ({
     const result = template.replace(/\$([A-Za-z0-9_]+)/g, (_, key) => {
       return formRef?.current?.[key] ?? "";
     });
-
-    return formatter && (!currency && !userInteraction) ? formatter(result) : result;
+    return formatter ? formatter(result) : result;
   };
 
   const handleBlur = (e: any) => {
     onBlur?.(e);
-    if (formatter && currency) setLocalValue(formatter(localValue));
+    if (formatter) setLocalValue(formatter(inputRef.current?.value));
   };
 
   const handleValueHelp = (val: any) => {
     onChangeValueHelp?.(val);
-    setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '', false) : value ?? '');
+    setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '') : value ?? '');
     setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
   };
 
-  const handleInput = (val: string) => {
+  const handleInput = (val: string, isDatePicker = false) => {
     onChange?.(val);
-    setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '', false) : value ?? '');
-    setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
+    if (isDatePicker) {
+      setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '') : value ?? '');
+      setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
+    }
   };
 
   const handleOpenValueHelp = async () => {
@@ -155,7 +156,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
       fixed: datePickerFixed,
       isOpen: true,
       input: inputRef,
-      onChange: handleInput,
+      onChange: (val: string) => handleInput(val, true),
       buttonEvent: e
     });
   };

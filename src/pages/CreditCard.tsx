@@ -5,6 +5,7 @@ import {
   IonContent,
   IonFooter,
   IonIcon,
+  IonItem,
   IonPage,
   IonSelect,
   IonSelectOption,
@@ -14,9 +15,9 @@ import {
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./PersonalExpense.css";
-import { add, addOutline } from 'ionicons/icons';
+import { add, addOutline, calendarClear } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
-import { banknotesGlassIcon } from '../assets/images';
+import { banknotesGlassIcon, creditcardGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
 import { deleteAttach, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStart } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
@@ -35,7 +36,7 @@ import { FlipWords } from '../components/FlipWords';
 import useAppStore from '../stores/appStore';
 import CustomDialog from '../components/Dialog';
 
-const PersonalExpense: React.FC = () => {
+const CreditCard: React.FC = () => {
   const router = useIonRouter();
   //* 전체
   const [step, setStep] = useState(0);
@@ -58,7 +59,7 @@ const PersonalExpense: React.FC = () => {
     let title;
     switch (step) {
       case 0:
-        title = '임직원 개인경비';
+        title = '법인카드';
         break;
       case 1:
         title = '전표 헤더';
@@ -121,7 +122,7 @@ const PersonalExpense: React.FC = () => {
 
   useIonViewWillEnter(() => {
     const initApproval = async () => {
-      const approval = await getStart('IA103');
+      const approval = await getStart('IA102');
       if (approval instanceof Error) {
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
         return router.goBack();
@@ -412,10 +413,48 @@ const PersonalExpense: React.FC = () => {
             exit="exit"
             style={{ height: '100%', padding: '12px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
           >
+            <div style={{ padding: '0 20px' }}>
+              <IonSelect interface="popover" placeholder="회사코드" >
+                <IonSelectOption value="bananas">Bananas</IonSelectOption>
+              </IonSelect>
+              <IonSelect interface="popover" placeholder="카드번호">
+                <IonSelectOption value="bananas">Bananas</IonSelectOption>
+              </IonSelect>
+              <div className='date-toolbar-wrapper' style={{ padding: '4px 0', height: '52px' }}>
+                <IonItem
+                  button
+                  mode='md'
+                  className='date-toolbar-button-wrapper'
+                  id="start-date-trigger"
+                  style={{ flex: 1, '--min-height': '42px', '--height': '42px' }}
+                // onClick={() => setIsStartDateOpen(true)}
+                >
+                  <div className='date-toolbar-button'>
+                    <IonIcon icon={calendarClear} />
+                    <span>{'2026.01.01'}</span>
+                    {/* <span>{formatDate(startDate)}</span> */}
+                  </div>
+                </IonItem>
+                <span>~</span>
+                <IonItem
+                  button
+                  mode='md'
+                  className='date-toolbar-button-wrapper'
+                  id="end-date-trigger"
+                  style={{ flex: 1, '--min-height': '42px', '--height': '42px' }}
+                // onClick={() => setIsEndDateOpen(true)}
+                >
+                  <div className='date-toolbar-button'>
+                    <IonIcon icon={calendarClear} />
+                    <span>{'2026.01.01'}</span>
+                  </div>
+                </IonItem>
+                <IonButton style={{ height: '42px', width: '72px' }}>조회</IonButton>
+              </div>
+            </div>
             <Item
               setScrollRef={setScrollRef}
               docItems={approval?.FLOWHD_DOCITEM}
-              onAddItem={handleAddItem}
               onDeleteItem={handleDeleteItem}
               onItemClick={(item) => {
                 const cloneItem = _.cloneDeep<any>(item);
@@ -686,7 +725,7 @@ const PersonalExpense: React.FC = () => {
   );
 };
 
-export default PersonalExpense;
+export default CreditCard;
 
 
 
@@ -695,7 +734,6 @@ interface ItemProps {
   docItems: any;
   onItemClick: (item: any) => void;
   onDeleteItem: (index: any) => void;
-  onAddItem: () => void;
   setScrollRef: any;
 }
 
@@ -703,7 +741,6 @@ const Item: React.FC<ItemProps> = ({
   docItems,
   onItemClick,
   onDeleteItem,
-  onAddItem,
   setScrollRef
 }) => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -781,7 +818,7 @@ const Item: React.FC<ItemProps> = ({
         })
         :
         <div style={{
-          paddingTop: '26px',
+          paddingTop: '126px',
           marginBottom: '21px',
           display: 'flex',
           flexDirection: 'column',
@@ -790,7 +827,7 @@ const Item: React.FC<ItemProps> = ({
           width: '100%',
         }}>
           <div style={{ height: '130px' }}>
-            <CachedImage src={banknotesGlassIcon} width={130} height={130}></CachedImage>
+            <CachedImage src={creditcardGlassIcon} width={130} height={130}></CachedImage>
           </div>
           <div style={{
             display: 'flex',
@@ -800,27 +837,11 @@ const Item: React.FC<ItemProps> = ({
             width: '100%',
             padding: '24px 0'
           }}>
-            <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
-            <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
+            <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>법인카드 사용 내역을</span>
+            <span style={{ fontSize: '18px', fontWeight: '500' }}>조회해 보세요</span>
           </div>
         </div>
       }
-      <IonButton
-        type='button'
-        mode='md'
-        onClick={onAddItem}
-        style={{
-          width: '100%',
-          height: '58px',
-          '--background': 'transparent',
-          '--color': 'var(--ion-color-step-900)',
-          borderRadius: '17px',
-          border: '1px dashed var(--custom-border-color-100)',
-          fontSize: '16px',
-          marginBottom: '20px'
-        }}>
-        {<IonIcon src={addOutline} style={{ marginRight: '2px' }} />}항목 추가
-      </IonButton>
     </div>
   );
 };
