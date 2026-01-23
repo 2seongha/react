@@ -120,17 +120,17 @@ const CreditCard: React.FC = () => {
     </span>
   }, [step]);
 
-  const setScrollRef = (node: HTMLDivElement) => {
-    if (isSearching) {
-      return;
-    }
-    if (node) {
-      scrollRef.current = node;
-      requestAnimationFrame(() => {
-        if (lastScrollRef.current) node.scrollTop = lastScrollRef.current;
-      });
-    }
-  }
+  // const setScrollRef = (node: HTMLDivElement) => {
+  //   if (isSearching) {
+  //     return;
+  //   }
+  //   if (node) {
+  //     scrollRef.current = node;
+  //     requestAnimationFrame(() => {
+  //       if (lastScrollRef.current) node.scrollTop = lastScrollRef.current;
+  //     });
+  //   }
+  // }
 
   const goStep = useCallback((newStep: number) => {
     prevStepRef.current = currStepRef.current;
@@ -291,7 +291,7 @@ const CreditCard: React.FC = () => {
       });
     } finally {
       setIsSearching(false);
-      lastScrollRef.current = scrollRef.current?.scrollTop ?? 0;
+      // lastScrollRef.current = scrollRef.current?.scrollTop ?? 0;
     }
   }, [searchFilter]);
 
@@ -677,7 +677,7 @@ const CreditCard: React.FC = () => {
             style={{ height: '100%', padding: '12px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
           >
             <Item
-              setScrollRef={setScrollRef}
+              // setScrollRef={setScrollRef}
               cardList={cardList}
               onDeleteItem={handleDeleteItem}
               onItemClick={(item) => {
@@ -962,19 +962,20 @@ interface ItemProps {
   cardList: any;
   onItemClick: (item: any) => void;
   onDeleteItem: (index: any) => void;
-  setScrollRef: any;
+  // setScrollRef: any;
 }
 
 const Item: React.FC<ItemProps> = ({
   cardList,
   onItemClick,
   onDeleteItem,
-  setScrollRef
+  // setScrollRef
 }) => {
   const themeMode = useAppStore(state => state.themeMode);
 
   return (
-    <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
+    // <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
+    <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} >
       {cardList === null
         ?
         <div style={{
