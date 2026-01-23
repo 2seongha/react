@@ -121,6 +121,9 @@ const CreditCard: React.FC = () => {
   }, [step]);
 
   const setScrollRef = (node: HTMLDivElement) => {
+    if (isSearching) {
+      return;
+    }
     if (node) {
       scrollRef.current = node;
       requestAnimationFrame(() => {
@@ -276,8 +279,6 @@ const CreditCard: React.FC = () => {
   //* 검색 버튼
   const handleSearch = useCallback(async () => {
     try {
-      lastScrollRef.current = 0;
-      if (scrollRef.current) scrollRef.current.scrollTop = 0;
       setIsSearching(true);
       const cardList = await getCardList('IA102', searchFilter.companyCode, searchFilter.cardNo, searchFilter.startDate, searchFilter.endDate);
       setCardList(cardList);
@@ -290,6 +291,7 @@ const CreditCard: React.FC = () => {
       });
     } finally {
       setIsSearching(false);
+      lastScrollRef.current = scrollRef.current?.scrollTop ?? 0;
     }
   }, [searchFilter]);
 
@@ -493,7 +495,7 @@ const CreditCard: React.FC = () => {
         )}
       />
       {step === 0 && <>
-        <IonHeader>
+        <IonHeader mode='ios'>
           <div style={{ padding: '0 21px' }}>
             <IonSelect
               mode='md'
