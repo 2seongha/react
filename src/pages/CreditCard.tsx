@@ -1,25 +1,29 @@
-import React, { forwardRef, RefObject, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, RefObject, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   IonBackButton,
   IonButton,
   IonContent,
+  IonDatetime,
   IonFooter,
+  IonHeader,
   IonIcon,
   IonItem,
   IonPage,
+  IonPopover,
   IonSelect,
   IonSelectOption,
   IonTextarea,
+  IonToolbar,
   useIonRouter,
   useIonViewWillEnter,
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
-import "./PersonalExpense.css";
+import "./CreditCard.css";
 import { add, addOutline, calendarClear } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon, creditcardGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { deleteAttach, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStart } from '../stores/service';
+import { deleteAttach, getCardList, getCardNo, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStart } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
@@ -35,10 +39,11 @@ import AnimatedIcon from '../components/AnimatedIcon';
 import { FlipWords } from '../components/FlipWords';
 import useAppStore from '../stores/appStore';
 import CustomDialog from '../components/Dialog';
+import NoData from '../components/NoData';
 
 const CreditCard: React.FC = () => {
   const router = useIonRouter();
-  //* 전체
+  //* ==========상태 관련===========
   const [step, setStep] = useState(0);
   const [enabledStep3, setEnabledStep3] = useState(true);
   const [approval, setApproval] = useState<any>(null);
@@ -47,6 +52,7 @@ const CreditCard: React.FC = () => {
   const ignorePopRef = useRef(false);
   const interactPopRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const lastScrollRef = useRef<number | null>(null);
   const prevStepRef = useRef(0);
   const currStepRef = useRef(0);
   const animationRef = useRef(false); // 애니메이션 중 뒤로가기 막음
@@ -55,6 +61,40 @@ const CreditCard: React.FC = () => {
   const fileNoRef = useRef(0); // 첨부 파일 넘버는 상태 유지
   const itemRef = useRef<AddItemHandle>(null);
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
+
+  const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
+  const [cardList, setCardList] = useState(null); // 카드 사용 내역
+
+  //* 날짜 관련
+  const { defaultStartDate, defaultEndDate } = useMemo(() => {
+    return {
+      defaultStartDate: dayjs().subtract(3, 'month').startOf('month').format('YYYYMMDD'),
+      defaultEndDate: dayjs().format('YYYYMMDD')
+    };
+  }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
+
+  const [isStartDateOpen, setIsStartDateOpen] = useState(false);
+  const [isEndDateOpen, setIsEndDateOpen] = useState(false);
+
+  // 날짜 포맷팅 함수 - useCallback으로 최적화
+  const formatDate = useCallback((dateString: string) => {
+    if (!dateString) return '날짜 선택';
+    return dayjs(dateString).format('YYYY-MM-DD');
+  }, []);
+
+  //* 검색 관련
+  const [searchData, setSearchData] = useState<any>({
+    companyCode: [],
+    cardNo: [],
+  }); // 바인딩 데이터
+  const [searchFilter, setSearchFilter] = useState<any>({
+    companyCode: '',
+    cardNo: '',
+    startDate: defaultStartDate,
+    endDate: defaultEndDate
+  }); // 검색 조건
+
+  //* ==========레이아웃 관련===========
   const title = useMemo(() => {
     let title;
     switch (step) {
@@ -84,7 +124,7 @@ const CreditCard: React.FC = () => {
     if (node) {
       scrollRef.current = node;
       requestAnimationFrame(() => {
-        node.scrollTop = node.scrollHeight;
+        if (lastScrollRef.current) node.scrollTop = lastScrollRef.current;
       });
     }
   }
@@ -120,16 +160,37 @@ const CreditCard: React.FC = () => {
     transition: { duration: 0.25 },
   };
 
+  //* ==========이벤트===========
   useIonViewWillEnter(() => {
     const initApproval = async () => {
-      const approval = await getStart('IA102');
-      if (approval instanceof Error) {
+
+      const [approval, companyCode] = await Promise.all([
+        getStart('IA102'),
+        getSearchHelp('BUK'),
+      ]);
+      if (approval instanceof Error || companyCode instanceof Error) {
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
         return router.goBack();
       }
       oriItem.current = approval.FLOWHD_DOCITEM[0];
       approval.FLOWHD_DOCITEM = [];
       setApproval(approval);
+
+      const defaultCompanyCode = companyCode[0].Key;
+      const cardNo = await getCardNo('IA102', defaultCompanyCode, searchFilter.endDate, searchFilter.startDate);
+
+      setSearchData({
+        companyCode,
+        cardNo
+      });
+
+      setSearchFilter((prev: any) => {
+        return {
+          ...prev,
+          companyCode: defaultCompanyCode,
+          cardNo: cardNo[0].Cardno
+        }
+      });
     }
     initApproval();
   });
@@ -182,6 +243,55 @@ const CreditCard: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  //* ==========메소드===========
+  //* 회사코드 변경
+  const handleChangeFilter = useCallback(async (e: any, type: string) => {
+    var value = e?.target?.value;
+    setSearchFilter((prev: any) => {
+      return {
+        ...prev,
+        [type]: value,
+      }
+    });
+
+    if (type === 'companyCode') {
+      const cardNo = await getCardNo('IA102', value, searchFilter.endDate, searchFilter.startDate);
+
+      setSearchData((prev: any) => {
+        return {
+          ...prev,
+          cardNo,
+        }
+      });
+
+      setSearchFilter((prev: any) => {
+        return {
+          ...prev,
+          cardNo: cardNo[0].Cardno
+        }
+      });
+    }
+  }, []);
+
+  //* 검색 버튼
+  const handleSearch = useCallback(async () => {
+    try {
+      lastScrollRef.current = 0;
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+      setIsSearching(true);
+      const cardList = await getCardList('IA102', searchFilter.companyCode, searchFilter.cardNo, searchFilter.startDate, searchFilter.endDate);
+      setCardList(cardList);
+    } catch (e) {
+      new Notify({
+        status: 'error',
+        title: '예상치 못한 오류가 발생했습니다.',
+        position: 'x-center bottom',
+        autotimeout: 2000,
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  }, [searchFilter]);
 
   //* 항목 추가
   const oriItem = useRef(null); // 항목 템플릿
@@ -382,6 +492,157 @@ const CreditCard: React.FC = () => {
           </IonButton>
         )}
       />
+      {step === 0 && <>
+        <IonHeader>
+          <div style={{ padding: '0 21px' }}>
+            <IonSelect
+              mode='md'
+              className='custom-ion-select'
+              label='회사코드'
+              interface="popover"
+              placeholder="회사코드"
+              style={{ marginBottom: '4px' }}
+              interfaceOptions={{ cssClass: 'full-width-popover' }}
+              justify='start'
+              value={searchFilter.companyCode}
+              onIonChange={e => handleChangeFilter(e, 'companyCode')}>
+              {
+                searchData.companyCode?.map((companyCode: any) =>
+                  <IonSelectOption key={companyCode.Key} value={companyCode.Key}>
+                    {`${companyCode.Key} (${companyCode.Name})`}
+                  </IonSelectOption>)
+              }
+            </IonSelect>
+            <IonSelect
+              mode='md'
+              className='custom-ion-select'
+              label='카드번호'
+              interface="popover"
+              placeholder="카드번호"
+              style={{ marginBottom: '12px' }}
+              interfaceOptions={{ cssClass: 'full-width-popover' }}
+              justify='start'
+              value={searchFilter.cardNo}
+              onIonChange={e => handleChangeFilter(e, 'cardNo')}>
+              {
+                searchData.cardNo?.map((cardNo: any) =>
+                  <IonSelectOption key={cardNo.Cardno} value={cardNo.Cardno}>
+                    {`${cardNo.Cardno.replace(/.{4}(?=.+)/g, '$&-')} ${cardNo.GubunTx ? `(${cardNo.GubunTx.slice(0, 2)} ${cardNo.OwnerName})` : ''}`}
+                  </IonSelectOption>)
+              }
+            </IonSelect>
+            <div className='date-toolbar-wrapper' style={{ padding: '0' }}>
+              <IonItem
+                button
+                mode='md'
+                className='date-toolbar-button-wrapper'
+                id="start-date-trigger"
+                style={{ flex: 1, '--min-height': '38px', '--height': '38px', border: 'none', '--background': 'var(--custom-border-color-0)' }}
+                onClick={() => setIsStartDateOpen(true)}
+              >
+                <div className='date-toolbar-button'>
+                  <IonIcon icon={calendarClear} />
+                  <span>{formatDate(searchFilter.startDate)}</span>
+                </div>
+              </IonItem>
+              <span>~</span>
+              <IonItem
+                button
+                mode='md'
+                className='date-toolbar-button-wrapper'
+                id="end-date-trigger"
+                style={{ flex: 1, '--min-height': '38px', '--height': '38px', border: 'none', '--background': 'var(--custom-border-color-0)' }}
+                onClick={() => setIsEndDateOpen(true)}
+              >
+                <div className='date-toolbar-button'>
+                  <IonIcon icon={calendarClear} />
+                  <span>{formatDate(searchFilter.endDate)}</span>
+                </div>
+              </IonItem>
+              <IonButton
+                style={{
+                  height: '38px',
+                  width: '72px',
+                  '--border-radius': '10px'
+                }}
+                onClick={handleSearch}
+                disabled={isSearching}>
+                {isSearching ? <LoadingIndicator color='#fff' style={{ width: 24 }} /> : '조회'}
+              </IonButton>
+            </div>
+          </div>
+        </IonHeader>
+        < IonPopover
+          mode='ios'
+          side="bottom" alignment="center"
+          trigger="start-date-trigger"
+          isOpen={isStartDateOpen}
+          onDidDismiss={() => setIsStartDateOpen(false)}
+          showBackdrop={true}
+        >
+          <IonDatetime
+            mode='md'
+            class='date-picker-pop-up'
+            value={dayjs(searchFilter.startDate).format('YYYY-MM-DD')}
+            onClick={(e) => {
+              const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
+              const isDayButtonClicked = path?.some((el) =>
+                el instanceof HTMLElement &&
+                el.classList.contains('calendar-day-wrapper')
+              );
+
+              if (isDayButtonClicked) {
+                if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
+                  setSearchFilter((prev: any) => {
+                    return {
+                      ...prev,
+                      startDate: dayjs((e.target as any).closest('ion-datetime').value).format('YYYYMMDD')
+                    }
+                  })
+                }
+                setIsStartDateOpen(false);
+              }
+            }}
+            presentation="date"
+            locale="ko-KR"
+          />
+        </IonPopover>
+        <IonPopover
+          mode='ios'
+          side="bottom" alignment="center"
+          trigger="end-date-trigger"
+          isOpen={isEndDateOpen}
+          onDidDismiss={() => setIsEndDateOpen(false)}
+          showBackdrop={true}
+        >
+          <IonDatetime
+            mode='md'
+            class='date-picker-pop-up'
+            value={dayjs(searchFilter.endDate).format('YYYY-MM-DD')}
+            onClick={(e) => {
+              const path = (e.nativeEvent as any).composedPath?.() as EventTarget[];
+              const isDayButtonClicked = path?.some((el) =>
+                el instanceof HTMLElement &&
+                el.classList.contains('calendar-day-wrapper')
+              );
+              if (isDayButtonClicked) {
+                if (typeof (e.target as any).closest('ion-datetime')?.value === 'string') {
+                  setSearchFilter((prev: any) => {
+                    return {
+                      ...prev,
+                      endDate: dayjs((e.target as any).closest('ion-datetime').value).format('YYYYMMDD')
+                    }
+                  })
+                }
+                setIsEndDateOpen(false);
+              }
+            }}
+            presentation="date"
+            locale="ko-KR"
+          />
+        </IonPopover>
+      </>
+      }
       < IonContent
         fullscreen
         scrollX={false}
@@ -413,50 +674,15 @@ const CreditCard: React.FC = () => {
             exit="exit"
             style={{ height: '100%', padding: '12px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
           >
-            <div style={{ padding: '0 20px' }}>
-              <IonSelect interface="popover" placeholder="회사코드" >
-                <IonSelectOption value="bananas">Bananas</IonSelectOption>
-              </IonSelect>
-              <IonSelect interface="popover" placeholder="카드번호">
-                <IonSelectOption value="bananas">Bananas</IonSelectOption>
-              </IonSelect>
-              <div className='date-toolbar-wrapper' style={{ padding: '4px 0', height: '52px' }}>
-                <IonItem
-                  button
-                  mode='md'
-                  className='date-toolbar-button-wrapper'
-                  id="start-date-trigger"
-                  style={{ flex: 1, '--min-height': '42px', '--height': '42px' }}
-                // onClick={() => setIsStartDateOpen(true)}
-                >
-                  <div className='date-toolbar-button'>
-                    <IonIcon icon={calendarClear} />
-                    <span>{'2026.01.01'}</span>
-                    {/* <span>{formatDate(startDate)}</span> */}
-                  </div>
-                </IonItem>
-                <span>~</span>
-                <IonItem
-                  button
-                  mode='md'
-                  className='date-toolbar-button-wrapper'
-                  id="end-date-trigger"
-                  style={{ flex: 1, '--min-height': '42px', '--height': '42px' }}
-                // onClick={() => setIsEndDateOpen(true)}
-                >
-                  <div className='date-toolbar-button'>
-                    <IonIcon icon={calendarClear} />
-                    <span>{'2026.01.01'}</span>
-                  </div>
-                </IonItem>
-                <IonButton style={{ height: '42px', width: '72px' }}>조회</IonButton>
-              </div>
-            </div>
             <Item
               setScrollRef={setScrollRef}
-              docItems={approval?.FLOWHD_DOCITEM}
+              cardList={cardList}
               onDeleteItem={handleDeleteItem}
               onItemClick={(item) => {
+                if (scrollRef.current) {
+                  lastScrollRef.current = scrollRef.current.scrollTop;
+                }
+
                 const cloneItem = _.cloneDeep<any>(item);
                 setDocItem(cloneItem);
                 setIsSaveEnabled(true);
@@ -731,14 +957,14 @@ export default CreditCard;
 
 //* ========== Step 0. 항목 ==========
 interface ItemProps {
-  docItems: any;
+  cardList: any;
   onItemClick: (item: any) => void;
   onDeleteItem: (index: any) => void;
   setScrollRef: any;
 }
 
 const Item: React.FC<ItemProps> = ({
-  docItems,
+  cardList,
   onItemClick,
   onDeleteItem,
   setScrollRef
@@ -747,78 +973,10 @@ const Item: React.FC<ItemProps> = ({
 
   return (
     <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
-      {docItems?.length > 0
+      {cardList === null
         ?
-        docItems.map((item: any, index: number) => {
-          return <div
-            className='ion-activatable'
-            key={'doc-item-' + item.CNT}
-            onClick={() => onItemClick(item)}
-            style={{
-              marginBottom: '12px',
-              boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
-              borderRadius: '12px',
-              width: '100%',
-              padding: '21px',
-              position: 'relative',
-              border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
-            }}>
-            <IonButton
-              mode='md'
-              color='danger'
-              fill='clear'
-              style={{ position: 'absolute', right: 8, top: 14, '--ripple-color': 'transparent' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteItem(index);
-              }}>삭제</IonButton>
-            <span style={{
-              display: 'block',
-              color: 'var(--ion-color-step-500)',
-              fontSize: '13px',
-              marginBottom: '15px'
-            }}>{dayjs(item.VALUT).format('YYYY-MM-DD')}</span>
-            <span style={{
-              display: 'block',
-              marginBottom: '4px',
-              fontSize: '14px',
-              fontWeight: '600'
-            }}>{item.ACCOUNT_CODE_T}</span>
-            <span style={{
-              fontSize: '17px',
-              fontWeight: '700'
-            }}>{Number(item.WRBTR).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
-            <span style={{
-              height: '1px',
-              backgroundColor: 'var(--custom-border-color-50)',
-              margin: '12px 0',
-              display: 'block'
-            }}></span>
-            <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-              <span>GL계정</span>
-              <span>{item.SAKNR || '-'}</span>
-            </div>
-            <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-              <span>GL계정명</span>
-              <span>{item.SAKNR_T || '-'}</span>
-            </div>
-            <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-              <span>코스트센터</span>
-              <span>{item.KOSTL || '-'}</span>
-            </div>
-            <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-              <span>코스트센터명</span>
-              <span>{item.KOSTL_T || '-'}</span>
-            </div>
-            <div className="custom-item-body-line">
-              <span>항목텍스트</span>
-              <span>{item.SGTXT || '-'}</span>
-            </div>
-          </div>
-        })
-        :
         <div style={{
-          paddingTop: '126px',
+          paddingTop: '26px',
           marginBottom: '21px',
           display: 'flex',
           flexDirection: 'column',
@@ -841,6 +999,71 @@ const Item: React.FC<ItemProps> = ({
             <span style={{ fontSize: '18px', fontWeight: '500' }}>조회해 보세요</span>
           </div>
         </div>
+        :
+        _.isEmpty(cardList)
+          ?
+          <NoData />
+          :
+          cardList.map((item: any, index: number) => {
+            return <div
+              className='ion-activatable'
+              key={'card-list-item-' + item.Seq}
+              onClick={() => onItemClick(item)}
+              style={{
+                marginBottom: '12px',
+                boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                borderRadius: '12px',
+                width: '100%',
+                padding: '21px',
+                position: 'relative',
+                border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
+              }}>
+              <span style={{
+                display: 'flex',
+                color: 'var(--ion-color-step-500)',
+                fontSize: '13px',
+                marginBottom: '15px',
+                width: '100%',
+                justifyContent: 'space-between'
+              }}>No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}<span style={{
+                display: 'inline',
+                color: 'var(--ion-color-step-500)',
+                fontSize: '13px',
+              }}>{dayjs(item.Usedat).format('YYYY-MM-DD')}</span></span>
+              <span style={{
+                display: 'block',
+                marginBottom: '4px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>{item.PUsage}</span>
+              <span style={{
+                fontSize: '17px',
+                fontWeight: '700'
+              }}>{Number(item.LocalAmt).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
+              <span style={{
+                height: '1px',
+                backgroundColor: 'var(--custom-border-color-50)',
+                margin: '12px 0',
+                display: 'block'
+              }}></span>
+              <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                <span>공급업체명</span>
+                <span>{item.LifnrTx || '-'}</span>
+              </div>
+              <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                <span>계정그룹명</span>
+                <span>{item.Sgtxt || '-'}</span>
+              </div>
+              <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                <span>사업장</span>
+                <span>{item.Bupla || '-'}</span>
+              </div>
+              <div className="custom-item-body-line">
+                <span>세금코드</span>
+                <span>{item.Mwskz || '-'}</span>
+              </div>
+            </div>
+          })
       }
     </div>
   );

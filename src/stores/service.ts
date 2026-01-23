@@ -279,6 +279,38 @@ export async function patchPsuhAllow(PERSONAL_ALLOW: string, NOTICE_ALLOW: strin
   }
 }
 
+export async function getCardNo(FLOWCODE?: string, BUKRS?: string, VENDA?: string, VBEDA?: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    // const BUKRS = user?.BUKRS;
+
+    const api = createApiInstance();
+    const res = await api.get(`/v1/api/cardNo?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&FLOWCODE=${FLOWCODE ?? ''}&VENDA=${VENDA ?? ''}&VBEDA=${VBEDA ?? ''}`);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function getCardList(FLOWCODE?: string, BUKRS?: string, CARDNO?: string, START_DATE?: string, END_DATE?: string): Promise<any> {
+  try {
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    // const BUKRS = user?.BUKRS;
+
+    const api = createApiInstance();
+    const res = await api.get(`/v1/api/cardList?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&FLOWCODE=${FLOWCODE ?? ''}&CARDNO=${CARDNO ?? ''}&&START_DATE=${START_DATE ?? ''}&END_DATE=${END_DATE ?? ''}`);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
 export async function getNotices(): Promise<NoticeModel[]> {
   try {
     // Simulate API loading delay

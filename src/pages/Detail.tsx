@@ -1224,7 +1224,7 @@ const SubItem: React.FC<SubProps> = React.memo(
         {...customItemProps}
         style={{
           backgroundColor: "var(--ion-card-background2)",
-          border: "1px solid var(--custom-border-color-0)",
+          border: "1px solid var(--custom-border-color-50)",
           marginBottom: "12px",
           ...style
         }}
@@ -1323,7 +1323,7 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
         {...customItemProps}
         style={{
           backgroundColor: "var(--ion-card-background2)",
-          border: "1px solid var(--custom-border-color-0)",
+          border: "1px solid var(--custom-border-color-50)",
           marginBottom: "12px",
         }}
       />
@@ -1414,7 +1414,7 @@ const AttachItem: React.FC<AttachProps> = React.memo(
         {...customItemProps}
         style={{
           backgroundColor: "var(--ion-card-background2)",
-          border: "1px solid var(--custom-border-color-0)",
+          border: "1px solid var(--custom-border-color-50)",
           marginBottom: "12px",
           ...style
         }}

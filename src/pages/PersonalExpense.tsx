@@ -745,7 +745,7 @@ const Item: React.FC<ItemProps> = ({
               display: 'block',
               marginBottom: '4px',
               fontSize: '14px',
-              fontWeight: '600'
+              fontWeight: '500'
             }}>{item.ACCOUNT_CODE_T}</span>
             <span style={{
               fontSize: '17px',
@@ -801,7 +801,7 @@ const Item: React.FC<ItemProps> = ({
             padding: '24px 0'
           }}>
             <span style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px' }}>임직원 개인경비 상신을 위해</span>
-            <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해주세요</span>
+            <span style={{ fontSize: '18px', fontWeight: '500' }}>항목을 추가해 주세요</span>
           </div>
         </div>
       }
