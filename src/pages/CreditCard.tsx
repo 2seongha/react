@@ -40,6 +40,7 @@ import { FlipWords } from '../components/FlipWords';
 import useAppStore from '../stores/appStore';
 import CustomDialog from '../components/Dialog';
 import NoData from '../components/NoData';
+import { Virtuoso } from 'react-virtuoso';
 
 const CreditCard: React.FC = () => {
   const router = useIonRouter();
@@ -111,7 +112,7 @@ const CreditCard: React.FC = () => {
         title = '결재 정보';
         break;
       case 99:
-        title = '항목 추가';
+        title = '상세 정보';
         break;
     }
     return <span
@@ -119,18 +120,6 @@ const CreditCard: React.FC = () => {
       {title}
     </span>
   }, [step]);
-
-  // const setScrollRef = (node: HTMLDivElement) => {
-  //   if (isSearching) {
-  //     return;
-  //   }
-  //   if (node) {
-  //     scrollRef.current = node;
-  //     requestAnimationFrame(() => {
-  //       if (lastScrollRef.current) node.scrollTop = lastScrollRef.current;
-  //     });
-  //   }
-  // }
 
   const goStep = useCallback((newStep: number) => {
     prevStepRef.current = currStepRef.current;
@@ -496,14 +485,18 @@ const CreditCard: React.FC = () => {
       />
       {step === 0 && <>
         <IonHeader mode='ios'>
-          <div style={{ padding: '0 21px' }}>
+          <div style={{
+            padding: '0 21px 12px 21px',
+            borderRadius: '12px',
+            borderBottom: '1px solid var(--custom-border-color-50)'
+          }}>
             <IonSelect
               mode='md'
               className='custom-ion-select'
               label='회사코드'
               interface="popover"
               placeholder="회사코드"
-              style={{ marginBottom: '4px' }}
+              style={{ marginBottom: '4px', fontSize: '14px' }}
               interfaceOptions={{ cssClass: 'full-width-popover' }}
               justify='start'
               value={searchFilter.companyCode}
@@ -521,7 +514,7 @@ const CreditCard: React.FC = () => {
               label='카드번호'
               interface="popover"
               placeholder="카드번호"
-              style={{ marginBottom: '12px' }}
+              style={{ marginBottom: '12px', fontSize: '14px' }}
               interfaceOptions={{ cssClass: 'full-width-popover' }}
               justify='start'
               value={searchFilter.cardNo}
@@ -665,32 +658,39 @@ const CreditCard: React.FC = () => {
         }}>
           <LoadingIndicator />
         </div>}
+        {(step === 0 || step === 99) && <motion.div
+          // {<motion.div
+          key="step0"
+          custom={step - prevStepRef.current}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          style={{
+            height: '100%',
+            padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px',
+            display: step === 0 ? 'block' : 'none'
+          }}
+        >
+          <Item
+            // setScrollRef={setScrollRef}
+            cardList={cardList}
+            onDeleteItem={handleDeleteItem}
+            onItemClick={(item) => {
+              if (scrollRef.current) {
+                lastScrollRef.current = scrollRef.current.scrollTop;
+              }
+
+              const cloneItem = _.cloneDeep<any>(item);
+              setDocItem(cloneItem);
+              setIsSaveEnabled(true);
+              goStep(99);
+            }} />
+        </motion.div>}
+
         <AnimatePresence mode="wait" initial={false}>
           {/* 항목 페이지 */}
-          {step === 0 && <motion.div
-            key="step0"
-            custom={step - prevStepRef.current}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            style={{ height: '100%', padding: '12px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
-          >
-            <Item
-              // setScrollRef={setScrollRef}
-              cardList={cardList}
-              onDeleteItem={handleDeleteItem}
-              onItemClick={(item) => {
-                if (scrollRef.current) {
-                  lastScrollRef.current = scrollRef.current.scrollTop;
-                }
-
-                const cloneItem = _.cloneDeep<any>(item);
-                setDocItem(cloneItem);
-                setIsSaveEnabled(true);
-                goStep(99);
-              }} />
-          </motion.div>}
+          {/* {(step === 0 || step === 99) && <motion.div */}
 
           {/* 항목 추가 페이지 */}
           {step === 99 && <AddItem
@@ -975,7 +975,7 @@ const Item: React.FC<ItemProps> = ({
 
   return (
     // <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
-    <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} >
+    <div style={{ overflow: 'auto', height: '100%', padding: !_.isEmpty(cardList) ? '' : '12px 21px 0 21px' }} >
       {cardList === null
         ?
         <div style={{
@@ -1007,66 +1007,92 @@ const Item: React.FC<ItemProps> = ({
           ?
           <NoData />
           :
-          cardList.map((item: any, index: number) => {
-            return <div
-              className='ion-activatable'
-              key={'card-list-item-' + item.Seq}
-              onClick={() => onItemClick(item)}
-              style={{
-                marginBottom: '12px',
-                boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
-                borderRadius: '12px',
-                width: '100%',
-                padding: '21px',
-                position: 'relative',
-                border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
-              }}>
-              <span style={{
-                display: 'flex',
-                color: 'var(--ion-color-step-500)',
-                fontSize: '13px',
-                marginBottom: '15px',
-                width: '100%',
-                justifyContent: 'space-between'
-              }}>No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}<span style={{
-                display: 'inline',
-                color: 'var(--ion-color-step-500)',
-                fontSize: '13px',
-              }}>{dayjs(item.Usedat).format('YYYY-MM-DD')}</span></span>
-              <span style={{
-                display: 'block',
-                marginBottom: '4px',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}>{item.PUsage}</span>
-              <span style={{
-                fontSize: '17px',
-                fontWeight: '700'
-              }}>{Number(item.LocalAmt).toLocaleString("ko-KR")} <span style={{ fontSize: '16px', fontWeight: '700' }}>원</span></span>
-              <span style={{
-                height: '1px',
-                backgroundColor: 'var(--custom-border-color-50)',
-                margin: '12px 0',
-                display: 'block'
-              }}></span>
-              <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                <span>공급업체명</span>
-                <span>{item.LifnrTx || '-'}</span>
+          <Virtuoso
+            style={{ height: '100%', padding: '0px 21px' }}
+            data={cardList}
+            totalCount={cardList.length}
+            itemContent={(index, item) => (
+              <div
+                className='ion-activatable'
+                key={'card-list-item-' + item.Seq}
+                onClick={() => onItemClick(item)}
+                style={{
+                  margin: '0 0 12px 0', // 여백 유지
+                  boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                  borderRadius: '12px',
+                  width: 'calc(100% - 42px)',
+                  padding: '21px',
+                  position: 'relative',
+                  backgroundColor: 'var(--ion-background-color, #fff)', // 배경색 명시 권장
+                  border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
+                }}
+              >
+                <span style={{
+                  display: 'flex',
+                  color: 'var(--ion-color-step-500)',
+                  fontSize: '13px',
+                  marginBottom: '15px',
+                  width: '100%',
+                  justifyContent: 'space-between'
+                }}>
+                  No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
+                  <span style={{
+                    display: 'inline',
+                    color: 'var(--ion-color-step-500)',
+                    fontSize: '13px',
+                  }}>
+                    {dayjs(item.Usedat).format('YYYY-MM-DD')}
+                  </span>
+                </span>
+
+                <span style={{
+                  display: 'block',
+                  marginBottom: '4px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>{item.PUsage}</span>
+
+                <span style={{
+                  fontSize: '17px',
+                  fontWeight: '700'
+                }}>
+                  {Number(item.LocalAmt).toLocaleString("ko-KR")}
+                  <span style={{ fontSize: '16px', fontWeight: '700' }}> 원</span>
+                </span>
+
+                <span style={{
+                  height: '1px',
+                  backgroundColor: 'var(--custom-border-color-50)',
+                  margin: '12px 0',
+                  display: 'block'
+                }}></span>
+
+                <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                  <span>공급업체명</span>
+                  <span>{item.LifnrTx || '-'}</span>
+                </div>
+                <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                  <span>계정그룹명</span>
+                  <span>{item.Sgtxt || '-'}</span>
+                </div>
+                <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                  <span>사업장</span>
+                  <span>{item.Bupla || '-'}</span>
+                </div>
+                <div className="custom-item-body-line">
+                  <span>세금코드</span>
+                  <span>{item.Mwskz || '-'}</span>
+                </div>
               </div>
-              <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                <span>계정그룹명</span>
-                <span>{item.Sgtxt || '-'}</span>
-              </div>
-              <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                <span>사업장</span>
-                <span>{item.Bupla || '-'}</span>
-              </div>
-              <div className="custom-item-body-line">
-                <span>세금코드</span>
-                <span>{item.Mwskz || '-'}</span>
-              </div>
-            </div>
-          })
+            )}
+            // Virtuoso는 스크롤 패딩을 위해 components를 제공합니다.
+            components={{
+              Header: () => <div style={{ padding: '12px 0' }}>
+                <span style={{ color: 'var(--ion-color-secondary)', fontSize: '13px' }}>Total. {cardList.length}</span>
+              </div>,
+              Footer: () => <div style={{ height: '20px' }} />
+            }}
+          />
       }
     </div>
   );
@@ -1095,43 +1121,44 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   const attendeeFormRef = useRef<FormRef>({});
   const [, forceRender] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0); // 수익성 리프레시 키
+  const [vatCodeRefreshKey, setVatCodeRefreshKey] = useState(0); // 수익성 리프레시 키
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
   const [errorList, setErrorList] = useState<any>(null); // 에러 목록
   const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
   // 참석자, 수익성 사용여부 체크
-  const checkExtraFieldUse = useCallback(async (clear = true) => {
-    const cloneApproval = _.cloneDeep(approval);
+  const checkExtraFieldUse = useCallback(async () => {
+    // const cloneApproval = _.cloneDeep(approval);
     const cloneDocItem = _.cloneDeep(docItem);
-    cloneDocItem.WRBTR = '0';
-    cloneApproval.FLOWHD_DOCITEM = [cloneDocItem];
-    cloneApproval.ACTIVITY = 'ENTER';
-    cloneApproval.FIELD = 'ACCOUNT_CODE_T';
-    cloneApproval.GUBUN = 'I';
-    const res = await postExtraFieldUse(cloneApproval);
+    // cloneDocItem.WRBTR = '0';
+    // cloneApproval.FLOWHD_DOCITEM = [cloneDocItem];
+    // cloneApproval.ACTIVITY = 'ENTER';
+    // cloneApproval.FIELD = 'ACCOUNT_CODE_T';
+    // cloneApproval.GUBUN = 'I';
+    // const res = await postExtraFieldUse(cloneApproval);
 
-    if (clear) {
-      if (!res.ATTENDEE_EDIT) {
-        docItem.DOCITEM_ATTENDEELIST = [];
-      }
-      if (!res.PAOBJNR_EDIT) {
-        docItem.RKE_KNDNR = '';
-        docItem.RKE_KNDNR_T = '';
-        docItem.RKE_VKORG = '';
-        docItem.RKE_VKORG_T = '';
-        docItem.RKE_VTWEG = '';
-        docItem.RKE_VTWEG_T = '';
-        docItem.RKE_SPART = '';
-        docItem.RKE_SPART_T = '';
-        docItem.RKE_WERKS = '';
-        docItem.RKE_WERKS_T = '';
-        docItem.RKE_ARTNR = '';
-        docItem.RKE_ARTNR_T = '';
-      }
+    // if (clear) {
+    if (formRef.current.SgtxtAdd22 !== 'X') {
+      docItem.CardListAttendeeList.results = [];
     }
+    if (formRef.current.SgtxtAdd21 !== 'PAOBJNR-R' && formRef.current.SgtxtAdd21 !== 'PAOBJNR-O') {
+      docItem.RKE_KNDNR = '';
+      docItem.RKE_KNDNR_T = '';
+      docItem.RKE_VKORG = '';
+      docItem.RKE_VKORG_T = '';
+      docItem.RKE_VTWEG = '';
+      docItem.RKE_VTWEG_T = '';
+      docItem.RKE_SPART = '';
+      docItem.RKE_SPART_T = '';
+      docItem.RKE_WERKS = '';
+      docItem.RKE_WERKS_T = '';
+      docItem.RKE_ARTNR = '';
+      docItem.RKE_ARTNR_T = '';
+    }
+    // }
 
-    setExtraFieldUse(res);
-  }, []);
+    // setExtraFieldUse(res);
+  }, [formRef]);
 
   // 참석자 추가 팝업 오픈
   const openAddAttendee = useCallback(() => {
@@ -1199,11 +1226,14 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
-    if (docItem.ACCOUNT_CODE) {
-      checkExtraFieldUse(false);
+    if (docItem.Sgtxt) {
+      checkExtraFieldUse();
     } else {
-      docItem.DOCITEM_ATTENDEELIST = [];
+      docItem.CardListAttendeeList = [];
     }
+
+    if (docItem.Mwskz === 'V0') docItem.Wmwst = '0';
+
     formRef.current = docItem || {};
     checkRequired();
     forceRender(prev => prev + 1);
@@ -1283,26 +1313,57 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
         <div style={{ padding: '0 21px' }}>
           <CustomInput
             formRef={formRef}
-            valueTemplate="$ACCOUNT_CODE_T"
-            helperTextTemplate="GL계정 : $SAKNR | GL계정명 : $SAKNR_T"
+            valueTemplate="$LifnrTx"
+            label="공급업체명"
+            onFocus={handleFocus}
+            readOnly
+            clearInput
+            style={{ marginBottom: '28px' }}
+          />
+          <CustomInput
+            formRef={formRef}
+            valueTemplate="$Budat"
+            label="전기일"
+            onFocus={handleFocus}
+            formatter={(value) => dayjs(value).format('YYYY.MM.DD')}
+            readOnly
+            clearInput
+            style={{ marginBottom: '28px' }}
+          />
+          <CustomInput
+            formRef={formRef}
+            valueTemplate="$PUsage"
+            label="가맹점명"
+            onFocus={handleFocus}
+            readOnly
+            clearInput
+            style={{ marginBottom: '28px' }}
+          />
+          <CustomInput
+            formRef={formRef}
+            valueTemplate="$Sgtxt"
+            helperTextTemplate="GL계정 : $Saknr | GL계정명 : $SaknrTx"
             label="계정그룹명"
             required
             onFocus={handleFocus}
-            onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA103')}
+            onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA102')}
             onChange={(value) => {
-              formRef.current.ACCOUNT_CODE_T = value;
+              formRef.current.Sgtxt = value;
               if (!value) {
-                formRef.current.ACCOUNT_CODE = '';
-                formRef.current.SAKNR = '';
-                formRef.current.SAKNR_T = '';
+                formRef.current.SgtxtNo = '';
+                formRef.current.Saknr = '';
+                formRef.current.SaknrTx = '';
               }
               checkRequired();
             }}
             onChangeValueHelp={(value) => {
-              formRef.current.ACCOUNT_CODE = value.Key;
-              formRef.current.ACCOUNT_CODE_T = value.Name;
-              formRef.current.SAKNR = value.Add1;
-              formRef.current.SAKNR_T = value.KeyName;
+              formRef.current.SgtxtNo = value.Key;
+              formRef.current.Sgtxt = value.Name;
+              formRef.current.Saknr = value.Add1;
+              formRef.current.SaknrTx = value.KeyName;
+
+              formRef.current.SgtxtAdd21 = value.Add21;
+              formRef.current.SgtxtAdd22 = value.Add22;
               checkRequired();
               checkExtraFieldUse();
             }}
@@ -1312,60 +1373,13 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
           />
           <CustomInput
             formRef={formRef}
-            valueTemplate="$KOSTL"
-            helperTextTemplate="코스트센터명 : $KOSTL_T"
-            label="코스트센터"
+            valueTemplate="$Dtext"
+            label="상세적요"
+            required
             onFocus={handleFocus}
-            onValueHelp={() => getSearchHelp('KOSTL', 'IA103')}
             onChange={(value) => {
-              formRef.current.KOSTL = value;
-              if (!value) {
-                formRef.current.KOSTL_T = '';
-              }
-            }}
-            onChangeValueHelp={(value) => {
-              formRef.current.KOSTL = value.Key;
-              formRef.current.KOSTL_T = value.Name;
-            }}
-            style={{ marginBottom: '28px' }}
-            clearInput
-          />
-          <CustomInput
-            formRef={formRef}
-            valueTemplate="$AUFNR"
-            helperTextTemplate="오더명 : $AUFNR_T"
-            label="오더번호"
-            onFocus={handleFocus}
-            onValueHelp={() => getSearchHelp('AUFNR', 'IA103')}
-            onChange={(value) => {
-              formRef.current.AUFNR = value;
-              if (!value) {
-                formRef.current.AUFNR_T = '';
-              }
-            }}
-            onChangeValueHelp={(value) => {
-              formRef.current.AUFNR = value.Key;
-              formRef.current.AUFNR_T = value.Name;
-            }}
-            style={{ marginBottom: '28px' }}
-            clearInput
-          />
-          <CustomInput
-            formRef={formRef}
-            valueTemplate="$PROJK"
-            helperTextTemplate="WBS요소명 : $PROJK_T"
-            label="WBS요소"
-            onFocus={handleFocus}
-            onValueHelp={() => getSearchHelp('PROJK', 'IA103')}
-            onChange={(value) => {
-              formRef.current.PROJK = value;
-              if (!value) {
-                formRef.current.PROJK_T = '';
-              }
-            }}
-            onChangeValueHelp={(value) => {
-              formRef.current.PROJK = value.Key;
-              formRef.current.PROJK_T = value.Name;
+              formRef.current.Dtext = value;
+              checkRequired();
             }}
             style={{ marginBottom: '28px' }}
             clearInput
@@ -1374,88 +1388,181 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
             <CustomInput
               currency
               formRef={formRef}
-              valueTemplate="$WRBTR"
-              label="전표통화금액"
-              required
-              formatter={(value) => {
-                if (!value) return "";
-                const raw = value
-                  .replace(/[^0-9\-]/g, "") // 숫자와 - 만 허용
-                  .replace(/(?!^)-/g, "");  // -는 맨 앞만 허용
-
-                if (raw === "" || raw === "-") return raw;
-
-                try {
-                  // Number 대신 BigInt를 사용하여 정밀도 유지
-                  return BigInt(raw).toLocaleString("ko-KR");
-                } catch (e) {
-                  // 숫자가 너무 커서 BigInt 변환도 실패하는 경우 등에 대한 예외 처리
-                  return raw;
-                }
-              }}
+              valueTemplate="$LocalAmt"
+              label="승인금액"
               onFocus={handleFocus}
-              onChange={(value) => {
-                formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
-                checkRequired();
+              formatter={(val) => {
+                if (!val && val !== 0) return "";
+                const num = val.toString().split(".")[0].replace(/[^0-9\-]/g, "");
+                return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
               }}
+              readOnly
               style={{ marginBottom: '28px', textAlign: 'right' }}
               inputMode='numeric'
             />
-            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.WAERS}</span>
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.Hwaer}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CustomInput
+              currency
+              formRef={formRef}
+              valueTemplate="$CancAmt"
+              label="취소금액"
+              onFocus={handleFocus}
+              formatter={(val) => {
+                if (!val && val !== 0) return "";
+                const num = val.toString().split(".")[0].replace(/[^0-9\-]/g, "");
+                return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              }}
+              readOnly
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
+            />
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.Hwaer}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CustomInput
+              currency
+              formRef={formRef}
+              valueTemplate="$TotalAmt"
+              label="최종금액"
+              onFocus={handleFocus}
+              formatter={(val) => {
+                if (!val && val !== 0) return "";
+                const num = val.toString().split(".")[0].replace(/[^0-9\-]/g, "");
+                return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              }}
+              readOnly
+              // onChange={(value) => {
+              //   formRef.current.WRBTR = value.replace(/[^0-9.-]/g, '');
+              //   checkRequired();
+              // }}
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
+              disabled
+            />
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.Hwaer}</span>
           </div>
 
           <CustomInput
             formRef={formRef}
-            valueTemplate="$SGTXT"
-            label="항목텍스트"
+            valueTemplate="$Mwskz"
+            helperTextTemplate='세금코드명 : $MwskzTx'
+            label="세금코드"
             required
+            readOnly
+            disabled={!formRef.current.Sgtxt}
             onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('MWSKZ', 'IA102')}
             onChange={(value) => {
-              formRef.current.SGTXT = value;
-              checkRequired();
+              formRef.current.Mwskz = value;
+              if (!value) {
+                formRef.current.MwskzTx = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.Mwskz = value.Key;
+              formRef.current.MwskzTx = value.Name;
+
+              // V0은 부가세 0
+              if (value.Key === 'V0') {
+                formRef.current.Amount = '0';
+                formRef.current.Wmwst = '0';
+              } else {
+                formRef.current.Amount = String(Math.floor(Number(formRef.current.TotalAmt) / 1.1));
+                formRef.current.Wmwst = String(Number(formRef.current.TotalAmt) - Number(formRef.current.Amount));
+              }
+              setVatCodeRefreshKey(prev => prev + 1);
+            }}
+            style={{ marginBottom: '28px' }}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CustomInput
+              currency
+              formRef={formRef}
+              valueTemplate="$Amount"
+              label="공급가액"
+              key={`sp-${vatCodeRefreshKey}`}
+              onFocus={handleFocus}
+              formatter={(val) => {
+                if (!val && val !== 0) return "";
+                const num = val.toString().split(".")[0].replace(/[^0-9\-]/g, "");
+                return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              }}
+              readOnly
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
+            />
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.Hwaer}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CustomInput
+              currency
+              formRef={formRef}
+              valueTemplate="$Wmwst"
+              label="부가세"
+              key={`sp-${vatCodeRefreshKey}`}
+              onFocus={handleFocus}
+              formatter={(val) => {
+                if (!val && val !== 0) return "";
+                const num = val.toString().split(".")[0].replace(/[^0-9\-]/g, "");
+                return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              }}
+              readOnly
+              style={{ marginBottom: '28px', textAlign: 'right' }}
+              inputMode='numeric'
+            />
+            <span style={{ paddingBottom: '10px', color: 'var(--ion-color-step-600)' }}>{docItem?.Hwaer}</span>
+          </div>
+          <CustomInput
+            formRef={formRef}
+            valueTemplate="$Kostl"
+            helperTextTemplate="코스트센터명 : $KostlTx"
+            label="코스트센터"
+            onFocus={handleFocus}
+            onValueHelp={() => getSearchHelp('KOSTL', 'IA102')}
+            onChange={(value) => {
+              formRef.current.Kostl = value;
+              if (!value) {
+                formRef.current.KostlTx = '';
+              }
+            }}
+            onChangeValueHelp={(value) => {
+              formRef.current.Kostl = value.Key;
+              formRef.current.KostlTx = value.Name;
             }}
             style={{ marginBottom: '28px' }}
             clearInput
+            readOnly
           />
+
           <CustomInput
             formRef={formRef}
-            valueTemplate="$ZUONR"
-            label="지정"
+            valueTemplate="$ApprNum"
+            label="승인번호"
             onFocus={handleFocus}
-            onChange={(value) => {
-              formRef.current.ZUONR = value;
-            }}
-            style={{ marginBottom: '28px' }}
+            readOnly
             clearInput
-          />
-          <CustomInput
-            formRef={formRef}
-            valueTemplate="$VALUT"
-            label="기준일자"
-            readOnly
-            date
-            formatter={(value) => {
-              return dayjs(value).format('YYYY-MM-DD');
-            }}
-            onFocus={handleFocus}
-            onChange={(value) => {
-              formRef.current.VALUT = value;
-            }}
             style={{ marginBottom: '28px' }}
           />
+
           <CustomInput
             formRef={formRef}
-            valueTemplate="$ZFBDT"
-            label="만기계산일"
-            readOnly
-            date
-            formatter={(value) => {
-              return dayjs(value).format('YYYY-MM-DD');
-            }}
+            valueTemplate="$InduCode"
+            label="업종코드"
             onFocus={handleFocus}
-            onChange={(value) => {
-              formRef.current.ZFBDT = value;
-            }}
+            readOnly
+            clearInput
+            style={{ marginBottom: '28px' }}
+          />
+
+          <CustomInput
+            formRef={formRef}
+            valueTemplate="$OwnerName"
+            label="카드소유자"
+            onFocus={handleFocus}
+            readOnly
+            clearInput
             style={{ marginBottom: '28px' }}
           />
         </div>

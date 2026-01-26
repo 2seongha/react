@@ -286,6 +286,10 @@ ion-input {
   /* --border-radius: 12px !important; */
 }
 
+ion-input.input-disabled {
+  pointer-events: none;
+}
+
 ion-select {
   border-bottom: 1px solid var(--input-color);
 }
@@ -294,6 +298,10 @@ ion-select::part(label) {
   color: var(--ion-color-step-700);
   font-weight: 500;
   font-size: 15px;
+}
+
+ion-select.custom-ion-select::part(label) {
+  font-size: 14px;
 }
 
 .input-wrapper.sc-ion-input-md {

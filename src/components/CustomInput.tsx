@@ -131,6 +131,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   const handleOpenValueHelp = async () => {
     if (beforeOpenValueHelp && !beforeOpenValueHelp()) return;
+    if (!onValueHelp) return;
+
     setTimeout(() => {
       if (inputRef.current && !inputRef.current.classList.contains("has-focus")) {
         inputRef.current.classList.add("has-focus");
