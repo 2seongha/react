@@ -980,7 +980,7 @@ const Item: React.FC<ItemProps> = ({
       {cardList === null
         ?
         <div style={{
-          paddingTop: '26px',
+          paddingTop: '58px',
           marginBottom: '21px',
           display: 'flex',
           flexDirection: 'column',
