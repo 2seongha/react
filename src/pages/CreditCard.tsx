@@ -658,14 +658,14 @@ const CreditCard: React.FC = () => {
         }}>
           <LoadingIndicator />
         </div>}
-        {(step === 0 || step === 99) && <motion.div
+        {(step === 0 || step === 99) && <div
           // {<motion.div
           key="step0"
-          custom={step - prevStepRef.current}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
+          // custom={step - prevStepRef.current}
+          // variants={variants}
+          // initial="enter"
+          // animate="center"
+          // exit="exit"
           style={{
             height: '100%',
             padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px',
@@ -686,7 +686,7 @@ const CreditCard: React.FC = () => {
               setIsSaveEnabled(true);
               goStep(99);
             }} />
-        </motion.div>}
+        </div>}
 
         <AnimatePresence mode="wait" initial={false}>
           {/* 항목 페이지 */}
@@ -975,7 +975,8 @@ const Item: React.FC<ItemProps> = ({
 
   return (
     // <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
-    <div style={{ overflow: 'auto', height: '100%', padding: !_.isEmpty(cardList) ? '' : '12px 21px 0 21px' }} >
+    // <div style={{ overflow: 'auto', height: '100%', padding: !_.isEmpty(cardList) ? '' : '12px 21px 0 21px' }} >
+    <div style={{ overflow: 'auto', height: '100%' }} >
       {cardList === null
         ?
         <div style={{
@@ -1008,86 +1009,93 @@ const Item: React.FC<ItemProps> = ({
           <NoData />
           :
           <Virtuoso
-            style={{ height: '100%', padding: '0px 21px' }}
+            // style={{ height: '100%', padding: '0px 21px' }}
             data={cardList}
             totalCount={cardList.length}
+            defaultItemHeight={208}
+            increaseViewportBy={300}
             itemContent={(index, item) => (
-              <div
-                className='ion-activatable'
-                key={'card-list-item-' + item.Seq}
-                onClick={() => onItemClick(item)}
-                style={{
-                  margin: '0 0 12px 0', // 여백 유지
-                  boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
-                  borderRadius: '12px',
-                  width: 'calc(100% - 42px)',
-                  padding: '21px',
-                  position: 'relative',
-                  backgroundColor: 'var(--ion-background-color, #fff)', // 배경색 명시 권장
-                  border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
-                }}
-              >
-                <span style={{
-                  display: 'flex',
-                  color: 'var(--ion-color-step-500)',
-                  fontSize: '13px',
-                  marginBottom: '15px',
-                  width: '100%',
-                  justifyContent: 'space-between'
-                }}>
-                  No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
+              <div style={{
+                padding: '0 21px 12px 21px', // 좌우 패딩과 아이템 간격을 여기서 조절
+                boxSizing: 'border-box'
+              }}>
+                <div
+                  className='ion-activatable'
+                  key={'card-list-item-' + item.Seq}
+                  onClick={() => onItemClick(item)}
+                  style={{
+                    // margin: '0 0 12px 0', // 여백 유지
+                    boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+                    borderRadius: '12px',
+                    // width: 'calc(100% - 42px)',
+                    padding: '21px',
+                    position: 'relative',
+                    backgroundColor: 'var(--ion-background-color, #fff)', // 배경색 명시 권장
+                    border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
+                  }}
+                >
                   <span style={{
-                    display: 'inline',
+                    display: 'flex',
                     color: 'var(--ion-color-step-500)',
                     fontSize: '13px',
+                    marginBottom: '15px',
+                    width: '100%',
+                    justifyContent: 'space-between'
                   }}>
-                    {dayjs(item.Usedat).format('YYYY-MM-DD')}
+                    No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
+                    <span style={{
+                      display: 'inline',
+                      color: 'var(--ion-color-step-500)',
+                      fontSize: '13px',
+                    }}>
+                      {dayjs(item.Usedat).format('YYYY-MM-DD')}
+                    </span>
                   </span>
-                </span>
 
-                <span style={{
-                  display: 'block',
-                  marginBottom: '4px',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}>{item.PUsage}</span>
+                  <span style={{
+                    display: 'block',
+                    marginBottom: '4px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>{item.PUsage}</span>
 
-                <span style={{
-                  fontSize: '17px',
-                  fontWeight: '700'
-                }}>
-                  {Number(item.LocalAmt).toLocaleString("ko-KR")}
-                  <span style={{ fontSize: '16px', fontWeight: '700' }}> 원</span>
-                </span>
+                  <span style={{
+                    fontSize: '17px',
+                    fontWeight: '700'
+                  }}>
+                    {Number(item.LocalAmt).toLocaleString("ko-KR")}
+                    <span style={{ fontSize: '16px', fontWeight: '700' }}> 원</span>
+                  </span>
 
-                <span style={{
-                  height: '1px',
-                  backgroundColor: 'var(--custom-border-color-50)',
-                  margin: '12px 0',
-                  display: 'block'
-                }}></span>
+                  <span style={{
+                    height: '1px',
+                    backgroundColor: 'var(--custom-border-color-50)',
+                    margin: '12px 0',
+                    display: 'block'
+                  }}></span>
 
-                <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                  <span>공급업체명</span>
-                  <span>{item.LifnrTx || '-'}</span>
-                </div>
-                <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                  <span>계정그룹명</span>
-                  <span>{item.Sgtxt || '-'}</span>
-                </div>
-                <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
-                  <span>사업장</span>
-                  <span>{item.Bupla || '-'}</span>
-                </div>
-                <div className="custom-item-body-line">
-                  <span>세금코드</span>
-                  <span>{item.Mwskz || '-'}</span>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>공급업체명</span>
+                    <span>{item.LifnrTx || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>계정그룹명</span>
+                    <span>{item.Sgtxt || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line" style={{ marginBottom: '4px' }}>
+                    <span>사업장</span>
+                    <span>{item.Bupla || '-'}</span>
+                  </div>
+                  <div className="custom-item-body-line">
+                    <span>세금코드</span>
+                    <span>{item.Mwskz || '-'}</span>
+                  </div>
                 </div>
               </div>
             )}
             // Virtuoso는 스크롤 패딩을 위해 components를 제공합니다.
             components={{
-              Header: () => <div style={{ padding: '12px 0' }}>
+              Header: () => <div style={{ padding: '12px 21px' }}>
                 <span style={{ color: 'var(--ion-color-secondary)', fontSize: '13px' }}>Total. {cardList.length}</span>
               </div>,
               Footer: () => <div style={{ height: '20px' }} />
