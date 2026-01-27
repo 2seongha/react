@@ -86,7 +86,6 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
 
   const handleModalWillPresent = () => {
     setIsModalOpen(true);
-
     pushModal(modalId);
     // 모달이 열릴 때 히스토리 추가
     const currentState = window.history.state;
@@ -113,7 +112,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
     if (!isModalOpen) return;
 
     const handlePopState = (event: PopStateEvent) => {
-      if (isModalOpen) {
+      if (isModalOpen && !event.state?.modalOpen) {
         // 뒤로가기로 인한 모달 닫기
         closedByBackButtonRef.current = true;
         dismiss();

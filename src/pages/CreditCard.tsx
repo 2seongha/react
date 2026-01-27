@@ -67,6 +67,7 @@ const CreditCard: React.FC = () => {
   const itemRef = useRef<AddItemHandle>(null);
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
   const [selectedList, setSelectedList] = useState<any[]>([]); // 선택된 리스트
+  const batchFormRef = useRef<FormRef>({}); // 일괄적용 폼
 
   const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
   const [cardList, setCardList] = useState(null); // 카드 사용 내역
@@ -401,7 +402,8 @@ const CreditCard: React.FC = () => {
       position: 'x-center bottom',
       autotimeout: 2000
     });
-
+    batchFormRef.current = {};
+    document.getElementById("batch-dialog-trigger")?.click();
   }, [selectedList]);
 
   return (
@@ -649,13 +651,7 @@ const CreditCard: React.FC = () => {
           <LoadingIndicator />
         </div>}
         {(step === 0 || step === 99) && <div
-          // {<motion.div
           key="step0"
-          // custom={step - prevStepRef.current}
-          // variants={variants}
-          // initial="enter"
-          // animate="center"
-          // exit="exit"
           style={{
             height: '100%',
             padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px',
@@ -697,6 +693,7 @@ const CreditCard: React.FC = () => {
                   '--border-radius': '12px',
                 }}>임시저장({selectedList.length})</IonFabButton>
               <IonFabButton
+                // id='batch-dialog-trigger'
                 color='medium'
                 onClick={handleBatchApply}
                 style={{
@@ -706,6 +703,82 @@ const CreditCard: React.FC = () => {
                 }}>일괄적용({selectedList.length})</IonFabButton>
             </IonFabList>
           </IonFab>
+          <IonButton id='batch-dialog-trigger' style={{ display: 'none' }}></IonButton>
+          <CustomDialog
+            trigger="batch-dialog-trigger"
+            dialogStyle={{
+              width: '100%'
+            }}
+            onDidDismiss={() => {
+            }}
+            title="일괄적용"
+            body={
+              <div style={{ padding: '0 8px 8px 8px' }}>
+                <CustomInput
+                  formRef={batchFormRef}
+                  valueTemplate="$Sgtxt"
+                  helperTextTemplate="GL계정 : $Saknr | GL계정명 : $SaknrTx"
+                  label="계정그룹명"
+                  required
+                  // onFocus={handleFocus}
+                  onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA102')}
+                  onChange={(value) => {
+                    batchFormRef.current.Sgtxt = value;
+                    if (!value) {
+                      batchFormRef.current.SgtxtNo = '';
+                      batchFormRef.current.Saknr = '';
+                      batchFormRef.current.SaknrTx = '';
+                    }
+                  }}
+                  onChangeValueHelp={(value) => {
+                    batchFormRef.current.SgtxtNo = value.Key;
+                    batchFormRef.current.Sgtxt = value.Name;
+                    batchFormRef.current.Saknr = value.Add1;
+                    batchFormRef.current.SaknrTx = value.KeyName;
+                  }}
+                  readOnly
+                  clearInput
+                  style={{ marginBottom: '28px' }}
+                />
+                <CustomInput
+                  formRef={batchFormRef}
+                  valueTemplate="$Dtext"
+                  label="상세적요"
+                  required
+                  // onFocus={handleFocus}
+                  onChange={(value) => {
+                    batchFormRef.current.Dtext = value;
+                  }}
+                  style={{ marginBottom: '28px' }}
+                  clearInput
+                />
+                <CustomInput
+                  formRef={batchFormRef}
+                  valueTemplate="$Kostl"
+                  helperTextTemplate="코스트센터명 : $KostlTx"
+                  label="코스트센터"
+                  // onFocus={handleFocus}
+                  onValueHelp={() => getSearchHelp('KOSTL', 'IA102')}
+                  onChange={(value) => {
+                    batchFormRef.current.Kostl = value;
+                    if (!value) {
+                      batchFormRef.current.KostlTx = '';
+                    }
+                  }}
+                  onChangeValueHelp={(value) => {
+                    batchFormRef.current.Kostl = value.Key;
+                    batchFormRef.current.KostlTx = value.Name;
+                  }}
+                  style={{ marginBottom: '28px' }}
+                  clearInput
+                  readOnly
+                />
+              </div>
+            }
+            // onSecondButtonClick={handleAddAttendee}
+            firstButtonText="닫기"
+            secondButtonText='적용'
+          />
         </div>}
 
         <AnimatePresence mode="wait" initial={false}>
@@ -1693,8 +1766,6 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
           trigger="attendee-dialog-trigger"
           dialogStyle={{
             width: '100%'
-          }}
-          onDidDismiss={() => {
           }}
           title="참석자 추가"
           body={

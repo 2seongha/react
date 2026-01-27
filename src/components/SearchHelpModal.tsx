@@ -74,12 +74,14 @@ const SearchHelpModal: React.FC<SearchHelpModalProps> = ({
   // 브라우저 뒤로가기 버튼 처리
   useEffect(() => {
     if (!searchHelp?.isOpen) return;
-
+    
     const handlePopState = (event: PopStateEvent) => {
-      closedByBackButtonRef.current = true;
-      dismiss();
+      // event.state에 내가 넣어둔 searchHelpOpen이 있는지 확인
+      if (searchHelp?.isOpen && !event.state?.searchHelpOpen) {
+        closedByBackButtonRef.current = true;
+        dismiss();
+      }
     };
-
     window.addEventListener("popstate", handlePopState);
 
     return () => {
