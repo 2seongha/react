@@ -356,7 +356,7 @@ const CreditCard: React.FC = () => {
     });
 
     new Notify({
-      title: '수정되었습니다.',
+      title: '변경되었습니다.',
       position: 'x-center bottom',
       autotimeout: 2000,
     });
