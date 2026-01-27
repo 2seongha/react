@@ -681,7 +681,7 @@ const CreditCard: React.FC = () => {
             vertical="bottom"
             horizontal="end"
             style={{
-              marginBottom: 'calc(var(--ion-safe-area-bottom) + 96px)',
+              marginBottom: 'calc(var(--ion-safe-area-bottom) + 82px)',
               marginRight: '12px'
             }}>
             <IonFabButton>
