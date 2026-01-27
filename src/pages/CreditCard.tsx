@@ -306,7 +306,7 @@ const CreditCard: React.FC = () => {
 
   const reOrderItemNo = useCallback((list: any) => {
     return list.map((itm: any, i: number) => {
-      itm.DOCITEM_ATTENDEELIST.forEach((attendee: any, idx: number) => {
+      itm.CardListAttendeeList.results.forEach((attendee: any, idx: number) => {
         attendee.ITEMNO = String(i + 1);
         attendee.KEY_CNT = String(idx + 1);
       });
@@ -320,9 +320,7 @@ const CreditCard: React.FC = () => {
 
   // 항목 저장
   const handleSaveItem = useCallback((item: any) => {
-    const newItem = { ...item };
-    let isEdit = false;
-
+    const newItem = itemRef.current?.getFormRef();
     const validate = itemRef.current?.validate();
     if (!validate?.result) {
       return new Notify({
@@ -333,7 +331,7 @@ const CreditCard: React.FC = () => {
       });
     }
 
-    const attendeeList = newItem.DOCITEM_ATTENDEELIST;
+    const attendeeList = newItem.CardListAttendeeList.results;
     if (!_.isEmpty(attendeeList)) {
       const { hasA, hasB } = attendeeList.reduce((acc: any, item: any) => {
         if (item.GUBUN === 'A') acc.hasA = true;
@@ -351,36 +349,14 @@ const CreditCard: React.FC = () => {
       }
     }
 
-    setApproval((prev: any) => {
-      if (!prev || !prev.FLOWHD_DOCITEM) {
-        return { ...prev, FLOWHD_DOCITEM: [{ ...newItem, CNT: '1', ITEMNO: '1' }] };
-      }
-
-      const list = [...prev.FLOWHD_DOCITEM];
-      const index = list.findIndex(
-        (itm) => String(itm.CNT) === String(newItem.CNT)
+    setCardList((prev: any) => {
+      return prev.map((oldItem: any) =>
+        oldItem.Seq === newItem.Seq ? { ...newItem } : oldItem
       );
-
-      let newList;
-      if (index > -1) {
-        isEdit = true;
-        newList = list.map((itm, i) =>
-          i === index ? { ...itm, ...newItem } : itm
-        );
-      } else {
-        newList = [...list, newItem];
-      }
-
-      // CNT, ITEMNO 재할당
-      newList = reOrderItemNo(newList);
-
-      return {
-        ...prev,
-        FLOWHD_DOCITEM: newList,
-      };
     });
+
     new Notify({
-      title: isEdit ? '수정되었습니다.' : '추가되었습니다.',
+      title: '수정되었습니다.',
       position: 'x-center bottom',
       autotimeout: 2000,
     });
@@ -1111,6 +1087,7 @@ const Item: React.FC<ItemProps> = ({
 //* ========== Step 99. 항목 추가 ==========
 interface AddItemHandle {
   validate: () => any;
+  getFormRef: () => any;
 }
 
 interface AddItemProps {
@@ -1135,37 +1112,40 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
   // 참석자, 수익성 사용여부 체크
-  const checkExtraFieldUse = useCallback(async () => {
-    // const cloneApproval = _.cloneDeep(approval);
-    const cloneDocItem = _.cloneDeep(docItem);
-    // cloneDocItem.WRBTR = '0';
-    // cloneApproval.FLOWHD_DOCITEM = [cloneDocItem];
-    // cloneApproval.ACTIVITY = 'ENTER';
-    // cloneApproval.FIELD = 'ACCOUNT_CODE_T';
-    // cloneApproval.GUBUN = 'I';
-    // const res = await postExtraFieldUse(cloneApproval);
+  const checkExtraFieldUse = useCallback(async (sgtxtSearchHelp?: any) => {
+    if (!formRef.current.Sgtxt) return;
 
-    // if (clear) {
-    if (formRef.current.SgtxtAdd22 !== 'X') {
-      docItem.CardListAttendeeList.results = [];
+    let attendeeEdit, paobjnrEdit;
+    if (!sgtxtSearchHelp) {
+      sgtxtSearchHelp = await getSearchHelp('ACCOUNT_CODE_T', 'IA102');
+      sgtxtSearchHelp = sgtxtSearchHelp.find((sh: any) => sh.Key === formRef.current.SgtxtNo);
     }
-    if (formRef.current.SgtxtAdd21 !== 'PAOBJNR-R' && formRef.current.SgtxtAdd21 !== 'PAOBJNR-O') {
-      docItem.RKE_KNDNR = '';
-      docItem.RKE_KNDNR_T = '';
-      docItem.RKE_VKORG = '';
-      docItem.RKE_VKORG_T = '';
-      docItem.RKE_VTWEG = '';
-      docItem.RKE_VTWEG_T = '';
-      docItem.RKE_SPART = '';
-      docItem.RKE_SPART_T = '';
-      docItem.RKE_WERKS = '';
-      docItem.RKE_WERKS_T = '';
-      docItem.RKE_ARTNR = '';
-      docItem.RKE_ARTNR_T = '';
-    }
-    // }
 
-    // setExtraFieldUse(res);
+    attendeeEdit = sgtxtSearchHelp.Add22 === 'X';
+    paobjnrEdit = sgtxtSearchHelp.Add21 === 'PAOBJNR-R' || sgtxtSearchHelp.Add21 === 'PAOBJNR-O';
+
+    if (!attendeeEdit) {
+      formRef.current.CardListAttendeeList.results = [];
+    }
+    if (!paobjnrEdit) {
+      formRef.current.RKE_KNDNR = '';
+      formRef.current.RKE_KNDNR_T = '';
+      formRef.current.RKE_VKORG = '';
+      formRef.current.RKE_VKORG_T = '';
+      formRef.current.RKE_VTWEG = '';
+      formRef.current.RKE_VTWEG_T = '';
+      formRef.current.RKE_SPART = '';
+      formRef.current.RKE_SPART_T = '';
+      formRef.current.RKE_WERKS = '';
+      formRef.current.RKE_WERKS_T = '';
+      formRef.current.RKE_ARTNR = '';
+      formRef.current.RKE_ARTNR_T = '';
+    }
+
+    setExtraFieldUse({
+      ATTENDEE_EDIT: attendeeEdit,
+      PAOBJNR_EDIT: paobjnrEdit
+    });
   }, [formRef]);
 
   // 참석자 추가 팝업 오픈
@@ -1214,16 +1194,16 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
       return false;
     }
 
-    docItem.DOCITEM_ATTENDEELIST.push(attendeeFormRef.current);
+    formRef.current.CardListAttendeeList.results.push(attendeeFormRef.current);
     forceRender(prev => prev + 1);
     return true;
   }, [attendeeFormRef]);
 
   // 참석자 삭제
   const handleDeleteAttendee = useCallback((index: number) => {
-    docItem.DOCITEM_ATTENDEELIST.splice(index, 1);
+    formRef.current.CardListAttendeeList.results.splice(index, 1);
     forceRender(prev => prev + 1);
-  }, [docItem]);
+  }, [formRef]);
 
   const handleAttendeeInputChange = useCallback((values: Record<string, any>) => {
     attendeeFormRef.current = {
@@ -1234,24 +1214,22 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
 
   // docItem 변경 시 form 재할당
   useEffect(() => {
-    if (docItem.Sgtxt) {
+    formRef.current = { ...docItem };
+    if (formRef.current.Sgtxt) {
       checkExtraFieldUse();
-    } else {
-      docItem.CardListAttendeeList = [];
     }
 
-    if (docItem.Mwskz === 'V0') docItem.Wmwst = '0';
+    if (formRef.current.Mwskz === 'V0') formRef.current.Wmwst = '0';
 
-    formRef.current = docItem || {};
     checkRequired();
     forceRender(prev => prev + 1);
   }, [docItem]);
 
   const checkRequired = useCallback(() => {
-    if (formRef.current.ACCOUNT_CODE_T
-      && formRef.current.WRBTR
-      && formRef.current.SGTXT
-      && (!extraFieldUse?.ATTENDEE_EDIT || !_.isEmpty(docItem.DOCITEM_ATTENDEELIST))) {
+    if (formRef.current.Sgtxt
+      && formRef.current.Mwskz
+      && formRef.current.Dtext
+      && (!extraFieldUse?.ATTENDEE_EDIT || !_.isEmpty(formRef.current.CardListAttendeeList?.results))) {
       onSaveEnabledChange(true);
     } else {
       onSaveEnabledChange(false);
@@ -1282,7 +1260,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   // 유효성 체크
   useImperativeHandle(ref, () => ({
     validate() {
-      if (extraFieldUse?.ATTENDEE_EDIT && _.isEmpty(docItem.DOCITEM_ATTENDEELIST)) return {
+      if (extraFieldUse.ATTENDEE_EDIT && _.isEmpty(formRef.current.CardListAttendeeList.results)) return {
         result: false,
         message: '참석자를 추가해주세요.'
       };
@@ -1290,6 +1268,9 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
         result: true,
         message: ''
       };
+    },
+    getFormRef() {
+      return formRef.current;
     }
   }));
 
@@ -1370,10 +1351,8 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
               formRef.current.Saknr = value.Add1;
               formRef.current.SaknrTx = value.KeyName;
 
-              formRef.current.SgtxtAdd21 = value.Add21;
-              formRef.current.SgtxtAdd22 = value.Add22;
               checkRequired();
-              checkExtraFieldUse();
+              checkExtraFieldUse(value);
             }}
             readOnly
             clearInput
@@ -1576,7 +1555,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
         </div>
         <IonButton id='attendee-dialog-trigger' style={{ display: 'none' }} onClick={openAddAttendee} />
 
-        {docItem.ACCOUNT_CODE && extraFieldUse === null && <div>
+        {formRef.current.Sgtxt && extraFieldUse === null && <div>
           <LoadingIndicator style={{ margin: '0 auto', marginTop: '50px', marginBottom: '50px' }} />
         </div>}
 
@@ -1595,14 +1574,14 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
               }}>
                 <IonIcon src={add} />추가
               </IonButton>
-              {_.isEmpty(docItem.DOCITEM_ATTENDEELIST)
+              {_.isEmpty(formRef.current.CardListAttendeeList.results)
                 ? <span style={{ color: 'var(--ion-color-secondary)' }}>참석자를 추가해주세요.</span>
-                : docItem.DOCITEM_ATTENDEELIST.map((attendee: any, index: number) => <div key={`attendee${index}`}>
+                : formRef.current.CardListAttendeeList.results.map((attendee: any, index: number) => <div key={`attendee${index}`}>
                   <div
                     style={{
                       display: "flex",
                       gap: "4px",
-                      marginBottom: index === docItem.DOCITEM_ATTENDEELIST.length - 1 ? "" : "32px",
+                      marginBottom: index === formRef.current.CardListAttendeeList.results.length - 1 ? "" : "32px",
                       alignItems: "center",
                       justifyContent: "space-between"
                     }}

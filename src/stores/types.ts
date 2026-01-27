@@ -140,5 +140,5 @@ export interface DeviceInfoModel {
 }
 
 export type FormRef = {
-  [key: string]: string | undefined;
+  [key: string]: string | undefined | any;
 };

@@ -123,10 +123,10 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   const handleInput = (val: string, isDatePicker = false) => {
     onChange?.(val);
-    if (isDatePicker) {
+    // if (isDatePicker) {
       setLocalValue(valueTemplate ? resolveTemplate(valueTemplate ?? '') : value ?? '');
       setLocalHelper(helperTextTemplate ? resolveTemplate(helperTextTemplate ?? '') : helperTextTemplate ?? '');
-    }
+    // }
   };
 
   const handleOpenValueHelp = async () => {
