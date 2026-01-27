@@ -2,6 +2,7 @@ import React, { forwardRef, RefObject, useCallback, useEffect, useImperativeHand
 import {
   IonBackButton,
   IonButton,
+  IonCheckbox,
   IonContent,
   IonDatetime,
   IonFooter,
@@ -62,6 +63,7 @@ const CreditCard: React.FC = () => {
   const fileNoRef = useRef(0); // 첨부 파일 넘버는 상태 유지
   const itemRef = useRef<AddItemHandle>(null);
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
+  const [selectedList, setSelectedList] = useState<string[]>([]); // 선택된 리스트
 
   const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
   const [cardList, setCardList] = useState(null); // 카드 사용 내역
@@ -280,7 +282,6 @@ const CreditCard: React.FC = () => {
       });
     } finally {
       setIsSearching(false);
-      // lastScrollRef.current = scrollRef.current?.scrollTop ?? 0;
     }
   }, [searchFilter]);
 
@@ -289,34 +290,19 @@ const CreditCard: React.FC = () => {
   const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
   const [isSaveEnabled, setIsSaveEnabled] = useState(false);
 
-  // 항목 추가
-  const handleAddItem = useCallback(() => {
-    const cloneItem = _.cloneDeep<any>(oriItem.current);
-    if (cloneItem) {
-      cloneItem.BUZEI = ''; // 공란
-      cloneItem.SEQNR = '1'; // 임직원개인경비 - 1고정
-      cloneItem.WRBTR = '';
-      cloneItem.DMBTR = '';
-    }
-
-    goStep(99);
-    setDocItem(cloneItem);
-    setIsSaveEnabled(false);
-  }, [approval]);
-
-  const reOrderItemNo = useCallback((list: any) => {
-    return list.map((itm: any, i: number) => {
-      itm.CardListAttendeeList.results.forEach((attendee: any, idx: number) => {
-        attendee.ITEMNO = String(i + 1);
-        attendee.KEY_CNT = String(idx + 1);
-      });
-      return {
-        ...itm,
-        CNT: String(i + 1),
-        ITEMNO: String(i + 1),
-      };
-    });
-  }, []);
+  // const reOrderItemNo = useCallback((list: any) => {
+  //   return list.map((itm: any, i: number) => {
+  //     itm.CardListAttendeeList.results.forEach((attendee: any, idx: number) => {
+  //       attendee.ITEMNO = String(i + 1);
+  //       attendee.KEY_CNT = String(idx + 1);
+  //     });
+  //     return {
+  //       ...itm,
+  //       CNT: String(i + 1),
+  //       ITEMNO: String(i + 1),
+  //     };
+  //   });
+  // }, []);
 
   // 항목 저장
   const handleSaveItem = useCallback((item: any) => {
@@ -349,6 +335,10 @@ const CreditCard: React.FC = () => {
       }
     }
 
+    newItem.CardListAttendeeList.results.forEach((attendee: any, idx: number) => {
+      attendee.KEY_CNT = String(idx + 1);
+    });
+
     setCardList((prev: any) => {
       return prev.map((oldItem: any) =>
         oldItem.Seq === newItem.Seq ? { ...newItem } : oldItem
@@ -364,31 +354,14 @@ const CreditCard: React.FC = () => {
     goStep(0);
   }, [step]);
 
-  // 항목 삭제
-  const handleDeleteItem = useCallback((deleteIndex: number) => {
-    setApproval((prev: any) => {
-      if (!prev || !prev.FLOWHD_DOCITEM) return { FLOWHD_DOCITEM: [] };
-      new Notify({
-        status: 'error',
-        title: '삭제되었습니다.',
-        position: 'x-center bottom',
-        autotimeout: 2000
-      });
-      // deleteIndex 기준으로 필터링 + 재정렬
-      let newList = prev.FLOWHD_DOCITEM
-        .filter((_: any, i: number) => i !== deleteIndex);
-
-      // CNT, ITEMNO 재할당
-      newList = reOrderItemNo(newList);
-
-      return {
-        ...prev,
-        FLOWHD_DOCITEM: newList,
-      };
-    });
-
-  }, []);
-
+  // 항목 선택
+  const handleSelectItem = useCallback((item: any) => {
+    if (selectedList.includes(item.Seq)) {
+      setSelectedList((prev) => prev.filter((seq) => seq !== item.Seq));
+    } else {
+      setSelectedList((prev) => [...prev, item.Seq]);
+    }
+  }, [selectedList]);
 
   return (
     <IonPage className='personal-expense'>
@@ -649,9 +622,7 @@ const CreditCard: React.FC = () => {
           }}
         >
           <Item
-            // setScrollRef={setScrollRef}
             cardList={cardList}
-            onDeleteItem={handleDeleteItem}
             onItemClick={(item) => {
               if (scrollRef.current) {
                 lastScrollRef.current = scrollRef.current.scrollTop;
@@ -661,7 +632,9 @@ const CreditCard: React.FC = () => {
               setDocItem(cloneItem);
               setIsSaveEnabled(true);
               goStep(99);
-            }} />
+            }}
+            onItemSelect={handleSelectItem}
+            selectedList={selectedList} />
         </div>}
 
         <AnimatePresence mode="wait" initial={false}>
@@ -689,7 +662,11 @@ const CreditCard: React.FC = () => {
               exit="exit"
               style={{ height: '100%', padding: '0px 0px calc(82px + var(--ion-safe-area-bottom)) 0px' }}
             >
-              <Header docHeader={approval.FLOWHD_DOCHD} />
+              <Header
+                docHeader={approval.FLOWHD_DOCHD}
+                cardList={cardList}
+                selectedList={selectedList}
+              />
             </motion.div>
           }
 
@@ -823,7 +800,7 @@ const CreditCard: React.FC = () => {
                   mode="md"
                   color="primary"
                   disabled={
-                    step === 0 ? !approval?.FLOWHD_DOCITEM?.length :
+                    step === 0 ? _.isEmpty(selectedList) :
                       step === 3 ? enabledStep3 :
                         false}
                   style={{
@@ -850,10 +827,8 @@ const CreditCard: React.FC = () => {
                     : () => {
                       webviewHaptic('mediumImpact');
                       let totalWRBTR = 0;
-                      // let totalDMBTR = 0;
                       approval.FLOWHD_DOCITEM.forEach((item: any) => {
                         totalWRBTR += Number(item.WRBTR);
-                        // totalDMBTR += Number(item.DMBTR);
                       });
 
                       approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
@@ -861,7 +836,7 @@ const CreditCard: React.FC = () => {
                       goStep(step + 1);
                     }}
                 >
-                  {step === 3 ? '결재 상신' : '다음 단계'}
+                  {step === 3 ? '결재 상신' : step === 0 ? `다음 단계(${selectedList.length})` : '다음 단계'}
                 </IonButton>
               </motion.div>
             )}
@@ -931,21 +906,19 @@ const CreditCard: React.FC = () => {
 
 export default CreditCard;
 
-
-
 //* ========== Step 0. 항목 ==========
 interface ItemProps {
   cardList: any;
   onItemClick: (item: any) => void;
-  onDeleteItem: (index: any) => void;
-  // setScrollRef: any;
+  onItemSelect: (item: any) => void;
+  selectedList: string[];
 }
 
 const Item: React.FC<ItemProps> = ({
   cardList,
   onItemClick,
-  onDeleteItem,
-  // setScrollRef
+  onItemSelect,
+  selectedList
 }) => {
   const themeMode = useAppStore(state => state.themeMode);
 
@@ -993,21 +966,33 @@ const Item: React.FC<ItemProps> = ({
             itemContent={(index, item) => (
               <div style={{
                 padding: '0 21px 12px 21px', // 좌우 패딩과 아이템 간격을 여기서 조절
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  position: 'absolute',
+                  zIndex: '1'
+                }}
+                  onClick={(e) => {
+                    if (!item.Sgtxt || !item.Dtext) {
+                      e.preventDefault();
+                      return;
+                    }
+                    e.stopPropagation();
+                    onItemSelect(item);
+                  }} />
                 <div
                   className='ion-activatable'
                   key={'card-list-item-' + item.Seq}
                   onClick={() => onItemClick(item)}
                   style={{
-                    // margin: '0 0 12px 0', // 여백 유지
                     boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
                     borderRadius: '12px',
-                    // width: 'calc(100% - 42px)',
                     padding: '21px',
                     position: 'relative',
-                    backgroundColor: 'var(--ion-background-color, #fff)', // 배경색 명시 권장
-                    border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)'
+                    border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)',
+                    backgroundColor: selectedList.includes(item.Seq) ? 'rgba(var(--ion-color-primary-rgb), .1)' : ''
                   }}
                 >
                   <span style={{
@@ -1018,7 +1003,31 @@ const Item: React.FC<ItemProps> = ({
                     width: '100%',
                     justifyContent: 'space-between'
                   }}>
-                    No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <IonCheckbox
+                        checked={selectedList.includes(item.Seq)}
+                        disabled={(!item.Sgtxt || !item.Dtext)}
+                        mode='md'
+                        style={{ pointerEvents: 'none' }}
+                      />
+                      No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
+                      {(!item.Sgtxt || !item.Dtext) ? <span style={{
+                        backgroundColor: '#ffe2ce',
+                        color: '#000',
+                        borderRadius: '4px',
+                        padding: '0 6px',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}>필수값 누락</span>
+                        : <span style={{
+                          backgroundColor: '#cdffba',
+                          color: '#000',
+                          borderRadius: '4px',
+                          padding: '0 6px',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }}>선택 가능</span>}
+                    </div>
                     <span style={{
                       display: 'inline',
                       color: 'var(--ion-color-step-500)',
@@ -1825,11 +1834,15 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
 //* ========== Step 1. 전표 헤더 ==========
 interface HeaderProps {
   docHeader?: any;
+  cardList?: any;
+  selectedList?: string[];
   onSave?: (item: any) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
   docHeader,
+  cardList,
+  selectedList
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<FormRef>({});
@@ -1841,26 +1854,35 @@ const Header: React.FC<HeaderProps> = ({
     forceRender(prev => prev + 1);
   }, [docHeader]);
 
-  const handleFocus = (e: any) => {
-    document.querySelectorAll('.has-focus').forEach((el) => {
-      el.classList.remove('has-focus');
-    });
+  // const handleFocus = (e: any) => {
+  //   document.querySelectorAll('.has-focus').forEach((el) => {
+  //     el.classList.remove('has-focus');
+  //   });
 
-    const container = containerRef.current;
-    const el = e.target;
-    if (!container || !el) return;
+  //   const container = containerRef.current;
+  //   const el = e.target;
+  //   if (!container || !el) return;
 
-    setTimeout(() => {
-      const offset = 60; // 위에서 50px 밑으로
-      const containerTop = container.getBoundingClientRect().top;
-      const elTop = e.target.getBoundingClientRect().top;
-      const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
-      container.scrollTo({
-        top: scrollTop,
-        behavior: "smooth",
-      });
-    }, 150)
-  };
+  //   setTimeout(() => {
+  //     const offset = 60; // 위에서 50px 밑으로
+  //     const containerTop = container.getBoundingClientRect().top;
+  //     const elTop = e.target.getBoundingClientRect().top;
+  //     const scrollTop = container.scrollTop + (elTop - containerTop) - offset;
+  //     container.scrollTo({
+  //       top: scrollTop,
+  //       behavior: "smooth",
+  //     });
+  //   }, 150)
+  // };
+
+  const totalSum = useMemo(() => {
+    const cardMap = new Map<string, string>(cardList.map((card: any) => [card.Seq, card.TotalAmt]));
+    const totalSum = selectedList?.reduce((acc, currentSeq) => {
+      const amount = Number(cardMap.get(currentSeq)) || 0; // 해당 Seq가 없으면 0 더하기
+      return acc + amount;
+    }, 0);
+    return totalSum?.toLocaleString("ko-KR") + ' KRW';
+  }, []);
 
   return (
     <>
@@ -1874,7 +1896,7 @@ const Header: React.FC<HeaderProps> = ({
           padding: '12px 21px calc(102px + max(var(--ion-safe-area-bottom), var(--keyboard-height))) 21px'
         }}>
         <CustomInput
-          disabled
+          readOnly
           formRef={formRef}
           valueTemplate="$BUKRS_T($BUKRS)"
           label="회사코드"
@@ -1882,7 +1904,7 @@ const Header: React.FC<HeaderProps> = ({
           style={{ marginBottom: '28px' }}
         />
         <CustomInput
-          disabled
+          readOnly
           formRef={formRef}
           valueTemplate="$BLART_T($BLART)"
           label="전표유형"
@@ -1890,14 +1912,14 @@ const Header: React.FC<HeaderProps> = ({
           style={{ marginBottom: '28px' }}
         />
         <CustomInput
-          disabled
+          readOnly
           formRef={formRef}
           valueTemplate="$CREATOR_LOGIN_ID | $CREATOR_NAME | $CREATOR_ORGTX"
           label="생성인"
           labelPlacement='fixed'
           style={{ marginBottom: '28px' }}
         />
-        <CustomInput
+        {/* <CustomInput
           required
           formRef={formRef}
           valueTemplate="$BLDAT"
@@ -1914,8 +1936,8 @@ const Header: React.FC<HeaderProps> = ({
             formRef.current.BLDAT = value;
           }}
           style={{ marginBottom: '28px' }}
-        />
-        <CustomInput
+        /> */}
+        {/* <CustomInput
           required
           disabled
           formRef={formRef}
@@ -1926,10 +1948,9 @@ const Header: React.FC<HeaderProps> = ({
             return dayjs(value).format('YYYY-MM-DD');
           }}
           style={{ marginBottom: '28px' }}
-        />
+        /> */}
         <CustomInput
-          required
-          disabled
+          readOnly
           formRef={formRef}
           valueTemplate="$WAERS"
           label="전표통화"
@@ -1937,21 +1958,10 @@ const Header: React.FC<HeaderProps> = ({
           style={{ marginBottom: '28px' }}
         />
         <CustomInput
-          disabled
-          formRef={formRef}
-          valueTemplate="$SUM_WRBTR"
-          label="전표통화 계"
+          readOnly
+          value={totalSum}
+          label="현지통화금액"
           labelPlacement='fixed'
-          formatter={(value) => {
-            if (!value) return "";
-            const raw = value
-              .replace(/[^0-9\-]/g, "") // 숫자, - 만 허용
-              .replace(/(?!^)-/g, "");  // - 는 맨 앞만
-
-            if (raw === "" || raw === "-") return raw;
-
-            return Number(raw).toLocaleString("ko-KR") + ' KRW';
-          }}
           style={{ marginBottom: '28px' }}
         />
       </div>
