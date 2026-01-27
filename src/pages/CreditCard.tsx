@@ -5,6 +5,9 @@ import {
   IonCheckbox,
   IonContent,
   IonDatetime,
+  IonFab,
+  IonFabButton,
+  IonFabList,
   IonFooter,
   IonHeader,
   IonIcon,
@@ -20,7 +23,7 @@ import {
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./CreditCard.css";
-import { add, addOutline, calendarClear } from 'ionicons/icons';
+import { add, addOutline, calendarClear, chevronUpCircle } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon, creditcardGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
@@ -63,7 +66,7 @@ const CreditCard: React.FC = () => {
   const fileNoRef = useRef(0); // 첨부 파일 넘버는 상태 유지
   const itemRef = useRef<AddItemHandle>(null);
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
-  const [selectedList, setSelectedList] = useState<string[]>([]); // 선택된 리스트
+  const [selectedList, setSelectedList] = useState<any[]>([]); // 선택된 리스트
 
   const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
   const [cardList, setCardList] = useState(null); // 카드 사용 내역
@@ -272,7 +275,14 @@ const CreditCard: React.FC = () => {
     try {
       setIsSearching(true);
       const cardList = await getCardList('IA102', searchFilter.companyCode, searchFilter.cardNo, searchFilter.startDate, searchFilter.endDate);
+      // cardList.forEach((card: any) => {
+      //   // 세금코드 디폴트 V0 고정
+      //   card.Mwskz = 'V0'
+      //   card.Amount = '0'
+      //   card.Wmwst = '0';
+      // });
       setCardList(cardList);
+      setSelectedList([]);
     } catch (e) {
       new Notify({
         status: 'error',
@@ -345,6 +355,13 @@ const CreditCard: React.FC = () => {
       );
     });
 
+    setSelectedList((prev) => {
+      // 만약 수정 중인 아이템이 선택된 목록에 있다면 업데이트, 없으면 유지
+      return prev.map((selectedItem) =>
+        selectedItem.Seq === newItem.Seq ? { ...newItem } : selectedItem
+      );
+    });
+
     new Notify({
       title: '변경되었습니다.',
       position: 'x-center bottom',
@@ -356,11 +373,35 @@ const CreditCard: React.FC = () => {
 
   // 항목 선택
   const handleSelectItem = useCallback((item: any) => {
-    if (selectedList.includes(item.Seq)) {
-      setSelectedList((prev) => prev.filter((seq) => seq !== item.Seq));
+    const isExist = selectedList.some((selected) => selected.Seq === item.Seq);
+
+    if (isExist) {
+      setSelectedList((prev) => prev.filter((prevItem) => prevItem.Seq !== item.Seq));
     } else {
-      setSelectedList((prev) => [...prev, item.Seq]);
+      setSelectedList((prev) => [...prev, item]);
     }
+  }, [selectedList]);
+
+  // 임시저장
+  const handleTempSave = useCallback((e: any) => {
+    if (_.isEmpty(selectedList)) return new Notify({
+      status: 'error',
+      title: '1건 이상 선택해주세요.',
+      position: 'x-center bottom',
+      autotimeout: 2000
+    });
+
+  }, [selectedList]);
+
+  // 일괄적용
+  const handleBatchApply = useCallback((e: React.MouseEvent<HTMLIonFabButtonElement>) => {
+    if (_.isEmpty(selectedList)) return new Notify({
+      status: 'error',
+      title: '1건 이상 선택해주세요.',
+      position: 'x-center bottom',
+      autotimeout: 2000
+    });
+
   }, [selectedList]);
 
   return (
@@ -635,6 +676,36 @@ const CreditCard: React.FC = () => {
             }}
             onItemSelect={handleSelectItem}
             selectedList={selectedList} />
+          <IonFab
+            slot="fixed"
+            vertical="bottom"
+            horizontal="end"
+            style={{
+              marginBottom: 'calc(var(--ion-safe-area-bottom) + 96px)',
+              marginRight: '12px'
+            }}>
+            <IonFabButton>
+              <IonIcon icon={addOutline}></IonIcon>
+            </IonFabButton>
+            <IonFabList side="top" style={{ right: 0 }}>
+              <IonFabButton
+                color='medium'
+                onClick={handleTempSave}
+                style={{
+                  width: 'auto',
+                  minWidth: '100px',
+                  '--border-radius': '12px',
+                }}>임시저장({selectedList.length})</IonFabButton>
+              <IonFabButton
+                color='medium'
+                onClick={handleBatchApply}
+                style={{
+                  width: 'auto',
+                  minWidth: '100px',
+                  '--border-radius': '12px',
+                }}>일괄적용({selectedList.length})</IonFabButton>
+            </IonFabList>
+          </IonFab>
         </div>}
 
         <AnimatePresence mode="wait" initial={false}>
@@ -792,15 +863,13 @@ const CreditCard: React.FC = () => {
                 style={{ flex: 1 }}
                 initial={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
                 animate={shouldAnimateEdge ? { y: 0 } : undefined}
-                // exit={shouldAnimateEdge ? { y: 82 + safeAreaBottom } : undefined}
-                // exit={shouldAnimateEdge ? { y: 0 } : undefined}
                 transition={{ duration: shouldAnimateEdge ? 0.25 : 0 }}
               >
                 <IonButton
                   mode="md"
                   color="primary"
                   disabled={
-                    step === 0 ? _.isEmpty(selectedList) :
+                    step === 0 ? _.isEmpty(selectedList.filter(selected => selected.Sgtxt && selected.Dtext && selected.Mwskz)) :
                       step === 3 ? enabledStep3 :
                         false}
                   style={{
@@ -836,7 +905,7 @@ const CreditCard: React.FC = () => {
                       goStep(step + 1);
                     }}
                 >
-                  {step === 3 ? '결재 상신' : step === 0 ? `다음 단계(${selectedList.length})` : '다음 단계'}
+                  {step === 3 ? '결재 상신' : step === 0 ? `다음 단계(${selectedList.filter((selected: any) => selected.Sgtxt && selected.Dtext && selected.Mwskz).length})` : '다음 단계'}
                 </IonButton>
               </motion.div>
             )}
@@ -975,10 +1044,6 @@ const Item: React.FC<ItemProps> = ({
                   zIndex: '1'
                 }}
                   onClick={(e) => {
-                    if (!item.Sgtxt || !item.Dtext) {
-                      e.preventDefault();
-                      return;
-                    }
                     e.stopPropagation();
                     onItemSelect(item);
                   }} />
@@ -992,7 +1057,7 @@ const Item: React.FC<ItemProps> = ({
                     padding: '21px',
                     position: 'relative',
                     border: themeMode === 'light' ? 'none' : '1px solid var(--custom-border-color-100)',
-                    backgroundColor: selectedList.includes(item.Seq) ? 'rgba(var(--ion-color-primary-rgb), .1)' : ''
+                    backgroundColor: selectedList.some((s: any) => s.Seq === item.Seq) ? 'rgba(var(--ion-color-primary-rgb), .1)' : ''
                   }}
                 >
                   <span style={{
@@ -1005,8 +1070,7 @@ const Item: React.FC<ItemProps> = ({
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <IonCheckbox
-                        checked={selectedList.includes(item.Seq)}
-                        disabled={(!item.Sgtxt || !item.Dtext)}
+                        checked={selectedList.some((s: any) => s.Seq === item.Seq)}
                         mode='md'
                         style={{ pointerEvents: 'none' }}
                       />
@@ -1026,7 +1090,7 @@ const Item: React.FC<ItemProps> = ({
                           padding: '0 6px',
                           fontSize: '12px',
                           fontWeight: '500'
-                        }}>선택 가능</span>}
+                        }}>상신 가능</span>}
                     </div>
                     <span style={{
                       display: 'inline',
@@ -1127,7 +1191,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
     let attendeeEdit, paobjnrEdit;
     if (!sgtxtSearchHelp) {
       sgtxtSearchHelp = await getSearchHelp('ACCOUNT_CODE_T', 'IA102');
-      sgtxtSearchHelp = sgtxtSearchHelp.find((sh: any) => sh.Key === formRef.current.SgtxtNo);
+      sgtxtSearchHelp = sgtxtSearchHelp.find((sh: any) => sh.Add1 === formRef.current.Saknr);
     }
 
     attendeeEdit = sgtxtSearchHelp.Add22 === 'X';
@@ -1227,8 +1291,6 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
     if (formRef.current.Sgtxt) {
       checkExtraFieldUse();
     }
-
-    if (formRef.current.Mwskz === 'V0') formRef.current.Wmwst = '0';
 
     checkRequired();
     forceRender(prev => prev + 1);
@@ -1835,7 +1897,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
 interface HeaderProps {
   docHeader?: any;
   cardList?: any;
-  selectedList?: string[];
+  selectedList?: any[];
   onSave?: (item: any) => void;
 }
 
@@ -1876,9 +1938,11 @@ const Header: React.FC<HeaderProps> = ({
   // };
 
   const totalSum = useMemo(() => {
-    const cardMap = new Map<string, string>(cardList.map((card: any) => [card.Seq, card.TotalAmt]));
-    const totalSum = selectedList?.reduce((acc, currentSeq) => {
-      const amount = Number(cardMap.get(currentSeq)) || 0; // 해당 Seq가 없으면 0 더하기
+    const cardMap = new Map<string, string>(cardList
+      .filter((card: any) => card.Sgtxt && card.Dtext && card.Mwskz)
+      .map((card: any) => [card.Seq, card.TotalAmt]));
+    const totalSum = selectedList?.reduce((acc, current) => {
+      const amount = Number(cardMap.get(current.Seq)) || 0; // 해당 Seq가 없으면 0 더하기
       return acc + amount;
     }, 0);
     return totalSum?.toLocaleString("ko-KR") + ' KRW';
