@@ -70,7 +70,8 @@ const CreditCard: React.FC = () => {
   const batchFormRef = useRef<FormRef>({}); // 일괄적용 폼
 
   const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
-  const [cardList, setCardList] = useState(null); // 카드 사용 내역
+  const [cardList, setCardList] = useState<any[] | null>(null); // 카드 사용 내역
+  const [sgtxtSearchHelp, setSgtxtSearchHelp] = useState<any>(null); // 계정그룹 서치헬프 화면진입시 1번조회
 
   //* 날짜 관련
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -162,17 +163,29 @@ const CreditCard: React.FC = () => {
   useIonViewWillEnter(() => {
     const initApproval = async () => {
 
-      const [approval, companyCode] = await Promise.all([
+      const [approval, companyCode, sgtxtSearchHelp] = await Promise.all([
         getStart('IA102'),
         getSearchHelp('BUK'),
+        getSearchHelp('ACCOUNT_CODE_T', 'IA102')
       ]);
-      if (approval instanceof Error || companyCode instanceof Error) {
+      if (approval instanceof Error || companyCode instanceof Error || sgtxtSearchHelp instanceof Error) {
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
         return router.goBack();
       }
-      oriItem.current = approval.FLOWHD_DOCITEM[0];
-      approval.FLOWHD_DOCITEM = [];
+
       setApproval(approval);
+      const sgtxtMap = new Map(
+        sgtxtSearchHelp.map((item: any) => {
+          // 미리 계산 로직
+          const processedItem = {
+            PAOBJNR_EDIT: item.Add21 === 'PAOBJNR-R' || item.Add21 === 'PAOBJNR-O',
+            ATTENDEE_EDIT: item.Add22 === 'X'
+          };
+
+          return [item.Add1, processedItem];
+        })
+      );
+      setSgtxtSearchHelp(sgtxtMap);
 
       const defaultCompanyCode = companyCode[0].Key;
       const cardNo = await getCardNo('IA102', defaultCompanyCode, searchFilter.endDate, searchFilter.startDate);
@@ -282,9 +295,18 @@ const CreditCard: React.FC = () => {
       //   card.Amount = '0'
       //   card.Wmwst = '0';
       // });
+      cardList.forEach((card: any) => {
+        if (card.Saknr) {
+          const editable = sgtxtSearchHelp.get(card.Saknr);
+          card.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+          card.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+          checkExtraFieldUse(card);
+        }
+      });
       setCardList(cardList);
       setSelectedList([]);
     } catch (e) {
+      console.log(e);
       new Notify({
         status: 'error',
         title: '예상치 못한 오류가 발생했습니다.',
@@ -294,10 +316,9 @@ const CreditCard: React.FC = () => {
     } finally {
       setIsSearching(false);
     }
-  }, [searchFilter]);
+  }, [searchFilter, sgtxtSearchHelp]);
 
   //* 항목 추가
-  const oriItem = useRef(null); // 항목 템플릿
   const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
   const [isSaveEnabled, setIsSaveEnabled] = useState(false);
 
@@ -351,16 +372,35 @@ const CreditCard: React.FC = () => {
     });
 
     setCardList((prev: any) => {
-      return prev.map((oldItem: any) =>
-        oldItem.Seq === newItem.Seq ? { ...newItem } : oldItem
-      );
+      return prev.map((oldItem: any) => {
+        let targetItem = oldItem.Seq === newItem.Seq ? { ...newItem } : oldItem;
+
+        if (targetItem.Saknr) {
+          const editable = sgtxtSearchHelp.get(targetItem.Saknr);
+          if (editable) {
+            targetItem.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+            targetItem.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+            checkExtraFieldUse(targetItem);
+          };
+        }
+        return targetItem;
+      });
     });
 
     setSelectedList((prev) => {
-      // 만약 수정 중인 아이템이 선택된 목록에 있다면 업데이트, 없으면 유지
-      return prev.map((selectedItem) =>
-        selectedItem.Seq === newItem.Seq ? { ...newItem } : selectedItem
-      );
+      return prev.map((selectedItem) => {
+        let targetItem = selectedItem.Seq === newItem.Seq ? { ...newItem } : selectedItem;
+
+        if (targetItem.Saknr) {
+          const editable = sgtxtSearchHelp.get(targetItem.Saknr);
+          if (editable) {
+            targetItem.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+            targetItem.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+            checkExtraFieldUse(targetItem);
+          };
+        }
+        return targetItem;
+      });
     });
 
     new Notify({
@@ -370,7 +410,7 @@ const CreditCard: React.FC = () => {
     });
 
     goStep(0);
-  }, [step]);
+  }, [step, sgtxtSearchHelp]);
 
   // 항목 선택
   const handleSelectItem = useCallback((item: any) => {
@@ -395,7 +435,7 @@ const CreditCard: React.FC = () => {
   }, [selectedList]);
 
   // 일괄적용
-  const handleBatchApply = useCallback((e: React.MouseEvent<HTMLIonFabButtonElement>) => {
+  const openBatchDialog = useCallback((e: React.MouseEvent<HTMLIonFabButtonElement>) => {
     if (_.isEmpty(selectedList)) return new Notify({
       status: 'error',
       title: '1건 이상 선택해주세요.',
@@ -405,6 +445,98 @@ const CreditCard: React.FC = () => {
     batchFormRef.current = {};
     document.getElementById("batch-dialog-trigger")?.click();
   }, [selectedList]);
+
+  // 일괄적용
+  const handleBatchApply = useCallback(() => {
+    const batchData = batchFormRef.current;
+    if (!batchData) return false;
+
+    // 1. 유효한 값(빈값 제외)만 추출
+    const updates = Object.fromEntries(
+      Object.entries(batchData).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+    );
+
+    if (Object.keys(updates).length === 0) return false;
+
+    const selectedSeqSet = new Set(selectedList.map((item: any) => item.Seq));
+
+    setCardList((prev: any) =>
+      prev.map((card: any) => {
+        if (!selectedSeqSet.has(card.Seq)) {
+          return card;
+        }
+
+        const updatedCard = Object.assign({}, card, updates);
+
+        if (updatedCard.Saknr) {
+          const editable = sgtxtSearchHelp.get(updatedCard.Saknr);
+          if (editable) {
+            updatedCard.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+            updatedCard.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+            checkExtraFieldUse(updatedCard);
+          }
+        }
+
+        return updatedCard;
+      })
+    );
+
+    setSelectedList((prev: any) =>
+      prev.map((item: any) => {
+        if (!selectedSeqSet.has(item.Seq)) {
+          return item;
+        }
+        // 이미 선택된 애들이므로 Seq 체크 후 바로 덮어쓰기
+        const updatedCard = selectedSeqSet.has(item.Seq) ? Object.assign({}, item, updates) : item;
+
+        if (updatedCard.Saknr) {
+          const editable = sgtxtSearchHelp.get(updatedCard.Saknr);
+          if (editable) {
+            updatedCard.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+            updatedCard.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+            checkExtraFieldUse(updatedCard);
+          }
+        }
+
+        return updatedCard;
+      })
+    );
+
+    return true;
+  }, [selectedList, sgtxtSearchHelp]);
+
+  const handleFocus = (e: any) => {
+    document.querySelectorAll('.has-focus').forEach((el) => {
+      el.classList.remove('has-focus');
+    });
+  };
+
+  // 참석자, 수익성 값 초기화
+  const checkExtraFieldUse = useCallback((item: any) => {
+    if (!item.Saknr) return;
+    const editable = sgtxtSearchHelp.get(item.Saknr);
+
+    if (!editable.ATTENDEE_EDIT) {
+      item.CardListAttendeeList.results = [];
+    }
+    if (!editable.PAOBJNR_EDIT) {
+      item.RKE_KNDNR = '';
+      item.RKE_KNDNR_T = '';
+      item.RKE_VKORG = '';
+      item.RKE_VKORG_T = '';
+      item.RKE_VTWEG = '';
+      item.RKE_VTWEG_T = '';
+      item.RKE_SPART = '';
+      item.RKE_SPART_T = '';
+      item.RKE_WERKS = '';
+      item.RKE_WERKS_T = '';
+      item.RKE_ARTNR = '';
+      item.RKE_ARTNR_T = '';
+    }
+
+    item.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+    item.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+  }, [sgtxtSearchHelp]);
 
   return (
     <IonPage className='personal-expense'>
@@ -693,9 +825,8 @@ const CreditCard: React.FC = () => {
                   '--border-radius': '12px',
                 }}>임시저장({selectedList.length})</IonFabButton>
               <IonFabButton
-                // id='batch-dialog-trigger'
                 color='medium'
-                onClick={handleBatchApply}
+                onClick={openBatchDialog}
                 style={{
                   width: 'auto',
                   minWidth: '100px',
@@ -709,9 +840,7 @@ const CreditCard: React.FC = () => {
             dialogStyle={{
               width: '100%'
             }}
-            onDidDismiss={() => {
-            }}
-            title="일괄적용"
+            title={`일괄적용(${selectedList.length})`}
             body={
               <div style={{ padding: '0 8px 8px 8px' }}>
                 <CustomInput
@@ -719,8 +848,7 @@ const CreditCard: React.FC = () => {
                   valueTemplate="$Sgtxt"
                   helperTextTemplate="GL계정 : $Saknr | GL계정명 : $SaknrTx"
                   label="계정그룹명"
-                  required
-                  // onFocus={handleFocus}
+                  onFocus={handleFocus}
                   onValueHelp={() => getSearchHelp('ACCOUNT_CODE_T', 'IA102')}
                   onChange={(value) => {
                     batchFormRef.current.Sgtxt = value;
@@ -744,8 +872,7 @@ const CreditCard: React.FC = () => {
                   formRef={batchFormRef}
                   valueTemplate="$Dtext"
                   label="상세적요"
-                  required
-                  // onFocus={handleFocus}
+                  onFocus={handleFocus}
                   onChange={(value) => {
                     batchFormRef.current.Dtext = value;
                   }}
@@ -757,7 +884,7 @@ const CreditCard: React.FC = () => {
                   valueTemplate="$Kostl"
                   helperTextTemplate="코스트센터명 : $KostlTx"
                   label="코스트센터"
-                  // onFocus={handleFocus}
+                  onFocus={handleFocus}
                   onValueHelp={() => getSearchHelp('KOSTL', 'IA102')}
                   onChange={(value) => {
                     batchFormRef.current.Kostl = value;
@@ -775,7 +902,7 @@ const CreditCard: React.FC = () => {
                 />
               </div>
             }
-            // onSecondButtonClick={handleAddAttendee}
+            onSecondButtonClick={handleBatchApply}
             firstButtonText="닫기"
             secondButtonText='적용'
           />
@@ -788,8 +915,8 @@ const CreditCard: React.FC = () => {
           {/* 항목 추가 페이지 */}
           {step === 99 && <AddItem
             ref={itemRef}
-            approval={approval}
             docItem={docItem}
+            checkExtraFieldUse={checkExtraFieldUse}
             onSaveEnabledChange={enabled => {
               setIsSaveEnabled(enabled);
             }}
@@ -942,7 +1069,11 @@ const CreditCard: React.FC = () => {
                   mode="md"
                   color="primary"
                   disabled={
-                    step === 0 ? _.isEmpty(selectedList.filter(selected => selected.Sgtxt && selected.Dtext && selected.Mwskz)) :
+                    step === 0 ? _.isEmpty(selectedList.filter(selected =>
+                      selected.Sgtxt &&
+                      selected.Dtext &&
+                      selected.Mwskz &&
+                      (!selected.ATTENDEE_EDIT || !_.isEmpty(selected.CardListAttendeeList.results)))) :
                       step === 3 ? enabledStep3 :
                         false}
                   style={{
@@ -978,7 +1109,11 @@ const CreditCard: React.FC = () => {
                       goStep(step + 1);
                     }}
                 >
-                  {step === 3 ? '결재 상신' : step === 0 ? `다음 단계(${selectedList.filter((selected: any) => selected.Sgtxt && selected.Dtext && selected.Mwskz).length})` : '다음 단계'}
+                  {step === 3 ? '결재 상신' : step === 0 ? `다음 단계(${selectedList.filter((selected: any) =>
+                    selected.Sgtxt &&
+                    selected.Dtext &&
+                    selected.Mwskz &&
+                    (!selected.ATTENDEE_EDIT || !_.isEmpty(selected.CardListAttendeeList.results))).length})` : '다음 단계'}
                 </IonButton>
               </motion.div>
             )}
@@ -1060,13 +1195,11 @@ const Item: React.FC<ItemProps> = ({
   cardList,
   onItemClick,
   onItemSelect,
-  selectedList
+  selectedList,
 }) => {
   const themeMode = useAppStore(state => state.themeMode);
 
   return (
-    // <div style={{ overflow: 'auto', height: '100%', padding: '12px 21px 0 21px' }} ref={setScrollRef}>
-    // <div style={{ overflow: 'auto', height: '100%', padding: !_.isEmpty(cardList) ? '' : '12px 21px 0 21px' }} >
     <div style={{ overflow: 'auto', height: '100%' }} >
       {cardList === null
         ?
@@ -1100,7 +1233,6 @@ const Item: React.FC<ItemProps> = ({
           <NoData />
           :
           <Virtuoso
-            // style={{ height: '100%', padding: '0px 21px' }}
             data={cardList}
             totalCount={cardList.length}
             defaultItemHeight={208}
@@ -1148,22 +1280,32 @@ const Item: React.FC<ItemProps> = ({
                         style={{ pointerEvents: 'none' }}
                       />
                       No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
-                      {(!item.Sgtxt || !item.Dtext) ? <span style={{
-                        backgroundColor: '#ffe2ce',
-                        color: '#000',
-                        borderRadius: '4px',
-                        padding: '0 6px',
-                        fontSize: '12px',
-                        fontWeight: '500'
-                      }}>필수값 누락</span>
-                        : <span style={{
-                          backgroundColor: '#cdffba',
+                      {(!item.Sgtxt || !item.Dtext)
+                        ? <span style={{
+                          backgroundColor: '#ffe2ce',
                           color: '#000',
                           borderRadius: '4px',
                           padding: '0 6px',
                           fontSize: '12px',
                           fontWeight: '500'
-                        }}>상신 가능</span>}
+                        }}>필수값 누락</span>
+                        : (item.ATTENDEE_EDIT && _.isEmpty(item.CardListAttendeeList.results)) ?
+                          <span style={{
+                            backgroundColor: '#ffcede',
+                            color: '#000',
+                            borderRadius: '4px',
+                            padding: '0 6px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}>참석자 누락</span>
+                          : <span style={{
+                            backgroundColor: '#d6ffc5',
+                            color: '#000',
+                            borderRadius: '4px',
+                            padding: '0 6px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}>상신 가능</span>}
                     </div>
                     <span style={{
                       display: 'inline',
@@ -1237,14 +1379,14 @@ interface AddItemHandle {
 }
 
 interface AddItemProps {
-  approval?: any;
-  docItem?: any;
+  docItem: any;
+  checkExtraFieldUse: (item: any) => void;
   onSaveEnabledChange: (enabled: boolean) => void;
 }
 
 const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
-  approval,
   docItem,
+  checkExtraFieldUse,
   onSaveEnabledChange,
 }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1255,44 +1397,8 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   const [vatCodeRefreshKey, setVatCodeRefreshKey] = useState(0); // 수익성 리프레시 키
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
   const [errorList, setErrorList] = useState<any>(null); // 에러 목록
-  const [extraFieldUse, setExtraFieldUse] = useState<any>(null);
 
-  // 참석자, 수익성 사용여부 체크
-  const checkExtraFieldUse = useCallback(async (sgtxtSearchHelp?: any) => {
-    if (!formRef.current.Sgtxt) return;
 
-    let attendeeEdit, paobjnrEdit;
-    if (!sgtxtSearchHelp) {
-      sgtxtSearchHelp = await getSearchHelp('ACCOUNT_CODE_T', 'IA102');
-      sgtxtSearchHelp = sgtxtSearchHelp.find((sh: any) => sh.Add1 === formRef.current.Saknr);
-    }
-
-    attendeeEdit = sgtxtSearchHelp.Add22 === 'X';
-    paobjnrEdit = sgtxtSearchHelp.Add21 === 'PAOBJNR-R' || sgtxtSearchHelp.Add21 === 'PAOBJNR-O';
-
-    if (!attendeeEdit) {
-      formRef.current.CardListAttendeeList.results = [];
-    }
-    if (!paobjnrEdit) {
-      formRef.current.RKE_KNDNR = '';
-      formRef.current.RKE_KNDNR_T = '';
-      formRef.current.RKE_VKORG = '';
-      formRef.current.RKE_VKORG_T = '';
-      formRef.current.RKE_VTWEG = '';
-      formRef.current.RKE_VTWEG_T = '';
-      formRef.current.RKE_SPART = '';
-      formRef.current.RKE_SPART_T = '';
-      formRef.current.RKE_WERKS = '';
-      formRef.current.RKE_WERKS_T = '';
-      formRef.current.RKE_ARTNR = '';
-      formRef.current.RKE_ARTNR_T = '';
-    }
-
-    setExtraFieldUse({
-      ATTENDEE_EDIT: attendeeEdit,
-      PAOBJNR_EDIT: paobjnrEdit
-    });
-  }, [formRef]);
 
   // 참석자 추가 팝업 오픈
   const openAddAttendee = useCallback(() => {
@@ -1361,8 +1467,8 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   // docItem 변경 시 form 재할당
   useEffect(() => {
     formRef.current = { ...docItem };
-    if (formRef.current.Sgtxt) {
-      checkExtraFieldUse();
+    if (formRef.current.Saknr) {
+      checkExtraFieldUse(formRef.current);
     }
 
     checkRequired();
@@ -1372,8 +1478,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   const checkRequired = useCallback(() => {
     if (formRef.current.Sgtxt
       && formRef.current.Mwskz
-      && formRef.current.Dtext
-      && (!extraFieldUse?.ATTENDEE_EDIT || !_.isEmpty(formRef.current.CardListAttendeeList?.results))) {
+      && formRef.current.Dtext) {
       onSaveEnabledChange(true);
     } else {
       onSaveEnabledChange(false);
@@ -1404,7 +1509,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   // 유효성 체크
   useImperativeHandle(ref, () => ({
     validate() {
-      if (extraFieldUse.ATTENDEE_EDIT && _.isEmpty(formRef.current.CardListAttendeeList.results)) return {
+      if (formRef.current.ATTENDEE_EDIT && _.isEmpty(formRef.current.CardListAttendeeList.results)) return {
         result: false,
         message: '참석자를 추가해주세요.'
       };
@@ -1496,7 +1601,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
               formRef.current.SaknrTx = value.KeyName;
 
               checkRequired();
-              checkExtraFieldUse(value);
+              checkExtraFieldUse(formRef.current);
             }}
             readOnly
             clearInput
@@ -1699,12 +1804,12 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
         </div>
         <IonButton id='attendee-dialog-trigger' style={{ display: 'none' }} onClick={openAddAttendee} />
 
-        {formRef.current.Sgtxt && extraFieldUse === null && <div>
+        {formRef.current.Sgtxt && formRef.current.ATTENDEE_EDIT === undefined && <div>
           <LoadingIndicator style={{ margin: '0 auto', marginTop: '50px', marginBottom: '50px' }} />
         </div>}
 
         {/* 참석자 */}
-        {extraFieldUse?.ATTENDEE_EDIT &&
+        {formRef.current.ATTENDEE_EDIT &&
           <div style={{
             borderTop: '21px solid var(--custom-border-color-50)',
           }}>
@@ -1826,7 +1931,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
         />
 
         {/* 수익성 */}
-        {extraFieldUse?.PAOBJNR_EDIT && <div style={{
+        {formRef.current.PAOBJNR_EDIT && <div style={{
           borderTop: '21px solid var(--custom-border-color-50)',
         }}>
           <div style={{
@@ -2010,7 +2115,10 @@ const Header: React.FC<HeaderProps> = ({
 
   const totalSum = useMemo(() => {
     const cardMap = new Map<string, string>(cardList
-      .filter((card: any) => card.Sgtxt && card.Dtext && card.Mwskz)
+      .filter((card: any) => card.Sgtxt &&
+        card.Dtext &&
+        card.Mwskz &&
+        (!card.ATTENDEE_EDIT || !_.isEmpty(card.CardListAttendeeList.results)))
       .map((card: any) => [card.Seq, card.TotalAmt]));
     const totalSum = selectedList?.reduce((acc, current) => {
       const amount = Number(cardMap.get(current.Seq)) || 0; // 해당 Seq가 없으면 0 더하기
