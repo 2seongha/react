@@ -456,7 +456,7 @@ const CreditCard: React.FC = () => {
       Object.entries(batchData).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
     );
 
-    if (Object.keys(updates).length === 0) return false;
+    if (Object.keys(updates).length === 0) return true;
 
     const selectedSeqSet = new Set(selectedList.map((item: any) => item.Seq));
 
@@ -685,7 +685,7 @@ const CreditCard: React.FC = () => {
                   '--border-radius': '10px'
                 }}
                 onClick={handleSearch}
-                disabled={isSearching}>
+                disabled={isSearching || !searchFilter.companyCode}>
                 {isSearching ? <LoadingIndicator color='#fff' style={{ width: 24 }} /> : '조회'}
               </IonButton>
             </div>
