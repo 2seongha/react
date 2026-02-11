@@ -97,7 +97,7 @@ const Settings: React.FC = () => {
             <span>개인 알림</span>
             <IonToggle checked={pushAllow?.PERSONAL_ALLOW === 'Y' ? true : false} onIonChange={(e) => {
               const checked = e.target.checked;
-              patchPsuhAllow(checked ? 'Y' : 'N', pushAllow?.NOTICE_ALLOW || 'Y');
+              patchPsuhAllow(checked ? 'Y' : 'N', '');
               setPushAllow({
                 PERSONAL_ALLOW: checked ? 'Y' : 'N',
                 NOTICE_ALLOW: pushAllow?.NOTICE_ALLOW || 'Y',
@@ -108,7 +108,7 @@ const Settings: React.FC = () => {
             <span>공지 알림</span>
             <IonToggle checked={pushAllow?.NOTICE_ALLOW === 'Y' ? true : false} onIonChange={(e) => {
               const checked = e.target.checked;
-              patchPsuhAllow(pushAllow?.PERSONAL_ALLOW || 'Y', checked ? 'Y' : 'N');
+              patchPsuhAllow('', checked ? 'Y' : 'N');
               setPushAllow({
                 PERSONAL_ALLOW: pushAllow?.PERSONAL_ALLOW || 'Y',
                 NOTICE_ALLOW: checked ? 'Y' : 'N',

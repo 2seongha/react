@@ -145,8 +145,8 @@ export const initWebview = async (): Promise<boolean> => {
 };
 
 const _initWebview = async (): Promise<void> => {
-  const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
-  // const isWebView = 'N'; // 환경변수 가져오기
+  // const isWebView = import.meta.env.VITE_WEBVIEW; // 환경변수 가져오기
+  const isWebView = 'Y'; // 환경변수 가져오기
   console.log("----- webview Init Start -----", isWebView);
 
   if (isWebView == "N") {
@@ -263,19 +263,6 @@ const _initWebview = async (): Promise<void> => {
       setCorp(corp);
 
       await getUser(loginId);
-      // 개발용
-      // const setCorp = useAppStore.getState().setCorp;
-      // const getUser = useAppStore.getState().getUser;
-      // setCorp({
-      //   corpId: "IRIS_BRIGHT",
-      //   corpNm: "아이리스 브라이트",
-      //   system: {
-      //     apiEndpoint:
-      //       "https://ibr-iflow-api-mobile-dev.cfapps.ap12.hana.ondemand.com/v1/api",
-      //     apiKey: "",
-      //   },
-      // });
-      // await getUser("w_usl_@irisbr.com");
 
       if (userInfoResolver) {
         userInfoResolver(true);

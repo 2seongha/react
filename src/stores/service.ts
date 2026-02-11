@@ -277,7 +277,7 @@ export async function patchPsuhAllow(PERSONAL_ALLOW: string, NOTICE_ALLOW: strin
     const LOGIN_ID = user?.LOGIN_ID;
 
     const deviceToken = localStorage.getItem('deviceToken');
-    if (!deviceToken) throw new Error('No device token~~~!');
+    // if (!deviceToken) throw new Error('No device token~~~!');
 
     const api = createApiInstance();
     const payload = {
