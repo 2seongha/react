@@ -653,6 +653,7 @@ const CreditCard: React.FC = () => {
     hdFlowhd.ACTIVITY = 'ENTER';
     hdFlowhd.FIELD = 'ACCOUNT_CODE_T';
     hdFlowhd.GUBUN = 'I';
+    delete hdFlowhd.FILES;
 
     const payload = {
       BUKRS: user?.BUKRS,
@@ -662,7 +663,6 @@ const CreditCard: React.FC = () => {
       LOGINID: user?.LOGIN_ID,
       ORGEH: user?.ORGEH
     }
-
     const result = await getCardVatCode(payload);
     return result;
   }, [approval, blart])
@@ -716,7 +716,7 @@ const CreditCard: React.FC = () => {
           )}
         </>
       }
-        customEndButtons={step === 4 && animationFinished && result.Type !== 'S' && (
+        customEndButtons={step === 4 && animationFinished && result.TYPE !== 'S' && (
           <IonButton
             mode="md"
             fill="clear"
@@ -1346,7 +1346,7 @@ const CreditCard: React.FC = () => {
                     }
                   }
                 >
-                  {result.Type === 'S' ? '닫기' : '이전 단계'}
+                  {result.TYPE === 'S' ? '닫기' : '이전 단계'}
                 </IonButton>
               </motion.div>
             )}
@@ -2470,7 +2470,7 @@ const Attach: React.FC<AttachProps> = ({
           ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
           ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_NAME,
           FILE_DESCRIPTION: file.name,
-          FILE_EXTENTION: file.name.split('.').pop()?.toUpperCase(),
+          FILE_EXTENTION: file.name.split('.').pop()?.toUpperCase().substring(0, 3), // 3자리 까지만 저장됨..
           FILE_LEN: file.size,
           FILE_NAME: file.name,
           FILE_NO: FILE_NO,

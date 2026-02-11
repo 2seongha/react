@@ -140,7 +140,7 @@ const App: React.FC = () => {
           <Route path="/search" component={Search} exact />
           <Route path="/privacyPolicy" component={PrivacyPolicy} exact />
           <Route path="/termsOfUse" component={TermsOfUse} exact />
-          <Route path="/attach/:FileName/:AttachUrl" component={Attach} exact />
+          <Route path="/attach/:FileName/:AttachUrl?" component={Attach} exact />
           <Route path="/personalExpense" component={PersonalExpense} exact />
           <Route path="/creditCard" component={CreditCard} exact />
           <Redirect exact from="/" to="/app/home" />

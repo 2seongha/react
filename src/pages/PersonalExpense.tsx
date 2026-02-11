@@ -1686,7 +1686,7 @@ const Attach: React.FC<AttachProps> = ({
           ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
           ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_NAME,
           FILE_DESCRIPTION: file.name,
-          FILE_EXTENTION: file.name.split('.').pop(),
+          FILE_EXTENTION: file.name.split('.').pop()?.substring(0,3),
           FILE_LEN: file.size,
           FILE_NAME: file.name,
           FILE_NO: FILE_NO,
