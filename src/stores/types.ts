@@ -54,7 +54,7 @@ export interface UserModel {
   RANK_NAME?: string;
   // POSITIONN?: string;
   // POSITIONN_NAME?: string;
-  // KOSTL?: string;
+  KOSTL?: string;
   // KOSTL_NAME?: string;
   // LAND1?: string;
   MAIL?: string;

@@ -151,12 +151,28 @@ export async function getSearchHelp(ENTITYSET: string, FLOWCODE?: string, INPUT1
   }
 }
 
-export async function postStart(APPROVAL: any): Promise<any> {
+// 임직원 개인 경비 상신
+export async function postStartPersonalExpense(APPROVAL: any): Promise<any> {
   try {
     const api = createApiInstance();
     const payload = APPROVAL;
 
-    const res = await api.post(`/v1/api/start`, payload);
+    const res = await api.post(`/v1/api/start/personalExpense`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+// 법인카드 상신
+export async function postStartCreditCard(APPROVAL: any): Promise<any> {
+  try {
+    const api = createApiInstance();
+    const payload = APPROVAL;
+
+    const res = await api.post(`/v1/api/start/creditCard`, payload);
 
     return res.data;
   } catch (error: any) {
@@ -302,7 +318,7 @@ export async function getCardList(FLOWCODE?: string, BUKRS?: string, CARDNO?: st
     // const BUKRS = user?.BUKRS;
 
     const api = createApiInstance();
-    const res = await api.get(`/v1/api/cardList?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&FLOWCODE=${FLOWCODE ?? ''}&CARDNO=${CARDNO ?? ''}&&START_DATE=${START_DATE ?? ''}&END_DATE=${END_DATE ?? ''}`);
+    const res = await api.get(`/v1/api/cardList?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}&FLOWCODE=${FLOWCODE ?? ''}&CARDNO=${CARDNO ?? ''}&START_DATE=${START_DATE ?? ''}&END_DATE=${END_DATE ?? ''}`);
 
     return res.data;
   } catch (error: any) {
@@ -313,51 +329,42 @@ export async function getCardList(FLOWCODE?: string, BUKRS?: string, CARDNO?: st
 
 export async function getNotices(): Promise<NoticeModel[]> {
   try {
-    // Simulate API loading delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    const user = useAppStore.getState().user;
+    const LOGIN_ID = user?.LOGIN_ID;
+    const BUKRS = user?.BUKRS;
 
-    // Mock API call with realistic notice data
-    const mockNotices: NoticeModel[] = [
-      {
-        id: 'NOTICE_001',
-        title: 'iFlow 시스템 업데이트 안내 (v2.1.0)',
-        content: '새로운 기능이 추가되었습니다.\n\n1. 모바일 알림 개선\n2. 결재선 설정 기능 강화\n3. 파일 첨부 용량 확대 (50MB → 100MB)\n4. UI/UX 개선\n\n업데이트는 1월 15일 자동으로 적용됩니다.',
-        isNew: true
-      },
-      {
-        id: 'NOTICE_002',
-        title: '2024년 연차/휴가 신청 안내',
-        content: '2024년도 연차 및 각종 휴가 신청에 대한 안내사항입니다.\n\n- 연차 신청: 최소 3일 전 신청\n- 병가 신청: 진단서 첨부 필수\n- 경조사 휴가: 관련 서류 제출\n\n자세한 사항은 인사팀에 문의바랍니다.',
-        isNew: true
-      },
-      {
-        id: 'NOTICE_003',
-        title: '설날 연휴 업무 중단 안내',
-        content: '2024년 설날 연휴 기간 중 업무 중단을 안내드립니다.\n\n■ 휴무 기간: 2024.02.09(금) ~ 2024.02.12(월)\n■ 정상 업무: 2024.02.13(화) 09:00부터\n■ 응급상황 연락처: 02-XXXX-XXXX\n\n즐거운 설날 연휴 보내세요.',
-        isNew: false
-      },
-      {
-        id: 'NOTICE_004',
-        title: '보안 강화를 위한 비밀번호 정책 변경',
-        content: '정보보안 강화를 위해 비밀번호 정책이 변경됩니다.\n\n■ 시행일: 2024.01.20\n■ 주요 변경사항:\n- 최소 8자 이상 (기존 6자)\n- 특수문자 포함 필수\n- 90일마다 변경 권장\n\n시행일 이후 로그인 시 비밀번호 변경이 안내됩니다.',
-        isNew: false
-      },
-      {
-        id: 'NOTICE_005',
-        title: '직장 내 괴롭힘 신고센터 운영 안내',
-        content: '임직원 여러분의 건전한 직장 문화 조성을 위해 신고센터를 운영합니다.\n\n■ 신고 방법:\n- 온라인: company-report.co.kr\n- 전화: 02-XXXX-XXXX (24시간)\n- 이메일: report@company.com\n\n모든 신고는 익명으로 처리되며, 신고자 보호가 보장됩니다.',
-        isNew: false
-      },
-      {
-        id: 'NOTICE_006',
-        title: 'AWS 교육과정 수강생 모집',
-        content: 'AWS 클라우드 전문가 과정 수강생을 모집합니다.\n\n■ 교육 기간: 2024.02.01 ~ 2024.02.29\n■ 교육 시간: 매주 화,목 19:00-21:00\n■ 모집 인원: 20명\n■ 신청 마감: 2024.01.25\n\n수료 시 AWS 자격증 응시비용을 지원합니다.',
-        isNew: false
-      }
-    ];
+    const api = createApiInstance();
+    const res = await api.get(`/v1/api/notice?LOGIN_ID=${LOGIN_ID}&BUKRS=${BUKRS}`);
 
-    return mockNotices;
-    // set({ menuAreas: mockAreas });
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function getCardVatCode(APPROVAL: any): Promise<any> {
+  try {
+    const api = createApiInstance();
+    const payload = APPROVAL;
+
+    const res = await api.post(`/v1/api/card/vatCode`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    console.error(error);
+    return error;
+  }
+}
+
+export async function postCardSave(APPROVAL: any): Promise<any> {
+  try {
+    const api = createApiInstance();
+    const payload = APPROVAL;
+
+    const res = await api.post(`/v1/api/card/save`, payload);
+
+    return res.data;
   } catch (error: any) {
     console.error(error);
     return error;

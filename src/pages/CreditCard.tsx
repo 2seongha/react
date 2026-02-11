@@ -27,9 +27,9 @@ import { add, addOutline, calendarClear, chevronUpCircle } from 'ionicons/icons'
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon, creditcardGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { deleteAttach, getCardList, getCardNo, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStart } from '../stores/service';
+import { deleteAttach, getCardList, getCardNo, getCardVatCode, getSearchHelp, getStart, postAttach, postCardSave, postExtraFieldUse, postStartCreditCard } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
-import _ from 'lodash';
+import _, { first } from 'lodash';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import LoadingIndicator from '../components/LoadingIndicator';
 import DatePickerModal from '../components/DatePicker';
@@ -52,6 +52,7 @@ const CreditCard: React.FC = () => {
   const [step, setStep] = useState(0);
   const [enabledStep3, setEnabledStep3] = useState(true);
   const [approval, setApproval] = useState<any>(null);
+  const [blart, setBlart] = useState<string>('');
   const [result, setResult] = useState<any>(null);
   const [animationFinished, setAnimationFinished] = useState<any>(null); // 결과 애니메이션 종료
   const ignorePopRef = useRef(false);
@@ -72,6 +73,7 @@ const CreditCard: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
   const [cardList, setCardList] = useState<any[] | null>(null); // 카드 사용 내역
   const [sgtxtSearchHelp, setSgtxtSearchHelp] = useState<any>(null); // 계정그룹 서치헬프 화면진입시 1번조회
+  const user = useAppStore(state => state.user);
 
   //* 날짜 관련
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -122,10 +124,7 @@ const CreditCard: React.FC = () => {
         title = '상세 정보';
         break;
     }
-    return <span
-    >
-      {title}
-    </span>
+    return <span>{title}</span>
   }, [step]);
 
   const goStep = useCallback((newStep: number) => {
@@ -163,16 +162,17 @@ const CreditCard: React.FC = () => {
   useIonViewWillEnter(() => {
     const initApproval = async () => {
 
-      const [approval, companyCode, sgtxtSearchHelp] = await Promise.all([
+      const [approval, companyCode, blart, sgtxtSearchHelp] = await Promise.all([
         getStart('IA102'),
         getSearchHelp('BUK'),
+        getSearchHelp('BLA', 'IA102'),
         getSearchHelp('ACCOUNT_CODE_T', 'IA102')
       ]);
-      if (approval instanceof Error || companyCode instanceof Error || sgtxtSearchHelp instanceof Error) {
+      if (approval instanceof Error || companyCode instanceof Error || blart instanceof Error || sgtxtSearchHelp instanceof Error) {
         webviewToast('예상치 못한 오류가 발생했습니다. 잠시 후 시도해주세요.');
         return router.goBack();
       }
-
+      setBlart(blart[0].Key);
       setApproval(approval);
       const sgtxtMap = new Map(
         sgtxtSearchHelp.map((item: any) => {
@@ -368,7 +368,7 @@ const CreditCard: React.FC = () => {
     }
 
     newItem.CardListAttendeeList.results.forEach((attendee: any, idx: number) => {
-      attendee.KEY_CNT = String(idx + 1);
+      attendee.ITEMSEQ = String(idx + 1);
     });
 
     setCardList((prev: any) => {
@@ -424,7 +424,7 @@ const CreditCard: React.FC = () => {
   }, [selectedList]);
 
   // 임시저장
-  const handleTempSave = useCallback((e: any) => {
+  const handleTempSave = useCallback(async (e: any) => {
     if (_.isEmpty(selectedList)) return new Notify({
       status: 'error',
       title: '1건 이상 선택해주세요.',
@@ -432,7 +432,47 @@ const CreditCard: React.FC = () => {
       autotimeout: 2000
     });
 
-  }, [selectedList]);
+    const cloneApproval = { ...approval };
+
+    const flowhdSubdata = selectedList;
+    flowhdSubdata.forEach(data => {
+      data.Blart = blart;
+      data.Bldat = data.ApprDate;
+      delete data.ATTENDEE_EDIT;
+      delete data.PAOBJNR_EDIT;
+    })
+
+    cloneApproval.FLOWHD_SUBDATA = flowhdSubdata;
+    const pickProps = [
+      'BUKRS',
+      'FLOWCNT',
+      'FLOWCODE',
+      'FLOWHD_SUBDATA',
+      'FLOWIT',
+      'FLOWIT_NO',
+      'FLOWNO',
+      'LOGIN_ID',
+      'WFIT_SUB_TYPE',
+      'WFIT_TYPE',
+      'WFSTAT',
+    ]
+
+    const hdFlowhd = _.pick(cloneApproval, pickProps);
+
+    const payload = {
+      HD_FLOWHD: [hdFlowhd],
+      LOGINID: user?.LOGIN_ID,
+      ZCHECK: 'S',
+    }
+
+    const result = await postCardSave(payload);
+    return new Notify({
+      status: 'success',
+      title: '저장되었습니다.',
+      position: 'x-center bottom',
+      autotimeout: 2000
+    });;
+  }, [approval, selectedList]);
 
   // 일괄적용
   const openBatchDialog = useCallback((e: React.MouseEvent<HTMLIonFabButtonElement>) => {
@@ -448,60 +488,87 @@ const CreditCard: React.FC = () => {
 
   // 일괄적용
   const handleBatchApply = useCallback(() => {
-    const batchData = batchFormRef.current;
-    if (!batchData) return false;
+    const apply = async () => {
 
-    // 1. 유효한 값(빈값 제외)만 추출
-    const updates = Object.fromEntries(
-      Object.entries(batchData).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
-    );
+      const batchData = batchFormRef.current;
+      if (!batchData) return false;
 
-    if (Object.keys(updates).length === 0) return true;
+      // 1. 유효한 값(빈값 제외)만 추출
+      const updates = Object.fromEntries(
+        Object.entries(batchData).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+      );
 
-    const selectedSeqSet = new Set(selectedList.map((item: any) => item.Seq));
+      if (Object.keys(updates).length === 0) return true;
 
-    setCardList((prev: any) =>
-      prev.map((card: any) => {
-        if (!selectedSeqSet.has(card.Seq)) {
-          return card;
-        }
+      const selectedSeqSet = new Set(selectedList.map((item: any) => item.Seq));
 
-        const updatedCard = Object.assign({}, card, updates);
+      if (updates.Saknr) {
+        const payloadItem = Object.assign({}, cardList?.[0], updates);
+        const vatCode = await initVatCode(payloadItem);
+        updates.Mwskz = vatCode;
+      }
 
-        if (updatedCard.Saknr) {
-          const editable = sgtxtSearchHelp.get(updatedCard.Saknr);
-          if (editable) {
-            updatedCard.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
-            updatedCard.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
-            checkExtraFieldUse(updatedCard);
+      setCardList((prev: any) =>
+        prev.map((card: any) => {
+          if (!selectedSeqSet.has(card.Seq)) {
+            return card;
           }
-        }
 
-        return updatedCard;
-      })
-    );
+          const updatedCard = Object.assign({}, card, updates);
 
-    setSelectedList((prev: any) =>
-      prev.map((item: any) => {
-        if (!selectedSeqSet.has(item.Seq)) {
-          return item;
-        }
-        // 이미 선택된 애들이므로 Seq 체크 후 바로 덮어쓰기
-        const updatedCard = selectedSeqSet.has(item.Seq) ? Object.assign({}, item, updates) : item;
-
-        if (updatedCard.Saknr) {
-          const editable = sgtxtSearchHelp.get(updatedCard.Saknr);
-          if (editable) {
-            updatedCard.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
-            updatedCard.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
-            checkExtraFieldUse(updatedCard);
+          if (updatedCard.Saknr) {
+            const editable = sgtxtSearchHelp.get(updatedCard.Saknr);
+            if (editable) {
+              updatedCard.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+              updatedCard.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+              checkExtraFieldUse(updatedCard);
+            }
           }
-        }
 
-        return updatedCard;
-      })
-    );
+          if (updatedCard.Mwskz === 'V0') {
+            updatedCard.Amount = '0';
+            updatedCard.Wmwst = '0';
+          } else {
+            updatedCard.Amount = String(Math.floor(Number(updatedCard.TotalAmt) / 1.1));
+            updatedCard.Wmwst = String(Number(updatedCard.TotalAmt) - Number(updatedCard.Amount));
+          }
 
+          return updatedCard;
+        })
+      );
+
+
+      setSelectedList((prev: any) =>
+        prev.map((item: any, index: number) => {
+          if (!selectedSeqSet.has(item.Seq)) {
+            return item;
+          }
+          // 이미 선택된 애들이므로 Seq 체크 후 바로 덮어쓰기
+          const updatedCard = selectedSeqSet.has(item.Seq) ? Object.assign({}, item, updates) : item;
+
+          if (updatedCard.Saknr) {
+            const editable = sgtxtSearchHelp.get(updatedCard.Saknr);
+            if (editable) {
+              updatedCard.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
+              updatedCard.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
+              checkExtraFieldUse(updatedCard);
+
+            }
+          }
+
+          if (updatedCard.Mwskz === 'V0') {
+            updatedCard.Amount = '0';
+            updatedCard.Wmwst = '0';
+          } else {
+            updatedCard.Amount = String(Math.floor(Number(updatedCard.TotalAmt) / 1.1));
+            updatedCard.Wmwst = String(Number(updatedCard.TotalAmt) - Number(updatedCard.Amount));
+          }
+
+          return updatedCard;
+        })
+      );
+    }
+    apply();
     return true;
   }, [selectedList, sgtxtSearchHelp]);
 
@@ -537,6 +604,68 @@ const CreditCard: React.FC = () => {
     item.ATTENDEE_EDIT = editable.ATTENDEE_EDIT;
     item.PAOBJNR_EDIT = editable.PAOBJNR_EDIT;
   }, [sgtxtSearchHelp]);
+
+  const initVatCode = useCallback(async (item: any) => {
+    const cloneApproval = { ...approval };
+
+    const flowhdSubdata = [item];
+    flowhdSubdata.forEach(data => {
+      data.Blart = blart;
+      data.Bldat = data.ApprDate;
+      delete data.ATTENDEE_EDIT;
+      delete data.PAOBJNR_EDIT;
+    })
+
+    cloneApproval.FLOWHD_SUBDATA = flowhdSubdata;
+    const pickProps = [
+      'ACTIVITY',
+      'BUKRS',
+      'CREATOR_LOGIN_ID',
+      'CREATOR_NAME',
+      'CREATOR_ORGEH',
+      'CREATOR_ORGTX',
+      'FLOWCNT',
+      'FLOWCODE',
+      'FLOWHD_APPRLINE',
+      'FLOWHD_MESSAGE',
+      'FLOWHD_SUBDATA',
+      'FLOWIT',
+      'FLOWIT_NO',
+      'FLOWNO',
+      'FLOW_TYPE',
+      'GUID',
+      'LOGIN_ID',
+      'LTEXT',
+      'RUSH',
+      'TITLE',
+      'WFIT_SUB_TYPE',
+      'WFIT_TYPE',
+      'WFSTAT',
+      'FILES',
+    ]
+
+    const hdFlowhd = _.pick(cloneApproval, pickProps);
+    hdFlowhd.CREATOR_LOGIN_ID = user?.LOGIN_ID;
+    hdFlowhd.CREATOR_NAME = user?.NAME;
+    hdFlowhd.CREATOR_ORGEH = user?.ORGEH;
+    hdFlowhd.CREATOR_ORGTX = user?.ORGTX;
+    hdFlowhd.FLOW_TYPE = 'S';
+    hdFlowhd.ACTIVITY = 'ENTER';
+    hdFlowhd.FIELD = 'ACCOUNT_CODE_T';
+    hdFlowhd.GUBUN = 'I';
+
+    const payload = {
+      BUKRS: user?.BUKRS,
+      HD_FLOWHD: [hdFlowhd],
+      HD_MESSAGE: [],
+      KOSTL: user?.KOSTL,
+      LOGINID: user?.LOGIN_ID,
+      ORGEH: user?.ORGEH
+    }
+
+    const result = await getCardVatCode(payload);
+    return result;
+  }, [approval, blart])
 
   return (
     <IonPage className='personal-expense'>
@@ -760,8 +889,7 @@ const CreditCard: React.FC = () => {
             locale="ko-KR"
           />
         </IonPopover>
-      </>
-      }
+      </>}
       < IonContent
         fullscreen
         scrollX={false}
@@ -809,7 +937,7 @@ const CreditCard: React.FC = () => {
             vertical="bottom"
             horizontal="end"
             style={{
-              marginBottom: 'calc(var(--ion-safe-area-bottom) + 82px)',
+              marginBottom: 'calc(var(--ion-safe-area-bottom) + 76px)',
               marginRight: '12px'
             }}>
             <IonFabButton>
@@ -920,6 +1048,7 @@ const CreditCard: React.FC = () => {
             onSaveEnabledChange={enabled => {
               setIsSaveEnabled(enabled);
             }}
+            initVatCode={initVatCode}
           />}
 
           {/* 헤더 페이지 */}
@@ -1087,25 +1216,73 @@ const CreditCard: React.FC = () => {
                       webviewHaptic('mediumImpact');
                       goStep(step + 1);
                       animationRef.current = true;
-                      let result = await postStart(approval);
+                      const cloneApproval = { ...approval };
+
+                      const flowhdSubdata = [...selectedList];
+                      flowhdSubdata.forEach(data => {
+                        data.Blart = blart;
+                        data.Bldat = data.ApprDate;
+                        delete data.ATTENDEE_EDIT;
+                        delete data.PAOBJNR_EDIT;
+                      })
+
+                      cloneApproval.FLOWHD_SUBDATA = flowhdSubdata;
+                      const pickProps = [
+                        'ACTIVITY',
+                        'BUKRS',
+                        'CREATOR_LOGIN_ID',
+                        'CREATOR_NAME',
+                        'CREATOR_ORGEH',
+                        'CREATOR_ORGTX',
+                        'FLOWCNT',
+                        'FLOWCODE',
+                        'FLOWHD_APPRLINE',
+                        'FLOWHD_ATTACH',
+                        'FLOWHD_MESSAGE',
+                        'FLOWHD_SUBDATA',
+                        'FLOWIT',
+                        'FLOWIT_NO',
+                        'FLOWNO',
+                        'FLOW_TYPE',
+                        'GUID',
+                        'LOGIN_ID',
+                        'LTEXT',
+                        'RUSH',
+                        'TITLE',
+                        'WFIT_SUB_TYPE',
+                        'WFIT_TYPE',
+                        'WFSTAT',
+                        'FILES',
+                      ]
+
+                      const hdFlowhd = _.pick(cloneApproval, pickProps);
+                      hdFlowhd.CREATOR_LOGIN_ID = user?.LOGIN_ID;
+                      hdFlowhd.CREATOR_NAME = user?.NAME;
+                      hdFlowhd.CREATOR_ORGEH = user?.ORGEH;
+                      hdFlowhd.CREATOR_ORGTX = user?.ORGTX;
+                      hdFlowhd.FLOW_TYPE = 'S';
+
+                      const payload = {
+                        BUKRS: user?.BUKRS,
+                        HD_FLOWHD: [hdFlowhd],
+                        HD_MESSAGE: [],
+                        KOSTL: user?.KOSTL,
+                        LOGINID: user?.LOGIN_ID,
+                        ORGEH: user?.ORGEH
+                      }
+
+                      let result = await postStartCreditCard(payload);
                       if (result instanceof Error) {
                         result = {
-                          Type: 'E',
-                          Message: '예상치 못한 오류가 발생했습니다.'
+                          TYPE: 'E',
+                          MESSAGE: '예상치 못한 오류가 발생했습니다.'
                         }
                       }
                       setResult(result);
-                      if (result?.Type === 'S') successRef.current = true;
+                      if (result?.TYPE === 'S') successRef.current = true;
                     }
                     : () => {
                       webviewHaptic('mediumImpact');
-                      let totalWRBTR = 0;
-                      approval.FLOWHD_DOCITEM.forEach((item: any) => {
-                        totalWRBTR += Number(item.WRBTR);
-                      });
-
-                      approval.FLOWHD_DOCHD.SUM_WRBTR = totalWRBTR.toString();
-                      approval.FLOWHD_DOCHD.SUM_DMBTR = totalWRBTR.toString();
                       goStep(step + 1);
                     }}
                 >
@@ -1117,7 +1294,6 @@ const CreditCard: React.FC = () => {
                 </IonButton>
               </motion.div>
             )}
-
             {step === 99 && (
               <motion.div key="step99" {...buttonMotion} style={{ flex: 1 }}>
                 <IonButton
@@ -1156,7 +1332,7 @@ const CreditCard: React.FC = () => {
                     fontSize: "18px",
                     fontWeight: "600",
                   }}
-                  onClick={result.Type === 'S'
+                  onClick={result.TYPE === 'S'
                     ? () => {
                       webviewHaptic('mediumImpact');
                       isCloseButtonRef.current = true;
@@ -1382,12 +1558,14 @@ interface AddItemProps {
   docItem: any;
   checkExtraFieldUse: (item: any) => void;
   onSaveEnabledChange: (enabled: boolean) => void;
+  initVatCode: (item: any) => void;
 }
 
 const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   docItem,
   checkExtraFieldUse,
   onSaveEnabledChange,
+  initVatCode,
 }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<FormRef>({});
@@ -1398,30 +1576,29 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
   const [attendeeType, setAttendeeType] = useState('A'); // 참석자 구분
   const [errorList, setErrorList] = useState<any>(null); // 에러 목록
 
-
-
   // 참석자 추가 팝업 오픈
   const openAddAttendee = useCallback(() => {
     setErrorList(null);
     setAttendeeType('A');
     const cloneItem = {
+      "ATTENDEE": "",
+      "BELNR": "",
+      "BUKRS": "",
+      "CNT": "",
+      "FLOWCNT": "",
       "FLOWCODE": "",
       "FLOWNO": "",
-      "FLOWCNT": "",
-      "KEY_NUM": "",
-      "KEY_CNT": "",
+      "GJAHR": "",
       "GUBUN": "",
       "GUBUN_TX": "",
-      "ATTENDEE": "",
+      "INSIDE": true,
+      "ITEMSEQ": "1",
+      "KEY_NUM": "",
       "LOGIN_ID": "",
       "ORGEH": "",
       "ORGTX": "",
+      "ORGTXEDIT": false,
       "PURPOSE": "",
-      "BUKRS": "",
-      "BELNR": "",
-      "GJAHR": "",
-      "SEQNR": "1",
-      "ITEMNO": "1"
     }
     cloneItem.GUBUN = 'A';
     cloneItem.GUBUN_TX = '내부';
@@ -1594,12 +1771,23 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
               }
               checkRequired();
             }}
-            onChangeValueHelp={(value) => {
+            onChangeValueHelp={async (value) => {
               formRef.current.SgtxtNo = value.Key;
               formRef.current.Sgtxt = value.Name;
               formRef.current.Saknr = value.Add1;
               formRef.current.SaknrTx = value.KeyName;
 
+              const vatCode = await initVatCode(formRef.current);
+              formRef.current.Mwskz = vatCode;
+              if (formRef.current.Mwskz === 'V0') {
+                formRef.current.Amount = '0';
+                formRef.current.Wmwst = '0';
+              } else {
+                formRef.current.Amount = String(Math.floor(Number(formRef.current.TotalAmt) / 1.1));
+                formRef.current.Wmwst = String(Number(formRef.current.TotalAmt) - Number(formRef.current.Amount));
+              }
+
+              setVatCodeRefreshKey(prev => prev + 1);
               checkRequired();
               checkExtraFieldUse(formRef.current);
             }}
@@ -1888,7 +2076,9 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
                     'ORGTX': '',
                     'PURPOSE': '',
                     'GUBUN': e.target.value,
-                    'GUBUN_TX': e.target.value === 'A' ? '내부' : '외부'
+                    'GUBUN_TX': e.target.value === 'A' ? '내부' : '외부',
+                    'INSIDE': e.target.value === 'A',
+                    'ORGTXEDIT': e.target.value !== 'A',
                   });
                   setAttendeeType(e.target.value);
                 }}>
@@ -2280,7 +2470,7 @@ const Attach: React.FC<AttachProps> = ({
           ATTACH_ERDAT: dayjs().format('YYYY.MM.DD'),
           ATTACH_NAME: approval.FLOWHD_DOCHD.CREATOR_NAME,
           FILE_DESCRIPTION: file.name,
-          FILE_EXTENTION: file.name.split('.').pop(),
+          FILE_EXTENTION: file.name.split('.').pop()?.toUpperCase(),
           FILE_LEN: file.size,
           FILE_NAME: file.name,
           FILE_NO: FILE_NO,
@@ -2529,7 +2719,7 @@ const Result: React.FC<ResultProps> = ({
       }}
     >
       <AnimatedIcon
-        status={res?.Type}
+        status={res?.TYPE}
         onAnimationComplete={() => {
           webviewHaptic("mediumImpact");
           onAnimationFinished?.(true);
@@ -2539,7 +2729,7 @@ const Result: React.FC<ResultProps> = ({
       />
 
       <span style={{ fontSize: '19px', fontWeight: '600' }}>
-        {'임직원개인경비 상신을'}
+        {'법인카드 상신을'}
       </span>
 
       <span style={{ fontSize: '19px', fontWeight: '600' }}>
@@ -2547,7 +2737,7 @@ const Result: React.FC<ResultProps> = ({
           style={{
             color:
               textAnimation && res
-                ? res?.Type === 'E'
+                ? res?.TYPE === 'E'
                   ? 'var(--red)'
                   : 'var(--ion-color-primary)'
                 : 'inherit'
@@ -2555,7 +2745,7 @@ const Result: React.FC<ResultProps> = ({
           animation={textAnimation}
           words={[
             textAnimation && res
-              ? res?.Type === 'E'
+              ? res?.TYPE === 'E'
                 ? '실패'
                 : '성공'
               : '진행'
@@ -2590,15 +2780,15 @@ const Result: React.FC<ResultProps> = ({
                 bottom: 0,
                 height: '2px', // 최대 border 두께
                 background: `linear-gradient(to right, transparent,
-                 ${res?.Type === 'E' ? '#af53f641' : '#00bc5b41'} 25%,
-                 ${res?.Type === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%,
-                 ${res?.Type === 'E' ? '#af53f641' : '#00bc5b41'} 75%,
+                 ${res?.TYPE === 'E' ? '#af53f641' : '#00bc5b41'} 25%,
+                 ${res?.TYPE === 'E' ? 'var(--red)' : 'var(--ion-color-primary)'} 50%,
+                 ${res?.TYPE === 'E' ? '#af53f641' : '#00bc5b41'} 75%,
                   transparent)`,
                 pointerEvents: 'none',
                 marginBottom: '12px'
               }}
             />
-            <span style={{ fontSize: '14px', fontWeight: '500' }}>{res?.Message}</span>
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>{res?.MESSAGE}</span>
           </motion.div>
         )}
       </AnimatePresence>

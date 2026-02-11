@@ -18,7 +18,7 @@ import { add, addOutline } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
-import { deleteAttach, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStart } from '../stores/service';
+import { deleteAttach, getSearchHelp, getStart, postAttach, postExtraFieldUse, postStartPersonalExpense } from '../stores/service';
 import { webviewHaptic, webviewToast } from '../webview';
 import _ from 'lodash';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
@@ -594,7 +594,7 @@ const PersonalExpense: React.FC = () => {
                       webviewHaptic('mediumImpact');
                       goStep(step + 1);
                       animationRef.current = true;
-                      let result = await postStart(approval);
+                      let result = await postStartPersonalExpense(approval);
                       if (result instanceof Error) {
                         result = {
                           Type: 'E',
@@ -862,7 +862,7 @@ const AddItem = forwardRef<AddItemHandle, AddItemProps>(({
     cloneApproval.FIELD = 'ACCOUNT_CODE_T';
     cloneApproval.GUBUN = 'I';
     const res = await postExtraFieldUse(cloneApproval);
-
+    
     if (clear) {
       if (!res.ATTENDEE_EDIT) {
         docItem.DOCITEM_ATTENDEELIST = [];

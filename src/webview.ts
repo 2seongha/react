@@ -138,7 +138,7 @@ export const initWebview = async (): Promise<boolean> => {
   if (deviceToken) {
     postFcmToken([], [deviceToken], localStorage.getItem('deviceInfo') || '');
     const getPushAllow = useAppStore.getState().getPushAllow;
-    getPushAllow(deviceToken);
+    getPushAllow();
   }
 
   return true;
@@ -163,7 +163,7 @@ const _initWebview = async (): Promise<void> => {
         apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
     });
-    await getUser("ITK00013");
+    await getUser("ITK00014");
     // 웹뷰가 아닌 경우 바로 완료 처리
     if (paddingResolver) {
       paddingResolver(true);

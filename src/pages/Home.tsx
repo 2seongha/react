@@ -39,10 +39,12 @@ const Home: React.FC = () => {
   const setSummaryForceRefresh = useAppStore(state => state.setSummaryForceRefresh);
 
   const getAreas = useAppStore(state => state.getAreas);
+  const getNotices = useAppStore(state => state.getNotices);
 
   useIonViewWillEnter(() => {
     setSummaryForceRefresh(true);
     getAreas('');
+    getNotices();
   });
 
   useEffect(() => {
@@ -112,9 +114,11 @@ export default Home;
 
 
 const NoticeCard: React.FC = () => {
+  const router = useIonRouter();
+
   return (
     <IonCard button className='home-card' onClick={() => {
-
+      router.push('/notice', 'forward');
     }}>
       <div className='notice-card-content'>
         <div className='notice-card-badge'>
