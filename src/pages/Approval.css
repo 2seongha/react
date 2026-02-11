@@ -24,19 +24,19 @@
   padding: 8px 20px;
 }
 
-.approval .select-all-button {
+.select-all-button {
   --min-height: 28px;
   --border-radius: 8px;
   height: 28px;
   /* flex: 0.; */
 }
 
-.approval .select-all-button>ion-checkbox {
+.select-all-button>ion-checkbox {
   flex: 0;
   margin-right: 8px;
 }
 
-.approval .select-all-button>span {
+.select-all-button>span {
   font-size: 12px;
 }
 

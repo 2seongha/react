@@ -23,7 +23,7 @@ import {
 } from '@ionic/react';
 import AppBar from '../components/AppBar';
 import "./CreditCard.css";
-import { add, addOutline, calendarClear, chevronUpCircle } from 'ionicons/icons';
+import { add, addOutline, calendarClear, chevronCollapseOutline, chevronExpandOutline, chevronUpCircle } from 'ionicons/icons';
 import CachedImage from '../components/CachedImage';
 import { banknotesGlassIcon, creditcardGlassIcon } from '../assets/images';
 import SearchHelpModal from '../components/SearchHelpModal';
@@ -69,11 +69,17 @@ const CreditCard: React.FC = () => {
   const shouldAnimateEdge = (step === 0) || (prevStepRef.current === 99 && step === 0);
   const [selectedList, setSelectedList] = useState<any[]>([]); // 선택된 리스트
   const batchFormRef = useRef<FormRef>({}); // 일괄적용 폼
+  const [headerExpand, setHeaderExpand] = useState<boolean>(true); // 첫 화면 헤더 접기/펼치기
 
   const [isSearching, setIsSearching] = useState(false); // 조회 중인지 버튼 제어
   const [cardList, setCardList] = useState<any[] | null>(null); // 카드 사용 내역
   const [sgtxtSearchHelp, setSgtxtSearchHelp] = useState<any>(null); // 계정그룹 서치헬프 화면진입시 1번조회
   const user = useAppStore(state => state.user);
+  const isAllSelected = useMemo(() => {
+    if (!cardList || _.isEmpty(cardList)) return false;
+    const selectedSeqSet = new Set(selectedList.map((item) => item.Seq));
+    return cardList.every((item) => selectedSeqSet.has(item.Seq));
+  }, [cardList, selectedList]);
 
   //* 날짜 관련
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -109,7 +115,7 @@ const CreditCard: React.FC = () => {
     let title;
     switch (step) {
       case 0:
-        title = '법인카드';
+        title = `법인카드 (${cardList?.length ?? 0})`;
         break;
       case 1:
         title = '전표 헤더';
@@ -125,7 +131,7 @@ const CreditCard: React.FC = () => {
         break;
     }
     return <span>{title}</span>
-  }, [step]);
+  }, [step, cardList]);
 
   const goStep = useCallback((newStep: number) => {
     prevStepRef.current = currStepRef.current;
@@ -321,20 +327,6 @@ const CreditCard: React.FC = () => {
   //* 항목 추가
   const [docItem, setDocItem] = useState(null); // 항목 추가 바인딩
   const [isSaveEnabled, setIsSaveEnabled] = useState(false);
-
-  // const reOrderItemNo = useCallback((list: any) => {
-  //   return list.map((itm: any, i: number) => {
-  //     itm.CardListAttendeeList.results.forEach((attendee: any, idx: number) => {
-  //       attendee.ITEMNO = String(i + 1);
-  //       attendee.KEY_CNT = String(idx + 1);
-  //     });
-  //     return {
-  //       ...itm,
-  //       CNT: String(i + 1),
-  //       ITEMNO: String(i + 1),
-  //     };
-  //   });
-  // }, []);
 
   // 항목 저장
   const handleSaveItem = useCallback((item: any) => {
@@ -667,6 +659,18 @@ const CreditCard: React.FC = () => {
     return result;
   }, [approval, blart])
 
+  // 전체 선택/해제 핸들러
+  const handleSelectAll = useCallback(() => {
+    if (!cardList || _.isEmpty(cardList)) {
+      setSelectedList([]);
+      return;
+    }
+
+    const selectedSeqSet = new Set(selectedList.map((item) => item.Seq));
+    const isAllSelected = cardList.every((item) => selectedSeqSet.has(item.Seq));
+    setSelectedList(isAllSelected ? [] : cardList);
+  }, [cardList, selectedList]);
+
   return (
     <IonPage className='personal-expense'>
       <AppBar title={title} customStartButtons={
@@ -716,32 +720,51 @@ const CreditCard: React.FC = () => {
           )}
         </>
       }
-        customEndButtons={step === 4 && animationFinished && result.TYPE !== 'S' && (
-          <IonButton
-            mode="md"
-            fill="clear"
-            color='medium'
-            onClick={() => {
-              isCloseButtonRef.current = true;
-              router.goBack();
-            }}
-            style={{
-              '--border-radius': '24px',
-              marginLeft: '8px',
-              width: '64px',
-              height: '48px',
-            }}
-          >
-            <span style={{ fontSize: '16px', fontWeight: '600' }}>닫기</span>
-          </IonButton>
-        )}
+        customEndButtons={
+          step === 0 ? (
+            <IonButton
+              mode="md"
+              fill="clear"
+              color='medium'
+              onClick={() => setHeaderExpand(!headerExpand)}
+              style={{
+                '--border-radius': '24px',
+                marginLeft: '8px',
+                width: '48px',
+                height: '48px',
+              }}
+            >
+              <IonIcon src={headerExpand ? chevronCollapseOutline : chevronExpandOutline}></IonIcon>
+            </IonButton>
+          ) :
+            step === 4 && animationFinished && result.TYPE !== 'S' ? (
+              <IonButton
+                mode="md"
+                fill="clear"
+                color='medium'
+                onClick={() => {
+                  isCloseButtonRef.current = true;
+                  router.goBack();
+                }}
+                style={{
+                  '--border-radius': '24px',
+                  marginLeft: '8px',
+                  width: '64px',
+                  height: '48px',
+                }}
+              >
+                <span style={{ fontSize: '16px', fontWeight: '600' }}>닫기</span>
+              </IonButton>
+            ) : null}
       />
       {step === 0 && <>
         <IonHeader mode='ios'>
           <div style={{
-            padding: '0 21px 12px 21px',
-            borderRadius: '12px',
-            borderBottom: '1px solid var(--custom-border-color-50)'
+            padding: '0 21px 8px 21px',
+            // borderRadius: '12px',
+            // borderBottom: '1px solid var(--custom-border-color-50)',
+            // height: 0,
+            display: headerExpand ? '' : 'none'
           }}>
             <IonSelect
               mode='md'
@@ -818,6 +841,25 @@ const CreditCard: React.FC = () => {
                 {isSearching ? <LoadingIndicator color='#fff' style={{ width: 24 }} /> : '조회'}
               </IonButton>
             </div>
+          </div>
+          <div style={{
+            display: 'flex',
+            padding: '8px 20px',
+            borderRadius: '12px',
+            borderBottom: '1px solid var(--custom-border-color-50)',
+          }}>
+            <IonItem
+              button
+              onTouchStart={handleSelectAll}
+              mode='md'
+              className='select-all-button'>
+              <IonCheckbox
+                mode='md'
+                checked={isAllSelected}
+                style={{ pointerEvents: 'none' }}
+              />
+              <span>전체 선택 <span style={{ color: 'var(--ion-color-primary)' }}>({selectedList.length})</span></span>
+            </IonItem>
           </div>
         </IonHeader>
         < IonPopover
@@ -1415,7 +1457,7 @@ const Item: React.FC<ItemProps> = ({
             increaseViewportBy={300}
             itemContent={(index, item) => (
               <div style={{
-                padding: '0 21px 12px 21px', // 좌우 패딩과 아이템 간격을 여기서 조절
+                padding: `${index === 0 ? '12px' : '0'} 21px 12px 21px`, // 좌우 패딩과 아이템 간격을 여기서 조절
                 boxSizing: 'border-box',
               }}>
                 <div style={{
@@ -1458,7 +1500,7 @@ const Item: React.FC<ItemProps> = ({
                       No.{item.Seq}{Number(item.SubSeq) > 0 && `-${Number(item.SubSeq)}`}
                       {(!item.Sgtxt || !item.Dtext)
                         ? <span style={{
-                          backgroundColor: '#ffe2ce',
+                          backgroundColor: '#ffcef4',
                           color: '#000',
                           borderRadius: '4px',
                           padding: '0 6px',
@@ -1467,7 +1509,7 @@ const Item: React.FC<ItemProps> = ({
                         }}>필수값 누락</span>
                         : (item.ATTENDEE_EDIT && _.isEmpty(item.CardListAttendeeList.results)) ?
                           <span style={{
-                            backgroundColor: '#ffcede',
+                            backgroundColor: '#ffdfff',
                             color: '#000',
                             borderRadius: '4px',
                             padding: '0 6px',
@@ -1475,7 +1517,7 @@ const Item: React.FC<ItemProps> = ({
                             fontWeight: '500'
                           }}>참석자 누락</span>
                           : <span style={{
-                            backgroundColor: '#d6ffc5',
+                            backgroundColor: '#c5ffdb',
                             color: '#000',
                             borderRadius: '4px',
                             padding: '0 6px',
@@ -1535,9 +1577,6 @@ const Item: React.FC<ItemProps> = ({
             )}
             // Virtuoso는 스크롤 패딩을 위해 components를 제공합니다.
             components={{
-              Header: () => <div style={{ padding: '12px 21px' }}>
-                <span style={{ color: 'var(--ion-color-secondary)', fontSize: '13px' }}>Total. {cardList.length}</span>
-              </div>,
               Footer: () => <div style={{ height: '20px' }} />
             }}
           />
@@ -2434,20 +2473,32 @@ const Attach: React.FC<AttachProps> = ({
   };
 
   const handleDeleteAttach = (fileNo: string) => {
-    const index = approval.FILES.findIndex(
+    // 1. 삭제할 대상을 찾기 (원본을 수정하지 않는 find 사용)
+    const targetFile = approval.FILES.find(
       (file: any) => file.FILE_NO === fileNo
     );
 
-    let removedFiles: any[] = [];
-
-    if (index !== -1) {
-      removedFiles = approval.FILES.splice(index, 1);
+    // 대상을 못 찾았거나 이미 삭제된 경우 방어 로직
+    if (!targetFile) {
+      console.error("삭제할 파일을 찾을 수 없습니다.");
+      return;
     }
 
-    const removedFile = removedFiles[0];
+    // 2. 중요: filter를 사용하여 삭제 대상을 제외한 "새로운 배열" 생성
+    // 이렇게 해야 React가 "아, 배열이 아예 바뀌었구나!" 하고 감지합니다.
+    const nextFiles = approval.FILES.filter(
+      (file: any) => file.FILE_NO !== fileNo
+    );
 
-    deleteAttach(approval.GUID, removedFile.FILE_NO, removedFile.FILE_TYPE);
-    setFiles(approval.FILES);
+    // 3. API 호출 (찾아둔 targetFile 정보 사용)
+    deleteAttach(approval.GUID, targetFile.FILE_NO, targetFile.FILE_TYPE);
+
+    // 4. 상태 업데이트
+    // 만약 approval.FILES가 단순 변수라면, 직접 교체해줘야 다음 삭제 때 find가 동작합니다.
+    approval.FILES = nextFiles;
+    setFiles(nextFiles);
+
+    // 알림창
     new Notify({
       status: 'error',
       title: '삭제되었습니다.',
