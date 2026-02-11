@@ -982,7 +982,7 @@ const CreditCard: React.FC = () => {
               marginBottom: 'calc(var(--ion-safe-area-bottom) + 76px)',
               marginRight: '12px'
             }}>
-            <IonFabButton>
+            <IonFabButton disabled={_.isEmpty(selectedList)}>
               <IonIcon icon={addOutline}></IonIcon>
             </IonFabButton>
             <IonFabList side="top" style={{ right: 0 }}>
