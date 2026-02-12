@@ -160,8 +160,7 @@ const NoticeList: React.FC<{
               fontSize: '13px',
               color: 'var(--ion-color-secondary)'
             }}>
-              <span>{dayjs(notice.CRE_DATE).format('YYYY-MM-DD')}</span>
-              <span>{notice.CRE_TIME.replace(/(\d{2})(?=\d)/g, '$1:')}</span>
+              <span>{dayjs(notice.CRE_DATE).format('YYYY-MM-DD')} {notice.CRE_TIME.replace(/(\d{2})(?=\d)/g, '$1:')}</span>
             </div>
           </div>
           <div style={{
