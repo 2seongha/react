@@ -48,7 +48,7 @@ const Notice: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader mode='ios'>
         <AppBar title={<span>공지사항</span>} showBackButton={true} />
         <Tabs value={value} onChange={handleTabChange} variant="fullWidth" aria-label="탭 메뉴" sx={{
           '& .MuiTab-root': {

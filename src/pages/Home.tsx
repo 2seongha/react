@@ -66,7 +66,7 @@ const Home: React.FC = () => {
     setMenuAreas(null);
     setApprovals(null);
     webviewHaptic("mediumImpact");
-    await Promise.allSettled(([getAreas('')]));
+    await Promise.allSettled(([getAreas(''), getNotices()]));
     event.detail.complete();
   }
 
