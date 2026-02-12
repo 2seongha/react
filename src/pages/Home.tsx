@@ -65,7 +65,7 @@ const Home: React.FC = () => {
   async function handleRefresh(event: RefresherCustomEvent) {
     setMenuAreas(null);
     setApprovals(null);
-    webviewHaptic("mediumImpact");
+    webviewHaptic("mediumImpact"); 
     await Promise.allSettled(([getAreas(''), getNotices()]));
     event.detail.complete();
   }

@@ -1312,7 +1312,7 @@ const CreditCard: React.FC = () => {
                         LOGINID: user?.LOGIN_ID,
                         ORGEH: user?.ORGEH
                       }
-
+                      debugger;
                       let result = await postStartCreditCard(payload);
                       if (result instanceof Error) {
                         result = {

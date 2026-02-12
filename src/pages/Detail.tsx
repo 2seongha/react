@@ -603,7 +603,7 @@ const Detail: React.FC = () => {
                     key={item.FLOWNO + item.LIST_SUB_KEY + index + item.KEY01 + item.KEY02 + item.KEY03}
                     selectable={header.P_AREA_CODE === "TODO" && approval.IS_SEPARATE}
                     item={item}
-                    sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.FLOWCNT === sub.FLOWCNT)}
+                    sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.LIST_SUB_KEY === sub.LIST_SUB_KEY)}
                     isSelected={selectedItems.has(getKey(item))}
                     onSelectionChange={handleItemSelection}
                     onProfitDialogOpen={(profitData) => {
