@@ -60,11 +60,15 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   const [stepText, setStepText] = useState("할까요?");
   const [status, setStatus] = useState<string | null>(null);
   const [flowCodeText, setFlowCodeText] = useState<string | null>(null);
+  const [displayCount, setDisplayCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
   const getApprovals = useAppStore(state => state.getApprovals);
 
   const [approvals, setApprovals] = useState(() =>
     _.cloneDeep(selectedApprovals ?? [])
   );
+  const getSuccessCount = (items: any[] = []) =>
+    items.filter(approval => approval.STATUS !== "error").length;
 
   useEffect(() => {
     if (!apprTitle || apprTitle === '-') return;
@@ -77,6 +81,11 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     ) && step !== 0)) return;
     setApprovals(_.cloneDeep(selectedApprovals) ?? []);
   }, [selectedApprovals]);
+
+  useEffect(() => {
+    if (step !== 0) return;
+    setDisplayCount(getSuccessCount(approvals ?? []));
+  }, [approvals, step]);
 
   async function dismiss() {
     modalRef.current?.dismiss();
@@ -103,6 +112,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
     setStep(0);
     setStepText("할까요?");
     setStatus(null);
+    setPendingCount(null);
 
     // 일반적인 닫기 (뒤로가기가 아닌)인 경우 히스토리에서 제거
     if (historyPushedRef.current && !closedByBackButtonRef.current) {
@@ -161,16 +171,41 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       webviewHaptic("mediumImpact");
       setStep(1);
       setStepText("할게요");
+      const opinion = textValue?.trim() ?? "";
+      const removeSubOpinion = (sub: any) => {
+        if (Array.isArray(sub)) {
+          return sub.map((item: any) => {
+            const { LTEXT, ...rest } = item ?? {};
+            return rest;
+          });
+        }
+        if (sub && Array.isArray(sub.results)) {
+          return {
+            ...sub,
+            results: sub.results.map((item: any) => {
+              const { LTEXT, ...rest } = item ?? {};
+              return rest;
+            }),
+          };
+        }
+        return sub;
+      };
 
-      const response = await postApprovals(activity, separate, approvals);
+      const payloadApprovals = _.cloneDeep(approvals ?? []).map((approval: any) => ({
+        ...approval,
+        LTEXT: opinion,
+        SUB: removeSubOpinion(approval.SUB),
+      }));
+
+      const response = await postApprovals(activity, separate, payloadApprovals);
       let RETTYPE;
       if (response instanceof Error) {
         RETTYPE = 'E';
-        approvals.forEach(approval => {
+        payloadApprovals.forEach((approval: any) => {
           approval.STATUS = "error";
           approval.MESSAGE = "예상치 못한 오류가 발생했습니다.";
 
-          approval.SUB.forEach((sub: any) => {
+          approval.SUB?.forEach((sub: any) => {
             sub.STATUS = "error";
             sub.MESSAGE = "예상치 못한 오류가 발생했습니다.";
           });
@@ -178,8 +213,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
       } else {
         RETTYPE = response.RETTYPE;
         const { LIST } = response;
-        approvals.forEach(approval => {
+        payloadApprovals.forEach((approval: any) => {
           const matched = LIST.find((l: any) => l.FLOWNO === approval.FLOWNO);
+          if (!matched) return;
           approval.STATUS =
             matched.RETTYPE === "S"
               ? "success"
@@ -187,8 +223,8 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 ? "error"
                 : "warning";
           approval.MESSAGE = matched.RETMSG;
-          -          approval.SUB.forEach((sub: any) => {
-            const matchedSub = matched.SUB.find(
+          approval.SUB?.forEach((sub: any) => {
+            const matchedSub = matched.SUB?.find(
               (s: any) => sub.LIST_SUB_KEY === s.LIST_SUB_KEY
             );
             sub.STATUS =
@@ -197,14 +233,15 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 : matched.TYPE === "E"
                   ? "error"
                   : "warning";
-            sub.MESSAGE = matchedSub.MESSAGE;
+            sub.MESSAGE = matchedSub?.MESSAGE;
           });
         });
       }
 
-      setApprovals(approvals);
+      setPendingCount(getSuccessCount(payloadApprovals));
+      setApprovals(payloadApprovals);
       if (!isNotification) {
-        await getApprovals("TODO", approvals?.[0].FLOWCODE, "", "");
+        await getApprovals("TODO", payloadApprovals?.[0]?.FLOWCODE, "", "");
       }
       setStatus(RETTYPE);
     } else if (step === 2) {
@@ -278,6 +315,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             <AnimatedIcon
               status={status}
               onAnimationComplete={() => {
+                if (pendingCount !== null) {
+                  setDisplayCount(pendingCount);
+                }
                 setStepText("했어요");
                 webviewHaptic("mediumImpact");
                 setTimeout(() => setStep(2), 1000);
@@ -291,7 +331,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             />}
           <span>
             {flowCodeText}
-            <span style={{ color: `var(--ion-color-${activity === 'APPROVE' ? 'primary' : 'danger'})` }}> {approvals?.length}건</span>을
+            <span style={{ color: `var(--ion-color-${activity === 'APPROVE' ? 'primary' : 'danger'})` }}> {displayCount}건</span>을
           </span>
           <span >
             <span style={{ color: `var(--ion-color-${activity === 'APPROVE' ? 'primary' : 'danger'})` }}>{separate && '분리 '}{activity === 'APPROVE' ? '승인' : '반려'}</span>{" "}
@@ -313,7 +353,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               }}>
               {(separate ? (approvals?.[0].SUB.filter(((s: any) => s.CHECK === 'I'))) : approvals)?.map((item: any, index: number) => (
                 <div key={`approval-modal-item-${index}`}
-                  className={`approval-modal-item ${status ?? ''}`}
+                  className={`approval-modal-item ${item.STATUS ?? ''}`}
                   style={{
                     backgroundColor: 'var(--ion-background-color2)',
                     padding: '16px 21px',
@@ -325,9 +365,9 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     position: 'relative'
                   }}>
                   {step === 2 && <IonIcon
-                    icon={status === 'E' ? alertCircle : status === 'S' ? checkmarkCircle : warning}
+                    icon={item.STATUS === 'error' ? alertCircle : item.STATUS === 'success' ? checkmarkCircle : warning}
                     style={{ fontSize: '24px' }}
-                    color={status === 'E' ? 'danger' : status === 'S' ? 'primary' : 'warning'}
+                    color={item.STATUS === 'error' ? 'danger' : item.STATUS === 'success' ? 'primary' : 'warning'}
                   />}
                   <div style={{
                     display: 'flex',

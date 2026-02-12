@@ -163,7 +163,7 @@ const _initWebview = async (): Promise<void> => {
         apiKey: "mwVB628W5ou3EXC84p9ZLnTdwhfhXF5mzBw/vHBiGFI=",
       },
     });
-    await getUser("ITK00014");
+    await getUser("ITK00013");
     // 웹뷰가 아닌 경우 바로 완료 처리
     if (paddingResolver) {
       paddingResolver(true);

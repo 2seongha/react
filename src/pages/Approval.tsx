@@ -498,8 +498,6 @@ const ApprovalItem: React.FC<ApprovalProps> = React.memo(({ index, approval, sel
     onSelectionChange(approval.FLOWNO, checked);
   }, [approval.FLOWNO, onSelectionChange]);
 
-  console.log('approval item rebuild : ' + index);
-
   // title 엘리먼트 메모이제이션 - 검색어가 변경될 때만 재생성
   const titleElement = useMemo(() => (
     <div className='custom-item-title'>

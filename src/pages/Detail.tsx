@@ -1290,7 +1290,7 @@ const ApprLineItem: React.FC<ApprLineProps> = React.memo(
           )}
         </div>
       ),
-      [apprLine.NAME, apprLine.ORGTX]
+      [apprLine.NAME, apprLine.ORGTX, text]
     );
 
     const bodyElement = useMemo(
