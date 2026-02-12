@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonPage } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, useIonViewWillEnter } from '@ionic/react';
 import React, { useRef } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -6,11 +6,17 @@ import Tab from '@mui/material/Tab';
 import { Swiper, SwiperClass, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import AppBar from '../components/AppBar';
+import useAppStore from '../stores/appStore';
 
 const Notice: React.FC = () => {
   const [value, setValue] = React.useState(0);
+  const getNoticies = useAppStore(state => state.getNotices);
+  const noticies = useAppStore(state => state.notices);
 
   const swiperRef = useRef<SwiperClass | null>(null);
+  useIonViewWillEnter(() => {
+    getNoticies();
+  }, [])
 
   const handleTabChange = React.useCallback((event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -27,6 +33,13 @@ const Notice: React.FC = () => {
           '& .MuiTab-root': {
             outline: 'none',
             boxShadow: 'none',
+            color: 'var(--ion-text-color)'
+          },
+          '& .Mui-selected': {
+            color: 'var(--ion-color-primary)', // 선택되었을 때 글자 색상
+          },
+          '& .MuiTabs-indicator': {
+            backgroundColor: 'var(--ion-color-primary)', // 아래쪽 바(인디케이터) 색상
           },
         }}>
           <Tab label="전체" />

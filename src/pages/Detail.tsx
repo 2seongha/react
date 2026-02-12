@@ -600,7 +600,7 @@ const Detail: React.FC = () => {
                 {approval.SUB.filter((sub: any) => sub.CHECK === 'I').map((item: any, index: number) => (
                   <SubItem
                     style={{ marginTop: index === 0 ? '12px' : 0 }}
-                    key={item.FLOWNO + item.LIST_SUB_KEY + index}
+                    key={item.FLOWNO + item.LIST_SUB_KEY + index + item.KEY01 + item.KEY02 + item.KEY03}
                     selectable={header.P_AREA_CODE === "TODO" && approval.IS_SEPARATE}
                     item={item}
                     sub={approval.SUB.filter((sub: any) => sub.CHECK === 'S' && item.FLOWCNT === sub.FLOWCNT)}

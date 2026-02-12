@@ -69,14 +69,15 @@
   background-color: var(--ion-color-primary);
 }
 
-.approval-modal-item.success::before {
-  background-color: var(--ion-color-success);
+.approval-modal-item.S::before {
+  background-color: var(--ion-color-primary);
+  /* background-color: var(--ion-color-success); */
 }
 
-.approval-modal-item.warning::before {
+.approval-modal-item.W::before {
   background-color: var(--ion-color-warning);
 }
 
-.approval-modal-item.error::before {
+.approval-modal-item.E::before {
   background-color: var(--ion-color-danger);
 }
