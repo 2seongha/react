@@ -80,10 +80,23 @@ export interface NotificationModel {
 }
 
 export interface NoticeModel {
-  id: string;
-  title?: string;
-  content?: string;
-  isNew?: boolean;
+  ALL_MODE: string;
+  ATTACH: string;
+  ATTACH_ICON: string;
+  CREATOR_ID: string;
+  CREATOR_NAME: string;
+  CRE_DATE: string;
+  CRE_TIME: string;
+  FDATE: string;
+  LEN: string;
+  LTEXT: string;
+  NO: string;
+  ORGEH: string;
+  ORGTX: string;
+  POPUP: string;
+  SEQNO: string;
+  TDATE: string;
+  TITLE: string;
 }
 
 export interface AreaModel {

@@ -585,8 +585,8 @@ const Detail: React.FC = () => {
                   <IonItem button onClick={handleSelectAll} mode='md' className='select-all-button' style={{
                     "--padding-start": "12px",
                     "--padding-end": "12px",
-                    "--padding-top": "8px",
-                    "--padding-bottom": "8px",
+                    // "--padding-top": "8px",
+                    // "--padding-bottom": "8px",
                     "--border-radius": "8px"
                   }}>
                     <IonCheckbox

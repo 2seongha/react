@@ -25,6 +25,7 @@ import PersonalExpense from './pages/PersonalExpense';
 import LoadingIndicator from './components/LoadingIndicator';
 import 'simple-notify/dist/simple-notify.css'
 import CreditCard from './pages/CreditCard';
+import NoticeDetail from './pages/NoticeDetail';
 
 const App: React.FC = () => {
   const themeMode = useAppStore(state => state.themeMode);
@@ -135,6 +136,7 @@ const App: React.FC = () => {
           <Route path="/approval/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT" component={Approval} exact />
           <Route path="/detail/:FLOWNO/:P_AREA_CODE/:AREA_CODE/:P_AREA_CODE_TXT/:AREA_CODE_TXT/:isNotification?" component={Detail} exact />
           <Route path="/notice" component={Notice} exact />
+          <Route path="/notice/:id" component={NoticeDetail} exact />
           <Route path="/settings" component={Settings} exact />
           <Route path="/myPage" component={MyPage} exact />
           <Route path="/search" component={Search} exact />

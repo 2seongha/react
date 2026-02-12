@@ -719,7 +719,7 @@ const Item: React.FC<ItemProps> = ({
             onClick={() => onItemClick(item)}
             style={{
               marginBottom: '12px',
-              boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px',
+              boxShadow: 'rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 0.5px',
               borderRadius: '12px',
               width: '100%',
               padding: '21px',

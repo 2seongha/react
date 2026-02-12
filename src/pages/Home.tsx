@@ -29,6 +29,7 @@ import { webviewHaptic } from '../webview';
 import CachedImage from '../components/CachedImage';
 import _ from 'lodash';
 import NotificationPopupModal from '../components/NotificationPopupModal';
+import dayjs from 'dayjs';
 
 const Home: React.FC = () => {
   const setMenuAreas = useAppStore(state => state.setAreas);
@@ -115,6 +116,31 @@ export default Home;
 
 const NoticeCard: React.FC = () => {
   const router = useIonRouter();
+  const notices = useAppStore(state => state.notices);
+  const latestRecentNoticeTitle = useMemo(() => {
+    if (!notices?.length) return null;
+
+    const recentNotices = notices.filter(notice => {
+      if (!notice.CRE_DATE) return false;
+      const created = dayjs(notice.CRE_DATE, 'YYYYMMDD', true);
+      if (!created.isValid()) return false;
+      return dayjs().diff(created, 'day') <= 7;
+    });
+
+    if (!recentNotices.length) return null;
+
+    const sortedRecentNotices = [...recentNotices].sort((a, b) => {
+      const aDateTime = dayjs(`${a.CRE_DATE}${a.CRE_TIME || '000000'}`, 'YYYYMMDDHHmmss', true);
+      const bDateTime = dayjs(`${b.CRE_DATE}${b.CRE_TIME || '000000'}`, 'YYYYMMDDHHmmss', true);
+
+      if (aDateTime.isValid() && bDateTime.isValid()) {
+        return bDateTime.valueOf() - aDateTime.valueOf();
+      }
+      return b.CRE_DATE.localeCompare(a.CRE_DATE);
+    });
+
+    return sortedRecentNotices[0]?.TITLE || null;
+  }, [notices]);
 
   return (
     <IonCard button className='home-card' onClick={() => {
@@ -124,7 +150,7 @@ const NoticeCard: React.FC = () => {
         <div className='notice-card-badge'>
           <span>공지사항</span>
         </div>
-        <span className='notice-card-notice'>새로운 공지사항이 없습니다.</span>
+        <span className='notice-card-notice'>{latestRecentNoticeTitle || '새로운 공지사항이 없습니다.'}</span>
         <IonIcon src={chevronForwardOutline} style={{ width: 20 }} />
       </div>
     </IonCard>
