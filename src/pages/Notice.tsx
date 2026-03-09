@@ -57,7 +57,7 @@ const Notice: React.FC = () => {
             color: 'var(--ion-text-color)'
           },
           '& .Mui-selected': {
-            color: 'var(--ion-color-primary)', // 선택되었을 때 글자 색상
+            color: 'var(--ion-color-primary) !important', // 선택되었을 때 글자 색상
           },
           '& .MuiTabs-indicator': {
             backgroundColor: 'var(--ion-color-primary)', // 아래쪽 바(인디케이터) 색상
